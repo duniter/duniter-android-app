@@ -23,7 +23,10 @@ Developpement use Android Studio (lastest version), and Android NDK (Native Deve
 
 You should instal
 - NDK :
-  Use version r9d (version r10d has a bug: http://www.cocos2d-x.org/news/307)
+  Use version r9d: https://dl.google.com/android/ndk/android-ndk-r9d-darwin-x86_64.tar.bz21.2K
+
+  Note: version r10d has a bug: http://www.cocos2d-x.org/news/307
+
 
 
 
