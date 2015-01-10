@@ -6,7 +6,7 @@ import org.apache.http.client.methods.HttpPost;
 import io.ucoin.app.model.BlockchainBlock;
 import io.ucoin.app.model.BlockchainParameter;
 
-public class BlockchainService extends AbstractService{
+public class BlockchainService extends AbstractNetworkService {
 
     private static final String TAG = "BlockchainService";
 
@@ -24,6 +24,7 @@ public class BlockchainService extends AbstractService{
     public BlockchainService() {
         super();
     }
+
     
     /**
      * get the blockchain parameters (currency parameters)

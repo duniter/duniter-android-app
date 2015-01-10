@@ -3,15 +3,21 @@ package io.ucoin.app.service;
 import android.util.Log;
 
 
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.message.BasicNameValuePair;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
 import io.ucoin.app.model.*;
 import io.ucoin.app.technical.UCoinTechnicalException;
+import io.ucoin.app.technical.crypto.CryptoUtils;
 
-public class WotService extends AbstractService {
+public class WotService extends AbstractNetworkService {
 
     private static final String TAG = "WotService";
 
@@ -25,9 +31,15 @@ public class WotService extends AbstractService {
 
     public static final String URL_CERTIFIERS_OF = URL_BASE + "/certifiers-of/%s";
 
+    public CryptoService cryptoService;
 
     public WotService() {
         super();
+    }
+
+    @Override
+    public void initialize() {
+        cryptoService = ServiceLocator.instance().getCryptoService();
     }
 
     public WotLookupResults find(String uidPattern) {
@@ -90,7 +102,7 @@ public class WotService extends AbstractService {
 
     }
     
-    public WotIdentityCertifications getCertifiersOf(String uid) throws Exception {
+    public WotIdentityCertifications getCertifiersOf(String uid) {
         Log.d(TAG, String.format("Try to get certifications done to uid: %s", uid));
 
         // call certifiers-of
@@ -101,43 +113,58 @@ public class WotService extends AbstractService {
         return result;
 
     }
-    
-//	public void sendSelf(String uid, SecretBox secretBox) throws Exception {
-//		// http post /wot/add
-//        HttpPost httpPost = new HttpPost(getAppendedPath(URL_ADD));
-//
-//        // compute the self-certification
-//		String selfCertification = computeSelfCertification(uid, secretBox);
-//
-//        List<NameValuePair> urlParameters = new ArrayList<NameValuePair>();
-//		urlParameters.add(new BasicNameValuePair("pubkey", "C02G8416DRJM"));
-//		urlParameters.add(new BasicNameValuePair("self", selfCertification));
-//		urlParameters.add(new BasicNameValuePair("other", ""));
-//
-//		httpPost.setEntity(new UrlEncodedFormEntity(urlParameters));
-//
-//        String selfResult = executeRequest(httpPost, String.class);
-//        Log.d(TAG, "received from /add: " + selfResult);
-//	}
-	
-//	public String computeSelfCertification(String uid, SecretBox secretBox) throws Exception {
-//		return computeSelfCertification(uid, new Date().getTime(), secretBox);
-//
-//	}
-//
-//	public String computeSelfCertification(String uid, long timestamp, SecretBox secretBox) throws Exception {
-//
-//		String uidMessage = "UID:" + uid;
-//		String signature = secretBox.sign(uidMessage);
-//
-//		return new StringBuilder().append(uidMessage).append('\n')
-//				.append("META:TS:").append(timestamp).append('\n')
-//				.append(signature)
-//				.toString();
-//
-//	}
+
+    public String sendSelf(byte[] pubKey, byte[] secKey, String uid) {
+        return sendSelf(
+                    pubKey,
+                    secKey,
+                    uid,
+                    System.currentTimeMillis());
+    }
+
+	public String sendSelf(byte[] pubKey, byte[] secKey, String uid, long timestamp) {
+		// http post /wot/add
+        HttpPost httpPost = new HttpPost(getAppendedPath(URL_ADD));
+
+        // compute the self-certification
+		String selfCertification = getSelfCertification(pubKey, secKey, uid, timestamp);
+
+        List<NameValuePair> urlParameters = new ArrayList<NameValuePair>();
+		urlParameters.add(new BasicNameValuePair("pubkey", CryptoUtils.encodeBase58(pubKey)));
+		urlParameters.add(new BasicNameValuePair("self", selfCertification));
+		urlParameters.add(new BasicNameValuePair("other", ""));
+
+        try {
+            httpPost.setEntity(new UrlEncodedFormEntity(urlParameters));
+        }
+        catch(UnsupportedEncodingException e) {
+            throw new UCoinTechnicalException(e);
+        }
+        String selfResult = executeRequest(httpPost, String.class);
+        Log.d(TAG, "received from /add: " + selfResult);
+
+        return selfResult;
+	}
 
     /* -- Internal methods -- */
+
+    protected String getSelfCertification(byte[] pubKey, byte[] secretKey, String uid, long timestamp) {
+        // Create the self part to sign
+        StringBuilder buffer = new StringBuilder()
+                .append("UID:")
+                .append(uid)
+                .append("\nMETA:TS:")
+                .append(timestamp)
+                .append('\n');
+
+        // Compute the signature
+        String signature = cryptoService.sign(buffer.toString(), secretKey);
+
+        // Append the signature
+        return buffer.append(signature)
+                .append('\n')
+                .toString();
+    }
 
     protected WotLookupUId getUid(WotLookupResults lookupResults, String filterUid) {
         if (lookupResults.getResults() == null || lookupResults.getResults().size() == 0) {

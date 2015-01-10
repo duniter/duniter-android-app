@@ -2,13 +2,18 @@ package io.ucoin.app.activity;
 
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.provider.Settings;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
 import io.ucoin.app.R;
 import io.ucoin.app.config.Configuration;
@@ -16,6 +21,7 @@ import io.ucoin.app.exception.UncaughtExceptionHandler;
 import io.ucoin.app.model.BlockchainParameter;
 import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.technical.AsyncTaskHandleException;
+import io.ucoin.app.technical.DateUtils;
 import io.ucoin.app.technical.ObjectUtils;
 
 
@@ -27,6 +33,7 @@ public class MainActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler(this));
+        DateUtils.setDefaultDateFormat(getDefaultDateFormat());
         setContentView(R.layout.activity_main);
 
         // Init configuration
@@ -51,6 +58,15 @@ public class MainActivity extends ActionBarActivity {
             @Override
             public void onClick(View v) {
                 wotSearch();
+            }
+        });
+
+        // Test crypto button
+        Button cryptoButton = (Button)findViewById(R.id.action_test_crypto);
+        cryptoButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                testCrypto();
             }
         });
     }
@@ -130,8 +146,27 @@ public class MainActivity extends ActionBarActivity {
         }
     }
 
+    protected void testCrypto() {
+        try {
+            Intent intent = new Intent(this, CryptoTestActivity.class);
+            startActivity(intent);
+        }
+        catch (Throwable t) {
+            onError(t);
+        }
+    }
+
     protected void onError(Throwable t) {
         TextView currencyText = (TextView) findViewById(R.id.currency_text);
         currencyText.setError(t.getMessage());
+    }
+
+    protected DateFormat getDefaultDateFormat() {
+        final String format = Settings.System.getString(getContentResolver(), Settings.System.DATE_FORMAT);
+        if (TextUtils.isEmpty(format)) {
+            return android.text.format.DateFormat.getMediumDateFormat(getApplicationContext());
+        } else {
+            return new SimpleDateFormat(format);
+        }
     }
 }

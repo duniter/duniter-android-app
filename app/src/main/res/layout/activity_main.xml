@@ -39,6 +39,14 @@
             android:layout_marginTop="16dp"
             android:text="@string/action_wot_search"
             android:textStyle="bold" />
+
+        <Button android:id="@+id/action_test_crypto"
+            style="?android:textAppearanceSmall"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Test crypto"
+            android:textStyle="bold" />
     </LinearLayout>
 
 </RelativeLayout>

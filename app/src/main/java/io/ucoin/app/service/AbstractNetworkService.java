@@ -23,7 +23,7 @@ import io.ucoin.app.technical.StandardCharsets;
 import io.ucoin.app.technical.UCoinTechnicalException;
 import io.ucoin.app.technical.gson.GsonUtils;
 
-public abstract class AbstractService implements Closeable {
+public abstract class AbstractNetworkService extends BaseService implements Closeable {
 
     private static final String TAG = "AbstractService";
 
@@ -34,7 +34,7 @@ public abstract class AbstractService implements Closeable {
     protected final Gson gson;
     protected final AndroidHttpClient httpClient;
 
-    public AbstractService() {
+    public AbstractNetworkService() {
         super();
         Configuration config = Configuration.instance();
 

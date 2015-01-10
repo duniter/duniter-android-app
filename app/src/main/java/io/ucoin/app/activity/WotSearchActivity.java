@@ -6,26 +6,21 @@ import android.annotation.TargetApi;
 import android.app.ListActivity;
 import android.app.SearchManager;
 import android.content.Intent;
-import android.database.DataSetObserver;
-import android.support.v7.app.ActionBarActivity;
-import android.support.v7.app.ActionBar;
-import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.os.Build;
-import android.widget.BaseAdapter;
 import android.widget.EditText;
-import android.widget.ListAdapter;
 import android.widget.ListView;
-import android.widget.TextView;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,16 +28,14 @@ import io.ucoin.app.R;
 import io.ucoin.app.adapter.IdentityListAdapter;
 import io.ucoin.app.exception.UncaughtExceptionHandler;
 import io.ucoin.app.model.BasicIdentity;
-import io.ucoin.app.model.Identity;
-import io.ucoin.app.model.WotLookupResult;
 import io.ucoin.app.model.WotLookupResults;
-import io.ucoin.app.model.WotLookupUId;
 import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.service.WotService;
 import io.ucoin.app.technical.AsyncTaskHandleException;
 
 public class WotSearchActivity extends ListActivity {
 
+    private static final String TAG = "WotSearchActivity";
     private static final List<BasicIdentity> EMPTY_LIST = new ArrayList<BasicIdentity>(0);
     private static final int MIN_SEARCH_CHARACTERS = 3;
 
@@ -70,7 +63,7 @@ public class WotSearchActivity extends ListActivity {
 
         mList = (ListView)getListView();
 
-        mIdentityListAdapter = new IdentityListAdapter(EMPTY_LIST) {
+        mIdentityListAdapter = new IdentityListAdapter(EMPTY_LIST, false) {
             @Override
             protected LayoutInflater getLayoutInflater() {
                 return WotSearchActivity.this.getLayoutInflater();
@@ -132,6 +125,14 @@ public class WotSearchActivity extends ListActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onListItemClick(ListView l, View v, int position, long id) {
+
+        BasicIdentity identity = (BasicIdentity)l.getAdapter().getItem(position);
+        Log.d(TAG, "click on " + identity.getUid() + "/" + identity.getPubkey());
+
     }
 
     protected void doSearch() {

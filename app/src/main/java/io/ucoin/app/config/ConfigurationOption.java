@@ -99,7 +99,8 @@ public enum ConfigurationOption {
     NODE_HOST(
             "ucoinj.node.host",
             "ucoinj.config.option.node.host.description",
-            "twiced.fr",
+            //"twiced.fr",
+            "server.e-is.pro",
             String.class,
             false),
 

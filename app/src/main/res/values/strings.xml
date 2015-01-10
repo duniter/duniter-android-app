@@ -10,8 +10,6 @@
     <string name="action_wot_search">Search user</string>
     <string name="title_activity_wot_search">Search</string>
     <string name="search_hint">Search</string>
-
-    <string name="hello_world">Hello world!</string>
-
+    <string name="title_activity_crypto_test">CryptoTestActivity</string>
 
 </resources>

@@ -53,14 +53,22 @@ public class ServiceLocator {
         return getService(WotService.class);
     }
 
+    public CryptoService getCryptoService() {
+        return getService(CryptoService.class);
+    }
+
     /* -- Internal methods -- */
-    protected <S> S getService(Class<S> clazz) {
+    protected <S extends BaseService> S getService(Class<S> clazz) {
         if (serviceCache.containsKey(clazz)) {
             return (S)serviceCache.get(clazz);
         }
         try {
             S service = (S)clazz.newInstance();
             serviceCache.put(clazz, service);
+
+            // Call initialization
+            service.initialize();
+
             return service;
         }
         catch (Exception e) {
