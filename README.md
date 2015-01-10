@@ -19,14 +19,13 @@ And maybe :
 The connection to the main account could also be asked automatically (when a transfer from secondaries account's could not be done)
 
 ## Developers
-Developpement use Android Studio (lastest version), and Android NDK (Native Developpement Kit) to be able to use TweetNaCl1 (a compact crypto library).
+Developpement use Android Studio , and Android NDK (Native Developpement Kit) to be able to use TweetNaCl (a compact crypto library).
 
-You should instal
-- NDK :
-  Use version r9d: https://dl.google.com/android/ndk/android-ndk-r9d-darwin-x86_64.tar.bz21.2K
-
-  Note: version r10d has a bug: http://www.cocos2d-x.org/news/307
-
+You should install
+- Android Studio: lastest version
+- NDK (Native Developpement Kit): use android-ndk-r10d (64bit)
+- clone the source repository from GitHub
+- Configure the Android Studio project : edit the local.properties file, use by Gradle
 
 
 
