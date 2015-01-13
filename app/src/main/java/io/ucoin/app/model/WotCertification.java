@@ -7,7 +7,7 @@ package io.ucoin.app.model;
  * @since 1.0
  *
  */
-public class WotCertification extends BasicIdentity{
+public class WotCertification extends Identity{
 
     private static final long serialVersionUID = 2204517069552693026L;
 

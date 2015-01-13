@@ -8,10 +8,10 @@ import java.util.List;
  * @since 1.0
  *
  */
-public class WotIdentityCertifications extends BasicIdentity {
+public class WotIdentityCertifications extends Identity {
     
     private static final long serialVersionUID = 8568496827055074607L;
-    
+
     private List<WotCertification> certifications;
 
     public List<WotCertification> getCertifications() {
@@ -21,6 +21,8 @@ public class WotIdentityCertifications extends BasicIdentity {
     public void setCertifications(List<WotCertification> certifications) {
         this.certifications = certifications;
     }
-    
+
+
+
     
 }

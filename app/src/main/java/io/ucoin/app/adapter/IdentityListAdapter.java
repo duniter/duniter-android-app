@@ -8,10 +8,12 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import io.ucoin.app.R;
 import io.ucoin.app.model.BasicIdentity;
+import io.ucoin.app.model.Identity;
 import io.ucoin.app.technical.DateUtils;
 
 /**
@@ -19,18 +21,25 @@ import io.ucoin.app.technical.DateUtils;
      */
 public abstract class IdentityListAdapter extends BaseAdapter {
 
-    private static final Integer IMAGE_MEMBER = R.drawable.male12;
-    private static final Integer IMAGE_NON_MEMBER = R.drawable.ic_launcher;
+    public static final List<Identity> EMPTY_LIST = new ArrayList<Identity>(0);
 
-    private List<BasicIdentity> mIdentities;
+    private List<? extends Identity> mIdentities;
     private boolean mAllowMultipleSelection;
 
-    public IdentityListAdapter(List<BasicIdentity> identities, boolean allowMultipleSelection) {
+    public IdentityListAdapter() {
+        this(EMPTY_LIST, false);
+    }
+
+    public IdentityListAdapter(List<? extends Identity> identities, boolean allowMultipleSelection) {
         mIdentities = identities;
         mAllowMultipleSelection = allowMultipleSelection;
     }
 
-    public void setIdentities(List<BasicIdentity> identities) {
+    public void setAllowMultipleSelection(boolean allowMultipleSelection) {
+        mAllowMultipleSelection = allowMultipleSelection;
+    }
+
+    public void setItems(List<? extends Identity> identities) {
         // skip when same object
         if (mIdentities != null && mIdentities.equals(identities)) {
             return;
@@ -45,7 +54,7 @@ public abstract class IdentityListAdapter extends BaseAdapter {
         return mIdentities.size();
     }
 
-    public BasicIdentity getItem(int position) {
+    public Identity getItem(int position) {
         return mIdentities.get(position);
     }
 
@@ -61,13 +70,12 @@ public abstract class IdentityListAdapter extends BaseAdapter {
                 convertView = getLayoutInflater().inflate(R.layout.list_item, container, false);
             }
             // Retrieve the item
-            BasicIdentity item = getItem(position);
+            Identity item = getItem(position);
 
             // Icon
-            // TODO: get if member or not
-            boolean isMember = true;
+
             ImageView icon = (ImageView) convertView.findViewById(R.id.icon);
-            icon.setImageResource(isMember ? IMAGE_MEMBER : IMAGE_NON_MEMBER);
+            icon.setImageResource(IdentityViewUtils.getImage(item));
 
             // Uid
             ((TextView) convertView.findViewById(R.id.uid))
@@ -83,8 +91,7 @@ public abstract class IdentityListAdapter extends BaseAdapter {
                     .setText(pubKey);
 
             // timestamp (join date)
-            // TODO : get the real timestamp
-            long timestamp = System.currentTimeMillis();
+            long timestamp = item.getTimestamp();
             ((TextView) convertView.findViewById(R.id.timestamp))
                     .setText(DateUtils.format(timestamp));
 

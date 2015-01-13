@@ -1,7 +1,4 @@
 package io.ucoin.app.technical;
-import android.app.Activity;
-import android.provider.Settings;
-import android.text.TextUtils;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -29,6 +26,18 @@ public class DateUtils {
         return DEFAULT_DATE_FORMAT.format(date);
     }
     public static String format(long timestamp) {
-        return DEFAULT_DATE_FORMAT.format(new Date(timestamp));
+        return DEFAULT_DATE_FORMAT.format(new Date(timestamp * 1000));
+    }
+
+    public static long getCurrentTimestamp() {
+        return (long)Math.floor(System.currentTimeMillis() / 1000);
+    }
+
+    public static long toTimestamp(Date aDate) {
+        return (long)Math.floor(aDate.getTime() / 1000);
+    }
+
+    public static long toTimestamp(long timestampInMillis) {
+        return (long)Math.floor(timestampInMillis / 1000);
     }
 }

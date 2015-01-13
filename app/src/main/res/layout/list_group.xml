@@ -1,0 +1,35 @@
+<!--
+  Copyright 2013 The Android Open Source Project
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+  -->
+
+<!--
+    The ListView from sample_main.xml has a choiceMode set, meaning that when a user
+    selects a list item, the ListView will set the state for that item's root view
+    (this CheckableLinearLayout) to "checked". Note that this requires that the root view
+    implements the Checkable interface. Once the root view is checked, any children that
+    have the duplicateParentState attribute set will inherit this "checked" state.
+-->
+<CheckedTextView xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/group"
+        android:layout_width="match_parent"
+        android:layout_height="?android:attr/listPreferredItemHeight"
+        android:layout_marginLeft="8dp"
+        android:gravity="left"
+        android:paddingLeft="32dp"
+        android:paddingTop="8dp"
+        android:text="Group title"
+        android:textAppearance="?android:textAppearanceListItem"/>
+

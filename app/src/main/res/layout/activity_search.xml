@@ -1,21 +1,25 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" android:id="@+id/container"
     android:layout_width="match_parent" android:layout_height="match_parent"
-    tools:context="io.ucoin.app.activity.WotSearchActivity" tools:ignore="MergeRootFrame"
+    tools:context="io.ucoin.app.activity.WotSearchActivity"
+    tools:ignore="MergeRootFrame"
     >
 
     <LinearLayout android:id="@+id/search_form" android:layout_width="match_parent"
         android:layout_height="wrap_content" android:orientation="vertical">
 
-        <EditText android:id="@+id/search" android:layout_width="match_parent"
+        <SearchView
+            android:id="@+id/search"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content" android:hint="@string/prompt_search"
             android:inputType="text" android:maxLines="1"
             android:singleLine="true"
             android:paddingBottom="@dimen/activity_vertical_margin"
             android:paddingLeft="@dimen/activity_horizontal_margin"
             android:paddingRight="@dimen/activity_horizontal_margin"
-            android:paddingTop="@dimen/activity_vertical_margin"/>
-
+            android:paddingTop="@dimen/activity_vertical_margin"
+            android:queryHint="uid or pubkey"
+            />
 
         <!-- Search progress -->
         <ProgressBar android:id="@+id/search_progress" style="?android:attr/progressBarStyleLarge"
@@ -28,7 +32,6 @@
             android:layout_weight="1"
             android:paddingLeft="@dimen/activity_horizontal_margin"
             android:paddingRight="@dimen/activity_horizontal_margin"
-            android:scrollbarStyle="outsideOverlay"
-            android:choiceMode="multipleChoice" />
+            android:scrollbarStyle="outsideOverlay" />
     </LinearLayout>
 </FrameLayout>

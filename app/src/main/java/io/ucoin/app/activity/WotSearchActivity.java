@@ -1,13 +1,9 @@
 package io.ucoin.app.activity;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.annotation.TargetApi;
 import android.app.ListActivity;
 import android.app.SearchManager;
 import android.content.Intent;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -16,33 +12,35 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.os.Build;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.SearchView;
+import android.widget.Toast;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.List;
 
 import io.ucoin.app.R;
 import io.ucoin.app.adapter.IdentityListAdapter;
+import io.ucoin.app.adapter.ProgressViewAdapter;
 import io.ucoin.app.exception.UncaughtExceptionHandler;
-import io.ucoin.app.model.BasicIdentity;
+import io.ucoin.app.model.Identity;
 import io.ucoin.app.model.WotLookupResults;
 import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.service.WotService;
 import io.ucoin.app.technical.AsyncTaskHandleException;
+import io.ucoin.app.technical.DateUtils;
 
 public class WotSearchActivity extends ListActivity {
 
-    private static final String TAG = "WotSearchActivity";
-    private static final List<BasicIdentity> EMPTY_LIST = new ArrayList<BasicIdentity>(0);
-    private static final int MIN_SEARCH_CHARACTERS = 3;
+    private static final String PARAM_CHOICE_MODE = "choiceMode";
 
-    private EditText mSearchView;
-    private View mProgressView;
+    private static final String TAG = "WotSearchActivity";
+    private static final int MIN_SEARCH_CHARACTERS = 2;
+
+    private SearchView mSearchView;
     private ListView mList;
     private IdentityListAdapter mIdentityListAdapter;
+    private ProgressViewAdapter mProgressViewAdapter;
 
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
@@ -57,13 +55,15 @@ public class WotSearchActivity extends ListActivity {
 
         setContentView(R.layout.activity_search);
 
-        mSearchView = (EditText) findViewById(R.id.search);
-
-        mProgressView= (View) findViewById(R.id.search_progress);
+        mSearchView = (SearchView) findViewById(R.id.search);
 
         mList = (ListView)getListView();
 
-        mIdentityListAdapter = new IdentityListAdapter(EMPTY_LIST, false) {
+        mProgressViewAdapter = new ProgressViewAdapter(
+                findViewById(R.id.search_progress),
+                mList);
+
+        mIdentityListAdapter = new IdentityListAdapter() {
             @Override
             protected LayoutInflater getLayoutInflater() {
                 return WotSearchActivity.this.getLayoutInflater();
@@ -71,27 +71,29 @@ public class WotSearchActivity extends ListActivity {
         };
         setListAdapter(mIdentityListAdapter);
 
-        mSearchView.addTextChangedListener(new TextWatcher() {
-
+        mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
-            public void onTextChanged(CharSequence cs, int arg1, int arg2, int arg3) {
-
+            public boolean onQueryTextChange(String query) {
                 // When user changed the Text: run search
-                if (cs.length() >= MIN_SEARCH_CHARACTERS) {
-                    doSearch();
+                if (query != null && query.length() >= MIN_SEARCH_CHARACTERS) {
+                    doSearch(query);
                 }
                 else {
-                    mIdentityListAdapter.setIdentities(EMPTY_LIST);
+                    mIdentityListAdapter.setItems(IdentityListAdapter.EMPTY_LIST);
                 }
+                return true;
             }
 
             @Override
-            public void beforeTextChanged(CharSequence arg0, int arg1, int arg2,
-                                          int arg3) {
-            }
-
-            @Override
-            public void afterTextChanged(Editable arg0) {
+            public boolean onQueryTextSubmit(String query) {
+                // When user changed the Text: run search
+                if (query != null && query.length() >= MIN_SEARCH_CHARACTERS) {
+                    doSearch(query);
+                }
+                else {
+                    mIdentityListAdapter.setItems(IdentityListAdapter.EMPTY_LIST);
+                }
+                return true;
             }
         });
 
@@ -99,8 +101,12 @@ public class WotSearchActivity extends ListActivity {
         Intent intent = getIntent();
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             String query = intent.getStringExtra(SearchManager.QUERY);
-            doSearch();
+            doSearch(query);
         }
+
+        // Apply the choice mode (could be change by parameter)
+        int choiceMode = intent.getIntExtra(PARAM_CHOICE_MODE, ListView.CHOICE_MODE_SINGLE);
+        mList.setChoiceMode(choiceMode);
 
     }
 
@@ -130,29 +136,32 @@ public class WotSearchActivity extends ListActivity {
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
 
-        BasicIdentity identity = (BasicIdentity)l.getAdapter().getItem(position);
-        Log.d(TAG, "click on " + identity.getUid() + "/" + identity.getPubkey());
+        Identity identity = (Identity)l.getAdapter().getItem(position);
+        Log.d(TAG, "click on " + identity.getUid() +  "/" + DateUtils.format(identity.getTimestamp())+"/"+identity.getPubkey()  );
 
+        // Open the identity
+        try {
+            Intent intent = new Intent(this, IdentityActivity.class);
+            intent.putExtra(IdentityActivity.PARAM_IDENTITY, identity);
+            startActivity(intent);
+        }
+        catch (Throwable t) {
+            onError(t);
+        }
     }
 
-    protected void doSearch() {
+    protected void doSearch(String searchQuery) {
 
         if (mSearchTask != null) {
             return;
         }
-
-        // Reset errors.
-        mSearchView.setError(null);
-
-        // Store values at the time of the login attempt.
-        String searchQuery = mSearchView.getText().toString().trim();
 
         boolean cancel = false;
         View focusView = null;
 
         // Check for a valid uid
         if (TextUtils.isEmpty(searchQuery)) {
-            mIdentityListAdapter.setIdentities(EMPTY_LIST);
+            mIdentityListAdapter.setItems(IdentityListAdapter.EMPTY_LIST);
             focusView = mSearchView;
             cancel = true;
         } else if (searchQuery.length() <= MIN_SEARCH_CHARACTERS) {
@@ -167,7 +176,7 @@ public class WotSearchActivity extends ListActivity {
         } else {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
-            showProgress(true);
+            mProgressViewAdapter.showProgress(true);
             mSearchTask = new SearchTask(searchQuery);
             mSearchTask.execute((Void) null);
         }
@@ -177,7 +186,7 @@ public class WotSearchActivity extends ListActivity {
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
      */
-    public class SearchTask extends AsyncTaskHandleException<Void, Void, List<BasicIdentity>> {
+    public class SearchTask extends AsyncTaskHandleException<Void, Void, List<Identity>> {
 
         private final String mSearchQuery;
 
@@ -186,7 +195,7 @@ public class WotSearchActivity extends ListActivity {
         }
 
         @Override
-        protected List<BasicIdentity> doInBackgroundHandleException(Void... params) {
+        protected List<Identity> doInBackgroundHandleException(Void... params) {
 
             WotService service = ServiceLocator.instance().getWotService();
             WotLookupResults results = service.find(mSearchQuery);
@@ -199,68 +208,44 @@ public class WotSearchActivity extends ListActivity {
         }
 
         @Override
-        protected void onSuccess(List<BasicIdentity> identities) {
+        protected void onSuccess(List<Identity> identities) {
             mSearchTask = null;
-            showProgress(false);
 
             if (identities == null || identities.size() == 0) {
-                // TODO translate
-                mSearchView.setError("No user found");
+                // TODO NLS
+                Toast.makeText(WotSearchActivity.this,
+                        "No user found",
+                        Toast.LENGTH_SHORT).show();
                 mSearchView.requestFocus();
-                mIdentityListAdapter.setIdentities(EMPTY_LIST);
-                return;
+                mIdentityListAdapter.setItems(IdentityListAdapter.EMPTY_LIST);
             }
-
-            mIdentityListAdapter.setIdentities(identities);
+            else {
+                mIdentityListAdapter.setItems(identities);
+            }
+            mProgressViewAdapter.showProgress(false);
         }
 
         @Override
         protected void onFailed(Throwable t) {
-            mSearchView.setError(t.getMessage());
+            Toast.makeText(WotSearchActivity.this,
+                    "Error: " + t.getMessage(),
+                    Toast.LENGTH_SHORT).show();
             mSearchView.requestFocus();
-            mIdentityListAdapter.setIdentities(EMPTY_LIST);
-            showProgress(false);
+            mIdentityListAdapter.setItems(IdentityListAdapter.EMPTY_LIST);
+            mProgressViewAdapter.showProgress(false);
         }
 
         @Override
         protected void onCancelled() {
             mSearchTask = null;
-            showProgress(false);
+            mProgressViewAdapter.showProgress(false);
         }
     }
 
-    /**
-     * Shows the progress UI and hides the login form.
-     */
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
-    public void showProgress(final boolean show) {
-        // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
-        // for very easy animations. If available, use these APIs to fade-in
-        // the progress spinner.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
-            int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
-
-            mList.animate().setDuration(shortAnimTime).alpha(
-                    show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mList.setVisibility(show ? View.GONE : View.VISIBLE);
-                }
-            });
-
-            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-            mProgressView.animate().setDuration(shortAnimTime).alpha(
-                    show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-                }
-            });
-        } else {
-            // The ViewPropertyAnimator APIs are not available, so simply show
-            // and hide the relevant UI components.
-            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-            mList.setVisibility(show ? View.GONE : View.VISIBLE);
-        }
+    protected void onError(Throwable t) {
+        Toast.makeText(WotSearchActivity.this,
+                "Error: " + t.getMessage(),
+                Toast.LENGTH_SHORT).show();
+        Log.e(TAG, t.getMessage());
     }
 }

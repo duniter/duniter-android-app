@@ -1,10 +1,13 @@
 package io.ucoin.app.activity;
 
+import android.app.SearchManager;
+import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.provider.Settings;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.widget.SearchView;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -75,6 +78,14 @@ public class MainActivity extends ActionBarActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
+
+        // Get the SearchView and set the searchable configuration
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        SearchView searchView = (SearchView) menu.findItem(R.id.action_wot_search).getActionView();
+        // Assumes current activity is the searchable activity
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+        searchView.setIconifiedByDefault(false); // Do not iconify the widget; expand it by default
+
         return true;
     }
 
@@ -92,6 +103,7 @@ public class MainActivity extends ActionBarActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_wot_search) {
+            wotSearch();
             return true;
         }
 

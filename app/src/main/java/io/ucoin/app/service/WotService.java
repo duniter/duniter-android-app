@@ -1,5 +1,6 @@
 package io.ucoin.app.service;
 
+import android.text.TextUtils;
 import android.util.Log;
 
 
@@ -14,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.ucoin.app.model.*;
+import io.ucoin.app.technical.DateUtils;
 import io.ucoin.app.technical.UCoinTechnicalException;
 import io.ucoin.app.technical.crypto.CryptoUtils;
 
@@ -54,19 +56,27 @@ public class WotService extends AbstractNetworkService {
 
     }
 
-    public List<BasicIdentity> toIdentities(WotLookupResults lookupResults) {
-        List<BasicIdentity> result = new ArrayList<>();
+    public List<Identity> toIdentities(WotLookupResults lookupResults) {
+        List<Identity> result = new ArrayList<>();
 
         for (WotLookupResult lookupResult: lookupResults.getResults()) {
             String pubKey = lookupResult.getPubkey();
             for (WotLookupUId lookupUid: lookupResult.getUids()) {
+                // Read the result row
                 String uid = lookupUid.getUid();
                 String self = lookupUid.getSelf();
+                long timestamp = -1;
+                String timestampStr = lookupUid.getMeta().get("timestamp");
+                if (!TextUtils.isEmpty(timestampStr)) {
+                    timestamp = Long.parseLong(timestampStr);
+                }
 
-                BasicIdentity identity = new BasicIdentity();
+                // Create and fill an identity
+                Identity identity = new Identity();
                 identity.setPubkey(pubKey);
                 identity.setUid(uid);
                 identity.setSignature(self);
+                identity.setTimestamp(timestamp);
                 result.add(identity);
             }
         }
@@ -111,7 +121,6 @@ public class WotService extends AbstractNetworkService {
         WotIdentityCertifications result = executeRequest(httpGet, WotIdentityCertifications.class);
         
         return result;
-
     }
 
     public String sendSelf(byte[] pubKey, byte[] secKey, String uid) {
@@ -119,7 +128,7 @@ public class WotService extends AbstractNetworkService {
                     pubKey,
                     secKey,
                     uid,
-                    System.currentTimeMillis());
+                    DateUtils.getCurrentTimestamp());
     }
 
 	public String sendSelf(byte[] pubKey, byte[] secKey, String uid, long timestamp) {
@@ -145,6 +154,11 @@ public class WotService extends AbstractNetworkService {
 
         return selfResult;
 	}
+
+    public void sendCertification(byte[] pubKey, byte[] secKey, String userUid,
+                                  long userTimestamp, String userPubKey) {
+        // TODO
+    }
 
     /* -- Internal methods -- */
 

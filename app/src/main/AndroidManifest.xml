@@ -59,6 +59,22 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="io.ucoin.app.activity.MainActivity" />
         </activity>
+        <activity
+            android:name=".activity.IdentityActivity"
+            android:label="@string/title_activity_identity"
+            android:parentActivityName=".activity.MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="io.ucoin.app.activity.MainActivity" />
+        </activity>
+        <activity
+            android:name=".activity.TransferActivity"
+            android:label="@string/title_activity_transfer"
+            android:parentActivityName=".activity.IdentityActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="io.ucoin.app.activity.IdentityActivity" />
+        </activity>
     </application>
 
 </manifest>

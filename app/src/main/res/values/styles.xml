@@ -3,6 +3,24 @@
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <!-- Customize your theme here. -->
+
+    </style>
+
+    <style name="FormItem">
+
+    </style>
+
+    <style name="FormLabel">
+        <item name="android:layout_marginRight">10dp</item>
+    </style>
+
+
+    <style name="FormText">
+
+    </style>
+
+    <style name="FormText.Editable">
+
     </style>
 
 </resources>

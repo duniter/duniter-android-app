@@ -35,6 +35,14 @@ public class BasicIdentity implements Serializable {
         this.signature = signature;
     }
 
+    public String getSelf() {
+        return signature;
+    }
+
+    public void setSelf(String signature) {
+        this.signature = signature;
+    }
+
     public String getUid() {
         return uid;
     }
@@ -45,11 +53,10 @@ public class BasicIdentity implements Serializable {
     
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder()
+        return new StringBuilder()
         .append("uid=").append(uid)
         .append(",pubkey=").append(pubkey)
-        .append(",signature").append(signature);
-
-        return sb.toString();
+        .append(",signature=").append(signature)
+         .toString();
     }
 }
