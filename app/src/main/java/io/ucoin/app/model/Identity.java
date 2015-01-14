@@ -8,7 +8,6 @@ public class Identity extends BasicIdentity {
 
     private long timestamp = -1;
 
-
     private Boolean isMember = null;
 
     /**
@@ -42,5 +41,11 @@ public class Identity extends BasicIdentity {
                 .append(isMember == null ? "" : ",isMember=")
                 .append(isMember == null ? "" : isMember.toString())
                 .toString();
+    }
+
+    public void copy(Identity identity) {
+        super.copy(identity);
+        this.timestamp = identity.timestamp;
+        this.isMember = identity.isMember;
     }
 }

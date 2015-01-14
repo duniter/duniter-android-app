@@ -1,26 +1,17 @@
 package io.ucoin.app.adapter;
 
 import android.content.Context;
-import android.graphics.Typeface;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.CheckedTextView;
-import android.widget.ExpandableListAdapter;
-import android.widget.ExpandableListView;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import io.ucoin.app.R;
-import io.ucoin.app.model.Identity;
 import io.ucoin.app.model.WotCertification;
 import io.ucoin.app.model.WotIdentityCertifications;
 import io.ucoin.app.technical.DateUtils;
@@ -112,7 +103,7 @@ public abstract class WotExpandableListAdapter extends BaseExpandableListAdapter
     @Override
     public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
         if (convertView == null) {
-            convertView = getLayoutInflater().inflate(R.layout.list_item, null);
+            convertView = getLayoutInflater().inflate(R.layout.list_small_identity_item, null);
         }
 
         // Certification
@@ -135,7 +126,6 @@ public abstract class WotExpandableListAdapter extends BaseExpandableListAdapter
         long timestamp = item.getTimestamp();
         ((TextView) convertView.findViewById(R.id.timestamp))
                 .setText(DateUtils.format(timestamp));
-
 
         ImageView choiceIndicator = (ImageView)convertView.findViewById(R.id.choiceIndicator);
         choiceIndicator.setVisibility(View.GONE);

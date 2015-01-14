@@ -3,10 +3,12 @@ package io.ucoin.app.activity;
 import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -23,12 +25,13 @@ import java.util.List;
 import java.util.Map;
 
 import io.ucoin.app.R;
-import io.ucoin.app.adapter.CertificationListAdapter;
 import io.ucoin.app.adapter.IdentityListAdapter;
 import io.ucoin.app.adapter.IdentityViewUtils;
 import io.ucoin.app.adapter.ProgressViewAdapter;
 import io.ucoin.app.adapter.WotExpandableListAdapter;
+import io.ucoin.app.config.Configuration;
 import io.ucoin.app.model.Identity;
+import io.ucoin.app.model.Wallet;
 import io.ucoin.app.model.WotCertification;
 import io.ucoin.app.model.WotIdentityCertifications;
 import io.ucoin.app.service.ServiceLocator;
@@ -39,14 +42,21 @@ import io.ucoin.app.technical.UCoinTechnicalException;
 
 public class IdentityActivity extends ActionBarActivity {
 
+    private static final String TAG = "IdentityActivity";
+
     public static final String PARAM_IDENTITY = "identity";
 
+    private Button mSignButton;
 
     private ProgressViewAdapter mProgressViewAdapter;
 
+    private ExpandableListView mWotListView;
+    private int mWotLastExpandedPosition = -1;
     private WotExpandableListAdapter mWotExpandableListAdapter;
+    private boolean mSignatureSingleLine = true;
+    private boolean mPubKeySingleLine = true;
 
-    @Override
+                         @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_identity);
@@ -54,8 +64,29 @@ public class IdentityActivity extends ActionBarActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         // Wot list
-        ExpandableListView wotListView = (ExpandableListView)findViewById(R.id.wot_list_view);
-        wotListView.setVisibility(View.GONE);
+        mWotListView = (ExpandableListView)findViewById(R.id.wot_list_view);
+        mWotListView.setVisibility(View.GONE);
+        mWotListView.setAdapter(mWotExpandableListAdapter);
+        mWotListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
+            @Override
+            public boolean onChildClick(ExpandableListView parent, View v,
+                                        int groupPosition, int childPosition, long id) {
+                // Get certification
+                WotCertification cert = (WotCertification) mWotExpandableListAdapter.getChild(groupPosition, childPosition);
+                loadIdentity(cert);
+                return true;
+            }
+        });
+        mWotListView.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
+            @Override
+            public void onGroupExpand(int groupPosition) {
+                if (mWotLastExpandedPosition != -1
+                        && groupPosition != mWotLastExpandedPosition) {
+                    mWotListView.collapseGroup(mWotLastExpandedPosition);
+                }
+                mWotLastExpandedPosition = groupPosition;
+            }
+        });
         mWotExpandableListAdapter = new WotExpandableListAdapter(this){
             @Override
             public String getGroupText(int groupPosition) {
@@ -63,15 +94,24 @@ public class IdentityActivity extends ActionBarActivity {
                 return groupPosition == 0 ? "certified by" : "certifiers of";
             }
         };
-        wotListView.setAdapter(mWotExpandableListAdapter);
-        wotListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
+
+        // Signature
+        final EditText signatureView = (EditText)findViewById(R.id.signature);
+        signatureView.setOnClickListener(new View.OnClickListener() {
             @Override
-            public boolean onChildClick(ExpandableListView parent, View v,
-                                        int groupPosition, int childPosition, long id) {
-                // Get certification
-                WotCertification cert = (WotCertification)mWotExpandableListAdapter.getChild(groupPosition, childPosition);
-                loadIdentity(cert);
-                return true;
+            public void onClick(View v) {
+                mSignatureSingleLine = !mSignatureSingleLine;
+                signatureView.setSingleLine(!mSignatureSingleLine);
+            }
+        });
+
+        // Pub key
+        final EditText pubKeyView = (EditText)findViewById(R.id.pubkey);
+        pubKeyView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mPubKeySingleLine = !mPubKeySingleLine;
+                pubKeyView.setSingleLine(mPubKeySingleLine);
             }
         });
 
@@ -79,7 +119,10 @@ public class IdentityActivity extends ActionBarActivity {
         progressView.setVisibility(View.VISIBLE);
         mProgressViewAdapter = new ProgressViewAdapter(
                 progressView,
-                wotListView);
+                mWotListView);
+
+
+        mSignButton = (Button)findViewById(R.id.sign_button);
 
         // Get the intent, verify the action and get the query
         Intent intent = getIntent();
@@ -116,7 +159,7 @@ public class IdentityActivity extends ActionBarActivity {
 
     /* internal methods */
 
-    protected void loadIdentity(Identity identity) {
+    protected void loadIdentity(final Identity identity) {
         // Uid
         setTitle(identity.getUid());
 
@@ -124,16 +167,19 @@ public class IdentityActivity extends ActionBarActivity {
         EditText timestampView = (EditText)findViewById(R.id.timestamp);
         timestampView.setText(DateUtils.format(identity.getTimestamp()));
 
-        // Pub key
-        EditText pubkeyView = (EditText)findViewById(R.id.pubkey);
-        pubkeyView.setText(identity.getPubkey());
+        // Signature
+        EditText signatureView = (EditText)findViewById(R.id.signature);
+        signatureView.setText(identity.getSignature());
 
-        // Certify button
-        Button certifyButton = (Button)findViewById(R.id.certify_button);
-        certifyButton.setOnClickListener(new View.OnClickListener() {
+        // Pub key
+        final EditText pubKeyView = (EditText)findViewById(R.id.pubkey);
+        pubKeyView.setText(identity.getPubkey());
+
+        // Sign button
+        mSignButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                doCertified();
+                doSign(identity);
             }
         });
 
@@ -142,10 +188,9 @@ public class IdentityActivity extends ActionBarActivity {
         transferButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                doTransfer();
+                doTransfer(identity);
             }
         });
-
 
         // Load WOT data
         mProgressViewAdapter.showProgress(true);
@@ -153,13 +198,20 @@ public class IdentityActivity extends ActionBarActivity {
         task.execute((Void) null);
     }
 
-    protected void doCertified() {
+    protected void doSign(Identity identity) {
 
+        // Disable sign button
+        mSignButton.setActivated(false);
+
+        // Execute sign task
+        SignTask task = new SignTask(identity);
+        task.execute((Void)null);
     }
 
-    protected void doTransfer() {
+    protected void doTransfer(final Identity identity) {
         try {
             Intent intent = new Intent(this, TransferActivity.class);
+            intent.putExtra(TransferActivity.PARAM_RECEIVER, identity);
             startActivity(intent);
         }
         catch (Throwable t) {
@@ -228,6 +280,7 @@ public class IdentityActivity extends ActionBarActivity {
         protected void onFailed(Throwable t) {
             mWotExpandableListAdapter.setItems(WotExpandableListAdapter.EMPTY_ITEMS);
             mProgressViewAdapter.showProgress(false);
+            onError(t);
         }
 
         @Override
@@ -237,24 +290,26 @@ public class IdentityActivity extends ActionBarActivity {
     }
 
     /**
-     * Certifya a user
+     * Sign a user
      */
-    public class CertifyTask extends AsyncTaskHandleException<Void, Void, Boolean> {
+    public class SignTask extends AsyncTaskHandleException<Void, Void, Boolean> {
 
         private final Identity mIdentity;
 
-        CertifyTask(Identity identity) {
+        SignTask(Identity identity) {
             mIdentity = identity;
         }
 
         @Override
         protected Boolean doInBackgroundHandleException(Void... params) {
+            Configuration config = Configuration.instance();
+            Wallet wallet = config.getCurrentWallet();
 
-            SparseArray<WotIdentityCertifications> results = new SparseArray<WotIdentityCertifications>();
             WotService service = ServiceLocator.instance().getWotService();
 
             // Send certification
-            //service.sendCertification();
+            String result = service.sendCertification(wallet, mIdentity);
+            Log.d(TAG, result);
 
             return true;
         }
@@ -264,7 +319,7 @@ public class IdentityActivity extends ActionBarActivity {
             if (success) {
                 // TODO NLS
                 Toast.makeText(IdentityActivity.this,
-                        "Successfully send certification",
+                        "Successfully sign " + mIdentity.getUid(),
                         Toast.LENGTH_SHORT).show();
             }
             mProgressViewAdapter.showProgress(false);
@@ -274,6 +329,8 @@ public class IdentityActivity extends ActionBarActivity {
         protected void onFailed(Throwable t) {
             mWotExpandableListAdapter.setItems(WotExpandableListAdapter.EMPTY_ITEMS);
             mProgressViewAdapter.showProgress(false);
+            mSignButton.setActivated(true);
+            onError(t);
         }
 
         @Override

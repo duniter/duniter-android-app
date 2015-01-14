@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="prompt_search">Search</string>
+    <string name="prompt_search">Identities search</string>
 
 
 </resources>

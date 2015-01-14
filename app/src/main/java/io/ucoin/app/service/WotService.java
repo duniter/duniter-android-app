@@ -33,6 +33,12 @@ public class WotService extends AbstractNetworkService {
 
     public static final String URL_CERTIFIERS_OF = URL_BASE + "/certifiers-of/%s";
 
+    /**
+     * See https://github.com/ucoin-io/ucoin-cli/blob/master/bin/ucoin
+     * > var hash = res.current ? res.current.hash : 'DA39A3EE5E6B4B0D3255BFEF95601890AFD80709';
+     */
+    public static final String BLOCK_ZERO_HASH = "DA39A3EE5E6B4B0D3255BFEF95601890AFD80709";
+
     public CryptoService cryptoService;
 
     public WotService() {
@@ -54,33 +60,6 @@ public class WotService extends AbstractNetworkService {
 
         return lookupResult;
 
-    }
-
-    public List<Identity> toIdentities(WotLookupResults lookupResults) {
-        List<Identity> result = new ArrayList<>();
-
-        for (WotLookupResult lookupResult: lookupResults.getResults()) {
-            String pubKey = lookupResult.getPubkey();
-            for (WotLookupUId lookupUid: lookupResult.getUids()) {
-                // Read the result row
-                String uid = lookupUid.getUid();
-                String self = lookupUid.getSelf();
-                long timestamp = -1;
-                String timestampStr = lookupUid.getMeta().get("timestamp");
-                if (!TextUtils.isEmpty(timestampStr)) {
-                    timestamp = Long.parseLong(timestampStr);
-                }
-
-                // Create and fill an identity
-                Identity identity = new Identity();
-                identity.setPubkey(pubKey);
-                identity.setUid(uid);
-                identity.setSignature(self);
-                identity.setTimestamp(timestamp);
-                result.add(identity);
-            }
-        }
-        return result;
     }
 
     public WotLookupUId findByUid(String uid) {
@@ -135,11 +114,14 @@ public class WotService extends AbstractNetworkService {
 		// http post /wot/add
         HttpPost httpPost = new HttpPost(getAppendedPath(URL_ADD));
 
+        // Compute the pub key hash
+        String pubKeyHash = CryptoUtils.encodeBase58(pubKey);
+
         // compute the self-certification
-		String selfCertification = getSelfCertification(pubKey, secKey, uid, timestamp);
+		String selfCertification = getSelfCertification(secKey, uid, timestamp);
 
         List<NameValuePair> urlParameters = new ArrayList<NameValuePair>();
-		urlParameters.add(new BasicNameValuePair("pubkey", CryptoUtils.encodeBase58(pubKey)));
+		urlParameters.add(new BasicNameValuePair("pubkey", pubKeyHash));
 		urlParameters.add(new BasicNameValuePair("self", selfCertification));
 		urlParameters.add(new BasicNameValuePair("other", ""));
 
@@ -155,14 +137,93 @@ public class WotService extends AbstractNetworkService {
         return selfResult;
 	}
 
-    public void sendCertification(byte[] pubKey, byte[] secKey, String userUid,
-                                  long userTimestamp, String userPubKey) {
-        // TODO
+    public String sendCertification(Wallet wallet,
+                                    Identity identity) {
+        return sendCertification(
+                    wallet.getPubKey(),
+                    wallet.getSecKey(),
+                    wallet.getIdentity().getUid(),
+                    wallet.getIdentity().getTimestamp(),
+                    identity.getUid(),
+                    identity.getPubkey(),
+                    identity.getTimestamp(),
+                    identity.getSignature());
+    }
+
+    public String sendCertification(byte[] pubKey, byte[] secKey,
+                                  String uid, long timestamp,
+                                  String userUid, String userPubKeyHash,
+                                  long userTimestamp, String userSignature) {
+        // http post /wot/add
+        HttpPost httpPost = new HttpPost(getAppendedPath(URL_ADD));
+
+        // Read the current block (number and hash)
+        BlockchainService blockchainService = ServiceLocator.instance().getBlockchainService();
+        BlockchainBlock currentBlock = blockchainService.getCurrentBlock();
+        int blockNumber = currentBlock.getNumber();
+        String blockHash = (blockNumber != 0)
+                ? currentBlock.getHash()
+                : BLOCK_ZERO_HASH;
+
+        // Compute the pub key hash
+        String pubKeyHash = CryptoUtils.encodeBase58(pubKey);
+
+        // compute the self-certification
+        String selfCertification = getSelfCertification(userUid, userTimestamp, userSignature);
+
+        // Compute the certification
+        String certification = getCertification(pubKey, secKey,
+                userUid, userTimestamp, userSignature,
+                blockNumber, blockHash);
+        String inlineCertification = toInlineCertification(pubKeyHash, userPubKeyHash, certification);
+
+        List<NameValuePair> urlParameters = new ArrayList<NameValuePair>();
+        urlParameters.add(new BasicNameValuePair("pubkey", userPubKeyHash));
+        urlParameters.add(new BasicNameValuePair("self", selfCertification));
+        urlParameters.add(new BasicNameValuePair("other", inlineCertification));
+
+        try {
+            httpPost.setEntity(new UrlEncodedFormEntity(urlParameters));
+        }
+        catch(UnsupportedEncodingException e) {
+            throw new UCoinTechnicalException(e);
+        }
+        String selfResult = executeRequest(httpPost, String.class);
+        Log.d(TAG, "received from /add: " + selfResult);
+
+        return selfResult;
+    }
+
+    public List<Identity> toIdentities(WotLookupResults lookupResults) {
+        List<Identity> result = new ArrayList<>();
+
+        for (WotLookupResult lookupResult: lookupResults.getResults()) {
+            String pubKey = lookupResult.getPubkey();
+            for (WotLookupUId lookupUid: lookupResult.getUids()) {
+                // Read the result row
+                String uid = lookupUid.getUid();
+                String self = lookupUid.getSelf();
+                long timestamp = -1;
+                String timestampStr = lookupUid.getMeta().get("timestamp");
+                if (!TextUtils.isEmpty(timestampStr)) {
+                    timestamp = Long.parseLong(timestampStr);
+                }
+
+                // Create and fill an identity
+                Identity identity = new Identity();
+                identity.setPubkey(pubKey);
+                identity.setUid(uid);
+                identity.setSelf(self);
+                identity.setTimestamp(timestamp);
+                result.add(identity);
+            }
+        }
+        return result;
     }
 
     /* -- Internal methods -- */
 
-    protected String getSelfCertification(byte[] pubKey, byte[] secretKey, String uid, long timestamp) {
+    protected String getSelfCertification(byte[] secKey, String uid, long timestamp) {
         // Create the self part to sign
         StringBuilder buffer = new StringBuilder()
                 .append("UID:")
@@ -172,11 +233,100 @@ public class WotService extends AbstractNetworkService {
                 .append('\n');
 
         // Compute the signature
-        String signature = cryptoService.sign(buffer.toString(), secretKey);
+        String signature = cryptoService.sign(buffer.toString(), secKey);
 
         // Append the signature
         return buffer.append(signature)
                 .append('\n')
+                .toString();
+    }
+
+    protected String toInlineCertification(String pubKeyHash,
+                                           String userPubKeyHash,
+                                           String certification) {
+        // Read the signature
+        String[] parts = certification.split("\n");
+        if (parts.length != 5) {
+            throw new UCoinTechnicalException("Bad certification document: " + certification);
+        }
+        String signature = parts[parts.length-1];
+
+        // Read the block number
+        parts = parts[parts.length-2].split(":");
+        if (parts.length != 3) {
+            throw new UCoinTechnicalException("Bad certification document: " + certification);
+        }
+        parts = parts[2].split("-");
+        if (parts.length != 2) {
+            throw new UCoinTechnicalException("Bad certification document: " + certification);
+        }
+        String blockNumber = parts[0];
+
+        return new StringBuilder()
+                .append(pubKeyHash)
+                .append(':')
+                .append(userPubKeyHash)
+                .append(':')
+                .append(blockNumber)
+                .append(':')
+                .append(signature)
+                .append('\n')
+                .toString();
+    }
+
+    protected String getCertification(byte[] pubKey, byte[] secKey, String userUid,
+                                   long userTimestamp,
+                                   String userSignature,
+                                   int blockNumber,
+                                   String blockHash) {
+        // Create the self part to sign
+        String unsignedCertification = getCertificationUnsigned(
+                userUid, userTimestamp, userSignature, blockNumber, blockHash);
+
+        // Compute the signature
+        String signature = cryptoService.sign(unsignedCertification, secKey);
+
+        // Append the signature
+        return new StringBuilder()
+                .append(unsignedCertification)
+                .append(signature)
+                .append('\n')
+                .toString();
+    }
+
+    protected String getCertificationUnsigned(String userUid,
+                                      long userTimestamp,
+                                      String userSignature,
+                                      int blockNumber,
+                                      String blockHash) {
+        // Create the self part to sign
+        return new StringBuilder()
+                .append("UID:")
+                .append(userUid)
+                .append("\nMETA:TS:")
+                .append(userTimestamp)
+                .append('\n')
+                .append(userSignature)
+                .append("\nMETA:TS:")
+                .append(blockNumber)
+                .append('-')
+                .append(blockHash)
+                .append('\n').toString();
+    }
+
+    protected String getSelfCertification(String uid,
+                                              long timestamp,
+                                              String signature) {
+        // Create the self part to sign
+        return new StringBuilder()
+                .append("UID:")
+                .append(uid)
+                .append("\nMETA:TS:")
+                .append(timestamp)
+                .append('\n')
+                .append(signature)
+                // FIXME : in ucoin, no '\n' here - is it a bug ?
+                //.append('\n')
                 .toString();
     }
 

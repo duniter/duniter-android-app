@@ -3,18 +3,22 @@ package io.ucoin.app.model;
 import java.io.Serializable;
 import java.util.List;
 
+import io.ucoin.app.model.Identity;
+import io.ucoin.app.model.Member;
+
 /**
  * A block from the blockchain.
- * 
+ *
  * @author Benoit Lavenier <benoit.lavenier@e-is.pro>
  * @since 1.0
  */
 public class BlockchainBlock implements Serializable {
 
     private static final long serialVersionUID = -5598140972293452669L;
-    
+
     private String version;
     private Integer nonce;
+    private Integer number;
     private Integer date;
     private Integer confirmedDate;
     private Integer membersCount;
@@ -29,7 +33,7 @@ public class BlockchainBlock implements Serializable {
     //private int memberChanges;
     private List<Identity> identities;
     private List<Member> joiners;
-//            private int actives": [],
+    //            private int actives": [],
 //            private int leavers": [],
 //            private int excluded": [],
 //            private int certifications": [],
@@ -46,6 +50,13 @@ public class BlockchainBlock implements Serializable {
     }
     public void setNonce(Integer nonce) {
         this.nonce = nonce;
+    }
+
+    public Integer getNumber() {
+        return number;
+    }
+    public void setNumber(Integer number) {
+        this.number = number;
     }
     public Integer getDate() {
         return date;

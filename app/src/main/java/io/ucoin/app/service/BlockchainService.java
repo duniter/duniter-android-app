@@ -17,6 +17,7 @@ public class BlockchainService extends AbstractNetworkService {
 
     public static final String URL_BLOCK = URL_BASE + "/block/%s";
 
+    public static final String URL_BLOCK_CURRENT = URL_BASE + "/current";
 
     public static final String URL_MEMBERSHIP = URL_BASE + "/membership";
 
@@ -48,6 +49,20 @@ public class BlockchainService extends AbstractNetworkService {
         // get blockchain parameter
         String path = String.format(URL_BLOCK, number);
         HttpGet httpGet = new HttpGet(getAppendedPath(path));
+        BlockchainBlock result = executeRequest(httpGet, BlockchainBlock.class);
+        return result;
+    }
+
+
+    /**
+     * Retrieve the current block
+     * @param number
+     * @return
+     * @throws Exception
+     */
+    public BlockchainBlock getCurrentBlock() {
+        // get blockchain parameter
+        HttpGet httpGet = new HttpGet(getAppendedPath(URL_BLOCK_CURRENT));
         BlockchainBlock result = executeRequest(httpGet, BlockchainBlock.class);
         return result;
     }

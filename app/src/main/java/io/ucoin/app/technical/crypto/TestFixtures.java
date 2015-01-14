@@ -41,4 +41,16 @@ public class TestFixtures {
     public String getUserPrivateKey() {
         return "58LDg8QLmF5pv6Dn9h7X4yFKfMTdP8fdAiWVcyDoTRJu454fwRihCLULH4MW37zncsg4ruoTGJPZneWk22QmG1w4";
     }
+
+    /**
+     * A signature, that corespond to getSelfTimestamp(), getUid()
+     * @return
+     */
+    public String getSelfSignature() {
+        return "p4Ws0RnhY2YSZV5d7MKHwwZ+t3aNK+reTA91coympE0v0MbL9QwczNHp4hnqcItVx8kPFTgoH8iTFJni8oksAg==";
+    }
+
+    public long getSelfTimestamp() {
+        return 1421066807;
+    }
 }

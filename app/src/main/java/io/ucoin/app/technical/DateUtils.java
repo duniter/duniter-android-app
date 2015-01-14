@@ -26,7 +26,9 @@ public class DateUtils {
         return DEFAULT_DATE_FORMAT.format(date);
     }
     public static String format(long timestamp) {
-        return DEFAULT_DATE_FORMAT.format(new Date(timestamp * 1000));
+        return timestamp > 0
+                ? DEFAULT_DATE_FORMAT.format(new Date(timestamp * 1000))
+                : null;
     }
 
     public static long getCurrentTimestamp() {

@@ -56,6 +56,8 @@ public class WotSearchActivity extends ListActivity {
         setContentView(R.layout.activity_search);
 
         mSearchView = (SearchView) findViewById(R.id.search);
+        mSearchView.setIconifiedByDefault(false);
+        mSearchView.setIconified(false);
 
         mList = (ListView)getListView();
 

@@ -13,8 +13,9 @@
     <string name="title_activity_crypto_test">CryptoTestActivity</string>
     <string name="title_activity_identity">Identity</string>
     <string name="timestamp_label">Registration Date</string>
+    <string name="signature_label">Signature</string>
     <string name="pubkey_label">Public key</string>
-    <string name="action_certify">Certify</string>
+    <string name="action_sign">Sign</string>
     <string name="action_transfer">Paid</string>
     <string name="title_activity_transfer">TransferActivity</string>
     <string name="hello_world">Hello world!</string>

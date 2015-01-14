@@ -1,6 +1,5 @@
 package io.ucoin.app.adapter;
 
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,7 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.ucoin.app.R;
-import io.ucoin.app.model.BasicIdentity;
 import io.ucoin.app.model.Identity;
 import io.ucoin.app.technical.DateUtils;
 
@@ -67,7 +65,7 @@ public abstract class IdentityListAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup container) {
         try {
             if (convertView == null) {
-                convertView = getLayoutInflater().inflate(R.layout.list_item, container, false);
+                convertView = getLayoutInflater().inflate(R.layout.list_identity_item, container, false);
             }
             // Retrieve the item
             Identity item = getItem(position);

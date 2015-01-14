@@ -59,4 +59,10 @@ public class BasicIdentity implements Serializable {
         .append(",signature=").append(signature)
          .toString();
     }
+
+    public void copy(BasicIdentity identity) {
+        this.uid = identity.uid;
+        this.pubkey = identity.pubkey;
+        this.signature = identity.signature;
+    }
 }
