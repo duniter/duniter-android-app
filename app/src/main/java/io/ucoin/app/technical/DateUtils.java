@@ -11,23 +11,35 @@ import java.util.Date;
  */
 public class DateUtils {
 
-    private static DateFormat DEFAULT_DATE_FORMAT = new SimpleDateFormat();
+    private static DateFormat DEFAULT_MEDIUM_DATE_FORMAT = new SimpleDateFormat();
+    private static DateFormat DEFAULT_LONG_DATE_FORMAT = new SimpleDateFormat();
 
 	protected DateUtils() {
 		// Helper class
 	}
 
-    public static void setDefaultDateFormat(DateFormat defaultDateFormat) {
-        DEFAULT_DATE_FORMAT = defaultDateFormat;
+    public static void setDefaultMediumDateFormat(DateFormat defaultDateFormat) {
+        DEFAULT_MEDIUM_DATE_FORMAT = defaultDateFormat;
+    }
+
+    public static void setDefaultLongDateFormat(DateFormat defaultDateFormat) {
+        DEFAULT_LONG_DATE_FORMAT = defaultDateFormat;
     }
 
 
     public static String format(Date date) {
-        return DEFAULT_DATE_FORMAT.format(date);
+        return DEFAULT_MEDIUM_DATE_FORMAT.format(date);
     }
+
     public static String format(long timestamp) {
         return timestamp > 0
-                ? DEFAULT_DATE_FORMAT.format(new Date(timestamp * 1000))
+                ? DEFAULT_MEDIUM_DATE_FORMAT.format(new Date(timestamp * 1000))
+                : null;
+    }
+
+    public static String formatLongFormat(long timestamp) {
+        return timestamp > 0
+                ? DEFAULT_LONG_DATE_FORMAT.format(new Date(timestamp * 1000))
                 : null;
     }
 

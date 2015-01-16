@@ -30,6 +30,7 @@ import io.ucoin.app.adapter.IdentityViewUtils;
 import io.ucoin.app.adapter.ProgressViewAdapter;
 import io.ucoin.app.adapter.WotExpandableListAdapter;
 import io.ucoin.app.config.Configuration;
+import io.ucoin.app.exception.UncaughtExceptionHandler;
 import io.ucoin.app.model.Identity;
 import io.ucoin.app.model.Wallet;
 import io.ucoin.app.model.WotCertification;
@@ -56,9 +57,10 @@ public class IdentityActivity extends ActionBarActivity {
     private boolean mSignatureSingleLine = true;
     private boolean mPubKeySingleLine = true;
 
-                         @Override
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler(this));
         setContentView(R.layout.activity_identity);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -66,7 +68,6 @@ public class IdentityActivity extends ActionBarActivity {
         // Wot list
         mWotListView = (ExpandableListView)findViewById(R.id.wot_list_view);
         mWotListView.setVisibility(View.GONE);
-        mWotListView.setAdapter(mWotExpandableListAdapter);
         mWotListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
             @Override
             public boolean onChildClick(ExpandableListView parent, View v,
@@ -94,6 +95,7 @@ public class IdentityActivity extends ActionBarActivity {
                 return groupPosition == 0 ? "certified by" : "certifiers of";
             }
         };
+        mWotListView.setAdapter(mWotExpandableListAdapter);
 
         // Signature
         final EditText signatureView = (EditText)findViewById(R.id.signature);

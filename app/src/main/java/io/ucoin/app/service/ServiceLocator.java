@@ -56,6 +56,12 @@ public class ServiceLocator {
     public CryptoService getCryptoService() {
         return getService(CryptoService.class);
     }
+    public DataService getDataService() {
+        return getService(DataService.class);
+    }
+    public DataContext getDataContext() {
+        return getService(DataContext.class);
+    }
 
     /* -- Internal methods -- */
     protected <S extends BaseService> S getService(Class<S> clazz) {

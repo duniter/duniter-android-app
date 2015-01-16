@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="currency_unit">
+        <item>Coins</item>
+        <item>UD</item>
+    </string-array>
+    <string-array name="inverse_currency_unit">
+        <item>UD</item>
+        <item>Coins</item>
+    </string-array>
+</resources>
+

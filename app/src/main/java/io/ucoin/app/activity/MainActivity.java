@@ -8,20 +8,27 @@ import android.provider.Settings;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.widget.SearchView;
+import android.text.Html;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
 import io.ucoin.app.R;
+import io.ucoin.app.adapter.ProgressViewAdapter;
 import io.ucoin.app.config.Configuration;
 import io.ucoin.app.exception.UncaughtExceptionHandler;
 import io.ucoin.app.model.BlockchainParameter;
+import io.ucoin.app.model.Wallet;
+import io.ucoin.app.service.DataContext;
 import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.technical.AsyncTaskHandleException;
 import io.ucoin.app.technical.DateUtils;
@@ -30,13 +37,22 @@ import io.ucoin.app.technical.ObjectUtils;
 
 public class MainActivity extends ActionBarActivity {
 
-    private TextView mCurrentText;
+    private static final String TAG = "MainActivity";
+
+    private TextView mCurrencyText;
+
+    private ProgressViewAdapter mProgressViewAdapter;
+    private ImageView mStateView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Prepare some utilities
         Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler(this));
-        DateUtils.setDefaultDateFormat(getDefaultDateFormat());
+        DateUtils.setDefaultMediumDateFormat(getMediumDateFormat());
+        DateUtils.setDefaultLongDateFormat(getLongDateFormat());
+
         setContentView(R.layout.activity_main);
 
         // Init configuration
@@ -44,7 +60,7 @@ public class MainActivity extends ActionBarActivity {
         Configuration.setInstance(config);
 
         // Currency text
-        mCurrentText = (TextView)findViewById(R.id.currency_text);
+        mCurrencyText = (TextView)findViewById(R.id.currency_text);
 
         // Connect button
         Button connectButton = (Button)findViewById(R.id.connect_button);
@@ -72,6 +88,17 @@ public class MainActivity extends ActionBarActivity {
                 testCrypto();
             }
         });
+
+        // Image
+        mStateView = (ImageView)findViewById(R.id.connected_icon);
+
+        // Progress
+        mProgressViewAdapter = new ProgressViewAdapter(
+                findViewById(R.id.load_progress),
+                mStateView);
+
+        // Init services
+        initServices();
     }
 
     @Override
@@ -112,32 +139,6 @@ public class MainActivity extends ActionBarActivity {
 
     /* -- Internal methods -- */
 
-
-    protected void connect() {
-        AsyncTask connectTask = new AsyncTaskHandleException<Void, Void, BlockchainParameter>() {
-            @Override
-            protected BlockchainParameter doInBackgroundHandleException(Void... arg0) {
-                BlockchainParameter result = ServiceLocator.instance().getBlockchainService().getParameters();
-                ObjectUtils.checkNotNull(result, "Could not reload currency name");
-                return result;
-            }
-
-            @Override
-            protected void onSuccess(BlockchainParameter p) {
-                TextView currencyText = (TextView) findViewById(R.id.currency_text);
-                currencyText.setText(p.getCurrency());
-            }
-
-            @Override
-            protected void onFailed(Throwable t) {
-                TextView currencyText = (TextView) findViewById(R.id.currency_text);
-                currencyText.setError(t.getMessage());
-            }
-        };
-
-        connectTask.execute();
-    }
-
     protected void signInOrRegister() {
         try {
             Intent intent = new Intent(this, LoginActivity.class);
@@ -173,12 +174,89 @@ public class MainActivity extends ActionBarActivity {
         currencyText.setError(t.getMessage());
     }
 
-    protected DateFormat getDefaultDateFormat() {
+    protected DateFormat getMediumDateFormat() {
         final String format = Settings.System.getString(getContentResolver(), Settings.System.DATE_FORMAT);
         if (TextUtils.isEmpty(format)) {
             return android.text.format.DateFormat.getMediumDateFormat(getApplicationContext());
         } else {
             return new SimpleDateFormat(format);
         }
+    }
+
+    protected DateFormat getLongDateFormat() {
+        return android.text.format.DateFormat.getLongDateFormat(getApplicationContext());
+    }
+
+    protected void initServices() {
+        // TODO detect the first launch (and start the login UI ?)
+        final boolean isFirstLaunch = false;
+
+        AsyncTask<Void, Void, BlockchainParameter> initServicesTask = new AsyncTaskHandleException<Void, Void, BlockchainParameter>() {
+            @Override
+            protected BlockchainParameter doInBackgroundHandleException(Void... arg0) {
+                DataContext dataContext = ServiceLocator.instance().getDataContext();
+
+                // Load currency
+                BlockchainParameter result = ServiceLocator.instance().getBlockchainService().getParameters();
+                dataContext.setBlockchainParameter(result);
+
+                // Load default wallet
+                Wallet defaultWallet = ServiceLocator.instance().getDataService().getDefaultWallet();
+                dataContext.setWallet(defaultWallet);
+
+                return result;
+            }
+
+            @Override
+            protected void onSuccess(final BlockchainParameter result) {
+                mCurrencyText.setText(Html.fromHtml(getString(R.string.connected_label, result.getCurrency())));
+                mStateView.setImageResource(R.drawable.world91);
+                mStateView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        // Display the currency details
+                        Toast.makeText(MainActivity.this,
+                                getString(R.string.connection_details,
+                                        result.getCurrency(),
+                                        result.getUd0(),
+                                        result.getDt()),
+                                Toast.LENGTH_LONG)
+                                .show();
+                    }
+                });
+                mProgressViewAdapter.showProgress(false);
+            }
+
+            @Override
+            protected void onFailed(Throwable t) {
+                final String errorMessage = getString(R.string.connected_error, t.getMessage());
+                Log.e(TAG, errorMessage, t);
+
+                mCurrencyText.setText(getString(R.string.not_connected_label));
+                mStateView.setImageResource(R.drawable.warning45);
+                mStateView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        // Display the error on click
+                        Toast.makeText(MainActivity.this,
+                                getString(R.string.connected_error, errorMessage),
+                                Toast.LENGTH_LONG)
+                                .show();
+                    }
+                });
+                mProgressViewAdapter.showProgress(false);
+
+                // Display the error
+                Toast.makeText(MainActivity.this,
+                        errorMessage,
+                        Toast.LENGTH_SHORT)
+                        .show();
+            }
+        };
+
+        mCurrencyText.setText(getString(R.string.connecting_label));
+        mProgressViewAdapter.showProgress(true);
+
+        initServicesTask.execute();
     }
 }

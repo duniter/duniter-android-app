@@ -50,9 +50,7 @@ public class WotSearchActivity extends ListActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler(this));
-
         setContentView(R.layout.activity_search);
 
         mSearchView = (SearchView) findViewById(R.id.search);

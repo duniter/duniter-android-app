@@ -1,10 +1,19 @@
 <resources>
+    <color name="theme_color">#b0b0ff</color>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="AppTheme" parent="Theme.AppCompat.Light">
         <!-- Customize your theme here. -->
-
+        <item name="android:windowBackground">@color/theme_color</item>
+        <item name="android:colorBackground">@color/theme_color</item>
+        <item name="android:actionBarStyle">@style/AppActionBar</item>
     </style>
+
+    <!-- ActionBar styles -->
+    <style name="AppActionBar"
+        parent="@android:style/Widget.Holo.Light.ActionBar.Solid.Inverse">
+    </style>
+
 
     <style name="FormItem">
 
@@ -16,11 +25,17 @@
 
 
     <style name="FormText">
-
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">#FFFFFF</item>
     </style>
 
     <style name="FormText.Editable">
 
+    </style>
+
+    <style name="FormText.Computed">
+        <item name="android:textStyle">italic</item>
+        <item name="android:textColor">#0099CC</item>
     </style>
 
 </resources>

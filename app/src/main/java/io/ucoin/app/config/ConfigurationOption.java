@@ -121,7 +121,7 @@ public enum ConfigurationOption {
     NODE_TIMEOUT(
             "ucoinj.node.timeout",
             "ucoinj.config.option.node.timeout.description",
-            "1500",
+            "3000",
             Integer.class,
             false);
 

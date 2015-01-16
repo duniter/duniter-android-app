@@ -35,7 +35,7 @@ public abstract class AsyncTaskHandleException<Param, Progress, Result> extends 
     protected abstract void onSuccess(Result result);
 
     protected void onFailed(Throwable error) {
-        // Do notthing by default. Could be ocverride
+        // Do nothing by default. Could be override
     }
 
     public Throwable getError() {
