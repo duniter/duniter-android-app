@@ -170,11 +170,7 @@ public class MainActivity extends ActionBarActivity
         mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextChange(String query) {
-                // When user changed the Text: run search
-                if (query != null && query.length() >= MIN_SEARCH_CHARACTERS) {
-                    doSearch(query);
-                }
-
+                doSearch(query);
                 return true;
             }
 
@@ -295,23 +291,9 @@ public class MainActivity extends ActionBarActivity
             return;
         }
 
-        boolean cancel = false;
-        View focusView = null;
-
-        // Check for a valid uid
-        if (TextUtils.isEmpty(searchQuery)) {
-            updateSearchResult(new ArrayList<Identity>());
-            focusView = mSearchView;
-            cancel = true;
-        } else if (searchQuery.length() <= MIN_SEARCH_CHARACTERS) {
-            focusView = mSearchView;
-            cancel = true;
-        }
-
-        if (cancel) {
-            // There was an error; don't attempt login and focus the first
-            // form field with an error.
-            focusView.requestFocus();
+        if (TextUtils.isEmpty(searchQuery) ||
+                searchQuery.length() <= MIN_SEARCH_CHARACTERS) {
+            mSearchView.requestFocus();
         } else {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
@@ -378,7 +360,6 @@ public class MainActivity extends ActionBarActivity
         }
     }
     
-
     public void updateSearchResult(List<Identity> list)
     {
         WotSearchFragment fragment = (WotSearchFragment)getFragmentManager()
