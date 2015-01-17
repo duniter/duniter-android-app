@@ -1,31 +1,28 @@
 package io.ucoin.app.fragment;
 
-import android.app.Activity;
+import android.app.Fragment;
+import android.app.FragmentManager;
 import android.app.ListFragment;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import java.util.List;
 
 import io.ucoin.app.R;
-import io.ucoin.app.adapter.IdentityListAdapter;
+import io.ucoin.app.activity.MainActivity;
+import io.ucoin.app.adapter.IdentityArrayAdapter;
 import io.ucoin.app.adapter.ProgressViewAdapter;
 import io.ucoin.app.model.Identity;
 
 
 public class WotSearchFragment extends ListFragment{
 
-    private OnIdentitySelectedListener onIdentitySelectedListener;
-
     private static final String TAG = "WotSearchFragment";
 
-    private ListView mList;
-    private IdentityListAdapter mIdentityListAdapter;
+    private IdentityArrayAdapter mIdentityArrayAdapter;
     private ProgressViewAdapter mProgressViewAdapter;
 
     static WotSearchFragment newInstance() {
@@ -37,28 +34,11 @@ public class WotSearchFragment extends ListFragment{
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-
-        try {
-            onIdentitySelectedListener = (OnIdentitySelectedListener) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
-                    + " must implement OnIdentitySelectedListener");
-        }
-    }
-
-    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mIdentityListAdapter = new IdentityListAdapter() {
-            @Override
-            protected LayoutInflater getLayoutInflater() {
-                return getActivity().getLayoutInflater();
-            }
-        };
-        setListAdapter(mIdentityListAdapter);
+        mIdentityArrayAdapter = new IdentityArrayAdapter(getActivity());
+        setListAdapter(mIdentityArrayAdapter);
     }
 
     @Override
@@ -70,11 +50,10 @@ public class WotSearchFragment extends ListFragment{
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mList = getListView();
 
         mProgressViewAdapter = new ProgressViewAdapter(
                 view.findViewById(R.id.search_progress),
-                mList);
+                getListView());
     }
 
     @Override
@@ -86,28 +65,21 @@ public class WotSearchFragment extends ListFragment{
 
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
-
         Identity identity = (Identity)l.getAdapter().getItem(position);
-        onIdentitySelectedListener.OnIdentitySelected(identity);
-    }
+        Fragment fragment =  IdentityFragment.newInstance(identity);
+        FragmentManager fragmentManager = getFragmentManager();
+        fragmentManager.beginTransaction()
+                .replace(R.id.frame_content, fragment)
+                .addToBackStack("SEARCH_BACKSTACK")
+                .commit();
 
-
-
-    protected void onError(Throwable t) {
-        Toast.makeText(getActivity(),
-                "Error: " + t.getMessage(),
-                Toast.LENGTH_SHORT).show();
-        Log.e(TAG, t.getMessage());
+        ((MainActivity) getActivity()).collapseSearchView();
     }
 
     public void callbackNewResult(List<Identity> identities)
     {
-        mIdentityListAdapter.setItems(identities);
+        mIdentityArrayAdapter.clear();
+        mIdentityArrayAdapter.addAll(identities);
+        mIdentityArrayAdapter.notifyDataSetChanged();
     }
-
-    // Container Activity must implement this interface
-    public interface OnIdentitySelectedListener {
-        public void OnIdentitySelected(Identity identity);
-    }
-
 }

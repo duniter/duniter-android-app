@@ -25,15 +25,14 @@ import android.widget.Toast;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 import io.ucoin.app.R;
-import io.ucoin.app.adapter.IdentityListAdapter;
 import io.ucoin.app.config.Configuration;
 import io.ucoin.app.exception.UncaughtExceptionHandler;
 import io.ucoin.app.fragment.CryptoTestFragment;
 import io.ucoin.app.fragment.HomeFragment;
-import io.ucoin.app.fragment.IdentityFragment;
 import io.ucoin.app.fragment.LoginFragment;
 import io.ucoin.app.fragment.WotSearchFragment;
 import io.ucoin.app.model.Identity;
@@ -45,8 +44,7 @@ import io.ucoin.app.technical.DateUtils;
 
 
 public class MainActivity extends ActionBarActivity
-        implements WotSearchFragment.OnIdentitySelectedListener,
-        ListView.OnItemClickListener {
+        implements ListView.OnItemClickListener {
 
     private static final int MIN_SEARCH_CHARACTERS = 2;
 
@@ -172,11 +170,7 @@ public class MainActivity extends ActionBarActivity
         mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextChange(String query) {
-                // When user changed the Text: run search
-                if (query != null && query.length() >= MIN_SEARCH_CHARACTERS) {
-                    doSearch(query);
-                }
-
+                doSearch(query);
                 return true;
             }
 
@@ -297,23 +291,9 @@ public class MainActivity extends ActionBarActivity
             return;
         }
 
-        boolean cancel = false;
-        View focusView = null;
-
-        // Check for a valid uid
-        if (TextUtils.isEmpty(searchQuery)) {
-            updateSearchResult(IdentityListAdapter.EMPTY_LIST);
-            focusView = mSearchView;
-            cancel = true;
-        } else if (searchQuery.length() <= MIN_SEARCH_CHARACTERS) {
-            focusView = mSearchView;
-            cancel = true;
-        }
-
-        if (cancel) {
-            // There was an error; don't attempt login and focus the first
-            // form field with an error.
-            focusView.requestFocus();
+        if (TextUtils.isEmpty(searchQuery) ||
+                searchQuery.length() <= MIN_SEARCH_CHARACTERS) {
+            mSearchView.requestFocus();
         } else {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
@@ -380,7 +360,6 @@ public class MainActivity extends ActionBarActivity
         }
     }
     
-
     public void updateSearchResult(List<Identity> list)
     {
         WotSearchFragment fragment = (WotSearchFragment)getFragmentManager()
@@ -391,15 +370,7 @@ public class MainActivity extends ActionBarActivity
          }
     }
 
-    public void OnIdentitySelected(Identity identity){
-        Fragment fragment =  IdentityFragment.newInstance(identity);
-        FragmentManager fragmentManager = getFragmentManager();
-        fragmentManager.beginTransaction()
-                .replace(R.id.frame_content, fragment)
-                .addToBackStack("SEARCH_BACKSTACK")
-                .commit();
-
-        MenuItemCompat.collapseActionView(mSearchItem);
+    public boolean collapseSearchView() {
+        return MenuItemCompat.collapseActionView(mSearchItem);
     }
-
 }
