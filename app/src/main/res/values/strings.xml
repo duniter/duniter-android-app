@@ -38,6 +38,7 @@
     <string name="connection_details">Successfully connected to a free currency.\n\tCurrency name: %1$s\n\tInitial UD: %2$s\n\tUD interval: %3$s</string>
 
     <string name="connected_error">Unable to connect (%s)</string>
+    <string name="identity_icon">Identity icon</string>
 
     <string name="no_results">No results</string>
 
