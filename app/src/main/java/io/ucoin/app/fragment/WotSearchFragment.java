@@ -1,6 +1,7 @@
 package io.ucoin.app.fragment;
 
-import android.app.Activity;
+import android.app.Fragment;
+import android.app.FragmentManager;
 import android.app.ListFragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -11,6 +12,7 @@ import android.widget.ListView;
 import java.util.List;
 
 import io.ucoin.app.R;
+import io.ucoin.app.activity.MainActivity;
 import io.ucoin.app.adapter.IdentityArrayAdapter;
 import io.ucoin.app.adapter.ProgressViewAdapter;
 import io.ucoin.app.model.Identity;
@@ -18,11 +20,9 @@ import io.ucoin.app.model.Identity;
 
 public class WotSearchFragment extends ListFragment{
 
-    private OnIdentitySelectedListener onIdentitySelectedListener;
-
     private static final String TAG = "WotSearchFragment";
 
-   private IdentityArrayAdapter mIdentityArrayAdapter;
+    private IdentityArrayAdapter mIdentityArrayAdapter;
     private ProgressViewAdapter mProgressViewAdapter;
 
     static WotSearchFragment newInstance() {
@@ -31,18 +31,6 @@ public class WotSearchFragment extends ListFragment{
         fragment.setArguments(args);
 
         return fragment;
-    }
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-
-        try {
-            onIdentitySelectedListener = (OnIdentitySelectedListener) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
-                    + " must implement OnIdentitySelectedListener");
-        }
     }
 
     @Override
@@ -77,9 +65,15 @@ public class WotSearchFragment extends ListFragment{
 
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
-
         Identity identity = (Identity)l.getAdapter().getItem(position);
-        onIdentitySelectedListener.OnIdentitySelected(identity);
+        Fragment fragment =  IdentityFragment.newInstance(identity);
+        FragmentManager fragmentManager = getFragmentManager();
+        fragmentManager.beginTransaction()
+                .replace(R.id.frame_content, fragment)
+                .addToBackStack("SEARCH_BACKSTACK")
+                .commit();
+
+        ((MainActivity) getActivity()).collapseSearchView();
     }
 
     public void callbackNewResult(List<Identity> identities)
@@ -88,10 +82,4 @@ public class WotSearchFragment extends ListFragment{
         mIdentityArrayAdapter.addAll(identities);
         mIdentityArrayAdapter.notifyDataSetChanged();
     }
-
-    // Container Activity must implement this interface
-    public interface OnIdentitySelectedListener {
-        public void OnIdentitySelected(Identity identity);
-    }
-
 }

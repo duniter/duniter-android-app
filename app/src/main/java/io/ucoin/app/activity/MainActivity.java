@@ -33,7 +33,6 @@ import io.ucoin.app.config.Configuration;
 import io.ucoin.app.exception.UncaughtExceptionHandler;
 import io.ucoin.app.fragment.CryptoTestFragment;
 import io.ucoin.app.fragment.HomeFragment;
-import io.ucoin.app.fragment.IdentityFragment;
 import io.ucoin.app.fragment.LoginFragment;
 import io.ucoin.app.fragment.WotSearchFragment;
 import io.ucoin.app.model.Identity;
@@ -45,8 +44,7 @@ import io.ucoin.app.technical.DateUtils;
 
 
 public class MainActivity extends ActionBarActivity
-        implements WotSearchFragment.OnIdentitySelectedListener,
-        ListView.OnItemClickListener {
+        implements ListView.OnItemClickListener {
 
     private static final int MIN_SEARCH_CHARACTERS = 2;
 
@@ -391,15 +389,7 @@ public class MainActivity extends ActionBarActivity
          }
     }
 
-    public void OnIdentitySelected(Identity identity){
-        Fragment fragment =  IdentityFragment.newInstance(identity);
-        FragmentManager fragmentManager = getFragmentManager();
-        fragmentManager.beginTransaction()
-                .replace(R.id.frame_content, fragment)
-                .addToBackStack("SEARCH_BACKSTACK")
-                .commit();
-
-        MenuItemCompat.collapseActionView(mSearchItem);
+    public boolean collapseSearchView() {
+        return MenuItemCompat.collapseActionView(mSearchItem);
     }
-
 }
