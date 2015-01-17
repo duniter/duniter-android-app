@@ -25,10 +25,10 @@ import android.widget.Toast;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 import io.ucoin.app.R;
-import io.ucoin.app.adapter.IdentityListAdapter;
 import io.ucoin.app.config.Configuration;
 import io.ucoin.app.exception.UncaughtExceptionHandler;
 import io.ucoin.app.fragment.CryptoTestFragment;
@@ -300,7 +300,7 @@ public class MainActivity extends ActionBarActivity
 
         // Check for a valid uid
         if (TextUtils.isEmpty(searchQuery)) {
-            updateSearchResult(IdentityListAdapter.EMPTY_LIST);
+            updateSearchResult(new ArrayList<Identity>());
             focusView = mSearchView;
             cancel = true;
         } else if (searchQuery.length() <= MIN_SEARCH_CHARACTERS) {
