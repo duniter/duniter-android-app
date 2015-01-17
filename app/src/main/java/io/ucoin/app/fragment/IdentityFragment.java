@@ -131,8 +131,11 @@ public class IdentityFragment extends Fragment {
             public boolean onChildClick(ExpandableListView parent, View v,
                                         int groupPosition, int childPosition, long id) {
                 // Get certification
-                WotCertification cert = (WotCertification) mWotListAdapter.getChild(groupPosition, childPosition);
+                WotCertification cert = (WotCertification) mWotListAdapter
+                        .getChild(groupPosition, childPosition);
+
                 updateIdentityView(cert);
+
                 return true;
             }
         });
