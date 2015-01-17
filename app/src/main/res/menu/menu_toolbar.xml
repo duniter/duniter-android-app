@@ -4,12 +4,14 @@
     xmlns:yourapp="http://schemas.android.com/apk/res-auto">
 
     <item android:id="@+id/action_wot_search"
-        android:title="@string/action_wot_search"
-        android:icon="@drawable/search57"
+        android:title="@string/search_user"
+        android:icon="@drawable/ic_search_white_24dp"
         yourapp:showAsAction="ifRoom|collapseActionView"
         yourapp:actionViewClass="android.support.v7.widget.SearchView" />
 
 
-    <item android:id="@+id/action_settings" android:title="@string/action_settings"
+    <item android:id="@+id/action_settings" android:title="@string/settings"
         android:orderInCategory="100" app:showAsAction="never" />
 </menu>
+
+

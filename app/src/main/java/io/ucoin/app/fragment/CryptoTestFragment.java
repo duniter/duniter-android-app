@@ -1,35 +1,44 @@
-package io.ucoin.app.activity;
+package io.ucoin.app.fragment;
 
-import android.support.v7.app.ActionBarActivity;
+import android.app.Fragment;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
 import io.ucoin.app.R;
-import io.ucoin.app.model.WotLookupUId;
 import io.ucoin.app.service.CryptoService;
 import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.service.WotService;
 import io.ucoin.app.technical.AsyncTaskHandleException;
 import io.ucoin.app.technical.crypto.CryptoUtils;
 import io.ucoin.app.technical.crypto.TestFixtures;
-import za.co.twyst.tweetnacl.TweetNaCl;
 
-public class CryptoTestActivity extends ActionBarActivity {
+public class CryptoTestFragment extends Fragment {
 
     private TextView resultText;
+
+
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        super.onCreateView(inflater, container, savedInstanceState);
+
+        return inflater.inflate(R.layout.fragment_crypto_test,
+                container, false);
+    }
+
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_crypto_test);
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
-        resultText = (TextView) findViewById(R.id.resultText);
+        getActivity().setTitle(getString(R.string.crypto_test));
 
-        Button seedButton = (Button) findViewById(R.id.generateButton);
+        resultText = (TextView) view.findViewById(R.id.resultText);
+
+        Button seedButton = (Button) view.findViewById(R.id.generateButton);
         seedButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -37,7 +46,7 @@ public class CryptoTestActivity extends ActionBarActivity {
             }
         });
 
-        Button signButton = (Button) findViewById(R.id.signButton);
+        Button signButton = (Button) view.findViewById(R.id.signButton);
         signButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -45,7 +54,7 @@ public class CryptoTestActivity extends ActionBarActivity {
             }
         });
 
-        Button selfButton = (Button) findViewById(R.id.selfButton);
+        Button selfButton = (Button) view.findViewById(R.id.selfButton);
         selfButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -54,27 +63,10 @@ public class CryptoTestActivity extends ActionBarActivity {
         });
     }
 
-
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_crypto_test, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
+    public void onActivityCreated(Bundle savedInstanceState)
+    {
+        super.onActivityCreated(savedInstanceState);
     }
 
     private void generate() {
@@ -113,7 +105,7 @@ public class CryptoTestActivity extends ActionBarActivity {
             byte[] pub = CryptoUtils.decodeBase58(rawPub);
             byte[] sec = CryptoUtils.decodeBase58(rawSec);
             String rawMsg = "UID:"+fixtures.getUid()+"\n"
-                + "META:TS:1420881879\n";
+                    + "META:TS:1420881879\n";
             String rawSig = "TMgQysT7JwY8XwemskwWb8LBDJybLUsnxqaaUvSteIYpOxRiB92gkFQQcGpBwq4hAwhEiqBAiFkiXIozppDDDg==";
 
             CryptoService service = ServiceLocator.instance().getCryptoService();
