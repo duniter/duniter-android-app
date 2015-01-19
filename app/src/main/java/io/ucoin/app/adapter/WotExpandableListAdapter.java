@@ -92,7 +92,7 @@ public abstract class WotExpandableListAdapter extends BaseExpandableListAdapter
 
     @Override
     public boolean isChildSelectable(int groupPosition, int childPosition) {
-        return false;
+        return true;
     }
 
     @Override
@@ -130,13 +130,6 @@ public abstract class WotExpandableListAdapter extends BaseExpandableListAdapter
         ImageView choiceIndicator = (ImageView)convertView.findViewById(R.id.choiceIndicator);
         choiceIndicator.setVisibility(View.GONE);
 
-        convertView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(mContext, item.toString(),
-                        Toast.LENGTH_SHORT).show();
-            }
-        });
         return convertView;
     }
 

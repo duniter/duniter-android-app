@@ -10,6 +10,7 @@
 
 # intelliJ IDE
 *.idea
+.idea/
 
 # Generated files
 bin/
@@ -27,3 +28,9 @@ proguard/
 
 # Log Files
 *.log
+
+scrypt/src/main/libs/**/*.*
+scrypt/src/main/obj/**/*.*
+tweetNaCl/src/main/libs/**/*.so
+tweetNaCl/src/main/obj/**/*.*
+.project

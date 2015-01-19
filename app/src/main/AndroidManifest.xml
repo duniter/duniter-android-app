@@ -22,27 +22,7 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <!-- enable the search dialog to send searches to SearchableActivity -->
-            <meta-data
-                android:name="android.app.default_searchable"
-                android:value=".activity.WotSearchActivity" />
-        </activity>
-        <activity
-            android:name=".activity.LoginActivity"
-            android:label="@string/title_activity_login"
-            android:windowSoftInputMode="adjustResize|stateVisible" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".activity.MainActivity" />
-        </activity>
-        <activity
-            android:name=".activity.SettingsActivity"
-            android:label="@string/title_activity_settings" >
-        </activity>
-        <activity
-            android:name=".activity.WotSearchActivity"
-            android:label="@string/title_activity_wot_search"
-            android:parentActivityName=".activity.MainActivity" >
+
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
             </intent-filter>
@@ -52,28 +32,8 @@
                 android:resource="@xml/searchable" />
         </activity>
         <activity
-            android:name=".activity.CryptoTestActivity"
-            android:label="@string/title_activity_crypto_test"
-            android:parentActivityName=".activity.MainActivity" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="io.ucoin.app.activity.MainActivity" />
-        </activity>
-        <activity
-            android:name=".activity.IdentityActivity"
-            android:label="@string/title_activity_identity"
-            android:parentActivityName=".activity.MainActivity" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="io.ucoin.app.activity.MainActivity" />
-        </activity>
-        <activity
-            android:name=".activity.TransferActivity"
-            android:label="@string/title_activity_transfer"
-            android:parentActivityName=".activity.IdentityActivity" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="io.ucoin.app.activity.IdentityActivity" />
+            android:name=".activity.SettingsActivity"
+            android:label="@string/title_activity_settings" >
         </activity>
     </application>
 

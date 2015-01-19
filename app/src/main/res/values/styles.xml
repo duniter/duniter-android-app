@@ -2,11 +2,14 @@
     <color name="theme_color">#b0b0ff</color>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light">
-        <!-- Customize your theme here. -->
-        <item name="android:windowBackground">@color/theme_color</item>
-        <item name="android:colorBackground">@color/theme_color</item>
-        <item name="android:actionBarStyle">@style/AppActionBar</item>
+    <style name="AppTheme" parent="AppTheme.Base" />
+    
+    <style name="AppTheme.Base" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">#8BC43A</item>
+        <item name="colorPrimaryDark">#33691E</item>
+        <item name="colorAccent">#FF0057</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowActionBar">false</item>
     </style>
 
     <!-- ActionBar styles -->
@@ -16,17 +19,30 @@
 
 
     <style name="FormItem">
+        <item name="android:paddingLeft">@dimen/activity_horizontal_margin</item>
+        <item name="android:paddingRight">@dimen/activity_horizontal_margin</item>
+        <item name="android:paddingTop">@dimen/activity_vertical_margin</item>
+        <item name="android:paddingBottom">@dimen/activity_vertical_margin</item>
+    </style>
 
+    <style name="List">
+        <item name="android:paddingLeft">@dimen/activity_horizontal_margin</item>
+        <item name="android:paddingRight">@dimen/activity_horizontal_margin</item>
+        <item name="android:paddingTop">@dimen/activity_vertical_margin</item>
+        <item name="android:paddingBottom">@dimen/activity_vertical_margin</item>
     </style>
 
     <style name="FormLabel">
         <item name="android:layout_marginRight">10dp</item>
     </style>
 
+    <style name="FormLabel.Suffix">
+        <item name="android:textStyle">bold</item>
+    </style>
 
     <style name="FormText">
         <item name="android:textStyle">normal</item>
-        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:gravity">left|center_vertical</item>
     </style>
 
     <style name="FormText.Editable">
@@ -37,5 +53,10 @@
         <item name="android:textStyle">italic</item>
         <item name="android:textColor">#0099CC</item>
     </style>
+
+    <style name="FormButton">
+        <item name="android:gravity">center_horizontal</item>
+    </style>
+
 
 </resources>

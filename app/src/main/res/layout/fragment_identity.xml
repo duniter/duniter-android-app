@@ -1,0 +1,102 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/FormItem"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            style="@style/FormLabel"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:text="@string/timestamp_label"
+            />
+
+        <EditText
+            style="@style/FormText"
+            android:id="@+id/timestamp"
+            android:layout_height="wrap_content"
+            android:layout_width="fill_parent"
+            android:layout_weight="1"
+            android:singleLine="true"
+            android:editable="false"
+            android:text="Dec 12, 2014"
+            android:maxLines="1"
+            />
+
+        <TextView
+            style="@style/FormLabel"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:text="@string/signature_label"
+            />
+
+        <EditText
+            style="@style/FormText"
+            android:id="@+id/signature"
+            android:layout_height="wrap_content"
+            android:layout_width="fill_parent"
+            android:layout_weight="1"
+            android:singleLine="true"
+            android:editable="false"
+            android:text="p4Ws0RnhY2YSZV5d7MKHwwZ+t3aNK+reTA91coympE0v0MbL9QwczNHp4hnqcItVx8kPFTgoH8iTFJni8oksAg=="
+            android:maxLines="3"
+            />
+
+        <TextView
+            style="@style/FormLabel"
+            android:layout_height="wrap_content"
+            android:layout_width="fill_parent"
+            android:text="@string/pubkey_label"
+            />
+
+        <EditText
+            style="@style/FormText"
+            android:id="@+id/pubkey"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:editable="false"
+            android:text="G2CBgZBPLe6FSFUgpx2Jf1Aqsgta6iib3vmDRA1yLiqU"
+            android:singleLine="true"
+            android:maxLines="3"
+            />
+
+        <Button
+            style="@style/FormButton"
+            android:id="@+id/transfer_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/action_transfer" />
+
+        <Button
+            style="@style/FormButton"
+            android:id="@+id/sign_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/action_sign"/>
+
+    </LinearLayout>
+
+    <!-- Search progress -->
+    <ProgressBar
+        style="?android:attr/progressBarStyleLarge"
+        android:id="@+id/load_progress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:visibility="gone"/>
+
+    <ExpandableListView
+        android:id="@+id/wot_list_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:scrollbarStyle="outsideOverlay" />
+</LinearLayout>
+
