@@ -7,18 +7,18 @@
 
     <TextView
         style="@style/FormLabel"
-        android:text="Wallet (sender)"
+        android:text="@string/wallet_transmitter"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
     <EditText
         style="@style/FormText"
-        android:id="@+id/senderUid"
+        android:id="@+id/transmitter_uid"
         android:layout_height="wrap_content"
         android:layout_width="fill_parent"
         android:layout_weight="1"
         android:singleLine="true"
-        android:text="main wallet"
+        android:text=""
         android:maxLines="1"
         />
 
@@ -31,12 +31,12 @@
 
     <EditText
         style="@style/FormText"
-        android:id="@+id/receiverUid"
+        android:id="@+id/receiver_uid"
         android:layout_height="wrap_content"
         android:layout_width="fill_parent"
         android:layout_weight="1"
         android:singleLine="true"
-        android:text="receiver uid"
+        android:text="@string/receiver_uid"
         android:maxLines="1"
         />
 
@@ -45,7 +45,7 @@
         style="@style/FormLabel"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
-        android:text="Amount"
+        android:text="@string/amount"
         android:layout_marginTop="40dp"
         />
 
@@ -111,25 +111,11 @@
             android:id="@+id/converted_amount_unit_text"
             android:layout_height="match_parent"
             android:layout_width="match_parent"
-            android:text="@string/unit_ud_label"
+            android:text="@string/universal_dividend_acronym"
             android:gravity="center_vertical|center_horizontal"
             />
 
     </LinearLayout>
-
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/action_transfer"
-        android:id="@+id/transfer_button"
-        android:layout_gravity="center_horizontal"
-        android:drawableLeft="@drawable/coins32"
-        android:drawablePadding="0dp"
-        android:paddingTop="0dp"
-        android:paddingBottom="0dp"
-        android:layout_marginTop="50dp"
-        />
-
 
     <!-- Login progress -->
     <ProgressBar android:id="@+id/login_progress" style="?android:attr/progressBarStyleLarge"

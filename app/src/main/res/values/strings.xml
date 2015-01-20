@@ -1,50 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    
-    <string name="action_settings">Settings</string>
-    <string name="action_wot_search">Search user</string>
-    <string name="action_sign">Sign</string>
-    <string name="action_transfer">Transfer</string>
-    <string name="action_history">History</string>
-    <string name="action_home">home</string>
-
-    <string name="title_activity_wot_search">Search</string>
-    <string name="title_activity_crypto_test">CryptoTestActivity</string>
-    <string name="title_activity_identity">Identity</string>
-    <string name="title_activity_transfer">Transfer</string>
-
-    <string name="timestamp_label">Registration Date</string>
-    <string name="signature_label">Signature</string>
-    <string name="pubkey_label">Public key</string>
-    <string name="connecting_label">Connecting...</string>
-    <string name="not_connected_label">Not connected</string>
-    <string name="connected_label"><![CDATA[You are connected to free currency \'<b/>%s</b>\'.]]></string>
-    <string name="unit_ud_label">UD</string>
-    <string name="unit_coins_label">coins</string>
-    <string name="certified_by_label">Certified by</string>
-    <string name="certifiers_of_label">Certifiers of</string>
-
-
+    <!--
+    No need to name a string longer
+    than the words it contains.
+    its name should be the snake case of its main words
+     -->
     <string name="app_name">uCoin</string>
-    <string name="app_label">uCoin</string>
-    <string name="welcome">Welcome to uCoin Android app !</string>
-    <string name="search_hint">Search</string>
-    <string name="search_user">Search user</string>
-    <string name="sign_in">Sign in</string>
-    <string name="crypto_test">Crypto (dev)</string>
-    <string name="settings">Settings</string>
-    <string name="not_connected">Not connected.</string>
+    <string name="ucoin">uCoin</string>
+    <string name="welcome_to_ucoin">Welcome to uCoin Android app !</string>
+
+    <!-- Strings related to connection -->
+    <string name="connecting_dots">Connecting…</string>
+    <string name="not_connected">Not connected</string>
+    <string name="connected_error">Unable to connect (%s)</string>
+    <string name="connected_label"><![CDATA[You are connected to free currency \'<b/>%s</b>\'.]]></string>
     <string name="connection_details">Successfully connected to a free currency.\n\tCurrency name: %1$s\n\tInitial UD: %2$s\n\tUD interval: %3$s</string>
 
-    <string name="connected_error">Unable to connect (%s)</string>
-    <string name="identity_icon">Identity icon</string>
-
+    <!-- Strings related to status -->
+    <string name="cancelled">Cancelled</string>
+    <string name="failed">Failed</string>
     <string name="no_results">No results</string>
 
+    <!-- Strings related to presentation -->
+    <string name="open_drawer">Open the navigation drawer</string>
+    <string name="close_drawer">Close the navigation drawer</string>
+
+    <!-- Strings related to transfer -->
+    <string name="wallet_transmitter">Wallet (transmitter)</string>
+    <string name="receiver_uid">Receiver uid</string>
+    <string name="amount">Amount</string>
+    <string name="universal_dividend_acronym">UD</string>
+    <string name="unit_coins_label">coins</string>
+    <string name="main_wallet">Main wallet</string>
+
+
+    <!-- Strings related to actions -->
+    <string name="send">Send</string>
+    <string name="generate_seed">Generate seed</string>
+    <string name="sign">Sign</string>
+    <string name="self">Self</string>
+    <string name="home">home</string>
+    <string name="search">Search</string>
+    <string name="sign_in">Sign in</string>
+    <string name="dev">Dev</string>
+    <string name="settings">Settings</string>
+    <string name="back">Back</string>
+
+    <!-- Strings related to identities -->
+    <string name="uid_or_public_key">Uid or public key</string>
+    <string name="identity_icon">Identity icon</string>
+    <string name="certified_by">Certified by</string>
+    <string name="certifiers_of">Certifiers of</string>
+    <string name="registration_date">Registration Date</string>
+    <string name="signature">Signature</string>
+    <string name="public_key">Public key</string>
+
+    <!-- Strings related to login -->
+    <string name="login">Login</string>
+    <string name="email_password_salt">Email (or password salt)</string>
+    <string name="password">Password</string>
+    <string name="login_too_short">This login is too short</string>
+    <string name="email_address_invalid">This email address is invalid</string>
+    <string name="password_too_short">This password is too short</string>
+    <string name="login_incorrect">This login is incorrect</string>
+    <string name="password_incorrect">This password is incorrect</string>
+    <string name="field_required">This field is required</string>
+
     <string-array name="drawer_items">
-        <item>@string/action_home</item>
-        <item>@string/action_sign_in</item>
-        <item>@string/crypto_test</item>
+        <item>@string/home</item>
+        <item>@string/sign_in</item>
+        <item>@string/dev</item>
+        <item>@string/settings</item>
     </string-array>
 </resources>

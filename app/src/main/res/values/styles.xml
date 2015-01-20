@@ -5,18 +5,18 @@
     <style name="AppTheme" parent="AppTheme.Base" />
     
     <style name="AppTheme.Base" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="colorPrimary">#8BC43A</item>
-        <item name="colorPrimaryDark">#33691E</item>
+        <item name="colorPrimary">#004D40</item>
+        <item name="colorPrimaryDark">#003124</item>
         <item name="colorAccent">#FF0057</item>
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowActionBar">false</item>
     </style>
 
-    <!-- ActionBar styles -->
+    <!-- ActionBar styles
     <style name="AppActionBar"
         parent="@android:style/Widget.Holo.Light.ActionBar.Solid.Inverse">
     </style>
-
+    -->
 
     <style name="FormItem">
         <item name="android:paddingLeft">@dimen/activity_horizontal_margin</item>
