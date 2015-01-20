@@ -6,9 +6,11 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -22,23 +24,11 @@ import io.ucoin.app.technical.AsyncTaskHandleException;
 
 public class TransferFragment extends Fragment {
 
-    public static final String PARAM_RECEIVER = "receiver";
-
-    public static TransferFragment newInstance(Identity identity) {
-        TransferFragment fragment = new TransferFragment();
-        Bundle args = new Bundle();
-        args.putSerializable(null, identity);
-        fragment.setArguments(args);
-
-        return fragment;
-    }
-
     private TextView mReceiverUidView;
     private TextView mAmountText;
     private TextView mConvertedText;
     private TextView mAmountUnitText;
     private TextView mConvertedUnitText;
-    private Button mTransferButton;
 
     private boolean mIsCoinUnit = true;
     private Integer mUniversalDividend = null;
@@ -46,17 +36,25 @@ public class TransferFragment extends Fragment {
 
     private Identity mIdentity;
 
-    @Override
-    public void onCreate (Bundle savedInstanceState)
-    {
-        super.onCreate(savedInstanceState);
-        mIdentity = (Identity)getArguments().getSerializable(null);
+    public static TransferFragment newInstance(Identity identity) {
+        TransferFragment fragment = new TransferFragment();
+        Bundle args = new Bundle();
+        args.putSerializable(Identity.class.getName(), identity);
+        fragment.setArguments(args);
+
+        return fragment;
     }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         return inflater.inflate(R.layout.fragment_transfer,
                 container, false);
     }
@@ -64,22 +62,26 @@ public class TransferFragment extends Fragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        getActivity().setTitle(R.string.send);
+
+        Bundle newInstanceArgs = getArguments();
+        final Identity identity = (Identity) newInstanceArgs
+                .getSerializable(Identity.class.getName());
 
         DataContext dataContext = ServiceLocator.instance().getDataContext();
-
         // Receiver uid
-        mReceiverUidView = (TextView)view.findViewById(R.id.receiverUid);
+        ((TextView) view.findViewById(R.id.receiver_uid)).setText(identity.getUid());
 
         // Amount
-        mAmountText = (TextView)view.findViewById(R.id.amount);
-        mAmountText.addTextChangedListener(new TextWatcher() {
+        final TextView amountText = (TextView)view.findViewById(R.id.amount);
+        amountText.addTextChangedListener(new TextWatcher() {
            @Override
            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
            }
 
            @Override
            public void onTextChanged(CharSequence s, int start, int before, int count) {
-               updateComvertedAmountView(mAmountText, mConvertedText, mIsCoinUnit);
+               updateComvertedAmountView(amountText, mConvertedText, mIsCoinUnit);
            }
 
            @Override
@@ -119,23 +121,27 @@ public class TransferFragment extends Fragment {
             }
         });
 
-        // transfer button
-        mTransferButton = (Button)view.findViewById(R.id.transfer_button);
-        mTransferButton.setEnabled(false);
-
         // Load data need for transfer
         loadDataTask();
-
-        updateIdentityView(mIdentity);
     }
 
 
-    private void updateIdentityView(Identity identity)
-    {
-        mIdentity = identity;
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.toolbar_transfer, menu);
+    }
 
-        // uid
-        mReceiverUidView.setText(identity.getUid());
+    @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        Bundle newInstanceArgs = getArguments();
+        final Identity identity = (Identity) newInstanceArgs
+                .getSerializable(Identity.class.getName());
+        getActivity().setTitle(identity.getUid());
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        return super.onOptionsItemSelected(item);
     }
 
     protected void loadDataTask() {
@@ -204,10 +210,10 @@ public class TransferFragment extends Fragment {
             if (success == null || !success.booleanValue()) {
                 Toast.makeText(getActivity(),
                         "Could not load data. Blockchain parameter not loaded.",
-                        Toast.LENGTH_SHORT);
+                        Toast.LENGTH_SHORT).show();
             }
 
-            mTransferButton.setEnabled(success);
+            //mTransferButton.setEnabled(success);
         }
     }
 

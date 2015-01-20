@@ -14,7 +14,7 @@
             style="@style/FormLabel"
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
-            android:text="@string/timestamp_label"
+            android:text="@string/registration_date"
             />
 
         <EditText
@@ -33,7 +33,7 @@
             style="@style/FormLabel"
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
-            android:text="@string/signature_label"
+            android:text="@string/signature"
             />
 
         <EditText
@@ -52,7 +52,7 @@
             style="@style/FormLabel"
             android:layout_height="wrap_content"
             android:layout_width="fill_parent"
-            android:text="@string/pubkey_label"
+            android:text="@string/public_key"
             />
 
         <EditText
@@ -66,20 +66,6 @@
             android:singleLine="true"
             android:maxLines="3"
             />
-
-        <Button
-            style="@style/FormButton"
-            android:id="@+id/transfer_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/action_transfer" />
-
-        <Button
-            style="@style/FormButton"
-            android:id="@+id/sign_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/action_sign"/>
 
     </LinearLayout>
 
