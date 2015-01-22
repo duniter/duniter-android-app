@@ -62,7 +62,7 @@ public class TransferFragment extends Fragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        getActivity().setTitle(R.string.send);
+        getActivity().setTitle(R.string.transfer);
 
         Bundle newInstanceArgs = getArguments();
         final Identity identity = (Identity) newInstanceArgs

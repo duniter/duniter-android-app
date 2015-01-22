@@ -11,7 +11,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.ExpandableListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -127,8 +126,20 @@ public class IdentityFragment extends Fragment {
 
                 Fragment fragment = IdentityFragment.newInstance(cert);
                 FragmentManager fragmentManager = getFragmentManager();
-                fragmentManager.popBackStack();
+
                 fragmentManager.beginTransaction()
+                        .setCustomAnimations(R.animator.slide_in_right,
+                                R.animator.slide_out_left)
+                        .remove(IdentityFragment.this)
+                        .commit();
+
+                fragmentManager.popBackStack();
+
+                fragmentManager.beginTransaction()
+                        .setCustomAnimations(R.animator.slide_in_right,
+                                R.animator.slide_out_left,
+                                R.animator.delayed_fade_in,
+                                R.animator.slide_out_up)
                         .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
                         .addToBackStack(fragment.getClass().getSimpleName())
                         .commit();
@@ -162,15 +173,20 @@ public class IdentityFragment extends Fragment {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+
         Bundle newInstanceArgs = getArguments();
         Identity identity = (Identity)
                 newInstanceArgs.getSerializable(Identity.class.getName());
 
         switch (item.getItemId()) {
-            case R.id.action_send:
+            case R.id.action_transfer:
                 Fragment fragment = TransferFragment.newInstance(identity);
                 FragmentManager fragmentManager = getFragmentManager();
                 fragmentManager.beginTransaction()
+                        .setCustomAnimations(R.animator.slide_in_down,
+                                R.animator.slide_out_up,
+                                R.animator.slide_in_up,
+                                R.animator.slide_out_down)
                         .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
                         .addToBackStack(fragment.getClass().getSimpleName())
                         .commit();

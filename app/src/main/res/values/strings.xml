@@ -35,7 +35,7 @@
 
 
     <!-- Strings related to actions -->
-    <string name="send">Send</string>
+    <string name="transfer">Transfer</string>
     <string name="generate_seed">Generate seed</string>
     <string name="sign">Sign</string>
     <string name="self">Self</string>

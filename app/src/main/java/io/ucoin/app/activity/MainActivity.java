@@ -22,7 +22,6 @@ import android.widget.ListView;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
-import java.util.Set;
 
 import io.ucoin.app.R;
 import io.ucoin.app.config.Configuration;
@@ -88,6 +87,11 @@ public class MainActivity extends ActionBarActivity
         //Initial fragment
         Fragment fragment = new HomeFragment();
         getFragmentManager().beginTransaction()
+                .setCustomAnimations(
+                        R.animator.fade_in,
+                        R.animator.fade_out,
+                        R.animator.delayed_slide_in_up,
+                        R.animator.fade_out)
                 .add(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
                 .addToBackStack(fragment.getClass().getSimpleName())
                 .commit();
@@ -114,7 +118,7 @@ public class MainActivity extends ActionBarActivity
     // after the first onResume() call
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-         return true;
+        return true;
     }
 
     @Override
@@ -140,7 +144,7 @@ public class MainActivity extends ActionBarActivity
             getSupportActionBar().setHomeButtonEnabled(true);
         }
 
-       return true;
+        return true;
     }
 
     @Override
@@ -177,10 +181,16 @@ public class MainActivity extends ActionBarActivity
     }
 
     public boolean onQueryTextSubmit(MenuItem searchItem, String query) {
+
+        searchItem.getActionView().clearFocus();
         WotSearchFragment fragment = WotSearchFragment.newInstance(query);
         mQueryResultListener = fragment;
-        searchItem.getActionView().clearFocus();
         getFragmentManager().beginTransaction()
+                .setCustomAnimations(
+                        R.animator.delayed_fade_in,
+                        R.animator.fade_out,
+                        R.animator.delayed_fade_in,
+                        R.animator.fade_out)
                 .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
                 .addToBackStack(fragment.getClass().getSimpleName())
                 .commit();
@@ -223,6 +233,11 @@ public class MainActivity extends ActionBarActivity
             // Insert the fragment by replacing any existing fragment
             fragmentManager.popBackStack(HomeFragment.class.getSimpleName(), 0);
             fragmentManager.beginTransaction()
+                    .setCustomAnimations(
+                            R.animator.delayed_fade_in,
+                            R.animator.fade_out,
+                            R.animator.delayed_fade_in,
+                            R.animator.fade_out)
                     .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
                     .addToBackStack(fragment.getClass().getSimpleName())
                     .commit();
@@ -253,6 +268,7 @@ public class MainActivity extends ActionBarActivity
 
         public void onQueryCancelled();
     }
+
 
     public class SearchTask extends AsyncTaskHandleException<Void, Void, List<Identity>> {
 

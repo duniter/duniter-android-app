@@ -125,6 +125,11 @@ public class WotSearchFragment extends ListFragment
         Fragment fragment = IdentityFragment.newInstance(identity);
         FragmentManager fragmentManager = getFragmentManager();
         fragmentManager.beginTransaction()
+                .setCustomAnimations(
+                        R.animator.delayed_slide_in_up,
+                        R.animator.fade_out,
+                        R.animator.delayed_fade_in,
+                        R.animator.slide_out_up)
                 .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
                 .addToBackStack(fragment.getClass().getSimpleName())
                 .commit();

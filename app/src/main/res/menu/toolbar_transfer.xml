@@ -3,11 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".MainActivity"
     >
-
-    <item android:id="@+id/action_send"
-        android:title="@string/send"
-        android:icon="@drawable/ic_send_white_24dp"
-        ucoin:showAsAction="always" />
 </menu>
 
 

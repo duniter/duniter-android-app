@@ -1,9 +1,9 @@
 <resources>
     <color name="theme_color">#b0b0ff</color>
-
+    <integer name="fragment_animation_time">500</integer>
     <!-- Base application theme. -->
     <style name="AppTheme" parent="AppTheme.Base" />
-    
+
     <style name="AppTheme.Base" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="colorPrimary">@color/primary</item>
         <item name="colorPrimaryDark">@color/primaryDark</item>
