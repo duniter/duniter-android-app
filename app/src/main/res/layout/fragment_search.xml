@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    style="@style/List"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -19,8 +18,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentTop="true"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin"
         android:scrollbarStyle="outsideOverlay" />
 
     <TextView
@@ -31,5 +28,5 @@
         android:text="@string/no_results"
         android:textAppearance="?android:textAppearanceMedium"
         android:textColor="@color/hideable_text_color"
-        android:textSize="18sp" />
+        android:textSize="18sp"/>
 </RelativeLayout>

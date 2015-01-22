@@ -100,9 +100,12 @@ public class MainActivity extends ActionBarActivity
         mToggle.syncState();
     }
 
-    //todo handle screen orientation change
+
     @Override
     public void onConfigurationChanged(android.content.res.Configuration newConfig) {
+        //todo handle screen orientation change
+        //for now it is just discarded by adding
+        //android:configChanges="orientation|screenSize" in the manifest
         super.onConfigurationChanged(newConfig);
         mToggle.onConfigurationChanged(newConfig);
     }

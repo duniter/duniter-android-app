@@ -1,88 +1,114 @@
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    style="@style/FormItem"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <LinearLayout
+    <RelativeLayout
+        android:id="@+id/header_layout"
+        style="@style/Header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_alignParentTop="true">
+
+        <TextView
+            android:id="@+id/uid"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:capitalize="characters"
+            android:textColor="@color/textPrimary"
+            android:textSize="@dimen/textsize_display_3"/>
+
+        <ImageView
+            android:id="@+id/qr_code"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:contentDescription="@string/identity_icon"
+            android:src="@drawable/male12" />
+
+        <TextView
+            android:id="@+id/timestamp_label"
+
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/uid"
+            android:text="@string/registration_date"
+            android:textColor="@color/textPrimary"
+            android:textSize="@dimen/textsize_headline" />
+
+        <TextView
+            android:id="@+id/timestamp"
+
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/timestamp_label"
+            android:maxLines="1"
+            android:singleLine="true"
+            android:text="Dec 12, 2014"
+            android:textColor="@color/textPrimary"
+            android:textSize="@dimen/textsize_subhead" />
+
+    </RelativeLayout>
+
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/header_layout"
         android:orientation="vertical">
 
         <TextView
-            style="@style/FormLabel"
-            android:layout_height="wrap_content"
+            android:id="@+id/signature_label"
             android:layout_width="wrap_content"
-            android:text="@string/registration_date"
-            />
-
-        <EditText
-            style="@style/FormText"
-            android:id="@+id/timestamp"
             android:layout_height="wrap_content"
-            android:layout_width="fill_parent"
-            android:layout_weight="1"
-            android:singleLine="true"
-            android:editable="false"
-            android:text="Dec 12, 2014"
-            android:maxLines="1"
-            />
+            android:text="@string/signature" />
 
         <TextView
-            style="@style/FormLabel"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:text="@string/signature"
-            />
-
-        <EditText
-            style="@style/FormText"
             android:id="@+id/signature"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_width="fill_parent"
-            android:layout_weight="1"
-            android:singleLine="true"
-            android:editable="false"
+            android:singleLine="false"
             android:text="p4Ws0RnhY2YSZV5d7MKHwwZ+t3aNK+reTA91coympE0v0MbL9QwczNHp4hnqcItVx8kPFTgoH8iTFJni8oksAg=="
-            android:maxLines="3"
-            />
+            android:textIsSelectable="true" />
 
         <TextView
-            style="@style/FormLabel"
-            android:layout_height="wrap_content"
             android:layout_width="fill_parent"
-            android:text="@string/public_key"
-            />
+            android:layout_height="wrap_content"
+            android:text="@string/public_key" />
 
-        <EditText
-            style="@style/FormText"
+        <TextView
             android:id="@+id/pubkey"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:editable="false"
-            android:text="G2CBgZBPLe6FSFUgpx2Jf1Aqsgta6iib3vmDRA1yLiqU"
-            android:singleLine="true"
             android:maxLines="3"
-            />
+            android:singleLine="false"
+            android:text="G2CBgZBPLe6FSFUgpx2Jf1Aqsgta6iib3vmDRA1yLiqU" />
 
+        <!-- Search progress -->
+        <ProgressBar
+            android:id="@+id/load_progress"
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:visibility="gone" />
+
+        <ExpandableListView
+            android:id="@+id/wot_list_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:scrollbarStyle="outsideOverlay" />
     </LinearLayout>
-
-    <!-- Search progress -->
-    <ProgressBar
-        style="?android:attr/progressBarStyleLarge"
-        android:id="@+id/load_progress"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:visibility="gone"/>
-
-    <ExpandableListView
-        android:id="@+id/wot_list_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:scrollbarStyle="outsideOverlay" />
 </LinearLayout>
 

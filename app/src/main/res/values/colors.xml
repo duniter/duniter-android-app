@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <color name="primary">#020036</color>
+    <color name="primaryDark">#003124</color>
+    <color name="accent">#FF0057</color>
+    <color name="textPrimary">#FFF</color>
+</resources>

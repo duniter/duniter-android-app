@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ExpandableListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -69,15 +70,19 @@ public class IdentityFragment extends Fragment {
         Bundle newInstanceArgs = getArguments();
         final Identity identity = (Identity) newInstanceArgs
                 .getSerializable(Identity.class.getName());
-        getActivity().setTitle(identity.getUid());
+
+        //Uid
+        TextView uidView = (TextView) view.findViewById(R.id.uid);
+        uidView.setText(identity.getUid());
 
         // Timestamp
-        EditText timestampView = (EditText) view.findViewById(R.id.timestamp);
+        TextView timestampView = (TextView) view.findViewById(R.id.timestamp);
         timestampView.setText(DateUtils.format(identity.getTimestamp()));
 
         // Signature
-        final EditText signatureView = (EditText) view.findViewById(R.id.signature);
+        final TextView signatureView = (TextView) view.findViewById(R.id.signature);
         signatureView.setText(identity.getSignature());
+        /*
         signatureView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -85,11 +90,11 @@ public class IdentityFragment extends Fragment {
                 signatureView.setSingleLine(!mSignatureSingleLine);
             }
         });
-
+*/
         // Pub key
-        final EditText pubkeyView = (EditText) view.findViewById(R.id.pubkey);
+        final TextView pubkeyView = (TextView) view.findViewById(R.id.pubkey);
         pubkeyView.setText(identity.getPubkey());
-
+/*
         pubkeyView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -97,7 +102,7 @@ public class IdentityFragment extends Fragment {
                 pubkeyView.setSingleLine(mPubKeySingleLine);
             }
         });
-
+*/
         // Wot list
         ExpandableListView wotListView = (ExpandableListView) view.findViewById(R.id.wot_list_view);
         wotListView.setVisibility(View.GONE);
@@ -152,10 +157,7 @@ public class IdentityFragment extends Fragment {
 
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
-        Bundle newInstanceArgs = getArguments();
-        final Identity identity = (Identity) newInstanceArgs
-                .getSerializable(Identity.class.getName());
-        getActivity().setTitle(identity.getUid());
+        getActivity().setTitle(R.string.identity);
     }
 
     @Override

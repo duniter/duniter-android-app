@@ -47,6 +47,7 @@
     <string name="back">Back</string>
 
     <!-- Strings related to identities -->
+    <string name="identity">Identity</string>
     <string name="uid_or_public_key">Uid or public key</string>
     <string name="identity_icon">Identity icon</string>
     <string name="certified_by">Certified by</string>

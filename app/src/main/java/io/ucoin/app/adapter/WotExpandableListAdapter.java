@@ -103,7 +103,7 @@ public abstract class WotExpandableListAdapter extends BaseExpandableListAdapter
     @Override
     public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
         if (convertView == null) {
-            convertView = getLayoutInflater().inflate(R.layout.list_small_identity_item, null);
+            convertView = getLayoutInflater().inflate(R.layout.list_item_identity_small, null);
         }
 
         // Certification
