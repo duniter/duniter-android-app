@@ -11,10 +11,6 @@ import io.ucoin.app.R;
  * Created by eis on 05/01/15.
  */
 public class UncaughtExceptionHandler implements java.lang.Thread.UncaughtExceptionHandler {
-
-
-    private static final String TAG = "UncaughtExceptionHandler";
-
     private Context context;
 
     public UncaughtExceptionHandler(Context context) {
@@ -28,7 +24,7 @@ public class UncaughtExceptionHandler implements java.lang.Thread.UncaughtExcept
 
     protected void displayMessageBox(String title, String message) {
 
-        Log.d(TAG, message);
+        Log.d(getClass().getSimpleName(), message);
 
         AlertDialog.Builder messageBox = new AlertDialog.Builder(this.context);
         messageBox.setTitle(title);
