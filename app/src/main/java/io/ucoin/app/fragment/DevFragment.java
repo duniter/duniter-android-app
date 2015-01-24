@@ -4,9 +4,11 @@ import android.app.Fragment;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.TextView;
 
 import io.ucoin.app.R;
@@ -17,16 +19,25 @@ import io.ucoin.app.technical.AsyncTaskHandleException;
 import io.ucoin.app.technical.crypto.CryptoUtils;
 import io.ucoin.app.technical.crypto.TestFixtures;
 
-public class CryptoTestFragment extends Fragment {
+public class DevFragment extends Fragment {
 
     private TextView resultText;
 
+    public static DevFragment newInstance() {
+       return new DevFragment();
+    }
 
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        super.onCreateView(inflater, container, savedInstanceState);
-
-        return inflater.inflate(R.layout.fragment_crypto_test,
+        super.onCreate(savedInstanceState);
+        return inflater.inflate(R.layout.fragment_dev,
                 container, false);
     }
 
@@ -34,39 +45,35 @@ public class CryptoTestFragment extends Fragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        getActivity().setTitle(getString(R.string.crypto_test));
-
         resultText = (TextView) view.findViewById(R.id.resultText);
+    }
 
-        Button seedButton = (Button) view.findViewById(R.id.generateButton);
-        seedButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                generate();
-            }
-        });
 
-        Button signButton = (Button) view.findViewById(R.id.signButton);
-        signButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                sign();
-            }
-        });
-
-        Button selfButton = (Button) view.findViewById(R.id.selfButton);
-        selfButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                self();
-            }
-        });
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.toolbar_dev, menu);
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState)
-    {
-        super.onActivityCreated(savedInstanceState);
+    public void onPrepareOptionsMenu(Menu menu) {
+        getActivity().setTitle(R.string.dev);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_generate_seed:
+                generate();
+                return true;
+                case R.id.action_sign:
+                sign();
+                return true;
+            case R.id.action_self:
+                self();
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     private void generate() {
@@ -90,7 +97,7 @@ public class CryptoTestFragment extends Fragment {
         }
         catch (Exception e) {
             resultText.setText(e.getMessage());
-            Log.e("CryptoTestActivity", e.getMessage(), e);
+            Log.e(getClass().getSimpleName(), e.getMessage(), e);
         }
 
     }
@@ -117,7 +124,7 @@ public class CryptoTestFragment extends Fragment {
         }
         catch (Exception e) {
             resultText.setText(e.getMessage());
-            Log.e("CryptoTestActivity", e.getMessage(), e);
+            Log.e(getClass().getSimpleName(), e.getMessage(), e);
         }
 
     }
@@ -196,7 +203,7 @@ public class CryptoTestFragment extends Fragment {
         @Override
         protected void onFailed(Throwable t) {
             resultText.setText(t.getMessage());
-            Log.e("CryptoTestActivity", t.getMessage(), t);
+            Log.e(getClass().getSimpleName(), t.getMessage(), t);
         }
 
         @Override

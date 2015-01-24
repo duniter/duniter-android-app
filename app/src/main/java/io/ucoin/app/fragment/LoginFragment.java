@@ -63,6 +63,12 @@ public class LoginFragment extends Fragment implements LoaderCallbacks<Cursor> {
     }
 
     @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
@@ -74,7 +80,6 @@ public class LoginFragment extends Fragment implements LoaderCallbacks<Cursor> {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
         getActivity().setTitle(getString(R.string.sign_in));
 
 
@@ -144,29 +149,29 @@ public class LoginFragment extends Fragment implements LoaderCallbacks<Cursor> {
 
         // Check for a valid uid
         if (TextUtils.isEmpty(uid)) {
-            mUidView.setError(getString(R.string.error_field_required));
+            mUidView.setError(getString(R.string.field_required));
             focusView = mUidView;
             cancel = true;
         } else if (!isUidValid(password)) {
-            mUidView.setError(getString(R.string.error_invalid_uid));
+            mUidView.setError(getString(R.string.login_too_short));
             focusView = mUidView;
             cancel = true;
         }
 
         // Check for a valid password, if the user entered one.
         if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
-            mPasswordView.setError(getString(R.string.error_invalid_password));
+            mPasswordView.setError(getString(R.string.password_too_short));
             focusView = mPasswordView;
             cancel = true;
         }
 
         // Check for a valid email address.
         if (TextUtils.isEmpty(email)) {
-            mEmailView.setError(getString(R.string.error_field_required));
+            mEmailView.setError(getString(R.string.field_required));
             focusView = mEmailView;
             cancel = true;
         } else if (!isEmailValid(email)) {
-            mEmailView.setError(getString(R.string.error_invalid_email));
+            mEmailView.setError(getString(R.string.email_address_invalid));
             focusView = mEmailView;
             cancel = true;
         }
@@ -354,7 +359,7 @@ public class LoginFragment extends Fragment implements LoaderCallbacks<Cursor> {
             if (success) {
                 getActivity().finish();
             } else {
-                mUidView.setError(getString(R.string.error_incorrect_uid));
+                mUidView.setError(getString(R.string.login_incorrect));
                 mUidView.requestFocus();
             }
         }
