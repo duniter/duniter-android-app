@@ -43,7 +43,6 @@
 
         <TextView
             android:id="@+id/timestamp"
-
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
@@ -61,37 +60,25 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/header_layout"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:paddingStart="8dp"
+        android:paddingLeft="8dp">
 
         <TextView
-            android:id="@+id/signature_label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/signature"
-            android:textSize="@dimen/abc_text_size_caption_material" />
+            style="@style/headline"
+            android:text="@string/signature"/>
 
         <TextView
             android:id="@+id/signature"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:singleLine="false"
-            android:textIsSelectable="true"
-            android:textSize="@dimen/abc_text_size_subhead_material" />
+            style="@style/subhead"/>
 
         <TextView
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/public_key"
-            android:textSize="@dimen/abc_text_size_body_1_material" />
+            style="@style/headline"
+            android:text="@string/public_key"/>
 
         <TextView
             android:id="@+id/pubkey"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:maxLines="3"
-            android:singleLine="false"
-            android:textSize="@dimen/abc_text_size_subhead_material"/>
+            style="@style/subhead"/>
 
         <!-- Search progress -->
         <ProgressBar
@@ -107,7 +94,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
-            android:scrollbarStyle="outsideOverlay" />
+            android:scrollbarStyle="outsideOverlay"
+            android:layout_marginLeft="8dp" />
     </LinearLayout>
 </LinearLayout>
 

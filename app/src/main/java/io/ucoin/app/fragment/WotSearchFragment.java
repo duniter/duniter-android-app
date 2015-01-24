@@ -1,5 +1,6 @@
 package io.ucoin.app.fragment;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.ListFragment;
@@ -83,8 +84,10 @@ public class WotSearchFragment extends ListFragment
                 .getString("query");
 
         getActivity().setTitle("/" + query);
+        ((MainActivity)getActivity()).setBackButtonEnabled(true);
+
         SearchManager searchManager = (SearchManager) getActivity()
-                .getSystemService(getActivity().SEARCH_SERVICE);
+                .getSystemService(Activity.SEARCH_SERVICE);
         final MenuItem searchItem = menu.findItem(R.id.action_search);
 
         SearchView searchView = (SearchView)searchItem.getActionView();
@@ -95,7 +98,6 @@ public class WotSearchFragment extends ListFragment
 
         //hide the keyboard and remove focus
         searchView.clearFocus();
-        getListView().requestFocus();
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override

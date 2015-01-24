@@ -56,7 +56,6 @@ public class BlockchainService extends AbstractNetworkService {
 
     /**
      * Retrieve the current block
-     * @param number
      * @return
      * @throws Exception
      */

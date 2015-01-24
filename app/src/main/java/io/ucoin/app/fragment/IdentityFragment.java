@@ -18,6 +18,7 @@ import android.widget.Toast;
 import java.util.ArrayList;
 
 import io.ucoin.app.R;
+import io.ucoin.app.activity.MainActivity;
 import io.ucoin.app.adapter.ProgressViewAdapter;
 import io.ucoin.app.adapter.WotExpandableListAdapter;
 import io.ucoin.app.config.Configuration;
@@ -42,7 +43,7 @@ public class IdentityFragment extends Fragment {
     public static IdentityFragment newInstance(Identity identity) {
         IdentityFragment fragment = new IdentityFragment();
         Bundle newInstanceArgs = new Bundle();
-        newInstanceArgs.putSerializable(Identity.class.getName(), identity);
+        newInstanceArgs.putSerializable(Identity.class.getSimpleName(), identity);
         fragment.setArguments(newInstanceArgs);
 
         return fragment;
@@ -68,7 +69,7 @@ public class IdentityFragment extends Fragment {
 
         Bundle newInstanceArgs = getArguments();
         final Identity identity = (Identity) newInstanceArgs
-                .getSerializable(Identity.class.getName());
+                .getSerializable(Identity.class.getSimpleName());
 
         //Uid
         TextView uidView = (TextView) view.findViewById(R.id.uid);
@@ -169,6 +170,7 @@ public class IdentityFragment extends Fragment {
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
         getActivity().setTitle(R.string.identity);
+        ((MainActivity)getActivity()).setBackButtonEnabled(true);
     }
 
     @Override
@@ -176,7 +178,7 @@ public class IdentityFragment extends Fragment {
 
         Bundle newInstanceArgs = getArguments();
         Identity identity = (Identity)
-                newInstanceArgs.getSerializable(Identity.class.getName());
+                newInstanceArgs.getSerializable(Identity.class.getSimpleName());
 
         switch (item.getItemId()) {
             case R.id.action_transfer:
@@ -295,7 +297,6 @@ public class IdentityFragment extends Fragment {
 
             // Send certification
             String result = service.sendCertification(wallet, mIdentity);
-            Log.d(getClass().getSimpleName(), result);
 
             return true;
         }

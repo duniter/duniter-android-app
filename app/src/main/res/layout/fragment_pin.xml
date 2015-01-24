@@ -1,0 +1,31 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/primary"
+    android:orientation="vertical"
+    tools:context="io.ucoin.ucoin.PinFragment">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:layout_marginTop="24dp"
+        android:text="@string/pin_code"
+        android:textColor="@color/textPrimary"
+        android:textSize="@dimen/abc_text_size_display_2_material" />
+
+    <EditText
+        android:id="@+id/pin_code"
+        android:layout_width="240dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="36dp"
+        android:textColor="@color/primary"
+        android:background="@color/textPrimary"
+        android:gravity="center"
+        android:inputType="numberPassword"
+        android:textSize="@dimen/abc_text_size_display_1_material"/>
+
+</LinearLayout>

@@ -24,34 +24,34 @@ Developpement use Android Studio , and Android NDK (Native Developpement Kit) to
 You should install
 - Android Studio: lastest version
 - NDK (Native Developpement Kit): use android-ndk-r10d (64bit)
-- clone the source repository from GitHub
 - Configure the Android Studio project : edit the local.properties file, use by Gradle
 
 - Install need for kalium-jni
+```
 sudo apt-get install build-essential libpcre3 libpcre3-dev libtool automake
+```
 
-- libsodium + generate for all Android architectures:
-git clone git clone https://github.com/jedisct1/libsodium.git
+
+- Clone the source repository from GitHub and generate static libsodium for all Android architectures :
+
+First export the path of the android NDK
+```
+export ANDROID_NDK_HOME=/absolutepath/to/android-ndk
+```
+
+Then
+
+```
+git clone https://github.com/ucoin-io/ucoin-android-app.git
+cd ucoin-android-app
+git submodule init
+git submodule sync
+git submodule update
+cd kalium-jni/src/main/jni/libsodium
 cd libsodium
-sudo mkdir /installs
-sudo ln -s `pwd` /installs/libsodium
-cd /installs/libsodium
 ./autogen.sh
-
-- generate libsodium for all Android architectures:
-export ANDROID_NDK_HOME=/path/to/android-ndk
 ./dist-build/android-arm.sh
 ./dist-build/android-mips.sh
 ./dist-build/android-x86.sh
-cd ..
-
-
-- Kalium-jni : (see https://github.com/joshjdevl/kalium-jni/blob/master/INSTALL.md)
-git clone https://github.com/joshjdevl/kalium-jni && cd kalium-jni
-cd jni
-./installswig.sh
-
-
-./compile.sh
-
-
+cd
+```

@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <!--
     No need to name a string longer
     than the words it contains.
     its name should be the snake case of its main words
-     -->
-    <string name="app_name">uCoin</string>
-    <string name="ucoin">uCoin</string>
+    -->
+
     <string name="welcome_to_ucoin">Welcome to uCoin Android app !</string>
+    <string name="title_activity_account">Account</string>
 
     <!-- Strings related to connection -->
     <string name="connecting_dots">Connecting…</string>
@@ -25,7 +26,7 @@
     <string name="open_drawer">Open the navigation drawer</string>
     <string name="close_drawer">Close the navigation drawer</string>
 
-    <!-- Strings related to transfer -->
+    <!-- Strings related to transfer/transaction -->
     <string name="wallet_transmitter">Wallet (transmitter)</string>
     <string name="receiver_uid">Receiver uid</string>
     <string name="amount">Amount</string>
@@ -34,6 +35,7 @@
     <string name="main_wallet">Main wallet</string>
     <string name="comment_hint">Comment</string>
     <string name="amount_not_integer">Amount must a valid integer</string>
+    <string name="transactions">Transactions</string>
 
     <!-- Strings related to actions -->
     <string name="transfer">Transfer</string>
@@ -46,6 +48,31 @@
     <string name="dev">Dev</string>
     <string name="settings">Settings</string>
     <string name="back">Back</string>
+    <string name="copy">Copy</string>
+    <string name="add">Add</string>
+    <string name="CANCEL">CANCEL</string>
+    <string name="ok">OK</string>
+    <string name="join">Join</string>
+    <string name="delete">Delete</string>
+    <string name="remove">Remove</string>
+
+    <!-- Strings related to community -->
+    <string name="lookup">Lookup</string>
+    <string name="node_address">Node address</string>
+    <string name="node_port">Node port</string>
+    <string name="rules">Rules</string>
+    <string name="growth">Growth</string>
+    <string name="community">Community</string>
+    <string name="no_community">No community</string>
+    <string name="no_transfer">No transfer</string>
+    <string name="communities">Communities</string>
+    <string name="members">Members</string>
+
+    <!-- Strings related to peer/node -->
+    <string name="enter_node_info">Enter node info</string>
+    <string name="enter_remote_address">Enter remote address</string>
+    <string name="add_node">Add node</string>
+    <string name="dialog_text_add_node">Please enter either a full qualified domain name, an IPv4, or an IPv6 address, and a port number</string>
 
     <!-- Strings related to identities -->
     <string name="identity">Identity</string>
@@ -57,10 +84,25 @@
     <string name="signature">Signature</string>
     <string name="public_key">Public key</string>
 
-    <!-- Strings related to login -->
+    <!-- Strings related to account/authentication --> -->
     <string name="login">Login</string>
+    <string name="next">Next</string>
     <string name="email_password_salt">Email (or password salt)</string>
     <string name="password">Password</string>
+    <string name="confirm_password">Confirm password</string>
+    <string name="pin_code">PIN code</string>
+    <string name="create_new_account">Create new account</string>
+    <string name="salt_or_email">Salt (or email)</string>
+    <string name="salt_instructions">Salt: we advice you to choose your personal e-mail as value for this
+        field. But you can put any other value: it only has to carry enough entropy to avoid key
+        collision. Typically, your personal e-mail is a good choice, added to the fact it is easy to
+        remember.</string>
+    <string name="password_instructions">Password: here, choose a very strong password, so no one
+        can find it. This password can\'t be changed thereafter, so choose it carefully.</string>
+
+    <string name="test">Test</string>
+
+
     <string name="login_too_short">This login is too short</string>
     <string name="email_address_invalid">This email address is invalid</string>
     <string name="password_too_short">This password is too short</string>
@@ -70,8 +112,10 @@
 
     <string-array name="drawer_items">
         <item>@string/home</item>
-        <item>@string/sign_in</item>
-        <item>@string/dev</item>
+        <item>@string/community</item>
+        <item>@string/login</item>
+        <item>@string/transactions</item>
         <item>@string/settings</item>
+        <item>@string/dev</item>
     </string-array>
 </resources>

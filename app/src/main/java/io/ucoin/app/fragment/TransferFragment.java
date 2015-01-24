@@ -18,6 +18,7 @@ import android.widget.Toast;
 
 import io.ucoin.app.R;
 import io.ucoin.app.adapter.ProgressViewAdapter;
+import io.ucoin.app.activity.MainActivity;
 import io.ucoin.app.model.BlockchainParameter;
 import io.ucoin.app.model.Identity;
 import io.ucoin.app.model.Wallet;
@@ -50,7 +51,7 @@ public class TransferFragment extends Fragment {
     public static TransferFragment newInstance(Identity identity) {
         TransferFragment fragment = new TransferFragment();
         Bundle args = new Bundle();
-        args.putSerializable(Identity.class.getName(), identity);
+        args.putSerializable(Identity.class.getSimpleName(), identity);
         fragment.setArguments(args);
 
         return fragment;
@@ -77,7 +78,7 @@ public class TransferFragment extends Fragment {
 
         Bundle newInstanceArgs = getArguments();
         mReceiverIdentity = (Identity) newInstanceArgs
-                .getSerializable(Identity.class.getName());
+                .getSerializable(Identity.class.getSimpleName());
 
         DataContext dataContext = ServiceLocator.instance().getDataContext();
         mIssuerWallet = dataContext.getWallet();
@@ -169,8 +170,9 @@ public class TransferFragment extends Fragment {
     public void onPrepareOptionsMenu(Menu menu) {
         Bundle newInstanceArgs = getArguments();
         final Identity identity = (Identity) newInstanceArgs
-                .getSerializable(Identity.class.getName());
+                .getSerializable(Identity.class.getSimpleName());
         getActivity().setTitle(identity.getUid());
+        ((MainActivity)getActivity()).setBackButtonEnabled(true);
     }
 
     @Override
