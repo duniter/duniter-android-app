@@ -30,7 +30,7 @@ public abstract class AsyncTaskHandleException<Param, Progress, Result> extends 
     }
 
 
-    protected abstract Result doInBackgroundHandleException(Param... params);
+    protected abstract Result doInBackgroundHandleException(Param... params) throws Exception;
 
     protected abstract void onSuccess(Result result);
 

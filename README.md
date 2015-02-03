@@ -27,5 +27,31 @@ You should install
 - clone the source repository from GitHub
 - Configure the Android Studio project : edit the local.properties file, use by Gradle
 
+- Install need for kalium-jni
+sudo apt-get install build-essential libpcre3 libpcre3-dev libtool automake
+
+- libsodium + generate for all Android architectures:
+git clone https://github.com/blavenie/libsodium.git
+cd libsodium
+sudo mkdir /installs
+sudo ln -s `pwd` /installs/libsodium
+cd /installs/libsodium
+./autogen.sh
+
+- generate libsodium for all Android architectures:
+export ANDROID_NDK_HOME=/path/to/android-ndk
+./dist-build/android-arm.sh
+./dist-build/android-mips.sh
+./dist-build/android-x86.sh
+cd ..
+
+
+- Kalium-jni : (see https://github.com/joshjdevl/kalium-jni/blob/master/INSTALL.md)
+git clone https://github.com/joshjdevl/kalium-jni && cd kalium-jni
+cd jni
+./installswig.sh
+
+
+./compile.sh
 
 

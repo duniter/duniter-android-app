@@ -33,6 +33,6 @@ proguard/
 
 scrypt/src/main/libs/**/*.*
 scrypt/src/main/obj/**/*.*
-tweetNaCl/src/main/libs/**/*.so
-tweetNaCl/src/main/obj/**/*.*
+kalium-jni/src/main/libs/**/*.so
+kalium-jni/src/main/obj/**/*.*
 .project

@@ -3,7 +3,6 @@ package io.ucoin.app.service;
 import android.text.TextUtils;
 import android.util.Log;
 
-
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
@@ -14,7 +13,13 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.ucoin.app.model.*;
+import io.ucoin.app.model.BlockchainBlock;
+import io.ucoin.app.model.Identity;
+import io.ucoin.app.model.Wallet;
+import io.ucoin.app.model.WotIdentityCertifications;
+import io.ucoin.app.model.WotLookupResult;
+import io.ucoin.app.model.WotLookupResults;
+import io.ucoin.app.model.WotLookupUId;
 import io.ucoin.app.technical.DateUtils;
 import io.ucoin.app.technical.UCoinTechnicalException;
 import io.ucoin.app.technical.crypto.CryptoUtils;
@@ -76,6 +81,23 @@ public class WotService extends AbstractNetworkService {
             return null;
         }
         
+        return uniqueResult;
+    }
+
+    public WotLookupUId findByUidAndPublicKey(String uid, String pubKey) {
+        Log.d(TAG, String.format("Try to find user info by uid [%s] and pubKey [%s]", uid, pubKey));
+
+        // call lookup
+        String path = String.format(URL_LOOKUP, uid);
+        HttpGet lookupHttpGet = new HttpGet(getAppendedPath(path));
+        WotLookupResults lookupResults = executeRequest(lookupHttpGet, WotLookupResults.class);
+
+        // Retrieve the exact uid
+        WotLookupUId uniqueResult = getUidByUidAndPublicKey(lookupResults, uid, pubKey);
+        if (uniqueResult == null) {
+            return null;
+        }
+
         return uniqueResult;
     }
 
@@ -199,26 +221,28 @@ public class WotService extends AbstractNetworkService {
 
         for (WotLookupResult lookupResult: lookupResults.getResults()) {
             String pubKey = lookupResult.getPubkey();
-            for (WotLookupUId lookupUid: lookupResult.getUids()) {
-                // Read the result row
-                String uid = lookupUid.getUid();
-                String self = lookupUid.getSelf();
-                long timestamp = -1;
-                String timestampStr = lookupUid.getMeta().get("timestamp");
-                if (!TextUtils.isEmpty(timestampStr)) {
-                    timestamp = Long.parseLong(timestampStr);
-                }
+            for (WotLookupUId source: lookupResult.getUids()) {
+                // Create and fill an identity, from a result row
+                Identity target = new Identity();
+                toIdentity(source, target);
 
-                // Create and fill an identity
-                Identity identity = new Identity();
-                identity.setPubkey(pubKey);
-                identity.setUid(uid);
-                identity.setSelf(self);
-                identity.setTimestamp(timestamp);
-                result.add(identity);
+                // fill the pub key
+                target.setPubkey(pubKey);
+
+                result.add(target);
             }
         }
         return result;
+    }
+
+    public void toIdentity(WotLookupUId source, Identity target) {
+
+        target.setUid(source.getUid());
+        target.setSelf(source.getSelf());
+        String timestampStr = source.getMeta().get("timestamp");
+        if (!TextUtils.isEmpty(timestampStr)) {
+            target.setTimestamp(Long.parseLong(timestampStr));
+        }
     }
 
     /* -- Internal methods -- */
@@ -345,6 +369,29 @@ public class WotService extends AbstractNetworkService {
             }
         }
         
+        return null;
+    }
+
+    protected WotLookupUId getUidByUidAndPublicKey(WotLookupResults lookupResults,
+                                                   String filterUid,
+                                                   String filterPublicKey) {
+        if (lookupResults.getResults() == null || lookupResults.getResults().size() == 0) {
+            return null;
+        }
+
+        for (WotLookupResult result : lookupResults.getResults()) {
+            if (filterPublicKey.equals(result.getPubkey())) {
+                if (result.getUids() != null && result.getUids().size() > 0) {
+                    for (WotLookupUId uid : result.getUids()) {
+                        if (filterUid.equals(uid.getUid())) {
+                            return uid;
+                        }
+                    }
+                }
+                break;
+            }
+        }
+
         return null;
     }
 

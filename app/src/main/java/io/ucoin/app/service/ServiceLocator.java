@@ -1,11 +1,13 @@
 package io.ucoin.app.service;
 
-import io.ucoin.app.technical.UCoinTechnicalException;
-
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ServiceLocator {
+import io.ucoin.app.technical.UCoinTechnicalException;
+
+public class ServiceLocator implements Closeable {
 
 
     private static final String TAG = "ServiceLocator";
@@ -25,6 +27,15 @@ public class ServiceLocator {
     
     public void init() {
         
+    }
+
+    @Override
+    public void close() throws IOException {
+        for(Object service: serviceCache.values()) {
+            if (service instanceof Closeable) {
+                ((Closeable)service).close();
+            }
+        }
     }
 
     /**
