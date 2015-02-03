@@ -32,7 +32,8 @@
     <string name="universal_dividend_acronym">UD</string>
     <string name="unit_coins_label">coins</string>
     <string name="main_wallet">Main wallet</string>
-
+    <string name="comment_hint">Comment</string>
+    <string name="amount_not_integer">Amount must a valid integer</string>
 
     <!-- Strings related to actions -->
     <string name="transfer">Transfer</string>

@@ -126,17 +126,22 @@ public class HomeFragment extends Fragment {
         @Override
         protected BlockchainParameter doInBackgroundHandleException(Void... param) {
             DataContext dataContext = ServiceLocator.instance().getDataContext();
+            Wallet currentWallet = dataContext.getWallet();
+            BlockchainParameter result = dataContext.getBlockchainParameter();
 
-            // Load currency
-            BlockchainParameter result = ServiceLocator.instance().getBlockchainService().getParameters();
-            dataContext.setBlockchainParameter(result);
+            if (currentWallet == null || result == null) {
+                // Load currency
+                result = ServiceLocator.instance().getBlockchainService().getParameters();
+                dataContext.setBlockchainParameter(result);
 
-            // Load default wallet
-            Wallet defaultWallet = ServiceLocator.instance().getDataService().getDefaultWallet();
-            dataContext.setWallet(defaultWallet);
+                // Load default wallet
+                Wallet defaultWallet = ServiceLocator.instance().getDataService().getDefaultWallet();
+                defaultWallet.setCurrency(result.getCurrency());
+                dataContext.setWallet(defaultWallet);
 
-            // Load the crypto service (load lib)
-            ServiceLocator.instance().getCryptoService();
+                // Load the crypto service (load lib)
+                ServiceLocator.instance().getCryptoService();
+            }
 
             return result;
         }

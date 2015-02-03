@@ -11,21 +11,24 @@ public class Wallet extends KeyPair {
 
     private Identity identity;
     private String salt;
+    private String currency;
 
     public Wallet() {
         super(null, null);
         this.identity = new Identity();
     }
 
-    public Wallet(String uid, byte[] pubKey, byte[] secKey) {
+    public Wallet(String currency, String uid, byte[] pubKey, byte[] secKey) {
         super(pubKey, secKey);
+        this.currency = currency;
         this.identity = new Identity();
         this.identity.setPubkey(pubKey == null ? null : CryptoUtils.encodeBase58(pubKey));
         this.identity.setUid(uid);
     }
 
-    public Wallet(byte[] secKey, Identity identity) {
+    public Wallet(String currency, byte[] secKey, Identity identity) {
         super(CryptoUtils.decodeBase58(identity.getPubkey()), secKey);
+        this.currency = currency;
         this.identity = identity;
     }
 
@@ -49,7 +52,22 @@ public class Wallet extends KeyPair {
         this.salt = salt;
     }
 
+    public String getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(String currency) {
+        this.currency = currency;
+    }
+
     public boolean isAuthenticate() {
         return secretKey != null && identity != null && identity.getPubkey() != null;
+    }
+
+    public String toString() {
+        return new StringBuilder().append(identity.getUid())
+                .append('@')
+                .append(currency)
+                .toString();
     }
 }

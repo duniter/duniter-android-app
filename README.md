@@ -31,7 +31,7 @@ You should install
 sudo apt-get install build-essential libpcre3 libpcre3-dev libtool automake
 
 - libsodium + generate for all Android architectures:
-git clone https://github.com/blavenie/libsodium.git
+git clone git clone https://github.com/jedisct1/libsodium.git
 cd libsodium
 sudo mkdir /installs
 sudo ln -s `pwd` /installs/libsodium

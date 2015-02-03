@@ -3,6 +3,10 @@ package io.ucoin.app.technical.crypto;
 
 public class TestFixtures {
 
+    public String getCurrency() {
+        return "meta_brouzouf";
+    }
+
     public String getUid() {
         return "cgeek";
     }

@@ -73,6 +73,9 @@ public class ServiceLocator implements Closeable {
     public DataContext getDataContext() {
         return getService(DataContext.class);
     }
+    public TransactionService getTransactionService() {
+        return getService(TransactionService.class);
+    }
 
     /* -- Internal methods -- */
     protected <S extends BaseService> S getService(Class<S> clazz) {

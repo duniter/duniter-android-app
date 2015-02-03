@@ -6,7 +6,7 @@ package io.ucoin.app.technical;
  * @since 
  *
  */
-public class UCoinBusinessException extends RuntimeException {
+public class UCoinBusinessException extends Exception {
 
     public UCoinBusinessException() {
         super();

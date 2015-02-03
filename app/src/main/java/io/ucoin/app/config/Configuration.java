@@ -87,6 +87,7 @@ public class Configuration  {
         identity.setTimestamp(fixtures.getSelfTimestamp());
         identity.setSignature(fixtures.getSelfSignature());
         currentWallet = new Wallet(
+                fixtures.getCurrency(),
                 CryptoUtils.decodeBase58(fixtures.getUserPrivateKey()),
                 identity);
 

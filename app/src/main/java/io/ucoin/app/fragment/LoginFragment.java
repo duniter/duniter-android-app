@@ -35,6 +35,7 @@ import java.util.List;
 import io.ucoin.app.R;
 import io.ucoin.app.model.Wallet;
 import io.ucoin.app.model.WotLookupUId;
+import io.ucoin.app.service.DataContext;
 import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.service.WotService;
 import io.ucoin.app.technical.AsyncTaskHandleException;
@@ -360,12 +361,18 @@ public class LoginFragment extends Fragment implements LoaderCallbacks<Cursor> {
 
         @Override
         protected Boolean doInBackgroundHandleException(Void... params) throws Exception {
+            DataContext context = ServiceLocator.instance().getDataContext();
+            String currency = "??";
+            if (context.getBlockchainParameter() != null) {
+                currency = context.getBlockchainParameter().getCurrency();
+            }
+
             // Create a seed from salt and password
             KeyPair keyPair = ServiceLocator.instance().getCryptoService().getKeyPair(mEmail, mPassword);
 
-            Wallet wallet = new Wallet(mUid, keyPair.publicKey, keyPair.secretKey);
+            Wallet wallet = new Wallet(currency, mUid, keyPair.publicKey, keyPair.secretKey);
+            context.setWallet(wallet);
 
-            ServiceLocator.instance().getDataContext().setWallet(wallet);
             WotService wotService = ServiceLocator.instance().getWotService();
             WotLookupUId result = wotService.findByUidAndPublicKey(mUid, wallet.getPubKeyHash());
             if (result != null) {

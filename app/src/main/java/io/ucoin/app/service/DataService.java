@@ -37,6 +37,7 @@ public class DataService extends BaseService {
             identity.setTimestamp(fixtures.getSelfTimestamp());
             identity.setSignature(fixtures.getSelfSignature());
             result = new Wallet(
+                    fixtures.getCurrency(),
                     CryptoUtils.decodeBase58(fixtures.getUserPrivateKey()),
                     identity);
         }

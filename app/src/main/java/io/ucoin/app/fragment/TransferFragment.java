@@ -11,15 +11,20 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import io.ucoin.app.R;
+import io.ucoin.app.adapter.ProgressViewAdapter;
 import io.ucoin.app.model.BlockchainParameter;
 import io.ucoin.app.model.Identity;
+import io.ucoin.app.model.Wallet;
 import io.ucoin.app.service.DataContext;
+import io.ucoin.app.service.InsufficientCreditException;
 import io.ucoin.app.service.ServiceLocator;
+import io.ucoin.app.service.TransactionService;
 import io.ucoin.app.technical.AsyncTaskHandleException;
 
 public class TransferFragment extends Fragment {
@@ -29,12 +34,18 @@ public class TransferFragment extends Fragment {
     private TextView mConvertedText;
     private TextView mAmountUnitText;
     private TextView mConvertedUnitText;
+    private TextView mCommentText;
+    private Button   mTransferButton;
+    private ProgressViewAdapter mProgressViewAdapter;
 
     private boolean mIsCoinUnit = true;
     private Integer mUniversalDividend = null;
     private boolean mIsRunningConvertion = false;
 
-    private Identity mIdentity;
+    private Wallet mIssuerWallet;
+    private Identity mReceiverIdentity;
+
+    private TransferTask mTransferTask = null;
 
     public static TransferFragment newInstance(Identity identity) {
         TransferFragment fragment = new TransferFragment();
@@ -65,23 +76,29 @@ public class TransferFragment extends Fragment {
         getActivity().setTitle(R.string.transfer);
 
         Bundle newInstanceArgs = getArguments();
-        final Identity identity = (Identity) newInstanceArgs
+        mReceiverIdentity = (Identity) newInstanceArgs
                 .getSerializable(Identity.class.getName());
 
         DataContext dataContext = ServiceLocator.instance().getDataContext();
+        mIssuerWallet = dataContext.getWallet();
+
+        // Issuer uid
+        ((TextView) view.findViewById(R.id.transmitter_uid))
+                .setText(mIssuerWallet.toString());
+
         // Receiver uid
-        ((TextView) view.findViewById(R.id.receiver_uid)).setText(identity.getUid());
+        ((TextView) view.findViewById(R.id.receiver_uid)).setText(mReceiverIdentity.getUid());
 
         // Amount
-        final TextView amountText = (TextView)view.findViewById(R.id.amount);
-        amountText.addTextChangedListener(new TextWatcher() {
+        mAmountText = (TextView)view.findViewById(R.id.amount);
+        mAmountText.addTextChangedListener(new TextWatcher() {
            @Override
            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
            }
 
            @Override
            public void onTextChanged(CharSequence s, int start, int before, int count) {
-               updateComvertedAmountView(amountText, mConvertedText, mIsCoinUnit);
+               updateComvertedAmountView(mAmountText, mConvertedText, mIsCoinUnit);
            }
 
            @Override
@@ -112,7 +129,7 @@ public class TransferFragment extends Fragment {
         // Converted unit
         mConvertedUnitText = (TextView)view.findViewById(R.id.converted_amount_unit_text);
 
-        // TOggle unit image
+        // Toggle unit image
         ImageView toggleImage = (ImageView)view.findViewById(R.id.toggle_unit_button);
         toggleImage.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -120,6 +137,23 @@ public class TransferFragment extends Fragment {
                 toggleUnits();
             }
         });
+
+        // Comment
+        mCommentText = (TextView)view.findViewById(R.id.comment);
+
+        // Transfer button
+        mTransferButton = (Button)view.findViewById(R.id.transfer_button);
+        mTransferButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                attemptTransfer();
+            }
+        });
+
+        // progress view
+        mProgressViewAdapter = new ProgressViewAdapter(
+                view.findViewById(R.id.transfer_progress),
+                mTransferButton);
 
         // Load data need for transfer
         loadDataTask();
@@ -144,9 +178,67 @@ public class TransferFragment extends Fragment {
         return super.onOptionsItemSelected(item);
     }
 
+    /* -- Internal methods -- */
+
     protected void loadDataTask() {
         LoadDataTask loadDataTask = new LoadDataTask();
         loadDataTask.execute((Void) null);
+    }
+
+    protected void attemptTransfer() {
+
+        // Reset errors.
+        mAmountText.setError(null);
+        mCommentText.setError(null);
+
+        // Store values
+        String amountStr = mAmountText.getText().toString();
+
+        boolean cancel = false;
+        View focusView = null;
+
+        // Check for a valid uid
+        if (TextUtils.isEmpty(amountStr)) {
+            mAmountText.setError(getString(R.string.field_required));
+            focusView = mAmountText;
+            cancel = true;
+        } else if (!isAmountValid(amountStr)) {
+            mAmountText.setError(getString(R.string.amount_not_integer));
+            focusView = mAmountText;
+            cancel = true;
+        }
+
+        if (cancel) {
+            // There was an error; don't attempt login and focus the first
+            // form field with an error.
+            focusView.requestFocus();
+        } else {
+            // Show a progress spinner, and kick off a background task to
+            // perform the user login attempt.
+            mProgressViewAdapter.showProgress(true);
+            mTransferTask = new TransferTask();
+            mTransferTask.execute((Void) null);
+        }
+    }
+
+    protected boolean isAmountValid(String amountStr) {
+        try {
+            Long.parseLong(amountStr);
+            return true;
+        } catch(NumberFormatException e) {
+            return false;
+        }
+    }
+
+    protected void toggleUnits() {
+        mIsCoinUnit = !mIsCoinUnit;
+        CharSequence amountUnitText = mAmountUnitText.getText();
+        mAmountUnitText.setText(mConvertedUnitText.getText());
+        mConvertedUnitText.setText(amountUnitText);
+        updateComvertedAmountView(mIsCoinUnit ? mAmountText : mConvertedText,
+                mIsCoinUnit ? mConvertedText : mAmountText,
+                mIsCoinUnit
+                );
     }
 
     protected void updateComvertedAmountView(TextView amountView,
@@ -184,6 +276,7 @@ public class TransferFragment extends Fragment {
         mIsRunningConvertion = false;
     }
 
+
     public class LoadDataTask extends AsyncTaskHandleException<Void, Void, Boolean>{
         @Override
         protected Boolean doInBackgroundHandleException(Void... strings) {
@@ -212,16 +305,69 @@ public class TransferFragment extends Fragment {
                         "Could not load data. Blockchain parameter not loaded.",
                         Toast.LENGTH_SHORT).show();
             }
+            else {
 
-            //mTransferButton.setEnabled(success);
+                mTransferButton.setEnabled(success);
+            }
         }
     }
 
-    private void toggleUnits() {
-        mIsCoinUnit = !mIsCoinUnit;
-        CharSequence amountUnitText = mAmountUnitText.getText();
-        mAmountUnitText.setText(mConvertedText.getText());
-        mConvertedText.setText(amountUnitText);
+    public class TransferTask extends AsyncTaskHandleException<Void, Void, Boolean>{
+        @Override
+        protected Boolean doInBackgroundHandleException(Void... strings) throws Exception {
+            TransactionService txService = ServiceLocator.instance().getTransactionService();
+
+            CharSequence amountStr;
+            if (mIsCoinUnit) {
+                amountStr = mAmountText.getText();
+            }
+            else {
+                amountStr = mConvertedText.getText();
+            }
+            long amount = Long.parseLong(amountStr.toString());
+
+            txService.transfert(
+                    mIssuerWallet,
+                    mReceiverIdentity.getPubkey(),
+                    amount,
+                    mCommentText.getText().toString()
+                    );
+
+            return true;
+        }
+
+        @Override
+        protected void onSuccess(Boolean success) {
+            mProgressViewAdapter.showProgress(false);
+            if (success == null || !success.booleanValue()) {
+                Toast.makeText(getActivity(),
+                        "Could not send transaction.",
+                        Toast.LENGTH_SHORT).show();
+            }
+            else {
+                Toast.makeText(getActivity(),
+                        "Successfully send transaction. Waiting processing by blockchain...",
+                        Toast.LENGTH_LONG).show();
+                // TODO smoul : could you go back to previous fragment ?
+                // Or maybe to a new transaction history fragment ?
+            }
+        }
+
+        @Override
+        protected void onFailed(Throwable error) {
+            super.onFailed(error);
+            if (error instanceof InsufficientCreditException) {
+                mAmountText.setError("Not enough money in wallet.");
+            }
+            else {
+                Toast.makeText(getActivity(),
+                        "Could not send transaction: " + error.getMessage(),
+                        Toast.LENGTH_SHORT).show();
+            }
+
+            mProgressViewAdapter.showProgress(false);
+        }
     }
+
 
 }

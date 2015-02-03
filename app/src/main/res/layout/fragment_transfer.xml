@@ -17,6 +17,7 @@
         android:singleLine="true"
         android:text=""
         android:maxLines="1"
+        android:editable="false"
         />
 
     <TextView
@@ -95,7 +96,8 @@
             android:text=""
             android:maxLines="1"
             android:layout_gravity="bottom"
-            android:ems="12" />
+            android:ems="12"
+            android:editable="false"/>
 
         <TextView
             android:id="@+id/converted_amount_unit_text"
@@ -106,6 +108,18 @@
             />
 
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/comment"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:hint="@string/comment_hint"
+        android:inputType="textMultiLine"
+        android:singleLine="false"
+        android:text=""
+        android:maxLines="4"
+        android:layout_gravity="bottom"
+        />
 
     <Button
     android:layout_width="match_parent"
@@ -121,7 +135,7 @@
     />
 
     <!-- Login progress -->
-    <ProgressBar android:id="@+id/login_progress"
+    <ProgressBar android:id="@+id/transfer_progress"
         style="?android:attr/progressBarStyleLarge"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

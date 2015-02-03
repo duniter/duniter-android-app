@@ -5,6 +5,8 @@ package io.ucoin.app.service;
  */
 public abstract class BaseService {
 
+    public static final String PROTOCOL_VERSION = "1";
+
     public BaseService() {
     }
 
