@@ -1,52 +1,32 @@
 package io.ucoin.app.model;
 
 import io.ucoin.app.technical.crypto.CryptoUtils;
+import io.ucoin.app.technical.crypto.KeyPair;
 
 /**
  * A wallet is a user account
  * Created by eis on 13/01/15.
  */
-public class Wallet {
+public class Wallet extends KeyPair {
 
-    private byte[] pubKey;
-    private byte[] secKey;
     private Identity identity;
+    private String salt;
 
     public Wallet() {
-        super();
+        super(null, null);
         this.identity = new Identity();
     }
 
-    public Wallet(byte[] pubKey, byte[] secKey) {
-        super();
-        this.pubKey = pubKey;
-        this.secKey = secKey;
+    public Wallet(String uid, byte[] pubKey, byte[] secKey) {
+        super(pubKey, secKey);
         this.identity = new Identity();
-        this.identity.setPubkey(CryptoUtils.encodeBase58(pubKey));
+        this.identity.setPubkey(pubKey == null ? null : CryptoUtils.encodeBase58(pubKey));
+        this.identity.setUid(uid);
     }
-
 
     public Wallet(byte[] secKey, Identity identity) {
-        super();
-        this.secKey = secKey;
-        this.pubKey = CryptoUtils.decodeBase58(identity.getPubkey());
+        super(CryptoUtils.decodeBase58(identity.getPubkey()), secKey);
         this.identity = identity;
-    }
-
-    public byte[] getSecKey() {
-        return secKey;
-    }
-
-    public void setSecKey(byte[] secKey) {
-        this.secKey = secKey;
-    }
-
-    public byte[] getPubKey() {
-        return pubKey;
-    }
-
-    public void setPubKey(byte[] pubKey) {
-        this.pubKey = pubKey;
     }
 
     public Identity getIdentity() {
@@ -55,5 +35,21 @@ public class Wallet {
 
     public void setIdentity(Identity identity) {
         this.identity = identity;
+    }
+
+    public String getPubKeyHash() {
+        return identity.getPubkey();
+    }
+
+    public String getSalt(){
+        return salt;
+    }
+
+    public void setSalt(String salt){
+        this.salt = salt;
+    }
+
+    public boolean isAuthenticate() {
+        return secretKey != null && identity != null && identity.getPubkey() != null;
     }
 }

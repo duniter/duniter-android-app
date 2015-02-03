@@ -85,7 +85,7 @@ public enum ConfigurationOption {
     NODE_CURRENCY(
             "ucoinj.node.currency",
             "ucoinj.config.option.node.currency.description",
-            "zeta_brouzouf",
+            "meta_brouzouf",
             String.class,
             false),
 

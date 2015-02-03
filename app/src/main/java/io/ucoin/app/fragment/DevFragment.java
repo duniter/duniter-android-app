@@ -17,6 +17,7 @@ import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.service.WotService;
 import io.ucoin.app.technical.AsyncTaskHandleException;
 import io.ucoin.app.technical.crypto.CryptoUtils;
+import io.ucoin.app.technical.crypto.KeyPair;
 import io.ucoin.app.technical.crypto.TestFixtures;
 
 public class DevFragment extends Fragment {
@@ -84,16 +85,23 @@ public class DevFragment extends Fragment {
             String salt = fixtures.getUserSalt();
             String password = fixtures.getUserPassword();
             String expectedBase64Hash = fixtures.getUserSeedHash();
+            String expectedBase58SecretKey = fixtures.getUserPrivateKey();
+            String expectedBase58PubKey = fixtures.getUserPublicKey();
+            byte[] pubKey = CryptoUtils.decodeBase58(expectedBase58PubKey);
 
             CryptoService service = ServiceLocator.instance().getCryptoService();
 
-            byte[] seed = service.computeSeed(salt, password);
-            String hash = CryptoUtils.encodeBase64(seed);
+            byte[] seed = service.getSeed(salt, password);
+            String seedHash = CryptoUtils.encodeBase64(seed);
+            boolean seedSuccess =  isEquals(expectedBase64Hash, seedHash);
 
-            boolean isSuccess =  isEquals(expectedBase64Hash, hash);
+            KeyPair keyPair = service.getKeyPairFromSeed(seed);
+            byte[] secretKey = keyPair.secretKey;
+            String secKeyHash = CryptoUtils.encodeBase58(secretKey);
+            boolean keyPairSuccess =  isEquals(expectedBase58SecretKey, secKeyHash);
 
-            //TweetNaCl.KeyPair kp = new TweetNaCl.KeyPair();
-            resultText.setText("result: " + isSuccess);
+            resultText.setText(String.format("seed: %s, keyPair: %s",
+                    seedSuccess, keyPairSuccess));
         }
         catch (Exception e) {
             resultText.setText(e.getMessage());
@@ -126,7 +134,6 @@ public class DevFragment extends Fragment {
             resultText.setText(e.getMessage());
             Log.e(getClass().getSimpleName(), e.getMessage(), e);
         }
-
     }
 
     private void self() {

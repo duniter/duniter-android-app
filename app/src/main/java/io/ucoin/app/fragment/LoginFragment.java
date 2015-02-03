@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.Fragment;
+import android.app.FragmentManager;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.ContentResolver;
 import android.content.CursorLoader;
@@ -32,9 +33,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.ucoin.app.R;
+import io.ucoin.app.model.Wallet;
 import io.ucoin.app.model.WotLookupUId;
 import io.ucoin.app.service.ServiceLocator;
+import io.ucoin.app.service.WotService;
 import io.ucoin.app.technical.AsyncTaskHandleException;
+import io.ucoin.app.technical.crypto.KeyPair;
 
 /**
  * A login screen that offers login via email/password.
@@ -82,7 +86,6 @@ public class LoginFragment extends Fragment implements LoaderCallbacks<Cursor> {
         super.onViewCreated(view, savedInstanceState);
         getActivity().setTitle(getString(R.string.sign_in));
 
-
         // Set up the login form.
         mUidView = (EditText) view.findViewById(R.id.uid);
 
@@ -111,6 +114,24 @@ public class LoginFragment extends Fragment implements LoaderCallbacks<Cursor> {
 
         mLoginFormView = view.findViewById(R.id.login_form);
         mProgressView = view.findViewById(R.id.login_progress);
+
+        // fill the UI with the default wallet
+        updateLoginView(ServiceLocator.instance().getDataService().getDefaultWallet());
+    }
+
+    private void updateLoginView(Wallet wallet) {
+        String uid = null;
+        String email = null;
+        if (wallet != null) {
+            if (wallet.getIdentity() != null) {
+                uid = wallet.getIdentity().getUid();
+            }
+            if (wallet.getSalt() != null) {
+                email = wallet.getSalt();
+            }
+        }
+        mUidView.setText(uid);
+        mEmailView.setText(email);
     }
 
     private void populateAutoComplete() {
@@ -320,6 +341,7 @@ public class LoginFragment extends Fragment implements LoaderCallbacks<Cursor> {
         mEmailView.setAdapter(adapter);
     }
 
+
     /**
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
@@ -337,18 +359,25 @@ public class LoginFragment extends Fragment implements LoaderCallbacks<Cursor> {
         }
 
         @Override
-        protected Boolean doInBackgroundHandleException(Void... params) {
-            // TODO: attempt authentication against a network service.
+        protected Boolean doInBackgroundHandleException(Void... params) throws Exception {
+            // Create a seed from salt and password
+            KeyPair keyPair = ServiceLocator.instance().getCryptoService().getKeyPair(mEmail, mPassword);
 
-            WotLookupUId result = ServiceLocator.instance().getWotService().findByUid(mUid);
+            Wallet wallet = new Wallet(mUid, keyPair.publicKey, keyPair.secretKey);
+
+            ServiceLocator.instance().getDataContext().setWallet(wallet);
+            WotService wotService = ServiceLocator.instance().getWotService();
+            WotLookupUId result = wotService.findByUidAndPublicKey(mUid, wallet.getPubKeyHash());
             if (result != null) {
+                // Refresh the wallet identity with lookup info
+                wotService.toIdentity(result, wallet.getIdentity());
                 return true;
             }
 
             // TODO: register the new account here.
             // send the self
 
-            return true;
+            return false;
         }
 
         @Override
@@ -357,7 +386,12 @@ public class LoginFragment extends Fragment implements LoaderCallbacks<Cursor> {
             showProgress(false);
 
             if (success) {
-                getActivity().finish();
+                Fragment homeFragment = new HomeFragment();
+                FragmentManager fragmentManager = getFragmentManager();
+                fragmentManager.beginTransaction()
+                        .add(R.id.frame_content, homeFragment, "HOME")
+                        .addToBackStack("HOME_BACKSTACK")
+                        .commit();
             } else {
                 mUidView.setError(getString(R.string.login_incorrect));
                 mUidView.requestFocus();

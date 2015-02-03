@@ -135,6 +135,9 @@ public class HomeFragment extends Fragment {
             Wallet defaultWallet = ServiceLocator.instance().getDataService().getDefaultWallet();
             dataContext.setWallet(defaultWallet);
 
+            // Load the crypto service (load lib)
+            ServiceLocator.instance().getCryptoService();
+
             return result;
         }
 
