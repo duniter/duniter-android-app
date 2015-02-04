@@ -1,6 +1,14 @@
 package io.ucoin.app.fragment;
 
 import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.LoaderManager;
+import android.content.ContentResolver;
+import android.content.ContentValues;
+import android.content.CursorLoader;
+import android.content.Loader;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -10,8 +18,14 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toolbar;
+
+import java.util.Random;
 
 import io.ucoin.app.R;
+import io.ucoin.app.activity.MainActivity;
+import io.ucoin.app.content.Provider;
+import io.ucoin.app.database.Contract;
 import io.ucoin.app.service.CryptoService;
 import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.service.WotService;
@@ -20,9 +34,12 @@ import io.ucoin.app.technical.crypto.CryptoUtils;
 import io.ucoin.app.technical.crypto.KeyPair;
 import io.ucoin.app.technical.crypto.TestFixtures;
 
-public class DevFragment extends Fragment {
+public class DevFragment extends Fragment implements
+        LoaderManager.LoaderCallbacks<Cursor>{
 
     private TextView resultText;
+    private TextView uid;
+    private TextView public_key;
 
     public static DevFragment newInstance() {
        return new DevFragment();
@@ -47,6 +64,17 @@ public class DevFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         resultText = (TextView) view.findViewById(R.id.resultText);
+        uid = (TextView) view.findViewById(R.id.uid);
+        public_key = (TextView) view.findViewById(R.id.public_key);
+
+        Cursor cursor = null;
+
+
+        ContentResolver cr = getActivity().getContentResolver();
+        Uri uri = Uri.parse(Provider.CONTENT_URI + "/identity/");
+        cursor = cr.query(uri, null, null, null, null);
+
+        this.getLoaderManager().initLoader(0, null, this);
     }
 
 
@@ -58,6 +86,7 @@ public class DevFragment extends Fragment {
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
         getActivity().setTitle(R.string.dev);
+        ((MainActivity)getActivity()).setBackButtonEnabled(false);
     }
 
     @Override
@@ -71,6 +100,9 @@ public class DevFragment extends Fragment {
                 return true;
             case R.id.action_self:
                 self();
+                return true;
+            case R.id.action_test:
+                test();
                 return true;
         }
 
@@ -150,6 +182,19 @@ public class DevFragment extends Fragment {
         task.execute((Void) null);
     }
 
+    private void test() {
+        Fragment fragment = PinFragment.newInstance();
+        FragmentManager fragmentManager = getFragmentManager();
+        fragmentManager.beginTransaction()
+                .setCustomAnimations(R.animator.fade_in,
+                        R.animator.fade_out,
+                        R.animator.fade_in,
+                        R.animator.fade_out)
+                .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
+                .addToBackStack(fragment.getClass().getSimpleName())
+                .commit();
+    }
+
     protected static boolean isEquals(byte[] expectedData, byte[] actualData) {
         if (expectedData == null && actualData != null) {
             return false;
@@ -172,6 +217,30 @@ public class DevFragment extends Fragment {
         }
 
         return expectedData.equals(actualData);
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        Uri uri = Uri.parse(Provider.CONTENT_URI + "/account/");
+        Log.d("DEVFRAGMENT", "ONCREATELOADER");
+        return new CursorLoader(getActivity(), uri, null,
+                null, null, null);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        int uidIndex = data.getColumnIndex(Contract.Account.UID);
+        int pubkeyIndex = data.getColumnIndex(Contract.Account.PUBLIC_KEY);
+
+        while (data.moveToNext()) {
+            uid.setText(data.getString(uidIndex));
+            public_key.setText(data.getString(pubkeyIndex));
+        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        Log.d("DEVFRAGMENT", "onLoaderReset");
     }
 
     /**

@@ -1,10 +1,15 @@
 package io.ucoin.app.model;
 
+import com.google.gson.Gson;
+
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.io.Serializable;
 import java.util.List;
 
-import io.ucoin.app.model.Identity;
-import io.ucoin.app.model.Member;
+import io.ucoin.app.technical.StandardCharsets;
+import io.ucoin.app.technical.gson.GsonUtils;
 
 /**
  * A block from the blockchain.
@@ -39,6 +44,13 @@ public class BlockchainBlock implements Serializable {
 //            private int certifications": [],
 //            private int transactions": [],
 //            private int raw": "Version: 1\nType: Block\nCurrency: zeta_brouzouf\nNonce: 8233\nNumber: 1\nDate: 1416589860\nConfirmedDate: 1416589860\nIssuer: HnFcSms8jzwngtVomTTnzudZx7SHUQY8sVE1y8yBmULk\nPreviousHash: 00006CD96A01378465318E48310118AC6B2F3625\nPreviousIssuer: HnFcSms8jzwngtVomTTnzudZx7SHUQY8sVE1y8yBmULk\nMembersCount: 4\nIdentities:\nJoiners:\nActives:\nLeavers:\nExcluded:\nCertifications:\nTransactions:\n"
+
+    public static BlockchainBlock fromJson(InputStream json) {
+        Gson gson = GsonUtils.newBuilder().create();
+        Reader reader = new InputStreamReader(json, StandardCharsets.UTF_8);
+        return gson.fromJson(reader, BlockchainBlock.class);
+    }
+
     public String getVersion() {
         return version;
     }

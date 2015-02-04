@@ -4,18 +4,24 @@
     tools:context=".MainActivity"
     >
 
-    <item android:id="@+id/action_generate_seed"
-        android:title="@string/generate_seed"
-        ucoin:showAsAction="never" />
-
     <item android:id="@+id/action_sign"
         android:title="@string/sign"
         android:icon="@drawable/ic_check_white_24dp"
-        ucoin:showAsAction="always|withText" />
+        ucoin:showAsAction="ifRoom|withText" />
 
     <item android:id="@+id/action_self"
         android:title="@string/self"
-        ucoin:showAsAction="always" />
+        ucoin:showAsAction="ifRoom" />
+
+    <item android:id="@+id/action_test"
+        android:title="@string/test"
+        ucoin:showAsAction="ifRoom" />
+
+    <item android:id="@+id/action_generate_seed"
+        android:title="@string/generate_seed"
+        ucoin:showAsAction="ifRoom" />
+
+
 
 </menu>
 

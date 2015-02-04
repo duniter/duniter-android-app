@@ -25,7 +25,7 @@
 		<io.ucoin.app.layout.FrameLayout
             android:id="@+id/frame_content"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_below="@+id/toolbar"/>
 
     </LinearLayout>
@@ -39,6 +39,5 @@
         android:divider="#333"
         android:dividerHeight="0dp"
         android:background="#FFF"/>
-        
 
 </android.support.v4.widget.DrawerLayout>

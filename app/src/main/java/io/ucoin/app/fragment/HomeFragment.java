@@ -32,6 +32,10 @@ public class HomeFragment extends Fragment {
     private ProgressViewAdapter mProgressViewAdapter;
     private ImageView mStatusImage;
 
+    public static HomeFragment newInstance() {
+        return new HomeFragment();
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -73,6 +77,8 @@ public class HomeFragment extends Fragment {
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
         getActivity().setTitle(getString(R.string.app_name));
+        ((MainActivity)getActivity()).setBackButtonEnabled(false);
+
         SearchManager searchManager = (SearchManager) getActivity()
                 .getSystemService(getActivity().SEARCH_SERVICE);
         final MenuItem searchItem = menu.findItem(R.id.action_search);
