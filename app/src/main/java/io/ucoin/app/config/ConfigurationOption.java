@@ -99,15 +99,15 @@ public enum ConfigurationOption {
     NODE_HOST(
             "ucoinj.node.host",
             "ucoinj.config.option.node.host.description",
-            "metab.ucoin.io",
-            //"server.e-is.pro",
+            //"metab.ucoin.io",
+            "server.e-is.pro",
             String.class,
             false),
 
     NODE_PORT(
             "ucoinj.node.port",
             "ucoinj.config.option.node.port.description",
-            "9201",
+            "9101",
             Integer.class,
             false),
 

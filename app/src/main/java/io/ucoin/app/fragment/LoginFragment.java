@@ -370,14 +370,19 @@ public class LoginFragment extends Fragment implements LoaderCallbacks<Cursor> {
             // Create a seed from salt and password
             KeyPair keyPair = ServiceLocator.instance().getCryptoService().getKeyPair(mEmail, mPassword);
 
+            // Create the wallet
             Wallet wallet = new Wallet(currency, mUid, keyPair.publicKey, keyPair.secretKey);
-            context.setWallet(wallet);
 
             WotService wotService = ServiceLocator.instance().getWotService();
             WotLookupUId result = wotService.findByUidAndPublicKey(mUid, wallet.getPubKeyHash());
             if (result != null) {
+
                 // Refresh the wallet identity with lookup info
                 wotService.toIdentity(result, wallet.getIdentity());
+
+                // Store the wallet into the data context
+                context.setWallet(wallet);
+
                 return true;
             }
 
@@ -393,11 +398,14 @@ public class LoginFragment extends Fragment implements LoaderCallbacks<Cursor> {
             showProgress(false);
 
             if (success) {
-                Fragment homeFragment = new HomeFragment();
-                FragmentManager fragmentManager = getFragmentManager();
-                fragmentManager.beginTransaction()
-                        .add(R.id.frame_content, homeFragment, "HOME")
-                        .addToBackStack("HOME_BACKSTACK")
+                Fragment fragment = HomeFragment.newInstance();
+                getFragmentManager().popBackStack();
+                getFragmentManager().beginTransaction()
+                        .setCustomAnimations(
+                                R.animator.fade_in,
+                                R.animator.fade_out)
+                        .add(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
+                        .addToBackStack(fragment.getClass().getSimpleName())
                         .commit();
             } else {
                 mUidView.setError(getString(R.string.login_incorrect));
