@@ -5,7 +5,7 @@ import android.accounts.AccountManager;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.LoaderManager;
-import android.content.Context;
+import android.content.ContentResolver;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
@@ -39,7 +39,6 @@ import io.ucoin.app.config.Configuration;
 import io.ucoin.app.content.Provider;
 import io.ucoin.app.database.Contract;
 import io.ucoin.app.fragment.CommunityListFragment;
-import io.ucoin.app.fragment.CreateAccountFragment;
 import io.ucoin.app.fragment.DevFragment;
 import io.ucoin.app.fragment.HomeFragment;
 import io.ucoin.app.fragment.LoginFragment;
@@ -69,6 +68,26 @@ public class MainActivity extends ActionBarActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        //LOAD account
+        AccountManager accountManager = AccountManager.get(this);
+        Account[] accounts = accountManager.getAccountsByType(getString(R.string.ACCOUNT_TYPE));
+
+        if (accounts.length == 0) {
+            Intent intent = new Intent(this, AddAccountActivity.class);
+            startActivity(intent);
+            finish();
+            return;
+        }
+
+        //todo handle this case
+        Account account = loadLastAccountUsed();
+        if (account == null) {
+            Toast.makeText(this, "Could Not load account", Toast.LENGTH_LONG).show();
+            finish();
+            return;
+
+        }
 
         // Prepare some utilities
         //Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler(this));
@@ -112,21 +131,11 @@ public class MainActivity extends ActionBarActivity
         mToggle = new ActionBarDrawerToggle(this, mDrawerLayout
                 , R.string.open_drawer, R.string.close_drawer);
 
-        //todo account creation/loading has been done quiclky and may
-        //need to be reimplemented
-        AccountManager accountManager = AccountManager.get(this);
-        Account[] accounts = accountManager.getAccountsByType(getString(R.string.ACCOUNT_TYPE));
+
+        ContentResolver.setSyncAutomatically(account, getString(R.string.AUTHORITY), true);
+
         Fragment fragment;
-        if (accounts.length == 0) {
-            fragment = CreateAccountFragment.newInstance();
-            mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-        } else {
-            if (loadAccount() == null) {
-                Toast.makeText(this, "Could Not load account", Toast.LENGTH_LONG).show();
-                finish();
-            }
-            fragment = HomeFragment.newInstance();
-        }
+        fragment = HomeFragment.newInstance();
 
         getFragmentManager().beginTransaction()
                 .setCustomAnimations(
@@ -324,7 +333,7 @@ public class MainActivity extends ActionBarActivity
         return android.text.format.DateFormat.getLongDateFormat(getApplicationContext());
     }
 
-    public Account loadAccount() {
+    public Account loadLastAccountUsed() {
         AccountManager accountManager = AccountManager.get(this);
         Account[] accounts = accountManager.getAccountsByType(getString(R.string.ACCOUNT_TYPE));
 
@@ -335,8 +344,6 @@ public class MainActivity extends ActionBarActivity
                     .getString("_id", "");
 
             if (last_account_id.equals(account_id)) {
-
-                mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
                 ((Application) getApplication()).setAccount(account);
                 this.getLoaderManager().initLoader(0, null, this);
                 return account;

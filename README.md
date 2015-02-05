@@ -22,16 +22,17 @@ The connection to the main account could also be asked automatically (when a tra
 Developpement use Android Studio , and Android NDK (Native Developpement Kit) to be able to use TweetNaCl (a compact crypto library).
 
 You should install
-- Android Studio: lastest version
-- NDK (Native Developpement Kit): use android-ndk-r10d (64bit)
+- [Android Studio](https://developer.android.com/sdk/index.html)
+- [NDK (Native Developpement Kit)](https://developer.android.com/tools/sdk/ndk/index.html): use android-ndk-r10d (64bit)
 - Configure the Android Studio project : edit the local.properties file, use by Gradle
 
-- Install need for kalium-jni
+- Install dependencies for needed for kalium-jni compilation
 ```
 sudo apt-get install build-essential libpcre3 libpcre3-dev libtool automake
 ```
 
 
+<<<<<<< HEAD
 - Clone the source repository from GitHub and generate static libsodium for all Android architectures :
 
 First export the path of the android NDK
@@ -54,3 +55,28 @@ cd kalium-jni/src/main/jni/libsodium
 ./dist-build/android-x86.sh
 cd
 ```
+=======
+- Clone the source repository from GitHub and generate static libsodium for all Android architectures using the following instructions :
+
+	First export the path of the android NDK previously installed
+	```
+	export ANDROID_NDK_HOME=/absolutepath/to/android-ndk
+	```
+
+	Then
+
+	```
+	git clone https://github.com/ucoin-io/ucoin-android-app.git
+	cd ucoin-android-app
+	git submodule init
+	git submodule sync
+	git submodule update
+	cd kalium-jni/src/main/jni/libsodium
+	cd libsodium
+	./autogen.sh
+	./dist-build/android-arm.sh
+	./dist-build/android-mips.sh
+	./dist-build/android-x86.sh
+	cd
+	```
+>>>>>>> 79b3d30995a6e1d7e71d99be8a9b55371054cf04

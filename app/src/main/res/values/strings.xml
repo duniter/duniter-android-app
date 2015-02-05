@@ -50,7 +50,7 @@
     <string name="back">Back</string>
     <string name="copy">Copy</string>
     <string name="add">Add</string>
-    <string name="CANCEL">CANCEL</string>
+    <string name="CANCEL">Cancel</string>
     <string name="ok">OK</string>
     <string name="join">Join</string>
     <string name="delete">Delete</string>
@@ -76,7 +76,8 @@
 
     <!-- Strings related to identities -->
     <string name="identity">Identity</string>
-    <string name="uid_or_public_key">Uid or public key</string>
+    <string name="uid_or_public_key">UID or public key</string>
+    <string name="user_id">User ID</string>
     <string name="identity_icon">Identity icon</string>
     <string name="certified_by">Certified by</string>
     <string name="certifiers_of">Certifiers of</string>
@@ -89,15 +90,16 @@
     <string name="next">Next</string>
     <string name="email_password_salt">Email (or password salt)</string>
     <string name="password">Password</string>
+    <string name="confirm">Confirm</string>
     <string name="confirm_password">Confirm password</string>
     <string name="pin_code">PIN code</string>
-    <string name="create_new_account">Create new account</string>
-    <string name="salt_or_email">Salt (or email)</string>
-    <string name="salt_instructions">Salt: we advice you to choose your personal e-mail as value for this
+    <string name="add_account">Add account</string>
+    <string name="salt">Salt</string>
+    <string name="salt_instructions">Salt: We advice you to choose your personal e-mail as value for this
         field. But you can put any other value: it only has to carry enough entropy to avoid key
         collision. Typically, your personal e-mail is a good choice, added to the fact it is easy to
         remember.</string>
-    <string name="password_instructions">Password: here, choose a very strong password, so no one
+    <string name="password_instructions">Password: Choose a very strong password, so no one
         can find it. This password can\'t be changed thereafter, so choose it carefully.</string>
 
     <string name="test">Test</string>
@@ -109,6 +111,12 @@
     <string name="login_incorrect">This login is incorrect</string>
     <string name="password_incorrect">This password is incorrect</string>
     <string name="field_required">This field is required</string>
+    <string name="uid_instructions">User ID: If you choose an UID which is already used inside a community, you won\'t be able to join this community. So ensure not to collide with someone else\'s UID.</string>
+    <string name="uid_cannot_be_empty">UID cannot be empty</string>
+    <string name="salt_cannot_be_empty">Salt cannot be empty</string>
+    <string name="password_cannot_be_empty">Password cannot be empty</string>
+    <string name="confirm_password_cannot_be_empty">Confirm password cannot be empty</string>
+    <string name="passwords_dont_match">Passwords don\'t match</string>
 
     <string-array name="drawer_items">
         <item>@string/home</item>
