@@ -48,7 +48,6 @@ git submodule init
 git submodule sync
 git submodule update
 cd kalium-jni/src/main/jni/libsodium
-cd libsodium
 ./autogen.sh
 ./dist-build/android-arm.sh
 ./dist-build/android-mips.sh
