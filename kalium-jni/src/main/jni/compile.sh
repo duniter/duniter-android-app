@@ -35,17 +35,17 @@ mkdir -p $destlib/x86
 
 #arm:
 echo $destlib/armeabi/$jnilib
-/installs/libsodium/android-toolchain-arm/arm-linux-androideabi/bin/gcc -I${JAVA_HOME}/include -I${JAVA_HOME}/include/linux -I/installs/libsodium/libsodium-android-arm/include sodium_wrap.c -shared -fPIC -L/installs/libsodium/libsodium-android-arm/lib -lsodium -o $jnilib
+libsodium/android-toolchain-arm/arm-linux-androideabi/bin/gcc -I${JAVA_HOME}/include -I${JAVA_HOME}/include/linux -Ilibsodium/libsodium-android-arm/include sodium_wrap.c -shared -fPIC -L/installs/libsodium/libsodium-android-arm/lib -lsodium -o $jnilib
 cp -r $jnilib $destlib/armeabi/
 
 #mips:
 echo $destlib/mips/$jnilib
-/installs/libsodium/android-toolchain-mips/mipsel-linux-android/bin/gcc -I${JAVA_HOME}/include -I${JAVA_HOME}/include/linux -I/installs/libsodium/libsodium-android-mips/include sodium_wrap.c -shared -fPIC -L/installs/libsodium/libsodium-android-mips/lib -lsodium -o $jnilib
+libsodium/android-toolchain-mips/mipsel-linux-android/bin/gcc -I${JAVA_HOME}/include -I${JAVA_HOME}/include/linux -Ilibsodium/libsodium-android-mips/include sodium_wrap.c -shared -fPIC -L/installs/libsodium/libsodium-android-mips/lib -lsodium -o $jnilib
 cp -r $jnilib $destlib/mips/
 
 #x86:
 echo $destlib/x86/$jnilib
-/installs/libsodium/android-toolchain-x86/i686-linux-android/bin/gcc -I${JAVA_HOME}/include -I${JAVA_HOME}/include/linux -I/installs/libsodium/libsodium-android-x86/include sodium_wrap.c -shared -fPIC -L/installs/libsodium/libsodium-android-x86/lib -lsodium -o $jnilib
+libsodium/android-toolchain-x86/i686-linux-android/bin/gcc -I${JAVA_HOME}/include -I${JAVA_HOME}/include/linux -Ilibsodium/libsodium-android-x86/include sodium_wrap.c -shared -fPIC -L/installs/libsodium/libsodium-android-x86/lib -lsodium -o $jnilib
 cp -r $jnilib $destlib/x86/
 
 #Remove the last file (has been copied into $destDir)
