@@ -88,7 +88,6 @@ public class TransactionService extends AbstractNetworkService {
 		result.setBalance(computeBalance(result.getSources()));
 
 		return result;
-
 	}
 
 	/* -- internal methods -- */
