@@ -19,10 +19,12 @@ import android.widget.Toast;
 import io.ucoin.app.R;
 import io.ucoin.app.activity.MainActivity;
 import io.ucoin.app.adapter.ProgressViewAdapter;
+import io.ucoin.app.config.Configuration;
 import io.ucoin.app.model.BlockchainParameter;
 import io.ucoin.app.model.Wallet;
 import io.ucoin.app.service.DataContext;
 import io.ucoin.app.service.ServiceLocator;
+import io.ucoin.app.service.exception.PeerConnectionException;
 import io.ucoin.app.technical.AsyncTaskHandleException;
 
 
@@ -130,14 +132,22 @@ public class HomeFragment extends Fragment {
 
     public class LoadCurrencyTask extends AsyncTaskHandleException<Void, Void, BlockchainParameter> {
         @Override
-        protected BlockchainParameter doInBackgroundHandleException(Void... param) {
+        protected BlockchainParameter doInBackgroundHandleException(Void... param) throws PeerConnectionException{
+
             DataContext dataContext = ServiceLocator.instance().getDataContext();
             Wallet currentWallet = dataContext.getWallet();
             BlockchainParameter result = dataContext.getBlockchainParameter();
 
             if (currentWallet == null || result == null) {
+                // Set the peer to use for network
+                io.ucoin.app.model.Peer node = new io.ucoin.app.model.Peer(
+                        Configuration.instance().getNodeHost(),
+                        Configuration.instance().getNodePort()
+                );
+                ServiceLocator.instance().getHttpService().connect(node);
+
                 // Load currency
-                result = ServiceLocator.instance().getBlockchainService().getParameters();
+                result = ServiceLocator.instance().getBlockchainRemoteService().getParameters();
                 dataContext.setBlockchainParameter(result);
 
                 // Load default wallet

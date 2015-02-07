@@ -4,6 +4,14 @@ import android.provider.BaseColumns;
 
 public interface Contract {
 
+    public static final class Currency implements BaseColumns {
+        public static final String TABLE_NAME = "Currency";
+        public static final String ACCOUNT_ID = "account_id";
+        public static final String CURRENCY_NAME = "currency_name";
+        public static final String MEMBERS_COUNT = "members_count";
+        public static final String FIRST_BLOCK_SIGNATURE = "first_block_signature";
+    }
+
     public static final class Account implements BaseColumns {
         public static final String TABLE_NAME = "account";
         public static final String UID = "uid";
@@ -20,13 +28,6 @@ public interface Contract {
         public static final String NAME = "name";
     }
 
-    public static final class Community implements BaseColumns {
-        public static final String TABLE_NAME = "Community";
-        public static final String CURRENCY_NAME = "currency_name";
-        public static final String ACCOUNT_ID = "account_id";
-        public static final String MEMBERS_COUNT = "members_count";
-        public static final String FIRST_BLOCK_SIGNATURE = "first_block_signature";
-    }
 
      public static final class Source implements BaseColumns {
         public static final String TABLE_NAME = "source";
@@ -40,10 +41,8 @@ public interface Contract {
 
     public static final class Peer implements BaseColumns {
         public static final String TABLE_NAME = "peer";
-        public static final String COMMUNITY_ID = "comunity_id";
-        public static final String DOMAIN = "domain";
-        public static final String IPV4 = "ipv4";
-        public static final String IPV6 = "ipv6";
+        public static final String CURRENCY_ID = "currency_id";
+        public static final String HOST = "host";
         public static final String PORT = "port";
     }
 

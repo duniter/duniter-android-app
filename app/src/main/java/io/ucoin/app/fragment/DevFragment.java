@@ -4,7 +4,6 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.LoaderManager;
 import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
@@ -18,9 +17,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toolbar;
-
-import java.util.Random;
 
 import io.ucoin.app.R;
 import io.ucoin.app.activity.MainActivity;
@@ -28,7 +24,7 @@ import io.ucoin.app.content.Provider;
 import io.ucoin.app.database.Contract;
 import io.ucoin.app.service.CryptoService;
 import io.ucoin.app.service.ServiceLocator;
-import io.ucoin.app.service.WotService;
+import io.ucoin.app.service.remote.WotRemoteService;
 import io.ucoin.app.technical.AsyncTaskHandleException;
 import io.ucoin.app.technical.crypto.CryptoUtils;
 import io.ucoin.app.technical.crypto.KeyPair;
@@ -264,7 +260,7 @@ public class DevFragment extends Fragment implements
         @Override
         protected String doInBackgroundHandleException(Void... params) {
 
-            WotService service = ServiceLocator.instance().getWotService();
+            WotRemoteService service = ServiceLocator.instance().getWotRemoteService();
             return service.sendSelf(mPubKey, mSecKey, mUid);
         }
 

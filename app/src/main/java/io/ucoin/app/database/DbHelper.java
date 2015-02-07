@@ -45,26 +45,26 @@ public class DbHelper extends SQLiteOpenHelper implements Contract {
                 ")";
         db.execSQL(CREATE_TABLE_WALLET);
 
-        String CREATE_TABLE_COMMUNITY = "CREATE TABLE " + Community.TABLE_NAME + "(" +
-                Community._ID + " INTEGER PRIMARY KEY AUTOINCREMENT" + COMMA +
-                Community.CURRENCY_NAME + TEXT + NOTNULL + UNIQUE + COMMA +
-                Community.ACCOUNT_ID + TEXT + NOTNULL + COMMA +
-                Community.MEMBERS_COUNT + INTEGER + NOTNULL + COMMA +
-                Community.FIRST_BLOCK_SIGNATURE + TEXT + UNIQUE + NOTNULL + COMMA +
-                "FOREIGN KEY (" + Community.ACCOUNT_ID + ") REFERENCES " +
+        String CREATE_TABLE_CURRENCY = "CREATE TABLE " + Currency.TABLE_NAME + "(" +
+                Currency._ID + " INTEGER PRIMARY KEY AUTOINCREMENT" + COMMA +
+                Currency.CURRENCY_NAME + TEXT + NOTNULL + UNIQUE + COMMA +
+                Currency.ACCOUNT_ID + TEXT + NOTNULL + COMMA +
+                Currency.MEMBERS_COUNT + INTEGER + NOTNULL + COMMA +
+                Currency.FIRST_BLOCK_SIGNATURE + TEXT + UNIQUE + NOTNULL + COMMA +
+                "FOREIGN KEY (" + Currency.ACCOUNT_ID + ") REFERENCES " +
                 Account.TABLE_NAME + "(" + Account._ID + ")" +
                 ")";
-        db.execSQL(CREATE_TABLE_COMMUNITY);
+        db.execSQL(CREATE_TABLE_CURRENCY);
 
         String CREATE_TABLE_PEER = "CREATE TABLE " + Peer.TABLE_NAME + "(" +
                 Peer._ID + " INTEGER PRIMARY KEY AUTOINCREMENT" + COMMA +
-                Peer.COMMUNITY_ID + INTEGER + NOTNULL + COMMA +
-                Peer.DOMAIN + TEXT + COMMA +
-                Peer.IPV4 + TEXT + COMMA +
-                Peer.IPV6 + TEXT + COMMA +
+                Peer.CURRENCY_ID + INTEGER + NOTNULL + COMMA +
+                Peer.HOST + TEXT + COMMA +
+                //Peer.IPV4 + TEXT + COMMA +
+                //Peer.IPV6 + TEXT + COMMA +
                 Peer.PORT + INTEGER + COMMA +
-                "FOREIGN KEY (" + Peer.COMMUNITY_ID + ") REFERENCES " +
-                Community.TABLE_NAME + "(" + Community._ID + ")" +
+                "FOREIGN KEY (" + Peer.CURRENCY_ID + ") REFERENCES " +
+                Currency.TABLE_NAME + "(" + Currency._ID + ")" +
                 ")";
         db.execSQL(CREATE_TABLE_PEER);
 
@@ -78,7 +78,7 @@ public class DbHelper extends SQLiteOpenHelper implements Contract {
                 Source.BLOCK + INTEGER + NOTNULL + COMMA +
                 UNIQUE + "(" + Source.FINGERPRINT + ")" + COMMA +
                 "FOREIGN KEY (" + Source.CURRENCY_NAME + ") REFERENCES " +
-                Community.TABLE_NAME + "(" + Community.CURRENCY_NAME + ")" + COMMA +
+                Currency.TABLE_NAME + "(" + Currency.CURRENCY_NAME + ")" + COMMA +
                 "FOREIGN KEY (" + Source.WALLET_PUBLIC_KEY + ") REFERENCES " +
                 Wallet.TABLE_NAME + "(" + Wallet.PUBLIC_KEY + ")" +
                 ")";
@@ -90,7 +90,7 @@ public class DbHelper extends SQLiteOpenHelper implements Contract {
                 Tx.COMMENT + TEXT + NOTNULL + COMMA +
                 Tx.BLOCK + INTEGER +  COMMA +
                 "FOREIGN KEY (" + Tx.CURRENCY_NAME + ") REFERENCES " +
-                Community.TABLE_NAME + "(" + Community.CURRENCY_NAME + ")" +
+                Currency.TABLE_NAME + "(" + Currency.CURRENCY_NAME + ")" +
                 ")";
         db.execSQL(CREATE_TABLE_TX);
 

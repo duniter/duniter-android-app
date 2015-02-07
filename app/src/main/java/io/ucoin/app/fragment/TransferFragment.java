@@ -17,15 +17,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import io.ucoin.app.R;
-import io.ucoin.app.adapter.ProgressViewAdapter;
 import io.ucoin.app.activity.MainActivity;
+import io.ucoin.app.adapter.ProgressViewAdapter;
 import io.ucoin.app.model.BlockchainParameter;
 import io.ucoin.app.model.Identity;
 import io.ucoin.app.model.Wallet;
 import io.ucoin.app.service.DataContext;
-import io.ucoin.app.service.InsufficientCreditException;
 import io.ucoin.app.service.ServiceLocator;
-import io.ucoin.app.service.TransactionService;
+import io.ucoin.app.service.exception.InsufficientCreditException;
+import io.ucoin.app.service.remote.TransactionRemoteService;
 import io.ucoin.app.technical.AsyncTaskHandleException;
 
 public class TransferFragment extends Fragment {
@@ -284,7 +284,7 @@ public class TransferFragment extends Fragment {
         protected Boolean doInBackgroundHandleException(Void... strings) {
             BlockchainParameter p = ServiceLocator.instance().getDataContext().getBlockchainParameter();
             if (p == null) {
-                p = ServiceLocator.instance().getBlockchainService().getParameters();
+                p = ServiceLocator.instance().getBlockchainRemoteService().getParameters();
             }
 
             if (p == null) {
@@ -317,7 +317,7 @@ public class TransferFragment extends Fragment {
     public class TransferTask extends AsyncTaskHandleException<Void, Void, Boolean>{
         @Override
         protected Boolean doInBackgroundHandleException(Void... strings) throws Exception {
-            TransactionService txService = ServiceLocator.instance().getTransactionService();
+            TransactionRemoteService txService = ServiceLocator.instance().getTransactionRemoteService();
 
             CharSequence amountStr;
             if (mIsCoinUnit) {

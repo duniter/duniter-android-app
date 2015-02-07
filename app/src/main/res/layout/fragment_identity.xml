@@ -57,46 +57,80 @@
 
     </RelativeLayout>
 
-    <LinearLayout
-        android:layout_width="wrap_content"
+    <TabHost
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/header_layout"
-        android:orientation="vertical"
-        android:paddingStart="8dp"
-        android:paddingLeft="8dp">
+        android:id="@+id/tabHost"
+        >
 
-        <TextView
-            style="@style/headline"
-            android:text="@string/signature"/>
+                <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/signature"
-            style="@style/subhead"/>
+                <TabWidget
+                    android:id="@android:id/tabs"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content">
 
-        <TextView
-            style="@style/headline"
-            android:text="@string/public_key"/>
+                </TabWidget>
 
-        <TextView
-            android:id="@+id/pubkey"
-            style="@style/subhead"/>
+                <FrameLayout
+                    android:id="@android:id/tabcontent"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent">
 
-        <!-- Search progress -->
-        <ProgressBar
-            android:id="@+id/load_progress"
-            style="?android:attr/progressBarStyleLarge"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:visibility="gone" />
+                    <LinearLayout
+                        android:id="@+id/tab1"
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent"
+                        android:orientation="vertical">
 
-        <ExpandableListView
-            android:id="@+id/wot_list_view"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:scrollbarStyle="outsideOverlay"
-            android:layout_marginLeft="8dp" />
-    </LinearLayout>
+                        <TextView
+                            style="@style/headline"
+                            android:text="@string/public_key"/>
+
+                        <TextView
+                            android:id="@+id/pubkey"
+                            style="@style/subhead"/>
+
+                        <TextView
+                            style="@style/headline"
+                            android:text="@string/signature"/>
+
+                        <TextView
+                            android:id="@+id/signature"
+                            style="@style/subhead"/>
+                        </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/tab2"
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent"
+                        android:orientation="vertical">
+                        <!-- Search progress -->
+                        <ProgressBar
+                            android:id="@+id/load_progress"
+                            style="?android:attr/progressBarStyleLarge"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_horizontal"
+                            android:visibility="gone" />
+
+                        <ExpandableListView
+                            android:id="@+id/wot_list_view"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentLeft="true"
+                            android:scrollbarStyle="outsideOverlay"
+                            android:layout_marginLeft="8dp" />
+
+                        </LinearLayout>
+
+                </FrameLayout>
+            </LinearLayout>
+
+    </TabHost>
+
 </LinearLayout>
 

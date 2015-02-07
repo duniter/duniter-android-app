@@ -12,9 +12,9 @@ import io.ucoin.app.R;
 import io.ucoin.app.database.Contract;
 
 
-public class CommunityCursorAdapter extends CursorAdapter{
+public class CurrencyCursorAdapter extends CursorAdapter{
 
-    public CommunityCursorAdapter(Context context, Cursor c, int flags) {
+    public CurrencyCursorAdapter(Context context, Cursor c, int flags) {
         super(context, c, flags);
     }
 
@@ -29,11 +29,11 @@ public class CommunityCursorAdapter extends CursorAdapter{
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
         TextView currency = (TextView) view.findViewById(R.id.currency_name);
-        int currencyIndex = cursor.getColumnIndex(Contract.Community.CURRENCY_NAME);
+        int currencyIndex = cursor.getColumnIndex(Contract.Currency.CURRENCY_NAME);
         currency.setText(cursor.getString(currencyIndex));
 
         TextView membersCount = (TextView) view.findViewById(R.id.members_count);
-        int membersCountIndex = cursor.getColumnIndex(Contract.Community.MEMBERS_COUNT);
+        int membersCountIndex = cursor.getColumnIndex(Contract.Currency.MEMBERS_COUNT);
         membersCount.setText(cursor.getString(membersCountIndex) + " " +
                 view.getContext().getString(R.string.members));
     }

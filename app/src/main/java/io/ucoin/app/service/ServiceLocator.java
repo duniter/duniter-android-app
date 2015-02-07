@@ -5,6 +5,10 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import io.ucoin.app.service.remote.BlockchainRemoteService;
+import io.ucoin.app.service.remote.NetworkRemoteService;
+import io.ucoin.app.service.remote.TransactionRemoteService;
+import io.ucoin.app.service.remote.WotRemoteService;
 import io.ucoin.app.technical.UCoinTechnicalException;
 
 public class ServiceLocator implements Closeable {
@@ -56,12 +60,17 @@ public class ServiceLocator implements Closeable {
         return instance;
     }
     
-    public BlockchainService getBlockchainService() {
-        return getService(BlockchainService.class);
+    public BlockchainRemoteService getBlockchainRemoteService() {
+        return getService(BlockchainRemoteService.class);
     }
-
-    public WotService getWotService() {
-        return getService(WotService.class);
+    public TransactionRemoteService getTransactionRemoteService() {
+        return getService(TransactionRemoteService.class);
+    }
+    public NetworkRemoteService getNetworkRemoteService() {
+        return getService(NetworkRemoteService.class);
+    }
+    public WotRemoteService getWotRemoteService() {
+        return getService(WotRemoteService.class);
     }
 
     public CryptoService getCryptoService() {
@@ -73,8 +82,8 @@ public class ServiceLocator implements Closeable {
     public DataContext getDataContext() {
         return getService(DataContext.class);
     }
-    public TransactionService getTransactionService() {
-        return getService(TransactionService.class);
+    public HttpService getHttpService() {
+        return getService(HttpService.class);
     }
 
     /* -- Internal methods -- */

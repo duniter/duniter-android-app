@@ -10,29 +10,23 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import io.ucoin.app.R;
 import io.ucoin.app.activity.MainActivity;
-import io.ucoin.app.adapter.CommunityCursorAdapter;
+import io.ucoin.app.adapter.CurrencyCursorAdapter;
 import io.ucoin.app.adapter.ProgressViewAdapter;
 import io.ucoin.app.content.Provider;
 import io.ucoin.app.database.Contract;
-import io.ucoin.app.model.BlockchainBlock;
-import io.ucoin.app.model.BlockchainParameter;
-import io.ucoin.app.service.ServiceLocator;
-import io.ucoin.app.technical.AsyncTaskHandleException;
 
 
 public class TransferListFragment extends ListFragment {
-    private CommunityCursorAdapter mCommunityCursorAdapter;
+    private CurrencyCursorAdapter mCurrencyCursorAdapter;
     private ProgressViewAdapter mProgressViewAdapter;
 
     static public TransferListFragment newInstance() {
@@ -67,13 +61,13 @@ public class TransferListFragment extends ListFragment {
 
         Uri uri = Uri.parse(Provider.CONTENT_URI + "/community/");
 
-        String selection = Contract.Community.ACCOUNT_ID + "=?";
+        String selection = Contract.Currency.ACCOUNT_ID + "=?";
         String[] selectionArgs = {sharedPref.getString("_id", "")};
 
         Cursor cursor = getActivity().getContentResolver().query(uri, new String[]{}, null,
                 null, null);
-        mCommunityCursorAdapter = new CommunityCursorAdapter((Context) getActivity(), cursor, 0);
-        setListAdapter(mCommunityCursorAdapter);
+        mCurrencyCursorAdapter = new CurrencyCursorAdapter((Context) getActivity(), cursor, 0);
+        setListAdapter(mCurrencyCursorAdapter);
     }
 
     @Override

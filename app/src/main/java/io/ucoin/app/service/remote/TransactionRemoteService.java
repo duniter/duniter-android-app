@@ -1,10 +1,9 @@
-package io.ucoin.app.service;
+package io.ucoin.app.service.remote;
 
 import android.util.Log;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.message.BasicNameValuePair;
 
@@ -16,10 +15,13 @@ import io.ucoin.app.model.TxOutput;
 import io.ucoin.app.model.TxSource;
 import io.ucoin.app.model.TxSourceResults;
 import io.ucoin.app.model.Wallet;
+import io.ucoin.app.service.CryptoService;
+import io.ucoin.app.service.ServiceLocator;
+import io.ucoin.app.service.exception.InsufficientCreditException;
 import io.ucoin.app.technical.UCoinTechnicalException;
 import io.ucoin.app.technical.crypto.DigestUtils;
 
-public class TransactionService extends AbstractNetworkService {
+public class TransactionRemoteService extends BaseRemoteService {
 
     private static final String TAG = "TransactionService";
 
@@ -32,13 +34,14 @@ public class TransactionService extends AbstractNetworkService {
 
 	private CryptoService cryptoService;
 
-	public TransactionService() {
+	public TransactionRemoteService() {
 		super();
 	}
 
 	@Override
 	public void initialize() {
-		cryptoService = ServiceLocator.instance().getCryptoService();
+        super.initialize();
+        cryptoService = ServiceLocator.instance().getCryptoService();
 	}
 
 	public String transfert(Wallet wallet, String destPubKey, long amount,
@@ -46,7 +49,7 @@ public class TransactionService extends AbstractNetworkService {
 		
 		// http post /tx/process
 		HttpPost httpPost = new HttpPost(
-				getAppendedPath(URL_TX_PROCESS));
+				getPath(URL_TX_PROCESS));
 
 		// compute transaction
 		String transaction = getTransaction(wallet, destPubKey, amount,
@@ -81,8 +84,7 @@ public class TransactionService extends AbstractNetworkService {
 
 		// get parameter
 		String path = String.format(URL_TX_SOURCES, pubKey);
-		HttpGet httpGet = new HttpGet(getAppendedPath(path));
-		TxSourceResults result = executeRequest(httpGet, TxSourceResults.class);
+		TxSourceResults result = executeRequest(path, TxSourceResults.class);
 
 		// Compute the balance
 		result.setBalance(computeBalance(result.getSources()));

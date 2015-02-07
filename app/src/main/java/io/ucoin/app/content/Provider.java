@@ -23,7 +23,7 @@ public class Provider extends ContentProvider implements Contract {
     private DbHelper mDbHelper;
     private static final int ACCOUNT = 10;
     private static final int ACCOUNT_ID = 11;
-    private static final int COMMUNITY = 20;
+    private static final int CURRENCY = 20;
     private static final int PEER = 30;
 
 
@@ -43,7 +43,7 @@ public class Provider extends ContentProvider implements Contract {
         CONTENT_URI = Uri.parse("content://" + AUTHORITY);
         uriMatcher.addURI(AUTHORITY, "account/", ACCOUNT);
         uriMatcher.addURI(AUTHORITY, "account/#", ACCOUNT_ID);
-        uriMatcher.addURI(AUTHORITY, "community/", COMMUNITY);
+        uriMatcher.addURI(AUTHORITY, "currency/", CURRENCY);
         uriMatcher.addURI(AUTHORITY, "peer/", PEER);
 
         return true;
@@ -79,8 +79,8 @@ public class Provider extends ContentProvider implements Contract {
                         null, null, null, sortOrder);
                 cursor.setNotificationUri(getContext().getContentResolver(), uri);
                 break;
-            case COMMUNITY :
-                queryBuilder.setTables(Community.TABLE_NAME);
+            case CURRENCY :
+                queryBuilder.setTables(Currency.TABLE_NAME);
                 cursor = queryBuilder.query(db, projection, selection,
                         selectionArgs, null, null, sortOrder);
                 cursor.setNotificationUri(getContext().getContentResolver(), uri);
@@ -104,9 +104,9 @@ public class Provider extends ContentProvider implements Contract {
                 id = db.insert(Account.TABLE_NAME, null, values);
                 uri = Uri.parse("identity/" + id);
                 break;
-            case COMMUNITY:
-                id = db.insert(Community.TABLE_NAME, null, values);
-                uri = Uri.parse("community/" + id);
+            case CURRENCY:
+                id = db.insert(Currency.TABLE_NAME, null, values);
+                uri = Uri.parse("currency/" + id);
                 break;
             case PEER:
                 id = db.insert(Peer.TABLE_NAME, null, values);

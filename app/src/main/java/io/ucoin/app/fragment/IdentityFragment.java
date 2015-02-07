@@ -3,7 +3,6 @@ package io.ucoin.app.fragment;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.os.Bundle;
-import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -12,6 +11,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ExpandableListView;
+import android.widget.TabHost;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,7 +27,7 @@ import io.ucoin.app.model.Wallet;
 import io.ucoin.app.model.WotCertification;
 import io.ucoin.app.model.WotIdentityCertifications;
 import io.ucoin.app.service.ServiceLocator;
-import io.ucoin.app.service.WotService;
+import io.ucoin.app.service.remote.WotRemoteService;
 import io.ucoin.app.technical.AsyncTaskHandleException;
 import io.ucoin.app.technical.DateUtils;
 
@@ -36,6 +36,7 @@ public class IdentityFragment extends Fragment {
 
     private ProgressViewAdapter mProgressViewAdapter;
     private WotExpandableListAdapter mWotListAdapter;
+    private TextView mTimestampView;
 
     private boolean mSignatureSingleLine = true;
     private boolean mPubKeySingleLine = true;
@@ -71,38 +72,38 @@ public class IdentityFragment extends Fragment {
         final Identity identity = (Identity) newInstanceArgs
                 .getSerializable(Identity.class.getSimpleName());
 
+        // Tab host
+        TabHost tabs = (TabHost)view.findViewById(R.id.tabHost);
+        tabs.setup();
+        {
+            TabHost.TabSpec spec = tabs.newTabSpec("tab1");
+            spec.setContent(R.id.tab1);
+            spec.setIndicator(getString(R.string.identity_details));
+            tabs.addTab(spec);
+        }
+        {
+            TabHost.TabSpec spec = tabs.newTabSpec("tab2");
+            spec.setContent(R.id.tab2);
+            spec.setIndicator(getString(R.string.community));
+            tabs.addTab(spec);
+        }
+
         //Uid
         TextView uidView = (TextView) view.findViewById(R.id.uid);
         uidView.setText(identity.getUid());
 
         // Timestamp
-        TextView timestampView = (TextView) view.findViewById(R.id.timestamp);
-        timestampView.setText(DateUtils.format(identity.getTimestamp()));
+        mTimestampView = (TextView) view.findViewById(R.id.timestamp);
+        mTimestampView.setText(DateUtils.format(identity.getTimestamp()));
 
         // Signature
         final TextView signatureView = (TextView) view.findViewById(R.id.signature);
         signatureView.setText(identity.getSignature());
-        /*
-        signatureView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mSignatureSingleLine = !mSignatureSingleLine;
-                signatureView.setSingleLine(!mSignatureSingleLine);
-            }
-        });
-*/
+
         // Pub key
         final TextView pubkeyView = (TextView) view.findViewById(R.id.pubkey);
         pubkeyView.setText(identity.getPubkey());
-/*
-        pubkeyView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mPubKeySingleLine = !mPubKeySingleLine;
-                pubkeyView.setSingleLine(mPubKeySingleLine);
-            }
-        });
-*/
+
         // Wot list
         ExpandableListView wotListView = (ExpandableListView) view.findViewById(R.id.wot_list_view);
         wotListView.setVisibility(View.GONE);
@@ -227,9 +228,15 @@ public class IdentityFragment extends Fragment {
 
         @Override
         protected SparseArray<WotIdentityCertifications> doInBackgroundHandleException(Void... params) {
+            WotRemoteService service = ServiceLocator.instance().getWotRemoteService();
+
+            // Reload identity (if need)
+            if (mIdentity.getTimestamp() == -1) {
+                Identity refreshIdentity = service.getIdentity(mIdentity.getUid(), mIdentity.getPubkey());
+                mIdentity.setTimestamp(refreshIdentity.getTimestamp());
+            }
 
             SparseArray<WotIdentityCertifications> results = new SparseArray<>();
-            WotService service = ServiceLocator.instance().getWotService();
 
             // Certified by
             WotIdentityCertifications certifiedBy = service.getCertifiedBy(mIdentity.getPubkey());
@@ -255,12 +262,16 @@ public class IdentityFragment extends Fragment {
         @Override
         protected void onSuccess(SparseArray<WotIdentityCertifications> wotCertifications) {
 
+            // Update WOT
             if (wotCertifications == null || wotCertifications.size() == 0) {
                 mWotListAdapter.setItems(WotExpandableListAdapter.EMPTY_ITEMS);
                 return;
             }
-
             mWotListAdapter.setItems(wotCertifications);
+
+            // update timestamp
+            mTimestampView.setText(DateUtils.format(mIdentity.getTimestamp()));
+
             mProgressViewAdapter.showProgress(false);
         }
 
@@ -293,7 +304,7 @@ public class IdentityFragment extends Fragment {
             Configuration config = Configuration.instance();
             Wallet wallet = config.getCurrentWallet();
 
-            WotService service = ServiceLocator.instance().getWotService();
+            WotRemoteService service = ServiceLocator.instance().getWotRemoteService();
 
             // Send certification
             String result = service.sendCertification(wallet, mIdentity);

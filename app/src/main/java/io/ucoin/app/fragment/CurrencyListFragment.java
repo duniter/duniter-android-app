@@ -18,30 +18,25 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-
 import io.ucoin.app.Application;
 import io.ucoin.app.R;
 import io.ucoin.app.activity.MainActivity;
-import io.ucoin.app.adapter.CommunityCursorAdapter;
+import io.ucoin.app.adapter.CurrencyCursorAdapter;
 import io.ucoin.app.adapter.ProgressViewAdapter;
 import io.ucoin.app.content.Provider;
 import io.ucoin.app.database.Contract;
-import io.ucoin.app.model.BlockchainBlock;
-import io.ucoin.app.model.BlockchainParameter;
-import io.ucoin.app.model.Community;
+import io.ucoin.app.model.Currency;
 import io.ucoin.app.model.Peer;
+import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.technical.AsyncTaskHandleException;
 
 
-public class CommunityListFragment extends ListFragment
+public class CurrencyListFragment extends ListFragment
         implements AddNodeDialogFragment.OnClickListener{
     private ProgressViewAdapter mProgressViewAdapter;
 
-    static public CommunityListFragment newInstance() {
-        return new CommunityListFragment();
+    static public CurrencyListFragment newInstance() {
+        return new CurrencyListFragment();
     }
 
     @Override
@@ -49,7 +44,7 @@ public class CommunityListFragment extends ListFragment
         mProgressViewAdapter.showProgress(true);
         Peer peer = (Peer) args.getSerializable(Peer.class.getSimpleName());
 
-        LoadCommunityTask task = new LoadCommunityTask();
+        LoadCurrencyTask task = new LoadCurrencyTask();
         task.execute(peer);
     }
 
@@ -63,7 +58,7 @@ public class CommunityListFragment extends ListFragment
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        return inflater.inflate(R.layout.fragment_community_list,
+        return inflater.inflate(R.layout.fragment_currency_list,
                 container, false);
     }
 
@@ -78,8 +73,9 @@ public class CommunityListFragment extends ListFragment
         TextView v = (TextView) view.findViewById(android.R.id.empty);
         v.setVisibility(View.GONE);
 
-        Uri uri = Uri.parse(Provider.CONTENT_URI + "/community/");
-        String selection = Contract.Community.ACCOUNT_ID + "=?";
+        Uri uri = Uri.parse(Provider.CONTENT_URI + "/currency/");
+        // TODO kimamila : filter ?
+        String selection = Contract.Currency.ACCOUNT_ID + "=?";
         String[] selectionArgs = {
                 ((Application) getActivity().getApplication()).getAccountId()
         };
@@ -87,16 +83,16 @@ public class CommunityListFragment extends ListFragment
         Cursor cursor = getActivity().getContentResolver().query(uri, new String[]{}, selection,
                 selectionArgs, null);
 
-        CommunityCursorAdapter communityCursorAdapter =
-                new CommunityCursorAdapter(getActivity(), cursor, 0);
+        CurrencyCursorAdapter currencyCursorAdapter =
+                new CurrencyCursorAdapter(getActivity(), cursor, 0);
 
-        setListAdapter(communityCursorAdapter);
+        setListAdapter(currencyCursorAdapter);
     }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-            inflater.inflate(R.menu.toolbar_community_list, menu);
-            getActivity().setTitle(R.string.communities);
+            inflater.inflate(R.menu.toolbar_currency_list, menu);
+            getActivity().setTitle(R.string.currencies);
             ((MainActivity) getActivity()).setBackButtonEnabled(false);
             ((MainActivity) getActivity()).
                     setToolbarColor(getResources().getColor(R.color.primary));
@@ -117,8 +113,8 @@ public class CommunityListFragment extends ListFragment
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         Cursor cursor = (Cursor) getListAdapter().getItem(position);
-        Community community = new Community(cursor);
-        Fragment fragment = CommunityFragment.newInstance(community);
+        Currency currency = ServiceLocator.instance().getDataService().toCurrency(cursor);
+        Fragment fragment = CurrencyFragment.newInstance(currency);
         FragmentManager fragmentManager = getFragmentManager();
         fragmentManager.beginTransaction()
                 .setCustomAnimations(
@@ -131,7 +127,7 @@ public class CommunityListFragment extends ListFragment
                 .commit();
     }
 
-    public class LoadCommunityTask extends AsyncTaskHandleException<Peer, Void, Community> {
+    public class LoadCurrencyTask extends AsyncTaskHandleException<Peer, Void, Currency> {
 
         private Activity mActivity = getActivity();
 
@@ -141,39 +137,17 @@ public class CommunityListFragment extends ListFragment
         }
 
         @Override
-        protected Community doInBackgroundHandleException(Peer... peers) throws Exception {
-             // Load currency
-            URL url = new URL("http", peers[0].getUrl(), peers[0].getPort(),
-                    "/blockchain/parameters");
+        protected Currency doInBackgroundHandleException(Peer... peers) throws Exception {
+            Currency currency = ServiceLocator.instance().getBlockchainRemoteService()
+                    .getCurrencyFromPeer(peers[0]);
 
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setConnectTimeout(5000);
-            InputStream stream = conn.getInputStream();
-            BlockchainParameter parameter = BlockchainParameter.fromJson(stream);
-
-            //Load first block
-            url = new URL("http", peers[0].getUrl(), peers[0].getPort(),
-                    "/blockchain/block/0");
-            conn = (HttpURLConnection) url.openConnection();
-            conn.setConnectTimeout(5000);
-            stream = conn.getInputStream();
-            BlockchainBlock firstBlock = BlockchainBlock.fromJson(stream);
-
-            //Load last block
-            url = new URL("http", peers[0].getUrl(), peers[0].getPort(),
-                    "/blockchain/current");
-            conn = (HttpURLConnection) url.openConnection();
-            conn.setConnectTimeout(5000);
-            stream = conn.getInputStream();
-            BlockchainBlock lastBlock = BlockchainBlock.fromJson(stream);
-
-            return new Community(parameter, firstBlock, lastBlock, peers);
+            return currency;
         }
 
         @Override
-        protected void onSuccess(Community community) {
+        protected void onSuccess(Currency currency) {
             mProgressViewAdapter.showProgress(false);
-            Fragment fragment = CommunityFragment.newInstance(community);
+            Fragment fragment = CurrencyFragment.newInstance(currency);
             FragmentManager fragmentManager = getFragmentManager();
             fragmentManager.beginTransaction()
                     .setCustomAnimations(

@@ -26,6 +26,7 @@
     <string name="open_drawer">Open the navigation drawer</string>
     <string name="close_drawer">Close the navigation drawer</string>
 
+
     <!-- Strings related to transfer/transaction -->
     <string name="wallet_transmitter">Wallet (transmitter)</string>
     <string name="receiver_uid">Receiver uid</string>
@@ -62,11 +63,12 @@
     <string name="node_port">Node port</string>
     <string name="rules">Rules</string>
     <string name="growth">Growth</string>
-    <string name="community">Community</string>
-    <string name="no_community">No community</string>
+    <string name="currency">Currency</string>
+    <string name="no_currency">No currency</string>
     <string name="no_transfer">No transfer</string>
-    <string name="communities">Communities</string>
+    <string name="currencies">Currencies</string>
     <string name="members">Members</string>
+    <string name="members_count">%s members</string>
 
     <!-- Strings related to peer/node -->
     <string name="enter_node_info">Enter node info</string>
@@ -84,6 +86,8 @@
     <string name="registration_date">Registration Date</string>
     <string name="signature">Signature</string>
     <string name="public_key">Public key</string>
+    <string name="identity_details">Details</string>
+    <string name="community">Community</string>
 
     <!-- Strings related to account/authentication --> -->
     <string name="login">Login</string>

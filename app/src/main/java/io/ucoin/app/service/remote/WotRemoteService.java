@@ -1,11 +1,10 @@
-package io.ucoin.app.service;
+package io.ucoin.app.service.remote;
 
 import android.text.TextUtils;
 import android.util.Log;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.message.BasicNameValuePair;
 
@@ -20,11 +19,13 @@ import io.ucoin.app.model.WotIdentityCertifications;
 import io.ucoin.app.model.WotLookupResult;
 import io.ucoin.app.model.WotLookupResults;
 import io.ucoin.app.model.WotLookupUId;
+import io.ucoin.app.service.CryptoService;
+import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.technical.DateUtils;
 import io.ucoin.app.technical.UCoinTechnicalException;
 import io.ucoin.app.technical.crypto.CryptoUtils;
 
-public class WotService extends AbstractNetworkService {
+public class WotRemoteService extends BaseRemoteService {
 
     private static final String TAG = "WotService";
 
@@ -46,12 +47,13 @@ public class WotService extends AbstractNetworkService {
 
     public CryptoService cryptoService;
 
-    public WotService() {
+    public WotRemoteService() {
         super();
     }
 
     @Override
     public void initialize() {
+        super.initialize();
         cryptoService = ServiceLocator.instance().getCryptoService();
     }
 
@@ -60,8 +62,7 @@ public class WotService extends AbstractNetworkService {
 
         // get parameter
         String path = String.format(URL_LOOKUP, uidPattern);
-        HttpGet lookupHttpGet = new HttpGet(getAppendedPath(path));
-        WotLookupResults lookupResult = executeRequest(lookupHttpGet, WotLookupResults.class);
+        WotLookupResults lookupResult = executeRequest(path, WotLookupResults.class);
 
         return lookupResult;
 
@@ -72,8 +73,7 @@ public class WotService extends AbstractNetworkService {
 
         // call lookup
         String path = String.format(URL_LOOKUP, uid);
-        HttpGet lookupHttpGet = new HttpGet(getAppendedPath(path));
-        WotLookupResults lookupResults = executeRequest(lookupHttpGet, WotLookupResults.class);
+        WotLookupResults lookupResults = executeRequest(path, WotLookupResults.class);
 
         // Retrieve the exact uid
         WotLookupUId uniqueResult = getUid(lookupResults, uid);
@@ -89,8 +89,7 @@ public class WotService extends AbstractNetworkService {
 
         // call lookup
         String path = String.format(URL_LOOKUP, uid);
-        HttpGet lookupHttpGet = new HttpGet(getAppendedPath(path));
-        WotLookupResults lookupResults = executeRequest(lookupHttpGet, WotLookupResults.class);
+        WotLookupResults lookupResults = executeRequest(path, WotLookupResults.class);
 
         // Retrieve the exact uid
         WotLookupUId uniqueResult = getUidByUidAndPublicKey(lookupResults, uid, pubKey);
@@ -101,13 +100,22 @@ public class WotService extends AbstractNetworkService {
         return uniqueResult;
     }
 
+    public Identity getIdentity(String uid, String pubKey) {
+        Log.d(TAG, String.format("Get identity by uid [%s] and pubKey [%s]", uid, pubKey));
+
+        WotLookupUId lookupUid = findByUidAndPublicKey(uid, pubKey);
+        if (lookupUid == null) {
+            return null;
+        }
+        return toIdentity(lookupUid);
+    }
+
     public WotIdentityCertifications getCertifiedBy(String uid) {
         Log.d(TAG, String.format("Try to get certifications done by uid: %s", uid));
 
         // call certified-by
         String path = String.format(URL_CERTIFIED_BY, uid);
-        HttpGet httpGet = new HttpGet(getAppendedPath(path));
-        WotIdentityCertifications result = executeRequest(httpGet, WotIdentityCertifications.class);
+        WotIdentityCertifications result = executeRequest(path, WotIdentityCertifications.class);
         
         return result;
 
@@ -118,8 +126,7 @@ public class WotService extends AbstractNetworkService {
 
         // call certifiers-of
         String path = String.format(URL_CERTIFIERS_OF, uid);
-        HttpGet httpGet = new HttpGet(getAppendedPath(path));
-        WotIdentityCertifications result = executeRequest(httpGet, WotIdentityCertifications.class);
+        WotIdentityCertifications result = executeRequest(path, WotIdentityCertifications.class);
         
         return result;
     }
@@ -134,7 +141,7 @@ public class WotService extends AbstractNetworkService {
 
 	public String sendSelf(byte[] pubKey, byte[] secKey, String uid, long timestamp) {
 		// http post /wot/add
-        HttpPost httpPost = new HttpPost(getAppendedPath(URL_ADD));
+        HttpPost httpPost = new HttpPost(getPath(URL_ADD));
 
         // Compute the pub key hash
         String pubKeyHash = CryptoUtils.encodeBase58(pubKey);
@@ -177,10 +184,10 @@ public class WotService extends AbstractNetworkService {
                                   String userUid, String userPubKeyHash,
                                   long userTimestamp, String userSignature) {
         // http post /wot/add
-        HttpPost httpPost = new HttpPost(getAppendedPath(URL_ADD));
+        HttpPost httpPost = new HttpPost(getPath(URL_ADD));
 
         // Read the current block (number and hash)
-        BlockchainService blockchainService = ServiceLocator.instance().getBlockchainService();
+        BlockchainRemoteService blockchainService = ServiceLocator.instance().getBlockchainRemoteService();
         BlockchainBlock currentBlock = blockchainService.getCurrentBlock();
         int blockNumber = currentBlock.getNumber();
         String blockHash = (blockNumber != 0)
@@ -233,6 +240,12 @@ public class WotService extends AbstractNetworkService {
             }
         }
         return result;
+    }
+
+    public Identity toIdentity(WotLookupUId source) {
+        Identity target = new Identity();
+        toIdentity(source, target);
+        return target;
     }
 
     public void toIdentity(WotLookupUId source, Identity target) {

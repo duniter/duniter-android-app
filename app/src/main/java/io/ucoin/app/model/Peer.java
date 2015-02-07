@@ -4,50 +4,38 @@ import java.io.Serializable;
 
 public class Peer implements Serializable {
 
-    private String mUrl;
-    private String mIPv4;
-    private String mIPv6;
-    private int mPort;
+    private final String host;
+    private final int port;
+    private final String url;
 
-    //todo filter address
-    public Peer(String address, int port) {
-        mUrl = address;
-        mIPv4= address;
-        mIPv6 = address;
-        mPort = port;
-
+    public Peer(String host, int port) {
+        this.host = host;
+        this.port = port;
+        this.url = initUrl(host, port);
     }
 
-    public Peer(String url, String IPv4, String IPv6, int port) {
-        mUrl = url;
-        mIPv4= IPv4;
-        mIPv6 = IPv6;
-        mPort = port;
-
-    }
-
-    public String getIPv4() {
-        return mIPv4;
-    }
-
-    public String getIPv6() {
-        return mIPv6;
-    }
-
-    public String getUrl() {
-        return mUrl;
+    public String getHost() {
+        return host;
     }
 
     public int getPort() {
-        return mPort;
+        return port;
+    }
+
+    public String getUrl() {
+        return url;
     }
 
     public String toString() {
-        String string = "url=" + mUrl + "\n" +
-        "ipv4=" + mIPv4 + "\n" +
-        "ipv6=" + mIPv6 + "\n" +
-        "port=" + Integer.toString(mPort);
+        return new StringBuilder().append("url=").append(url).append(",")
+                .append("host=").append(host).append(",")
+                .append("port=").append(port)
+                .toString();
+    }
 
-        return string;
+    /* -- Internal methods -- */
+
+    protected String initUrl(String host, int port) {
+        return String.format("http://%s:%s", host, port);
     }
 }

@@ -69,7 +69,7 @@
         </service>
 
         <service
-            android:name=".service.BlockchainService"
+            android:name=".service.remote.BlockchainRemoteService"
             android:exported="false"
             >
         </service>

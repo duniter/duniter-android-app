@@ -4,7 +4,6 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.Fragment;
-import android.app.FragmentManager;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.ContentResolver;
 import android.content.CursorLoader;
@@ -37,7 +36,7 @@ import io.ucoin.app.model.Wallet;
 import io.ucoin.app.model.WotLookupUId;
 import io.ucoin.app.service.DataContext;
 import io.ucoin.app.service.ServiceLocator;
-import io.ucoin.app.service.WotService;
+import io.ucoin.app.service.remote.WotRemoteService;
 import io.ucoin.app.technical.AsyncTaskHandleException;
 import io.ucoin.app.technical.crypto.KeyPair;
 
@@ -373,7 +372,7 @@ public class LoginFragment extends Fragment implements LoaderCallbacks<Cursor> {
             // Create the wallet
             Wallet wallet = new Wallet(currency, mUid, keyPair.publicKey, keyPair.secretKey);
 
-            WotService wotService = ServiceLocator.instance().getWotService();
+            WotRemoteService wotService = ServiceLocator.instance().getWotRemoteService();
             WotLookupUId result = wotService.findByUidAndPublicKey(mUid, wallet.getPubKeyHash());
             if (result != null) {
 

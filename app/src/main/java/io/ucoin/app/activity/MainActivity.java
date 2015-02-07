@@ -38,7 +38,7 @@ import io.ucoin.app.R;
 import io.ucoin.app.config.Configuration;
 import io.ucoin.app.content.Provider;
 import io.ucoin.app.database.Contract;
-import io.ucoin.app.fragment.CommunityListFragment;
+import io.ucoin.app.fragment.CurrencyListFragment;
 import io.ucoin.app.fragment.DevFragment;
 import io.ucoin.app.fragment.HomeFragment;
 import io.ucoin.app.fragment.LoginFragment;
@@ -47,7 +47,7 @@ import io.ucoin.app.fragment.WotSearchFragment;
 import io.ucoin.app.model.Identity;
 import io.ucoin.app.model.WotLookupResults;
 import io.ucoin.app.service.ServiceLocator;
-import io.ucoin.app.service.WotService;
+import io.ucoin.app.service.remote.WotRemoteService;
 import io.ucoin.app.technical.AsyncTaskHandleException;
 import io.ucoin.app.technical.DateUtils;
 
@@ -248,7 +248,7 @@ public class MainActivity extends ActionBarActivity
             case 1: //0 is home we only pop back, no need for new fragment
                 break;
             case 2:
-                fragment = CommunityListFragment.newInstance();
+                fragment = CurrencyListFragment.newInstance();
                 break;
             case 3:
                 fragment = LoginFragment.newInstance();
@@ -397,7 +397,7 @@ public class MainActivity extends ActionBarActivity
 
         @Override
         protected List<Identity> doInBackgroundHandleException(Void... params) {
-            WotService service = ServiceLocator.instance().getWotService();
+            WotRemoteService service = ServiceLocator.instance().getWotRemoteService();
             WotLookupResults results = service.find(mSearchQuery);
 
             if (results == null) {

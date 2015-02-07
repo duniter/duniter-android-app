@@ -1,4 +1,4 @@
-package io.ucoin.app.service;
+package io.ucoin.app.service.exception;
 
 import io.ucoin.app.technical.UCoinBusinessException;
 

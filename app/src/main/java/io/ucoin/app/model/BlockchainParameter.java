@@ -1,14 +1,6 @@
 package io.ucoin.app.model;
 
-import com.google.gson.Gson;
-
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.io.Serializable;
-
-import io.ucoin.app.technical.StandardCharsets;
-import io.ucoin.app.technical.gson.GsonUtils;
 
 /**
  * Blockwhain parameters.
@@ -91,12 +83,6 @@ public class BlockchainParameter implements Serializable{
      * The percent of previous issuers to reach for personalized difficulty
      */
     private Double percentRot;
-
-    public static BlockchainParameter fromJson(InputStream json) {
-        Gson gson = GsonUtils.newBuilder().create();
-        Reader reader = new InputStreamReader(json, StandardCharsets.UTF_8);
-        return gson.fromJson(reader, BlockchainParameter.class);
-    }
 
     @Override
     public String toString() {

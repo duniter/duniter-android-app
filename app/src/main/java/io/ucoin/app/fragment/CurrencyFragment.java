@@ -6,7 +6,6 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -20,17 +19,17 @@ import io.ucoin.app.R;
 import io.ucoin.app.activity.MainActivity;
 import io.ucoin.app.content.Provider;
 import io.ucoin.app.database.Contract;
-import io.ucoin.app.model.Community;
+import io.ucoin.app.model.Currency;
 import io.ucoin.app.model.Peer;
 
-public class CommunityFragment extends Fragment {
+public class CurrencyFragment extends Fragment {
 
 
-    public static CommunityFragment newInstance(Community community) {
+    public static CurrencyFragment newInstance(Currency currency) {
         Bundle newInstanceArgs = new Bundle();
-        newInstanceArgs.putSerializable(Community.class.getSimpleName(), community);
+        newInstanceArgs.putSerializable(Currency.class.getSimpleName(), currency);
 
-        CommunityFragment fragment = new CommunityFragment();
+        CurrencyFragment fragment = new CurrencyFragment();
         fragment.setArguments(newInstanceArgs);
         return fragment;
     }
@@ -46,25 +45,25 @@ public class CommunityFragment extends Fragment {
                              Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
 
-        return inflater.inflate(R.layout.fragment_community,
+        return inflater.inflate(R.layout.fragment_currency,
                 container, false);
     }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        getActivity().setTitle(getString(R.string.community));
+        getActivity().setTitle(getString(R.string.currency));
         ((MainActivity) getActivity()).setBackButtonEnabled(false);
 
         Bundle newInstanceArgs = getArguments();
-        Community community = (Community) newInstanceArgs
-                .getSerializable(Community.class.getSimpleName());
+        Currency currency = (Currency) newInstanceArgs
+                .getSerializable(Currency.class.getSimpleName());
 
-        TextView currency = (TextView) view.findViewById(R.id.currency);
-        currency.setText(community.getCurrencyName());
+        TextView currencyName = (TextView) view.findViewById(R.id.currency);
+        currencyName.setText(currency.getCurrencyName());
 
         TextView memberCount = (TextView) view.findViewById(R.id.members_count);
-        memberCount.setText(Integer.toString(community.getMembersCount()));
+        memberCount.setText(getString(R.string.members_count, currency.getMembersCount()));
 /*
         TextView mUd0 = (TextView) view.findViewById(R.id.ud0);
         TextView mSigDelay = (TextView) view.findViewById(R.id.sig_delay);
@@ -102,21 +101,21 @@ public class CommunityFragment extends Fragment {
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.toolbar_community, menu);
+        inflater.inflate(R.menu.toolbar_currency, menu);
 
-        //hide Add button and show delete if the community first block signature
+        //hide Add button and show delete if the currency first block signature
         // is already in the database
         Bundle newInstanceArgs = getArguments();
-        Community community = (Community) newInstanceArgs
-                .getSerializable(Community.class.getSimpleName());
+        Currency currency = (Currency) newInstanceArgs
+                .getSerializable(Currency.class.getSimpleName());
 
-        String selection = Contract.Community.ACCOUNT_ID + "=? AND " +
-                Contract.Community.FIRST_BLOCK_SIGNATURE + "=?";
+        String selection = Contract.Currency.ACCOUNT_ID + "=? AND " +
+                Contract.Currency.FIRST_BLOCK_SIGNATURE + "=?";
         String[] selectionArgs = new String[]{
                 ((Application) getActivity().getApplication()).getAccountId(),
-                community.getFirstBlockSignature()
+                currency.getFirstBlockSignature()
         };
-        Uri uri = Uri.parse(Provider.CONTENT_URI + "/community/");
+        Uri uri = Uri.parse(Provider.CONTENT_URI + "/currency/");
         Cursor cursor = getActivity().getContentResolver().query(uri, new String[]{}, selection,
                 selectionArgs, null);
 
@@ -130,7 +129,7 @@ public class CommunityFragment extends Fragment {
 
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
-        getActivity().setTitle(R.string.community);
+        getActivity().setTitle(R.string.currency);
         ((MainActivity) getActivity()).setBackButtonEnabled(true);
     }
 
@@ -152,20 +151,20 @@ public class CommunityFragment extends Fragment {
     public void add() {
         Bundle newInstanceArgs = getArguments();
 
-        Community community = (Community) newInstanceArgs
-                .getSerializable(Community.class.getSimpleName());
+        Currency currency = (Currency) newInstanceArgs
+                .getSerializable(Currency.class.getSimpleName());
 
-        Peer[] peers = community.getPeers();
+        Peer[] peers = currency.getPeers();
 
         String account_id = ((Application) getActivity().getApplication()).getAccountId();
-        //add Community to database
+        //add Currency to database
         ContentValues values = new ContentValues();
-        values.put(Contract.Community.ACCOUNT_ID, account_id);
-        values.put(Contract.Community.CURRENCY_NAME, community.getCurrencyName());
-        values.put(Contract.Community.MEMBERS_COUNT, community.getMembersCount());
-        values.put(Contract.Community.FIRST_BLOCK_SIGNATURE, community.getFirstBlockSignature());
+        values.put(Contract.Currency.ACCOUNT_ID, account_id);
+        values.put(Contract.Currency.CURRENCY_NAME, currency.getCurrencyName());
+        values.put(Contract.Currency.MEMBERS_COUNT, currency.getMembersCount());
+        values.put(Contract.Currency.FIRST_BLOCK_SIGNATURE, currency.getFirstBlockSignature());
 
-        Uri uri = Uri.parse(Provider.CONTENT_URI + "/community/");
+        Uri uri = Uri.parse(Provider.CONTENT_URI + "/currency/");
         uri = getActivity().getContentResolver().insert(uri, values);
 
         //add Peer to database
@@ -173,10 +172,8 @@ public class CommunityFragment extends Fragment {
 
         Long id = ContentUris.parseId(uri);
         values = new ContentValues();
-        values.put(Contract.Peer.COMMUNITY_ID, Long.toString(id));
-        values.put(Contract.Peer.DOMAIN, peer.getUrl());
-        values.put(Contract.Peer.IPV4, peer.getIPv4());
-        values.put(Contract.Peer.IPV6, peer.getIPv6());
+        values.put(Contract.Peer.CURRENCY_ID, Long.toString(id));
+        values.put(Contract.Peer.HOST, peer.getHost());
         values.put(Contract.Peer.PORT, Integer.toString(peer.getPort()));
         uri = Uri.parse(Provider.CONTENT_URI + "/peer/");
         uri = getActivity().getContentResolver().insert(uri, values);
