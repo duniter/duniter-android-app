@@ -4,7 +4,9 @@
     android:layout_height="wrap_content"
     android:background="@color/accent"
     android:orientation="vertical"
-    android:padding="8dp">
+    android:padding="8dp"
+    android:onClick="onClick"
+    android:clickable="true">
 
     <ImageButton
         android:id="@+id/icon"
@@ -25,7 +27,8 @@
         android:layout_toRightOf="@id/icon"
         android:text="taosty"
         android:textColor="@color/textPrimary"
-        android:textSize="@dimen/abc_text_size_display_1_material" />
+        android:textSize="@dimen/abc_text_size_display_1_material"
+        />
 
     <TextView
         android:id="@+id/public_key"

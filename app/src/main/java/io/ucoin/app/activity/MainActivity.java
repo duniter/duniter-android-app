@@ -73,6 +73,7 @@ public class MainActivity extends ActionBarActivity
         AccountManager accountManager = AccountManager.get(this);
         Account[] accounts = accountManager.getAccountsByType(getString(R.string.ACCOUNT_TYPE));
 
+        // If first time: create account
         if (accounts.length == 0) {
             Intent intent = new Intent(this, AddAccountActivity.class);
             startActivity(intent);
@@ -81,12 +82,11 @@ public class MainActivity extends ActionBarActivity
         }
 
         //todo handle this case
-        Account account = loadLastAccountUsed();
+        Account account = loadLastAccountUsed(accountManager, accounts);
         if (account == null) {
             Toast.makeText(this, "Could Not load account", Toast.LENGTH_LONG).show();
             finish();
             return;
-
         }
 
         // Prepare some utilities
@@ -109,7 +109,13 @@ public class MainActivity extends ActionBarActivity
         }
 
         //Navigation drawer
-        View listHeader = getLayoutInflater().inflate(R.layout.drawer_header, null);
+        final View listHeader = getLayoutInflater().inflate(R.layout.drawer_header, null);
+        listHeader.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onItemClick(null, listHeader, 1, 0); // go to home
+            }
+        });
         mUidView = (TextView) listHeader.findViewById(R.id.uid);
         mPubkeyView = (TextView) listHeader.findViewById(R.id.public_key);
 
@@ -248,10 +254,10 @@ public class MainActivity extends ActionBarActivity
             case 1: //0 is home we only pop back, no need for new fragment
                 break;
             case 2:
-                fragment = CurrencyListFragment.newInstance();
+                fragment = LoginFragment.newInstance();
                 break;
             case 3:
-                fragment = LoginFragment.newInstance();
+                fragment = CurrencyListFragment.newInstance();
                 break;
             case 4:
                 fragment = TransferListFragment.newInstance();
@@ -292,6 +298,7 @@ public class MainActivity extends ActionBarActivity
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        // Create the data loader, using cursor
         String account_id = ((Application) getApplication()).getAccountId();
         Uri uri = Uri.parse(Provider.CONTENT_URI + "/account/" + account_id);
 
@@ -301,6 +308,9 @@ public class MainActivity extends ActionBarActivity
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        if (data == null) {
+            return;
+        }
         int uidIndex = data.getColumnIndex(Contract.Account.UID);
         int pubkeyIndex = data.getColumnIndex(Contract.Account.PUBLIC_KEY);
 
@@ -333,9 +343,7 @@ public class MainActivity extends ActionBarActivity
         return android.text.format.DateFormat.getLongDateFormat(getApplicationContext());
     }
 
-    public Account loadLastAccountUsed() {
-        AccountManager accountManager = AccountManager.get(this);
-        Account[] accounts = accountManager.getAccountsByType(getString(R.string.ACCOUNT_TYPE));
+    public Account loadLastAccountUsed(AccountManager accountManager, Account[] accounts) {
 
         for (Account account : accounts) {
             String account_id = accountManager.getUserData(account, "_id");
@@ -344,12 +352,13 @@ public class MainActivity extends ActionBarActivity
                     .getString("_id", "");
 
             if (last_account_id.equals(account_id)) {
+                // Init the account to use, and init the data loader,
                 ((Application) getApplication()).setAccount(account);
                 this.getLoaderManager().initLoader(0, null, this);
                 return account;
             }
         }
-        finish();
+
         return null;
     }
 

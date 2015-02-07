@@ -1,9 +1,5 @@
 package io.ucoin.app.service;
 
-import android.database.Cursor;
-
-import io.ucoin.app.database.Contract;
-import io.ucoin.app.model.Currency;
 import io.ucoin.app.model.Identity;
 import io.ucoin.app.model.Wallet;
 import io.ucoin.app.technical.crypto.CryptoUtils;
@@ -23,6 +19,11 @@ public class DataService extends BaseService {
         super();
     }
 
+    public void saveAccount() {
+
+    }
+
+    // TODO : to remove (need only for DEV)
     public Wallet getDefaultWallet() {
         Wallet result;
         byte[] secretKey = null;
@@ -49,23 +50,4 @@ public class DataService extends BaseService {
         return result;
     }
 
-
-    public Currency toCurrency(Cursor cursor) {
-        Currency result = new Currency();
-        // TODO kimamila: get by index (with increment)
-        int idIndex = cursor.getColumnIndex(Contract.Currency._ID);
-        result.setId(cursor.getInt(idIndex));
-
-        int currencyNameIndex = cursor.getColumnIndex(Contract.Currency.CURRENCY_NAME);
-        result.setCurrencyName(cursor.getString(currencyNameIndex));
-
-        int membersCountIndex = cursor.getColumnIndex(Contract.Currency.MEMBERS_COUNT);
-        result.setMembersCount(cursor.getInt(membersCountIndex));
-
-        int firstBlockSignatureIndex = cursor
-                .getColumnIndex(Contract.Currency.FIRST_BLOCK_SIGNATURE);
-        result.setFirstBlockSignature(cursor.getString(firstBlockSignatureIndex));
-
-        return result;
-    }
 }

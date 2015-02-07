@@ -1,0 +1,41 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:minHeight="?android:listPreferredItemHeight"
+    android:gravity="center_vertical"
+    android:duplicateParentState="true"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp">
+
+    <TextView
+        android:id="@+id/currency_name"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:duplicateParentState="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:textAppearanceMedium"
+        android:textColor="@color/hideable_text_color"
+        android:textSize="@dimen/abc_text_size_title_material"
+        />
+
+    <TextView
+        android:id="@+id/pubkey"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/hideable_text_color"
+        android:textSize="@dimen/abc_text_size_body_2_material"
+        android:layout_below="@id/currency_name"
+        android:layout_alignParentLeft="true"/>
+
+    <TextView
+        android:id="@+id/credit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/hideable_text_color"
+        android:textSize="@dimen/abc_text_size_body_2_material"
+        android:layout_below="@id/pubkey"
+        android:layout_alignParentLeft="true"/>
+
+
+</RelativeLayout>

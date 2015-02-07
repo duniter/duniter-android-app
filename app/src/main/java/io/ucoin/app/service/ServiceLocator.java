@@ -85,6 +85,16 @@ public class ServiceLocator implements Closeable {
     public HttpService getHttpService() {
         return getService(HttpService.class);
     }
+    public AccountService getAccountService() {
+        return getService(AccountService.class);
+    }
+    public CurrencyService getCurrencyService() {
+        return getService(CurrencyService.class);
+    }
+    public WalletService getWalletService() {
+        return getService(WalletService.class);
+    }
+
 
     /* -- Internal methods -- */
     protected <S extends BaseService> S getService(Class<S> clazz) {
@@ -104,4 +114,6 @@ public class ServiceLocator implements Closeable {
             throw new UCoinTechnicalException("Could not load service: " + clazz.getName(), e);
         }
     }
+
+
 }

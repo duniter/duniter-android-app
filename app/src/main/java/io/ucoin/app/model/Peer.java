@@ -4,9 +4,10 @@ import java.io.Serializable;
 
 public class Peer implements Serializable {
 
-    private final String host;
-    private final int port;
-    private final String url;
+    private Long id;
+    private String host;
+    private int port;
+    private String url;
 
     public Peer(String host, int port) {
         this.host = host;
@@ -24,6 +25,14 @@ public class Peer implements Serializable {
 
     public String getUrl() {
         return url;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String toString() {

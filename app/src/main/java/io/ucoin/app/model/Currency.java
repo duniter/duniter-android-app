@@ -9,7 +9,7 @@ public class Currency implements Serializable {
 
     private Peer peers[];
 
-    private Integer id;
+    private Long id;
     private String currencyName;
     private Integer membersCount;
     private String firstBlockSignature;
@@ -27,7 +27,7 @@ public class Currency implements Serializable {
         this.peers = peers;
     }
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
@@ -52,7 +52,7 @@ public class Currency implements Serializable {
         this.peers = peers;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

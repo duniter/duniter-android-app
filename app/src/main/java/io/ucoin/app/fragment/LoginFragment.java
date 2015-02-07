@@ -1,20 +1,7 @@
 package io.ucoin.app.fragment;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.annotation.TargetApi;
 import android.app.Fragment;
-import android.app.LoaderManager.LoaderCallbacks;
-import android.content.ContentResolver;
-import android.content.CursorLoader;
-import android.content.Loader;
-import android.database.Cursor;
-import android.net.Uri;
-import android.os.AsyncTask;
-import android.os.Build;
-import android.os.Build.VERSION;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -22,16 +9,12 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
-import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import io.ucoin.app.R;
+import io.ucoin.app.adapter.ProgressViewAdapter;
 import io.ucoin.app.model.Wallet;
 import io.ucoin.app.model.WotLookupUId;
 import io.ucoin.app.service.DataContext;
@@ -43,7 +26,7 @@ import io.ucoin.app.technical.crypto.KeyPair;
 /**
  * A login screen that offers login via email/password.
  */
-public class LoginFragment extends Fragment implements LoaderCallbacks<Cursor> {
+public class LoginFragment extends Fragment {
 
 
     /**
@@ -53,10 +36,9 @@ public class LoginFragment extends Fragment implements LoaderCallbacks<Cursor> {
 
     // UI references.
     private EditText mUidView;
-    private AutoCompleteTextView mEmailView;
+    private EditText mSaltView;
     private EditText mPasswordView;
-    private View mProgressView;
-    private View mLoginFormView;
+    private ProgressViewAdapter mProgressViewAdapter;
 
     public static LoginFragment newInstance() {
         LoginFragment fragment = new LoginFragment();
@@ -86,17 +68,18 @@ public class LoginFragment extends Fragment implements LoaderCallbacks<Cursor> {
         super.onViewCreated(view, savedInstanceState);
         getActivity().setTitle(getString(R.string.sign_in));
 
-        // Set up the login form.
+        // UID
         mUidView = (EditText) view.findViewById(R.id.uid);
 
-        mEmailView = (AutoCompleteTextView) view.findViewById(R.id.email);
-        populateAutoComplete();
+        // Salt
+        mSaltView = (EditText) view.findViewById(R.id.salt);
 
+        // Password
         mPasswordView = (EditText) view.findViewById(R.id.password);
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
-                if (id == R.id.login || id == EditorInfo.IME_NULL) {
+                if (id == R.id.uid || id == EditorInfo.IME_NULL) {
                     attemptLogin();
                     return true;
                 }
@@ -112,14 +95,15 @@ public class LoginFragment extends Fragment implements LoaderCallbacks<Cursor> {
             }
         });
 
-        mLoginFormView = view.findViewById(R.id.login_form);
-        mProgressView = view.findViewById(R.id.login_progress);
+        mProgressViewAdapter = new ProgressViewAdapter(
+                view.findViewById(R.id.login_progress),
+                mSignInButton);
 
         // fill the UI with the default wallet
-        updateLoginView(ServiceLocator.instance().getDataService().getDefaultWallet());
+        updateView(ServiceLocator.instance().getDataService().getDefaultWallet());
     }
 
-    private void updateLoginView(Wallet wallet) {
+    private void updateView(Wallet wallet) {
         String uid = null;
         String email = null;
         if (wallet != null) {
@@ -131,19 +115,8 @@ public class LoginFragment extends Fragment implements LoaderCallbacks<Cursor> {
             }
         }
         mUidView.setText(uid);
-        mEmailView.setText(email);
+        mSaltView.setText(email);
     }
-
-    private void populateAutoComplete() {
-        if (VERSION.SDK_INT >= 14) {
-            // Use ContactsContract.Profile (API 14+)
-            getLoaderManager().initLoader(0, null, this);
-        } else if (VERSION.SDK_INT >= 8) {
-            // Use AccountManager (API 8+)
-            new SetupEmailAutoCompleteTask().execute(null, null);
-        }
-    }
-
 
     /**
      * Attempts to sign in or register the account specified by the login form.
@@ -157,12 +130,12 @@ public class LoginFragment extends Fragment implements LoaderCallbacks<Cursor> {
 
         // Reset errors.
         mUidView.setError(null);
-        mEmailView.setError(null);
+        mSaltView.setError(null);
         mPasswordView.setError(null);
 
         // Store values at the time of the login attempt.
         String uid = mUidView.getText().toString();
-        String email = mEmailView.getText().toString();
+        String email = mSaltView.getText().toString();
         String password = mPasswordView.getText().toString();
 
         boolean cancel = false;
@@ -188,12 +161,12 @@ public class LoginFragment extends Fragment implements LoaderCallbacks<Cursor> {
 
         // Check for a valid email address.
         if (TextUtils.isEmpty(email)) {
-            mEmailView.setError(getString(R.string.field_required));
-            focusView = mEmailView;
+            mSaltView.setError(getString(R.string.field_required));
+            focusView = mSaltView;
             cancel = true;
         } else if (!isEmailValid(email)) {
-            mEmailView.setError(getString(R.string.email_address_invalid));
-            focusView = mEmailView;
+            mSaltView.setError(getString(R.string.email_address_invalid));
+            focusView = mSaltView;
             cancel = true;
         }
 
@@ -204,7 +177,6 @@ public class LoginFragment extends Fragment implements LoaderCallbacks<Cursor> {
         } else {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
-            showProgress(true);
             mAuthTask = new UserLoginTask(uid, email, password);
             mAuthTask.execute((Void) null);
         }
@@ -222,48 +194,13 @@ public class LoginFragment extends Fragment implements LoaderCallbacks<Cursor> {
         return password.length() > 4;
     }
 
-    /**
-     * Shows the progress UI and hides the login form.
-     */
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
-    public void showProgress(final boolean show) {
-        // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
-        // for very easy animations. If available, use these APIs to fade-in
-        // the progress spinner.
-        if (VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
-            int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
-
-            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-            mLoginFormView.animate().setDuration(shortAnimTime).alpha(
-                    show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-                }
-            });
-
-            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-            mProgressView.animate().setDuration(shortAnimTime).alpha(
-                    show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-                }
-            });
-        } else {
-            // The ViewPropertyAnimator APIs are not available, so simply show
-            // and hide the relevant UI components.
-            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-        }
-    }
-
-    @Override
+    // TODO kimamila: use a loader to load existing Wallet, and then use this list to check is salt+password is correct
+    /*@Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
         return new CursorLoader(getActivity(),
                 // Retrieve data rows for the device user's 'profile' contact.
                 Uri.withAppendedPath(ContactsContract.Profile.CONTENT_URI,
-                        ContactsContract.Contacts.Data.CONTENT_DIRECTORY), ProfileQuery.PROJECTION,
+                        ContactsContract.Contacts.Data.CONTENT_DIRECTORY), WalletQuery.PROJECTION,
 
                 // Select only email addresses.
                 ContactsContract.Contacts.Data.MIMETYPE +
@@ -277,14 +214,13 @@ public class LoginFragment extends Fragment implements LoaderCallbacks<Cursor> {
 
     @Override
     public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
-        List<String> emails = new ArrayList<String>();
+        List<String> walletPubkeys = new ArrayList<String>();
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
-            emails.add(cursor.getString(ProfileQuery.ADDRESS));
+            walletPubkeys.add(cursor.getString(WalletQuery.PUBLIC_KEY));
             cursor.moveToNext();
         }
 
-        addEmailsToAutoComplete(emails);
     }
 
     @Override
@@ -292,55 +228,16 @@ public class LoginFragment extends Fragment implements LoaderCallbacks<Cursor> {
 
     }
 
-    private interface ProfileQuery {
+    private interface WalletQuery {
         String[] PROJECTION = {
-                ContactsContract.CommonDataKinds.Email.ADDRESS,
-                ContactsContract.CommonDataKinds.Email.IS_PRIMARY,
+                Contract.Wallet._ID,
+                Contract.Wallet.PUBLIC_KEY,
         };
 
-        int ADDRESS = 0;
-        int IS_PRIMARY = 1;
+        int ID = 0;
+        int PUBLIC_KEY = 1;
     }
-
-    /**
-     * Use an AsyncTask to fetch the user's email addresses on a background thread, and update
-     * the email text field with results on the main UI thread.
-     */
-    class SetupEmailAutoCompleteTask extends AsyncTask<Void, Void, List<String>> {
-
-        @Override
-        protected List<String> doInBackground(Void... voids) {
-            ArrayList<String> emailAddressCollection = new ArrayList<String>();
-
-            // Get all emails from the user's contacts and copy them to a list.
-            ContentResolver cr = getActivity().getContentResolver();
-            Cursor emailCur = cr.query(ContactsContract.CommonDataKinds.Email.CONTENT_URI, null,
-                    null, null, null);
-            while (emailCur.moveToNext()) {
-                String email = emailCur.getString(emailCur.getColumnIndex(ContactsContract
-                        .CommonDataKinds.Email.DATA));
-                emailAddressCollection.add(email);
-            }
-            emailCur.close();
-
-            return emailAddressCollection;
-        }
-
-        @Override
-        protected void onPostExecute(List<String> emailAddressCollection) {
-            addEmailsToAutoComplete(emailAddressCollection);
-        }
-    }
-
-    private void addEmailsToAutoComplete(List<String> emailAddressCollection) {
-        //Create adapter to tell the AutoCompleteTextView what to show in its dropdown list.
-        ArrayAdapter<String> adapter =
-                new ArrayAdapter<String>(getActivity(),
-                        android.R.layout.simple_dropdown_item_1line, emailAddressCollection);
-
-        mEmailView.setAdapter(adapter);
-    }
-
+    */
 
     /**
      * Represents an asynchronous login/registration task used to authenticate
@@ -356,6 +253,11 @@ public class LoginFragment extends Fragment implements LoaderCallbacks<Cursor> {
             mUid = uid;
             mEmail = email;
             mPassword = password;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            mProgressViewAdapter.showProgress(true);
         }
 
         @Override
@@ -382,6 +284,8 @@ public class LoginFragment extends Fragment implements LoaderCallbacks<Cursor> {
                 // Store the wallet into the data context
                 context.setWallet(wallet);
 
+                // TODO : Check is the wallet exists on DB account's wallets
+
                 return true;
             }
 
@@ -394,7 +298,6 @@ public class LoginFragment extends Fragment implements LoaderCallbacks<Cursor> {
         @Override
         protected void onSuccess(Boolean success) {
             mAuthTask = null;
-            showProgress(false);
 
             if (success) {
                 Fragment fragment = HomeFragment.newInstance();
@@ -409,19 +312,20 @@ public class LoginFragment extends Fragment implements LoaderCallbacks<Cursor> {
             } else {
                 mUidView.setError(getString(R.string.login_incorrect));
                 mUidView.requestFocus();
+                mProgressViewAdapter.showProgress(false);
             }
         }
 
         @Override
         protected void onFailed(Throwable t) {
             mPasswordView.setError(t.getMessage());
-            showProgress(false);
+            mProgressViewAdapter.showProgress(false);
         }
 
         @Override
         protected void onCancelled() {
             mAuthTask = null;
-            showProgress(false);
+            mProgressViewAdapter.showProgress(false);
         }
     }
 }

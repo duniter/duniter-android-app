@@ -1,12 +1,17 @@
 package io.ucoin.app.database;
 
 
-
+import android.app.Activity;
+import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.net.Uri;
 
-public class DbHelper extends SQLiteOpenHelper implements Contract {
+import io.ucoin.app.content.Provider;
+
+public class DatabaseHelper extends SQLiteOpenHelper implements Contract {
 
     private static final String INTEGER = " INTEGER ";
     private static final String REAL = " REAL ";
@@ -16,7 +21,7 @@ public class DbHelper extends SQLiteOpenHelper implements Contract {
     private static final String COMMA = ",";
 
 
-    public DbHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
+    public DatabaseHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
         super(context, name, factory, version);
     }
 
@@ -26,22 +31,25 @@ public class DbHelper extends SQLiteOpenHelper implements Contract {
         String CREATE_TABLE_ACCOUNT = "CREATE TABLE " + Account.TABLE_NAME + "(" +
                 Account._ID + " INTEGER PRIMARY KEY AUTOINCREMENT" + COMMA +
                 Account.PUBLIC_KEY + TEXT + NOTNULL + COMMA +
-                Account.SIGNATURE + TEXT + UNIQUE +  COMMA +
+                Account.SALT + TEXT + NOTNULL + COMMA +
                 Account.UID + TEXT + NOTNULL + COMMA +
-                Account.TIMESTAMP + INTEGER +  COMMA +
+                Account.CRYPT_PIN + TEXT + UNIQUE +  COMMA +
                 UNIQUE + "(" + Account.UID + COMMA + Account.PUBLIC_KEY + ")" +
                 ");";
         db.execSQL(CREATE_TABLE_ACCOUNT);
 
         String CREATE_TABLE_WALLET = "CREATE TABLE " + Wallet.TABLE_NAME + "(" +
                 Wallet._ID + " INTEGER PRIMARY KEY AUTOINCREMENT" + COMMA +
-                Wallet.PUBLIC_KEY + TEXT + NOTNULL + UNIQUE + COMMA +
-                Wallet.PRIVATE_KEY + TEXT +  NOTNULL + UNIQUE + COMMA +
-                Wallet.OWNER_PUBLIC_KEY + TEXT + NOTNULL + UNIQUE + COMMA +
-                Wallet.NAME + TEXT +  COMMA +
-                "FOREIGN KEY (" + Wallet.OWNER_PUBLIC_KEY + ") REFERENCES " +
-                Account.TABLE_NAME + "(" + Account.PUBLIC_KEY + ")" +
-                UNIQUE + "(" + Wallet.OWNER_PUBLIC_KEY + COMMA + Wallet.NAME + ")" +
+                Wallet.NAME + TEXT + COMMA +
+                Wallet.PUBLIC_KEY + TEXT + NOTNULL + COMMA +
+                Wallet.SECRET_KEY + TEXT + COMMA +
+                Wallet.ACCOUNT_ID + INTEGER + NOTNULL + COMMA +
+                Wallet.CURRENCY_ID + INTEGER + NOTNULL + COMMA +
+                Wallet.IS_MEMBER + INTEGER + NOTNULL + COMMA +
+                "FOREIGN KEY (" + Wallet.ACCOUNT_ID + ") REFERENCES " + Account.TABLE_NAME + "(" + Account._ID + ")" +
+                "FOREIGN KEY (" + Wallet.CURRENCY_ID + ") REFERENCES " + Currency.TABLE_NAME + "(" + Currency._ID + ")" +
+                UNIQUE + "(" + Wallet.CURRENCY_ID + COMMA + Wallet.PUBLIC_KEY + ")" +
+                UNIQUE + "(" + Wallet.CURRENCY_ID + COMMA + Wallet.NAME + ")" +
                 ")";
         db.execSQL(CREATE_TABLE_WALLET);
 
@@ -136,5 +144,42 @@ public class DbHelper extends SQLiteOpenHelper implements Contract {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 
+    }
+
+    public static io.ucoin.app.model.Currency insertCurrency(Activity activity,
+                                      String accountId,
+                                      io.ucoin.app.model.Currency currency
+                                      ) {
+
+        io.ucoin.app.model.Peer[] peers = currency.getPeers();
+
+        //add Currency to database
+        ContentValues values = new ContentValues();
+        values.put(Contract.Currency.ACCOUNT_ID, accountId);
+        values.put(Contract.Currency.CURRENCY_NAME, currency.getCurrencyName());
+        values.put(Contract.Currency.MEMBERS_COUNT, currency.getMembersCount());
+        values.put(Contract.Currency.FIRST_BLOCK_SIGNATURE, currency.getFirstBlockSignature());
+
+        Uri uri = Uri.parse(Provider.CONTENT_URI + "/currency/");
+        uri = activity.getContentResolver().insert(uri, values);
+        Long currencyId = ContentUris.parseId(uri);
+        currency.setId(currencyId);
+
+        //add Peer to database
+        io.ucoin.app.model.Peer peer = peers[0];
+
+        if (peer != null) {
+
+            values = new ContentValues();
+            values.put(Contract.Peer.CURRENCY_ID, Long.toString(currencyId));
+            values.put(Contract.Peer.HOST, peer.getHost());
+            values.put(Contract.Peer.PORT, Integer.toString(peer.getPort()));
+            uri = Uri.parse(Provider.CONTENT_URI + "/peer/");
+            uri = activity.getContentResolver().insert(uri, values);
+            Long peerId = ContentUris.parseId(uri);
+            peer.setId(peerId);
+        }
+
+        return currency;
     }
 }

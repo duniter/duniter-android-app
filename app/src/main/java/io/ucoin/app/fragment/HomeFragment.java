@@ -1,10 +1,10 @@
 package io.ucoin.app.fragment;
 
 import android.app.Fragment;
+import android.app.FragmentManager;
 import android.app.SearchManager;
 import android.os.Bundle;
 import android.support.v7.widget.SearchView;
-import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -13,9 +13,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TabHost;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import io.ucoin.app.Application;
 import io.ucoin.app.R;
 import io.ucoin.app.activity.MainActivity;
 import io.ucoin.app.adapter.ProgressViewAdapter;
@@ -30,6 +32,7 @@ import io.ucoin.app.technical.AsyncTaskHandleException;
 
 public class HomeFragment extends Fragment {
 
+    private View mStatusPanel;
     private TextView mStatusText;
     private ProgressViewAdapter mProgressViewAdapter;
     private ImageView mStatusImage;
@@ -56,6 +59,25 @@ public class HomeFragment extends Fragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        // Tab host
+        TabHost tabs = (TabHost)view.findViewById(R.id.tabHost);
+        tabs.setup();
+        {
+            TabHost.TabSpec spec = tabs.newTabSpec("tab1");
+            spec.setContent(R.id.tab1);
+            spec.setIndicator(getString(R.string.wallets));
+            tabs.addTab(spec);
+        }
+        {
+            TabHost.TabSpec spec = tabs.newTabSpec("tab2");
+            spec.setContent(R.id.tab2);
+            spec.setIndicator(getString(R.string.favorites));
+            tabs.addTab(spec);
+        }
+
+        mStatusPanel = view.findViewById(R.id.status_panel);
+        mStatusPanel.setVisibility(View.GONE);
+
         // Currency text
         mStatusText = (TextView) view.findViewById(R.id.status_text);
 
@@ -65,10 +87,11 @@ public class HomeFragment extends Fragment {
         // Progress
         mProgressViewAdapter = new ProgressViewAdapter(
                 view.findViewById(R.id.load_progress),
-                mStatusImage);
+                tabs);
 
-        // Load currency
-        loadCurrency();
+        // Load wallets
+        LoadWalletsTask loadWalletsTask = new LoadWalletsTask();
+        loadWalletsTask.execute();
     }
 
     @Override
@@ -117,20 +140,13 @@ public class HomeFragment extends Fragment {
         return false;
     }
 
-    protected void loadCurrency() {
-        // TODO detect the first launch (and start the login UI ?)
-        //smoul: do this in the onCreate method. It is called once on during fragment creation
-        //and as the home fragment is the root fragment of the app it'll be called
-        // only once during the whole activity lifecycle
-        mStatusText.setText(getString(R.string.connecting_dots));
-        mProgressViewAdapter.showProgress(true);
+    public class LoadWalletsTask extends AsyncTaskHandleException<Void, Void, BlockchainParameter> {
 
-        LoadCurrencyTask loadCurrencyTask = new LoadCurrencyTask();
-        loadCurrencyTask.execute();
-    }
+        @Override
+        protected void onPreExecute() {
+            mProgressViewAdapter.showProgress(true);
+        }
 
-
-    public class LoadCurrencyTask extends AsyncTaskHandleException<Void, Void, BlockchainParameter> {
         @Override
         protected BlockchainParameter doInBackgroundHandleException(Void... param) throws PeerConnectionException{
 
@@ -139,6 +155,8 @@ public class HomeFragment extends Fragment {
             BlockchainParameter result = dataContext.getBlockchainParameter();
 
             if (currentWallet == null || result == null) {
+                ((Application)getActivity().getApplication()).getAccountId();
+
                 // Set the peer to use for network
                 io.ucoin.app.model.Peer node = new io.ucoin.app.model.Peer(
                         Configuration.instance().getNodeHost(),
@@ -164,22 +182,15 @@ public class HomeFragment extends Fragment {
 
         @Override
         protected void onSuccess(final BlockchainParameter result) {
-            mStatusText.setText(Html.fromHtml(getString(R.string.connected_label, result.getCurrency())));
-            mStatusImage.setImageResource(R.drawable.world91);
-            mStatusImage.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    // Display the currency details
-                    Toast.makeText(HomeFragment.this.getActivity(),
-                            getString(R.string.connection_details,
-                                    result.getCurrency(),
-                                    result.getUd0(),
-                                    result.getDt()),
-                            Toast.LENGTH_LONG)
-                            .show();
-                }
-            });
             mProgressViewAdapter.showProgress(false);
+            mStatusText.setText("");
+
+            FragmentManager fm = getFragmentManager();
+            if (fm.findFragmentByTag("tab2") == null) {
+                fm.beginTransaction()
+                        .replace(R.id.tab2, WalletListFragment.newInstance(), "tab2")
+                        .commit();
+            }
         }
 
         @Override
@@ -200,6 +211,7 @@ public class HomeFragment extends Fragment {
                 }
             });
             mProgressViewAdapter.showProgress(false);
+            mStatusPanel.setVisibility(View.VISIBLE);
 
             // Display the error
             Toast.makeText(HomeFragment.this.getActivity(),

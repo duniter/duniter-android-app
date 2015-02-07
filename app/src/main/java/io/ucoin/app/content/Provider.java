@@ -12,7 +12,7 @@ import android.util.Log;
 
 import io.ucoin.app.R;
 import io.ucoin.app.database.Contract;
-import io.ucoin.app.database.DbHelper;
+import io.ucoin.app.database.DatabaseHelper;
 
 /*
  * Define an implementation of ContentProvider that stubs out
@@ -20,14 +20,12 @@ import io.ucoin.app.database.DbHelper;
  */
 public class Provider extends ContentProvider implements Contract {
 
-    private DbHelper mDbHelper;
+    private DatabaseHelper mDatabaseHelper;
     private static final int ACCOUNT = 10;
     private static final int ACCOUNT_ID = 11;
     private static final int CURRENCY = 20;
     private static final int PEER = 30;
-
-
-
+    private static final int WALLET = 40;
 
 
     public static Uri CONTENT_URI;
@@ -36,7 +34,7 @@ public class Provider extends ContentProvider implements Contract {
     @Override
     public boolean onCreate() {
         Context context = getContext();
-        mDbHelper = new DbHelper(getContext(), context.getString(R.string.DBNAME),
+        mDatabaseHelper = new DatabaseHelper(getContext(), context.getString(R.string.DBNAME),
                 null, context.getResources().getInteger(R.integer.DBVERSION));
 
         String AUTHORITY = getContext().getString(R.string.AUTHORITY);
@@ -45,6 +43,7 @@ public class Provider extends ContentProvider implements Contract {
         uriMatcher.addURI(AUTHORITY, "account/#", ACCOUNT_ID);
         uriMatcher.addURI(AUTHORITY, "currency/", CURRENCY);
         uriMatcher.addURI(AUTHORITY, "peer/", PEER);
+        uriMatcher.addURI(AUTHORITY, "wallet/", WALLET);
 
         return true;
     }
@@ -56,7 +55,7 @@ public class Provider extends ContentProvider implements Contract {
             String selection,
             String[] selectionArgs,
             String sortOrder) {
-        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+        SQLiteDatabase db = mDatabaseHelper.getReadableDatabase();
         int uriInt = uriMatcher.match(uri);
         if(uriInt == -1) {
             Log.d("PROVIDER", "NO MATCH URI");
@@ -85,6 +84,12 @@ public class Provider extends ContentProvider implements Contract {
                         selectionArgs, null, null, sortOrder);
                 cursor.setNotificationUri(getContext().getContentResolver(), uri);
                 break;
+            case WALLET :
+                queryBuilder.setTables(Wallet.TABLE_NAME);
+                cursor = queryBuilder.query(db, projection, selection,
+                        selectionArgs, null, null, sortOrder);
+                cursor.setNotificationUri(getContext().getContentResolver(), uri);
+                break;
         }
         return cursor;
     }
@@ -96,7 +101,7 @@ public class Provider extends ContentProvider implements Contract {
 
     @Override
     public Uri insert(Uri uri, ContentValues values) {
-        SQLiteDatabase db = mDbHelper.getWritableDatabase();
+        SQLiteDatabase db = mDatabaseHelper.getWritableDatabase();
         int uriType = uriMatcher.match(uri);
         long id;
         switch (uriType) {
@@ -111,6 +116,10 @@ public class Provider extends ContentProvider implements Contract {
             case PEER:
                 id = db.insert(Peer.TABLE_NAME, null, values);
                 uri = Uri.parse("peer/" + id);
+                break;
+            case WALLET:
+                id = db.insert(Wallet.TABLE_NAME, null, values);
+                uri = Uri.parse("wallet/" + id);
                 break;
             default:
                 throw new IllegalArgumentException("Unknown URI: " + uri);

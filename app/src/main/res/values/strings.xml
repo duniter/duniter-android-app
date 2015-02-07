@@ -6,11 +6,10 @@
     than the words it contains.
     its name should be the snake case of its main words
     -->
-
-    <string name="welcome_to_ucoin">Welcome to uCoin Android app !</string>
     <string name="title_activity_account">Account</string>
 
     <!-- Strings related to connection -->
+    <string name="connection">Connection</string>
     <string name="connecting_dots">Connecting…</string>
     <string name="not_connected">Not connected</string>
     <string name="connected_error">Unable to connect (%s)</string>
@@ -26,6 +25,9 @@
     <string name="open_drawer">Open the navigation drawer</string>
     <string name="close_drawer">Close the navigation drawer</string>
 
+    <!-- Strings related to wallet -->
+    <string name="wallets">Wallets</string>
+    <string name="no_wallet">No wallet</string>
 
     <!-- Strings related to transfer/transaction -->
     <string name="wallet_transmitter">Wallet (transmitter)</string>
@@ -43,10 +45,10 @@
     <string name="generate_seed">Generate seed</string>
     <string name="sign">Sign</string>
     <string name="self">Self</string>
-    <string name="home">home</string>
+    <string name="home">Home</string>
     <string name="search">Search</string>
     <string name="sign_in">Sign in</string>
-    <string name="dev">Dev</string>
+    <string name="dev">Test (dev)</string>
     <string name="settings">Settings</string>
     <string name="back">Back</string>
     <string name="copy">Copy</string>
@@ -58,6 +60,7 @@
     <string name="remove">Remove</string>
 
     <!-- Strings related to community -->
+    <string name="favorites">Favorites</string>
     <string name="lookup">Lookup</string>
     <string name="node_address">Node address</string>
     <string name="node_port">Node port</string>
@@ -124,8 +127,8 @@
 
     <string-array name="drawer_items">
         <item>@string/home</item>
-        <item>@string/community</item>
         <item>@string/login</item>
+        <item>@string/currencies</item>
         <item>@string/transactions</item>
         <item>@string/settings</item>
         <item>@string/dev</item>

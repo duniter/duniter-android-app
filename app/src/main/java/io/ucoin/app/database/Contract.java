@@ -4,6 +4,14 @@ import android.provider.BaseColumns;
 
 public interface Contract {
 
+    public static final class Account implements BaseColumns {
+        public static final String TABLE_NAME = "account";
+        public static final String UID = "uid";
+        public static final String PUBLIC_KEY = "public_key";
+        public static final String SALT = "salt";
+        public static final String CRYPT_PIN = "crypt_pin";
+    }
+
     public static final class Currency implements BaseColumns {
         public static final String TABLE_NAME = "Currency";
         public static final String ACCOUNT_ID = "account_id";
@@ -12,20 +20,14 @@ public interface Contract {
         public static final String FIRST_BLOCK_SIGNATURE = "first_block_signature";
     }
 
-    public static final class Account implements BaseColumns {
-        public static final String TABLE_NAME = "account";
-        public static final String UID = "uid";
-        public static final String PUBLIC_KEY = "public_key";
-        public static final String SIGNATURE = "signature";
-        public static final String TIMESTAMP = "timestamp";
-    }
-
     public static final class Wallet implements BaseColumns {
         public static final String TABLE_NAME = "wallet";
-        public static final String PUBLIC_KEY = "public_key";
-        public static final String PRIVATE_KEY = "private_key";
-        public static final String OWNER_PUBLIC_KEY = "owner_public_key";
         public static final String NAME = "name";
+        public static final String CURRENCY_ID = "currency_id";
+        public static final String ACCOUNT_ID = "account_id";
+        public static final String PUBLIC_KEY = "public_key";
+        public static final String SECRET_KEY = "secret_key";
+        public static final String IS_MEMBER = "is_member";
     }
 
 

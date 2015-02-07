@@ -23,7 +23,7 @@ public class CurrencyCursorAdapter extends CursorAdapter{
         LayoutInflater inflater = (LayoutInflater) context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-        return inflater.inflate(R.layout.list_item_community, parent, false);
+        return inflater.inflate(R.layout.list_item_currency, parent, false);
     }
 
     @Override
@@ -34,7 +34,8 @@ public class CurrencyCursorAdapter extends CursorAdapter{
 
         TextView membersCount = (TextView) view.findViewById(R.id.members_count);
         int membersCountIndex = cursor.getColumnIndex(Contract.Currency.MEMBERS_COUNT);
-        membersCount.setText(cursor.getString(membersCountIndex) + " " +
-                view.getContext().getString(R.string.members));
+        membersCount.setText(view.getContext().getString(
+                R.string.members_count,
+                cursor.getString(membersCountIndex)));
     }
 }

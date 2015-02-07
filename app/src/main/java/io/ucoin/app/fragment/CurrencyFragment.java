@@ -170,14 +170,15 @@ public class CurrencyFragment extends Fragment {
         //add Peer to database
         Peer peer = peers[0];
 
-        Long id = ContentUris.parseId(uri);
-        values = new ContentValues();
-        values.put(Contract.Peer.CURRENCY_ID, Long.toString(id));
-        values.put(Contract.Peer.HOST, peer.getHost());
-        values.put(Contract.Peer.PORT, Integer.toString(peer.getPort()));
-        uri = Uri.parse(Provider.CONTENT_URI + "/peer/");
-        uri = getActivity().getContentResolver().insert(uri, values);
-
+        if (peer != null) {
+            Long id = ContentUris.parseId(uri);
+            values = new ContentValues();
+            values.put(Contract.Peer.CURRENCY_ID, Long.toString(id));
+            values.put(Contract.Peer.HOST, peer.getHost());
+            values.put(Contract.Peer.PORT, Integer.toString(peer.getPort()));
+            uri = Uri.parse(Provider.CONTENT_URI + "/peer/");
+            uri = getActivity().getContentResolver().insert(uri, values);
+        }
         //refresh the toolbar menu
         getActivity().invalidateOptionsMenu();
     }

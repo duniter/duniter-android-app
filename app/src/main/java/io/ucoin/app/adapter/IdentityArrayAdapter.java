@@ -32,8 +32,8 @@ public class IdentityArrayAdapter extends ArrayAdapter<Identity> {
     public View getView(int position, View convertView, ViewGroup container) {
         // Retrieve the item
         Identity identity = getItem(position);
-
         ViewHolder viewHolder;
+
         //inflate
         if (convertView == null) {
             convertView = LayoutInflater.from(this.getContext())
@@ -47,10 +47,13 @@ public class IdentityArrayAdapter extends ArrayAdapter<Identity> {
         } else {
             viewHolder = (ViewHolder) convertView.getTag();
         }
+
         // Icon
         viewHolder.icon.setImageResource(IdentityViewUtils.getImage(identity));
+
         // Uid
         viewHolder.uid.setText(identity.getUid());
+
         // pubKey
         String pubKey = identity.getPubkey();
         // TODO : cut if too long ??

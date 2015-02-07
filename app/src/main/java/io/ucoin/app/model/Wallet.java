@@ -7,8 +7,10 @@ import io.ucoin.app.technical.crypto.KeyPair;
  * A wallet is a user account
  * Created by eis on 13/01/15.
  */
-public class Wallet extends KeyPair {
+public class Wallet extends KeyPair implements LocalEntity{
 
+
+    private Long id;
     private Identity identity;
     private String salt;
     private String currency;
@@ -62,6 +64,16 @@ public class Wallet extends KeyPair {
 
     public boolean isAuthenticate() {
         return secretKey != null && identity != null && identity.getPubkey() != null;
+    }
+
+    @Override
+    public Long getId() {
+        return id;
+    }
+
+    @Override
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String toString() {

@@ -31,12 +31,12 @@ import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.technical.AsyncTaskHandleException;
 
 
-public class CurrencyListFragment extends ListFragment
+public class WalletListFragment extends ListFragment
         implements AddNodeDialogFragment.OnClickListener{
     private ProgressViewAdapter mProgressViewAdapter;
 
-    static public CurrencyListFragment newInstance() {
-        return new CurrencyListFragment();
+    static public WalletListFragment newInstance() {
+        return new WalletListFragment();
     }
 
     @Override
@@ -49,7 +49,7 @@ public class CurrencyListFragment extends ListFragment
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        return inflater.inflate(R.layout.fragment_currency_list,
+        return inflater.inflate(R.layout.fragment_wallet_list,
                 container, false);
     }
 
@@ -64,8 +64,8 @@ public class CurrencyListFragment extends ListFragment
         TextView v = (TextView) view.findViewById(android.R.id.empty);
         v.setVisibility(View.GONE);
 
-        Uri uri = Uri.parse(Provider.CONTENT_URI + "/currency/");
-        String selection = Contract.Currency.ACCOUNT_ID + "=?";
+        Uri uri = Uri.parse(Provider.CONTENT_URI + "/wallet/");
+        String selection = Contract.Wallet.ACCOUNT_ID + "=?";
         String[] selectionArgs = {
                 ((Application) getActivity().getApplication()).getAccountId()
         };
@@ -82,7 +82,6 @@ public class CurrencyListFragment extends ListFragment
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
             inflater.inflate(R.menu.toolbar_currency_list, menu);
-            getActivity().setTitle(R.string.currencies);
             ((MainActivity) getActivity()).setBackButtonEnabled(false);
             ((MainActivity) getActivity()).
                     setToolbarColor(getResources().getColor(R.color.primary));
@@ -103,8 +102,9 @@ public class CurrencyListFragment extends ListFragment
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         Cursor cursor = (Cursor) getListAdapter().getItem(position);
-        Currency currency = ServiceLocator.instance().getCurrencyService().read(cursor);
-        Fragment fragment = CurrencyFragment.newInstance(currency);
+        // TODO : open transaction with a filter on this wallet ?
+        /*Wallet wallet = ServiceLocator.instance().getWalletService().read(cursor);
+        Fragment fragment = WalletFragment.newInstance(wallet);
         FragmentManager fragmentManager = getFragmentManager();
         fragmentManager.beginTransaction()
                 .setCustomAnimations(
@@ -114,7 +114,7 @@ public class CurrencyListFragment extends ListFragment
                         R.animator.slide_out_up)
                 .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
                 .addToBackStack(fragment.getClass().getSimpleName())
-                .commit();
+                .commit();*/
     }
 
 
