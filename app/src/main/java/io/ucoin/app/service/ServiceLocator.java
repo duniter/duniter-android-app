@@ -76,9 +76,6 @@ public class ServiceLocator implements Closeable {
     public CryptoService getCryptoService() {
         return getService(CryptoService.class);
     }
-    public DataService getDataService() {
-        return getService(DataService.class);
-    }
     public DataContext getDataContext() {
         return getService(DataContext.class);
     }

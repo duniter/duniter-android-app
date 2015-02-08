@@ -1,8 +1,12 @@
 package io.ucoin.app.service;
 
+import android.app.Application;
 import android.content.Context;
 import android.database.Cursor;
+import android.net.Uri;
 
+import io.ucoin.app.content.Provider;
+import io.ucoin.app.database.Contract;
 import io.ucoin.app.model.Wallet;
 
 /**
@@ -28,22 +32,58 @@ public class WalletService extends BaseService {
     }
 
     public Wallet read(final Cursor cursor) {
-        Wallet result = new Wallet();
-/*
         // TODO kimamila: use holder for index
-        int idIndex = cursor.getColumnIndex(Contract.Currency._ID);
-        result.setId(cursor.getLong(idIndex));
+        int idIndex = cursor.getColumnIndex(Contract.Wallet._ID);
+        Long id = cursor.getLong(idIndex);
 
-        int currencyNameIndex = cursor.getColumnIndex(Contract.Wallet.CURRENCY_NAME);
-        result.setCurrencyName(cursor.getString(currencyNameIndex));
+        int pubKeyIndex = cursor.getColumnIndex(Contract.Wallet.PUBLIC_KEY);
+        String pubKey = cursor.getString(pubKeyIndex);
 
-        int membersCountIndex = cursor.getColumnIndex(Contract.Wallet.MEMBERS_COUNT);
-        result.setMembersCount(cursor.getInt(membersCountIndex));
+        int secKeyIndex = cursor.getColumnIndex(Contract.Wallet.SECRET_KEY);
+        String secKey = cursor.getString(secKeyIndex);
 
-        int firstBlockSignatureIndex = cursor
-                .getColumnIndex(Contract.Currency.FIRST_BLOCK_SIGNATURE);
-        result.setFirstBlockSignature(cursor.getString(firstBlockSignatureIndex));
-*/
+        int uidIndex = cursor.getColumnIndex(Contract.Wallet.PUBLIC_KEY);
+        String uid = cursor.getString(uidIndex);
+
+        int isMemberKey = cursor.getColumnIndex(Contract.Wallet.IS_MEMBER);
+        boolean isMember = cursor.getInt(isMemberKey) == 1 ? true : false;
+
+        Wallet result = new Wallet("TODO currency", uid, pubKey, secKey);
+        result.setId(id);
+        result.getIdentity().setMember(isMember);
+
+        return result;
+    }
+
+    public Wallet getDefaultWallet(Application application) {
+        String accountId = ((io.ucoin.app.Application) application).getAccountId();
+        return getDefaultWallet(application, Long.parseLong(accountId));
+    }
+
+    public Wallet getDefaultWallet(Context context, long accountId) {
+
+        Uri uri = Uri.parse(Provider.CONTENT_URI + "/wallet/");
+        String selection = Contract.Currency.ACCOUNT_ID + "=?";
+        String[] selectionArgs = {
+                String.valueOf(accountId)
+        };
+        Cursor cursor = context.getContentResolver().query(uri, new String[]{}, selection,
+                selectionArgs, null);
+
+        Wallet result = null;
+        if (cursor.moveToNext()) {
+            result = read(cursor);
+        }
+
+        if (result == null) {
+
+            // FOR DEV ONLY
+            result = new Wallet();
+            result.getIdentity().setUid("kimamila");
+            result.setSalt("benoit.lavenier@e-is.pro");
+        }
+
+
         return result;
     }
 

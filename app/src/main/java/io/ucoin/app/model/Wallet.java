@@ -28,6 +28,14 @@ public class Wallet extends KeyPair implements LocalEntity{
         this.identity.setUid(uid);
     }
 
+    public Wallet(String currency, String uid, String pubKey, String secKey) {
+        super(CryptoUtils.decodeBase58(pubKey), secKey == null ? null : CryptoUtils.decodeBase58(secKey));
+        this.currency = currency;
+        this.identity = new Identity();
+        this.identity.setPubkey(pubKey);
+        this.identity.setUid(uid);
+    }
+
     public Wallet(String currency, byte[] secKey, Identity identity) {
         super(CryptoUtils.decodeBase58(identity.getPubkey()), secKey);
         this.currency = currency;

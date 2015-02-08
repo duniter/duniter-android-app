@@ -100,22 +100,23 @@ public class LoginFragment extends Fragment {
                 mSignInButton);
 
         // fill the UI with the default wallet
-        updateView(ServiceLocator.instance().getDataService().getDefaultWallet());
+        Wallet defaultWallet = ServiceLocator.instance().getWalletService().getDefaultWallet(getActivity().getApplication());
+        updateView(defaultWallet);
     }
 
     private void updateView(Wallet wallet) {
         String uid = null;
-        String email = null;
+        String salt = null;
         if (wallet != null) {
             if (wallet.getIdentity() != null) {
                 uid = wallet.getIdentity().getUid();
             }
             if (wallet.getSalt() != null) {
-                email = wallet.getSalt();
+                salt = wallet.getSalt();
             }
         }
         mUidView.setText(uid);
-        mSaltView.setText(email);
+        mSaltView.setText(salt);
     }
 
     /**

@@ -91,7 +91,7 @@ public class AddAccountActivity extends ActionBarActivity implements TextView.On
 
         // TODO to remove
         if (isDev) {
-            Wallet devWallet = ServiceLocator.instance().getDataService().getDefaultWallet();
+            Wallet devWallet = ServiceLocator.instance().getWalletService().getDefaultWallet(getApplication());
             mUidView.setText(devWallet.getIdentity().getUid());
             mSaltView.setText(devWallet.getSalt());
 

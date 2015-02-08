@@ -169,7 +169,7 @@ public class HomeFragment extends Fragment {
                 dataContext.setBlockchainParameter(result);
 
                 // Load default wallet
-                Wallet defaultWallet = ServiceLocator.instance().getDataService().getDefaultWallet();
+                Wallet defaultWallet = ServiceLocator.instance().getWalletService().getDefaultWallet(getActivity().getApplication());
                 defaultWallet.setCurrency(result.getCurrency());
                 dataContext.setWallet(defaultWallet);
 
@@ -186,9 +186,9 @@ public class HomeFragment extends Fragment {
             mStatusText.setText("");
 
             FragmentManager fm = getFragmentManager();
-            if (fm.findFragmentByTag("tab2") == null) {
+            if (fm.findFragmentByTag("tab1") == null) {
                 fm.beginTransaction()
-                        .replace(R.id.tab2, WalletListFragment.newInstance(), "tab2")
+                        .replace(R.id.tab1, WalletListFragment.newInstance(), "tab1")
                         .commit();
             }
         }
