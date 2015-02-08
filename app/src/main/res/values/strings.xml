@@ -28,6 +28,7 @@
     <!-- Strings related to wallet -->
     <string name="wallets">Wallets</string>
     <string name="no_wallet">No wallet</string>
+    <string name="credit">credit: %s</string>
 
     <!-- Strings related to transfer/transaction -->
     <string name="wallet_transmitter">Wallet (transmitter)</string>
@@ -59,9 +60,10 @@
     <string name="delete">Delete</string>
     <string name="remove">Remove</string>
 
-    <!-- Strings related to community -->
+    <!-- Strings related to currency -->
     <string name="favorites">Favorites</string>
     <string name="lookup">Lookup</string>
+    <string name="add_currency">Add currency</string>
     <string name="node_address">Node address</string>
     <string name="node_port">Node port</string>
     <string name="rules">Rules</string>

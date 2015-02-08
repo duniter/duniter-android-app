@@ -16,6 +16,7 @@ public class DatabaseHelper extends SQLiteOpenHelper implements Contract {
     private static final String INTEGER = " INTEGER ";
     private static final String REAL = " REAL ";
     private static final String TEXT = " TEXT ";
+    private static final String BLOB = " BLOB ";
     private static final String UNIQUE = " UNIQUE ";
     private static final String NOTNULL = " NOT NULL";
     private static final String COMMA = ",";
@@ -42,10 +43,12 @@ public class DatabaseHelper extends SQLiteOpenHelper implements Contract {
                 Wallet._ID + " INTEGER PRIMARY KEY AUTOINCREMENT" + COMMA +
                 Wallet.NAME + TEXT + COMMA +
                 Wallet.PUBLIC_KEY + TEXT + NOTNULL + COMMA +
+                // TODO : change SECRET_KEY type to BLOB
                 Wallet.SECRET_KEY + TEXT + COMMA +
                 Wallet.ACCOUNT_ID + INTEGER + NOTNULL + COMMA +
                 Wallet.CURRENCY_ID + INTEGER + NOTNULL + COMMA +
                 Wallet.IS_MEMBER + INTEGER + NOTNULL + COMMA +
+                Wallet.CREDIT + INTEGER + NOTNULL + COMMA +
                 "FOREIGN KEY (" + Wallet.ACCOUNT_ID + ") REFERENCES " + Account.TABLE_NAME + "(" + Account._ID + ")" +
                 "FOREIGN KEY (" + Wallet.CURRENCY_ID + ") REFERENCES " + Currency.TABLE_NAME + "(" + Currency._ID + ")" +
                 UNIQUE + "(" + Wallet.CURRENCY_ID + COMMA + Wallet.PUBLIC_KEY + ")" +
@@ -144,6 +147,20 @@ public class DatabaseHelper extends SQLiteOpenHelper implements Contract {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 
+        // TODO: for DEV only :
+        // Drop all tables
+        db.execSQL("DROP TABLE IF EXISTS " + TxOutput.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + TxInput.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + TxSignature.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + Tx.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + Source.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + Peer.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + Currency.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + Wallet.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + Account.TABLE_NAME);
+
+        // then recreate
+        onCreate(db);
     }
 
     public static io.ucoin.app.model.Currency insertCurrency(Activity activity,

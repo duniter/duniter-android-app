@@ -12,9 +12,15 @@ import io.ucoin.app.R;
 import io.ucoin.app.content.Provider;
 import io.ucoin.app.database.Contract;
 import io.ucoin.app.model.Account;
+import io.ucoin.app.model.Currency;
+import io.ucoin.app.model.Peer;
+import io.ucoin.app.model.Wallet;
+import io.ucoin.app.service.remote.TransactionRemoteService;
 import io.ucoin.app.technical.ObjectUtils;
 import io.ucoin.app.technical.StringUtils;
 import io.ucoin.app.technical.UCoinTechnicalException;
+import io.ucoin.app.technical.crypto.Base58;
+import io.ucoin.app.technical.crypto.KeyPair;
 
 /**
  * Created by eis on 07/02/15.
@@ -26,6 +32,57 @@ public class AccountService extends BaseService {
 
     public AccountService() {
         super();
+    }
+
+    public Account create(
+            Context context,
+            String uid,
+            String salt,
+            String password,
+            Peer peer) {
+
+        // Generate keys
+        CryptoService service = ServiceLocator.instance().getCryptoService();
+        KeyPair keys = service.getKeyPair(salt, password);
+
+        // Create account in DB
+        AccountService accountService = ServiceLocator.instance().getAccountService();
+        io.ucoin.app.model.Account account = new io.ucoin.app.model.Account();
+        account.setUid(uid);
+        account.setPubkey(Base58.encode(keys.getPubKey()));
+        account.setSalt(salt);
+        account = save(context, account);
+
+        // Get the currency from peer
+        Currency currency = ServiceLocator.instance().getBlockchainRemoteService()
+                .getCurrencyFromPeer(peer);
+        currency.setAccountId(account.getId());
+
+        // Create the currency in DB
+        CurrencyService currencyService = ServiceLocator.instance().getCurrencyService();
+        currency = currencyService.save(context, currency);
+
+        // Get credit
+        TransactionRemoteService txService = ServiceLocator.instance().getTransactionRemoteService();
+        Long credit = txService.getCredit(peer, account.getPubkey());
+
+        // Create a main wallet
+        Wallet wallet = new Wallet(currency.getCurrencyName(),
+                account.getUid(),
+                keys.getPubKey(),
+                keys.getSecKey()
+        );
+        wallet.setName(account.getUid() + "@" + currency.getCurrencyName());
+        wallet.setIsMember(Boolean.FALSE); // TODO : membership should be checked on server ?
+        wallet.setCurrencyId(currency.getId());
+        wallet.setAccountId(account.getId());
+        wallet.setCredit(credit == null ? 0 : credit.intValue());
+
+        // Save a new wallet
+        WalletService walletService = ServiceLocator.instance().getWalletService();
+        wallet = walletService.save(context, wallet);
+
+        return account;
     }
 
     public Account save(final Context context, final Account account) {
@@ -59,7 +116,7 @@ public class AccountService extends BaseService {
         uri = context.getContentResolver().insert(uri, values);
         Long accountId = ContentUris.parseId(uri);
         if (accountId < 0) {
-            throw new UCoinTechnicalException("Could not insert account: " + account.toString());
+            throw new UCoinTechnicalException("Error while inserting account");
         }
 
         //create account in android framework

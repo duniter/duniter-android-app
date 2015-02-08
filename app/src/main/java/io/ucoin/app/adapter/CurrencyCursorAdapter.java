@@ -28,14 +28,14 @@ public class CurrencyCursorAdapter extends CursorAdapter{
 
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
-        TextView currency = (TextView) view.findViewById(R.id.currency_name);
-        int currencyIndex = cursor.getColumnIndex(Contract.Currency.CURRENCY_NAME);
-        currency.setText(cursor.getString(currencyIndex));
+        TextView name = (TextView) view.findViewById(R.id.wallet_name);
+        int nameIndex = cursor.getColumnIndex(Contract.Wallet.NAME);
+        name.setText(cursor.getString(nameIndex));
 
-        TextView membersCount = (TextView) view.findViewById(R.id.members_count);
-        int membersCountIndex = cursor.getColumnIndex(Contract.Currency.MEMBERS_COUNT);
-        membersCount.setText(view.getContext().getString(
-                R.string.members_count,
-                cursor.getString(membersCountIndex)));
+        TextView credit = (TextView) view.findViewById(R.id.credit);
+        int creditIndex = cursor.getColumnIndex(Contract.Wallet.CREDIT);
+        credit.setText(view.getContext().getString(
+                R.string.credit,
+                cursor.getString(creditIndex)));
     }
 }

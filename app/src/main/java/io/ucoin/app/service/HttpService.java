@@ -99,11 +99,18 @@ public class HttpService extends BaseService implements Closeable{
 
 
     public String getPath(String absolutePath) {
+        checkDefaultPeer();
         return new StringBuilder().append(defaultPeer.getUrl()).append(absolutePath).toString();
     }
 
 
     /* -- Internal methods -- */
+
+    protected void checkDefaultPeer() {
+        if (defaultPeer == null) {
+            throw new IllegalStateException("No default peer defined");
+        }
+    }
 
     protected AndroidHttpClient createHttpClient() {
         AndroidHttpClient httpClient = AndroidHttpClient.newInstance(USER_AGENT);

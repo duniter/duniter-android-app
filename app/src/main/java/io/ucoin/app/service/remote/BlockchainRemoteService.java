@@ -83,7 +83,6 @@ public class BlockchainRemoteService extends BaseRemoteService {
         return result;
     }
 
-
     /**
      * Retrieve the current block
      * @return
@@ -114,14 +113,16 @@ public class BlockchainRemoteService extends BaseRemoteService {
      */
     public Currency getCurrencyFromPeer(Peer peer) {
         BlockchainParameter parameter = getParameters(peer);
-        BlockchainBlock firstBlock = getBlock(0);
-        BlockchainBlock lastBlock = getCurrentBlock();
+        BlockchainBlock firstBlock = getBlock(peer, 0);
+        BlockchainBlock lastBlock = getCurrentBlock(peer);
 
         Currency result = new Currency();
         result.setCurrencyName(parameter.getCurrency());
         result.setFirstBlockSignature(firstBlock.getSignature());
         result.setMembersCount(lastBlock.getMembersCount());
-        networkRemoteService.getPeers(peer);
+
+        // TODO make getPeers works
+        //networkRemoteService.getPeers(peer);
 
         return result;
     }

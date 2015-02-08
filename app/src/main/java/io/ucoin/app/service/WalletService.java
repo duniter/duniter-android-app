@@ -1,6 +1,8 @@
 package io.ucoin.app.service;
 
 import android.app.Application;
+import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
@@ -8,6 +10,10 @@ import android.net.Uri;
 import io.ucoin.app.content.Provider;
 import io.ucoin.app.database.Contract;
 import io.ucoin.app.model.Wallet;
+import io.ucoin.app.technical.ObjectUtils;
+import io.ucoin.app.technical.StringUtils;
+import io.ucoin.app.technical.UCoinTechnicalException;
+import io.ucoin.app.technical.crypto.CryptoUtils;
 
 /**
  * Created by eis on 07/02/15.
@@ -21,7 +27,17 @@ public class WalletService extends BaseService {
         super();
     }
 
+
     public Wallet save(final Context context, final Wallet wallet) {
+        ObjectUtils.checkNotNull(wallet);
+        ObjectUtils.checkNotNull(wallet.getCurrencyId());
+        ObjectUtils.checkNotNull(wallet.getAccountId());
+        ObjectUtils.checkNotNull(wallet.getName());
+        ObjectUtils.checkArgument(StringUtils.isNotBlank(wallet.getPubKeyHash()));
+        ObjectUtils.checkNotNull(wallet.getSecKey());
+        ObjectUtils.checkNotNull(wallet.getIsMember());
+        ObjectUtils.checkNotNull(wallet.getCredit());
+
         // Create
         if (wallet.getId() == null) {
             return insert(context, wallet);
@@ -92,30 +108,25 @@ public class WalletService extends BaseService {
     public Wallet insert(final Context context, final Wallet wallet) {
 
         //Create account in database
-        /*ContentValues values = new ContentValues();
-        values.put(Contract.Currency.UID, currency.getCurrencyName());
-        values.put(Contract.Account.PUBLIC_KEY, currency.getPubkey());
+        ContentValues values = new ContentValues();
+        values.put(Contract.Wallet.ACCOUNT_ID, wallet.getAccountId());
+        values.put(Contract.Wallet.CURRENCY_ID, wallet.getCurrencyId());
+        values.put(Contract.Wallet.NAME, wallet.getName());
+        values.put(Contract.Wallet.PUBLIC_KEY, wallet.getPubKeyHash());
+        values.put(Contract.Wallet.SECRET_KEY, CryptoUtils.encodeBase58(wallet.getSecKey()));
+        values.put(Contract.Wallet.IS_MEMBER, wallet.getIsMember().booleanValue() ? 1 : 0);
+        values.put(Contract.Wallet.CREDIT, wallet.getCredit());
 
-        Uri uri = Uri.parse(Provider.CONTENT_URI + "/account/");
+        Uri uri = Uri.parse(Provider.CONTENT_URI + "/wallet/");
         uri = context.getContentResolver().insert(uri, values);
-        Long accountId = ContentUris.parseId(uri);
-
-        //create account in android framework
-        Bundle data = new Bundle();
-        data.putString(Contract.Account._ID, accountId.toString());
-        data.putString(Contract.Account.PUBLIC_KEY, account.getPubkey());
-        android.accounts.Account androidAccount = new android.accounts.Account(account.getUid(), getString(R.string.ACCOUNT_TYPE));
-        AccountManager.get(context).addAccountExplicitly(androidAccount, null, data);
-
-        //keep a reference to the last account used
-        SharedPreferences.Editor editor =
-                getSharedPreferences("account", Context.MODE_PRIVATE).edit();
-        editor.putString("_id", accountId.toString());
-        editor.apply();
+        Long walletId = ContentUris.parseId(uri);
+        if (walletId < 0) {
+            throw new UCoinTechnicalException("Error while inserting wallet");
+        }
 
         // Refresh the inserted account
-        account.setId(accountId);
-*/
+        wallet.setId(walletId);
+
         return wallet;
     }
 

@@ -1,37 +1,29 @@
 package io.ucoin.app.activity;
 
+import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
-import android.view.KeyEvent;
-import android.view.View;
-import android.view.inputmethod.EditorInfo;
-import android.widget.EditText;
-import android.widget.TextView;
+import android.util.Log;
+import android.widget.Toast;
 
 import io.ucoin.app.R;
 import io.ucoin.app.adapter.ProgressViewAdapter;
-import io.ucoin.app.model.Wallet;
+import io.ucoin.app.fragment.AddAccountFragment;
+import io.ucoin.app.fragment.AddCurrencyFragment;
+import io.ucoin.app.model.Account;
+import io.ucoin.app.model.Peer;
 import io.ucoin.app.service.AccountService;
-import io.ucoin.app.service.CryptoService;
 import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.technical.AsyncTaskHandleException;
-import io.ucoin.app.technical.crypto.Base58;
-import io.ucoin.app.technical.crypto.KeyPair;
 
-public class AddAccountActivity extends ActionBarActivity implements TextView.OnEditorActionListener  {
+public class AddAccountActivity extends ActionBarActivity  {
 
-    private TextView mUidHint;
-    private TextView mSaltHint;
-    private TextView mPasswordHint;
-    private EditText mUidView;
-    private EditText mSaltView;
-    private EditText mPasswordView;
-    private EditText mConfirmPasswordView;
+    private final String TAG = "AddAccountActivity";
+
     private ProgressViewAdapter mProgressViewAdapter;
-
-    // TODO : to remove !
-    private boolean isDev = true;
+    private Bundle mResultBundle;
+    private Peer mPeer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,130 +31,70 @@ public class AddAccountActivity extends ActionBarActivity implements TextView.On
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_account);
 
-        mUidHint = (TextView) findViewById(R.id.uid_tip);
-        mSaltHint = (TextView) findViewById(R.id.salt_tip);
-        mPasswordHint = (TextView) findViewById(R.id.password_tip);
-
-        mUidView = (EditText) findViewById(R.id.uid);
-        mSaltView = (EditText) findViewById(R.id.salt);
-        mPasswordView = (EditText) findViewById(R.id.password);
-
-        mUidView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus) {
-                    mUidHint.setVisibility(View.VISIBLE);
-                } else {
-                    mUidHint.setVisibility(View.GONE);
-                }
-            }
-        });
-        mSaltView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus) {
-                    mSaltHint.setVisibility(View.VISIBLE);
-                } else {
-                    mSaltHint.setVisibility(View.GONE);
-                }
-            }
-        });
-        mPasswordView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus) {
-                    mPasswordHint.setVisibility(View.VISIBLE);
-                } else {
-                    mPasswordHint.setVisibility(View.GONE);
-                }
-            }
-        });
-
-        mConfirmPasswordView = (EditText) findViewById(R.id.confirm_password);
-        mConfirmPasswordView.setOnFocusChangeListener(mPasswordView.getOnFocusChangeListener());
-
-        mConfirmPasswordView.setOnEditorActionListener(this);
+        mResultBundle = new Bundle();
 
         mProgressViewAdapter = new ProgressViewAdapter(
                 this,
                 R.id.load_progress,
-                R.id.account_form
+                R.id.frame_content
         );
 
-        // TODO to remove
-        if (isDev) {
-            Wallet devWallet = ServiceLocator.instance().getWalletService().getDefaultWallet(getApplication());
-            mUidView.setText(devWallet.getIdentity().getUid());
-            mSaltView.setText(devWallet.getSalt());
-
-        }
+        // First step : add account fragment
+        Fragment fragment = AddAccountFragment.newInstance(new AddAccountFragment.OnClickListener() {
+            @Override
+            public void onPositiveClick(Bundle accountBundle) {
+                mResultBundle.putAll(accountBundle);
+                // Run second step
+                showStep2();
+            }
+        });
+        getFragmentManager().beginTransaction()
+                .setCustomAnimations(
+                        R.animator.fade_in,
+                        R.animator.fade_out)
+                .add(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
+                .addToBackStack(fragment.getClass().getSimpleName())
+                .commit();
     }
 
-    @Override
-    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-        if (actionId != EditorInfo.IME_ACTION_DONE) {
-            return false;
-        }
-
-        //validate uid
-        String uid = mUidView.getText().toString();
-        if (uid.isEmpty()) {
-            mUidView.setError(getString(R.string.uid_cannot_be_empty));
-            return false;
-        }
-
-        //validate salt
-        String salt = mSaltView.getText().toString();
-        if (salt.isEmpty()) {
-            mSaltView.setError(getString(R.string.salt_cannot_be_empty));
-            return false;
-        }
-
-        //validate password
-        String password = mPasswordView.getText().toString();
-        if (password.isEmpty()) {
-            mPasswordView.setError(getString(R.string.password_cannot_be_empty));
-            return false;
-        }
-
-        String confirmPassword = mConfirmPasswordView.getText().toString();
-        if (confirmPassword.isEmpty()) {
-            mConfirmPasswordView.setError(getString(R.string.confirm_password_cannot_be_empty));
-            return false;
-        }
-
-        if(!password.equals(confirmPassword)) {
-            mPasswordView.setError(getString(R.string.passwords_dont_match));
-            mConfirmPasswordView.setError(getString(R.string.passwords_dont_match));
-            return false;
-        }
-
-        AddAccountTask addAccountTask = new AddAccountTask(uid, salt, password);
-        addAccountTask.execute();
-
-        return true;
-    }
 
     @Override
     public void onBackPressed() {
         finish();
     }
 
+    private void showStep2() {
+        // Second step: add currency
+        AddCurrencyFragment fragment = AddCurrencyFragment.newInstance(new AddCurrencyFragment.OnClickListener() {
+            public void onPositiveClick(Bundle args) {
+                mResultBundle.putAll(args);
+                onFinishSteps();
+            }
+        });
+        getFragmentManager().beginTransaction()
+                .setCustomAnimations(
+                        R.animator.delayed_fade_in,
+                        R.animator.fade_out,
+                        R.animator.delayed_fade_in,
+                        R.animator.fade_out)
+                .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
+                .addToBackStack(fragment.getClass().getSimpleName())
+                .commit();
+    }
+
+    /**
+     * Call when account created (after step 2)
+     */
+    private void onFinishSteps(){
+        AddAccountTask task = new AddAccountTask();
+        task.execute(mResultBundle);
+    }
+
     /**
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
      */
-    public class AddAccountTask extends AsyncTaskHandleException<Void, Void, Boolean> {
-
-        private final String mUid;
-        private final String mSalt;
-        private final String mPassword;
-
-        AddAccountTask(String uid, String salt, String password) {
-            mUid = uid;
-            mSalt = salt;
-            mPassword = password;
-        }
+    public class AddAccountTask extends AsyncTaskHandleException<Bundle, Void, io.ucoin.app.model.Account> {
 
         @Override
         protected void onPreExecute() {
@@ -170,34 +102,37 @@ public class AddAccountActivity extends ActionBarActivity implements TextView.On
         }
 
         @Override
-        protected Boolean doInBackgroundHandleException(Void... params) throws Exception {
-            //generate keys
-            CryptoService service = ServiceLocator.instance().getCryptoService();
-            KeyPair keys = service.getKeyPair(mSalt, mPassword);
+        protected io.ucoin.app.model.Account doInBackgroundHandleException(Bundle... bundles) throws Exception {
+            Bundle bundle = bundles[0];
+            // Read the result bundle
+            String uid = bundle.getString("uid");
+            String salt = bundle.getString("salt");
+            String password = bundle.getString("password");
+            Peer peer = (Peer) bundle.getSerializable(Peer.class.getSimpleName());
 
-            // Save into DB
+            // Create account in DB
             AccountService accountService = ServiceLocator.instance().getAccountService();
-            io.ucoin.app.model.Account account = new io.ucoin.app.model.Account();
-            account.setUid(mUid);
-            account.setPubkey(Base58.encode(keys.getPubKey()));
-            account.setSalt(mSalt);
-
-            accountService.save(AddAccountActivity.this, account);
-            return true;
+            Account account = accountService.create(AddAccountActivity.this,
+                    uid, salt, password, peer);
+            return account;
         }
 
         @Override
-        protected void onSuccess(Boolean success) {
+        protected void onSuccess(io.ucoin.app.model.Account account) {
             //restart MainActivity
             Intent intent = new Intent(AddAccountActivity.this, MainActivity.class);
+            // TODO : give the wallet ?
             startActivity(intent);
             finish();
         }
 
         @Override
         protected void onFailed(Throwable t) {
-            mUidView.setError(t.getMessage());
             mProgressViewAdapter.showProgress(false);
+            Log.e(TAG, Log.getStackTraceString(t));
+            Toast.makeText(AddAccountActivity.this,
+                    "Error: " + t.getMessage(),
+                    Toast.LENGTH_SHORT).show();
         }
 
         @Override
@@ -205,4 +140,5 @@ public class AddAccountActivity extends ActionBarActivity implements TextView.On
             mProgressViewAdapter.showProgress(false);
         }
     }
+
 }

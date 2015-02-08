@@ -23,11 +23,12 @@ public interface Contract {
     public static final class Wallet implements BaseColumns {
         public static final String TABLE_NAME = "wallet";
         public static final String NAME = "name";
+        public static final String IS_MEMBER = "is_member";
         public static final String CURRENCY_ID = "currency_id";
         public static final String ACCOUNT_ID = "account_id";
         public static final String PUBLIC_KEY = "public_key";
         public static final String SECRET_KEY = "secret_key";
-        public static final String IS_MEMBER = "is_member";
+        public static final String CREDIT = "credit";
     }
 
 

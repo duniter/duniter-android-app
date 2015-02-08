@@ -1,10 +1,17 @@
 package io.ucoin.app.service;
 
+import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.net.Uri;
 
+import io.ucoin.app.content.Provider;
 import io.ucoin.app.database.Contract;
 import io.ucoin.app.model.Currency;
+import io.ucoin.app.technical.ObjectUtils;
+import io.ucoin.app.technical.StringUtils;
+import io.ucoin.app.technical.UCoinTechnicalException;
 
 /**
  * Created by eis on 07/02/15.
@@ -19,6 +26,15 @@ public class CurrencyService extends BaseService {
     }
 
     public Currency save(final Context context, final Currency currency) {
+        ObjectUtils.checkNotNull(currency);
+        ObjectUtils.checkArgument(StringUtils.isNotBlank(currency.getCurrencyName()));
+        ObjectUtils.checkArgument(StringUtils.isNotBlank(currency.getFirstBlockSignature()));
+        ObjectUtils.checkNotNull(currency.getMembersCount());
+        ObjectUtils.checkArgument(currency.getMembersCount().intValue() >= 0);
+
+        ObjectUtils.checkArgument((currency.getAccount() != null && currency.getAccount().getId() != null)
+            || currency.getAccountId() != null, "One of 'currency.account.id' or 'currency.accountId' is mandatory.");
+
         // Create
         if (currency.getId() == null) {
             return insert(context, currency);
@@ -53,30 +69,28 @@ public class CurrencyService extends BaseService {
     public Currency insert(final Context context, final Currency currency) {
 
         //Create account in database
-        /*ContentValues values = new ContentValues();
-        values.put(Contract.Currency.UID, currency.getCurrencyName());
-        values.put(Contract.Account.PUBLIC_KEY, currency.getPubkey());
+        ContentValues values = new ContentValues();
 
-        Uri uri = Uri.parse(Provider.CONTENT_URI + "/account/");
+        // account id
+        Long accountId = currency.getAccountId();
+        if (accountId == null) {
+            accountId = currency.getAccount().getId();
+        }
+        values.put(Contract.Currency.ACCOUNT_ID, accountId);
+        values.put(Contract.Currency.CURRENCY_NAME, currency.getCurrencyName());
+        values.put(Contract.Currency.FIRST_BLOCK_SIGNATURE, currency.getFirstBlockSignature());
+        values.put(Contract.Currency.MEMBERS_COUNT, currency.getMembersCount());
+
+        Uri uri = Uri.parse(Provider.CONTENT_URI + "/currency/");
         uri = context.getContentResolver().insert(uri, values);
-        Long accountId = ContentUris.parseId(uri);
-
-        //create account in android framework
-        Bundle data = new Bundle();
-        data.putString(Contract.Account._ID, accountId.toString());
-        data.putString(Contract.Account.PUBLIC_KEY, account.getPubkey());
-        android.accounts.Account androidAccount = new android.accounts.Account(account.getUid(), getString(R.string.ACCOUNT_TYPE));
-        AccountManager.get(context).addAccountExplicitly(androidAccount, null, data);
-
-        //keep a reference to the last account used
-        SharedPreferences.Editor editor =
-                getSharedPreferences("account", Context.MODE_PRIVATE).edit();
-        editor.putString("_id", accountId.toString());
-        editor.apply();
+        Long currencyId = ContentUris.parseId(uri);
+        if (currencyId < 0) {
+            throw new UCoinTechnicalException("Error while inserting currency");
+        }
 
         // Refresh the inserted account
-        account.setId(accountId);
-*/
+        currency.setId(currencyId);
+
         return currency;
     }
 

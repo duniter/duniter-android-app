@@ -1,8 +1,5 @@
 package io.ucoin.app.fragment;
 
-import android.app.Activity;
-import android.app.Fragment;
-import android.app.FragmentManager;
 import android.app.ListFragment;
 import android.database.Cursor;
 import android.net.Uri;
@@ -16,23 +13,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import io.ucoin.app.Application;
 import io.ucoin.app.R;
-import io.ucoin.app.activity.MainActivity;
 import io.ucoin.app.adapter.CurrencyCursorAdapter;
 import io.ucoin.app.adapter.ProgressViewAdapter;
 import io.ucoin.app.content.Provider;
 import io.ucoin.app.database.Contract;
-import io.ucoin.app.model.Currency;
-import io.ucoin.app.model.Peer;
-import io.ucoin.app.service.ServiceLocator;
-import io.ucoin.app.technical.AsyncTaskHandleException;
 
 
-public class WalletListFragment extends ListFragment
-        implements AddNodeDialogFragment.OnClickListener{
+public class WalletListFragment extends ListFragment{
     private ProgressViewAdapter mProgressViewAdapter;
 
     static public WalletListFragment newInstance() {
@@ -81,19 +71,17 @@ public class WalletListFragment extends ListFragment
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-            inflater.inflate(R.menu.toolbar_currency_list, menu);
+            /*inflater.inflate(R.menu.toolbar_currency_list, menu);
             ((MainActivity) getActivity()).setBackButtonEnabled(false);
             ((MainActivity) getActivity()).
-                    setToolbarColor(getResources().getColor(R.color.primary));
+                    setToolbarColor(getResources().getColor(R.color.primary));*/
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_add:
-                AddNodeDialogFragment fragment = AddNodeDialogFragment.newInstance(this);
-                fragment.show(getFragmentManager(),
-                        fragment.getClass().getSimpleName());
+                // TODO : show a "new wallet fragment"
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -117,58 +105,4 @@ public class WalletListFragment extends ListFragment
                 .commit();*/
     }
 
-
-    @Override
-    // THis is call when new peer added
-    public void onPositiveClick(Bundle args) {
-        mProgressViewAdapter.showProgress(true);
-        Peer peer = (Peer) args.getSerializable(Peer.class.getSimpleName());
-
-        LoadCurrencyTask task = new LoadCurrencyTask();
-        task.execute(peer);
-    }
-
-
-    public class LoadCurrencyTask extends AsyncTaskHandleException<Peer, Void, Currency> {
-
-        private Activity mActivity = getActivity();
-
-        @Override
-        protected void onPreExecute() {
-            mProgressViewAdapter.showProgress(true);
-        }
-
-        @Override
-        protected Currency doInBackgroundHandleException(Peer... peers) throws Exception {
-            Currency currency = ServiceLocator.instance().getBlockchainRemoteService()
-                    .getCurrencyFromPeer(peers[0]);
-
-            return currency;
-        }
-
-        @Override
-        protected void onSuccess(Currency currency) {
-            mProgressViewAdapter.showProgress(false);
-            Fragment fragment = CurrencyFragment.newInstance(currency);
-            FragmentManager fragmentManager = getFragmentManager();
-            fragmentManager.beginTransaction()
-                    .setCustomAnimations(
-                            R.animator.delayed_slide_in_up,
-                            R.animator.fade_out,
-                            R.animator.delayed_fade_in,
-                            R.animator.slide_out_up)
-                    .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
-                    .addToBackStack(fragment.getClass().getSimpleName())
-                    .commit();
-        }
-
-        @Override
-        protected void onFailed(Throwable t) {
-            mProgressViewAdapter.showProgress(false);
-            Toast.makeText(mActivity,
-                    t.getMessage(),
-                    Toast.LENGTH_LONG)
-                    .show();
-        }
-    }
 }

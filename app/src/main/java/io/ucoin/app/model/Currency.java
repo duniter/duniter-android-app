@@ -13,6 +13,8 @@ public class Currency implements Serializable {
     private String currencyName;
     private Integer membersCount;
     private String firstBlockSignature;
+    private Account account;
+    private Long accountId;
 
     public Currency() {
     }
@@ -66,5 +68,21 @@ public class Currency implements Serializable {
 
     public void setFirstBlockSignature(String firstBlockSignature) {
         this.firstBlockSignature = firstBlockSignature;
+    }
+
+    public Account getAccount() {
+        return account;
+    }
+
+    public void setAccount(Account account) {
+        this.account = account;
+    }
+
+    public Long getAccountId() {
+        return accountId;
+    }
+
+    public void setAccountId(Long accountId) {
+        this.accountId = accountId;
     }
 }

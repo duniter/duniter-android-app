@@ -31,8 +31,7 @@ import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.technical.AsyncTaskHandleException;
 
 
-public class CurrencyListFragment extends ListFragment
-        implements AddNodeDialogFragment.OnClickListener{
+public class CurrencyListFragment extends ListFragment {
     private ProgressViewAdapter mProgressViewAdapter;
 
     static public CurrencyListFragment newInstance() {
@@ -92,9 +91,24 @@ public class CurrencyListFragment extends ListFragment
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_add:
-                AddNodeDialogFragment fragment = AddNodeDialogFragment.newInstance(this);
-                fragment.show(getFragmentManager(),
-                        fragment.getClass().getSimpleName());
+                AddCurrencyFragment fragment = AddCurrencyFragment.newInstance(new AddCurrencyFragment.OnClickListener() {
+                    @Override
+                    public void onPositiveClick(Bundle args) {
+                        Peer peer = (Peer) args.getSerializable(Peer.class.getSimpleName());
+                        LoadCurrencyTask task = new LoadCurrencyTask();
+                        task.execute(peer);
+                    }
+                });
+                FragmentManager fragmentManager = getFragmentManager();
+                fragmentManager.beginTransaction()
+                        .setCustomAnimations(
+                                R.animator.delayed_slide_in_up,
+                                R.animator.fade_out,
+                                R.animator.delayed_fade_in,
+                                R.animator.slide_out_up)
+                        .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
+                        .addToBackStack(fragment.getClass().getSimpleName())
+                        .commit();
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -116,18 +130,6 @@ public class CurrencyListFragment extends ListFragment
                 .addToBackStack(fragment.getClass().getSimpleName())
                 .commit();
     }
-
-
-    @Override
-    // THis is call when new peer added
-    public void onPositiveClick(Bundle args) {
-        mProgressViewAdapter.showProgress(true);
-        Peer peer = (Peer) args.getSerializable(Peer.class.getSimpleName());
-
-        LoadCurrencyTask task = new LoadCurrencyTask();
-        task.execute(peer);
-    }
-
 
     public class LoadCurrencyTask extends AsyncTaskHandleException<Peer, Void, Currency> {
 

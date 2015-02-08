@@ -11,6 +11,13 @@ public class Wallet extends KeyPair implements LocalEntity{
 
 
     private Long id;
+    private Long currencyId;
+    private Long accountId;
+    private String name;
+    private Boolean isMember;
+    private Integer credit;
+
+    // TODO : voir si besoin de les garder
     private Identity identity;
     private String salt;
     private String currency;
@@ -72,6 +79,46 @@ public class Wallet extends KeyPair implements LocalEntity{
 
     public boolean isAuthenticate() {
         return secretKey != null && identity != null && identity.getPubkey() != null;
+    }
+
+    public Long getCurrencyId() {
+        return currencyId;
+    }
+
+    public void setCurrencyId(Long currencyId) {
+        this.currencyId = currencyId;
+    }
+
+    public Long getAccountId() {
+        return accountId;
+    }
+
+    public void setAccountId(Long accountId) {
+        this.accountId = accountId;
+    }
+
+    public Boolean getIsMember() {
+        return isMember;
+    }
+
+    public void setIsMember(Boolean isMember) {
+        this.isMember = isMember;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Integer getCredit() {
+        return credit;
+    }
+
+    public void setCredit(Integer credit) {
+        this.credit = credit;
     }
 
     @Override

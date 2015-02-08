@@ -11,6 +11,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.ucoin.app.model.Peer;
 import io.ucoin.app.model.TxOutput;
 import io.ucoin.app.model.TxSource;
 import io.ucoin.app.model.TxSourceResults;
@@ -80,7 +81,7 @@ public class TransactionRemoteService extends BaseRemoteService {
 	}
 
 	public TxSourceResults getSources(String pubKey) {
-		Log.d(TAG, String.format("Get sources by pubKey: %s", pubKey));
+		Log.d(TAG, String.format("Get sources by pubKey [%s]", pubKey));
 
 		// get parameter
 		String path = String.format(URL_TX_SOURCES, pubKey);
@@ -91,6 +92,21 @@ public class TransactionRemoteService extends BaseRemoteService {
 
 		return result;
 	}
+
+    public Long getCredit(Peer peer, String pubKey) {
+        Log.d(TAG, String.format("Get credit by pubKey [%s] from [%s]", pubKey, peer.getUrl()));
+
+        // get parameter
+        String path = String.format(URL_TX_SOURCES, pubKey);
+        TxSourceResults result = executeRequest(peer, path, TxSourceResults.class);
+
+        if (result == null) {
+            return null;
+        }
+
+        // Compute the balance
+        return computeBalance(result.getSources());
+    }
 
 	/* -- internal methods -- */
 

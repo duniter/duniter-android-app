@@ -69,6 +69,15 @@ public class MainActivity extends ActionBarActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // Prepare some utilities
+        //Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler(this));
+        DateUtils.setDefaultMediumDateFormat(getMediumDateFormat());
+        DateUtils.setDefaultLongDateFormat(getLongDateFormat());
+
+        // Init configuration
+        Configuration config = new Configuration();
+        Configuration.setInstance(config);
+
         //LOAD account
         AccountManager accountManager = AccountManager.get(this);
         Account[] accounts = accountManager.getAccountsByType(getString(R.string.ACCOUNT_TYPE));
@@ -89,16 +98,7 @@ public class MainActivity extends ActionBarActivity
             return;
         }
 
-        // Prepare some utilities
-        //Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler(this));
-        DateUtils.setDefaultMediumDateFormat(getMediumDateFormat());
-        DateUtils.setDefaultLongDateFormat(getLongDateFormat());
-
         setContentView(R.layout.activity_main);
-
-        // Init configuration
-        Configuration config = new Configuration();
-        Configuration.setInstance(config);
 
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
 
@@ -140,8 +140,7 @@ public class MainActivity extends ActionBarActivity
 
         ContentResolver.setSyncAutomatically(account, getString(R.string.AUTHORITY), true);
 
-        Fragment fragment;
-        fragment = HomeFragment.newInstance();
+        Fragment fragment = HomeFragment.newInstance();
 
         getFragmentManager().beginTransaction()
                 .setCustomAnimations(
