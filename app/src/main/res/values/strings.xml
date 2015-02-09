@@ -8,6 +8,18 @@
     -->
     <string name="title_activity_account">Account</string>
 
+    <!-- Strings related to account creation -->
+    <string name="creating_account_title">Hello</string>
+    <string name="creating_account_welcome"><![CDATA[Welcome to <b>uCoin</b>.<br/><small>A decentralized system for free currencies.</small>]]></string>
+    <string name="loading_dots">Loading...</string>
+    <string name="computing_keys">Computed keys...</string>
+    <string name="saving_account">Saving account...</string>
+    <string name="loading_currency">Loading currency from %s...</string>
+    <string name="saving_currency">Saving currency...</string>
+    <string name="loading_wallet_credit">Getting wallet credit...</string>
+    <string name="saving_wallet">Saving wallet...</string>
+    <string name="starting_home">Initializing app...</string>
+
     <!-- Strings related to connection -->
     <string name="connection">Connection</string>
     <string name="connecting_dots">Connecting…</string>
@@ -31,17 +43,22 @@
     <string name="credit">credit: %s</string>
 
     <!-- Strings related to transfer/transaction -->
-    <string name="wallet_transmitter">Wallet (transmitter)</string>
-    <string name="receiver_uid">Receiver uid</string>
+    <string name="wallet_transmitter">Wallet</string>
+    <string name="wallet_transmitter_hint">Wallet</string>
+    <string name="receiver">To</string>
+    <string name="receiver_hint">UID or public keyZ</string>
     <string name="amount">Amount</string>
+    <string name="amount_hint">Amount</string>
     <string name="universal_dividend_acronym">UD</string>
     <string name="unit_coins_label">coins</string>
     <string name="main_wallet">Main wallet</string>
+    <string name="comment">Comment</string>
     <string name="comment_hint">Comment</string>
     <string name="amount_not_integer">Amount must a valid integer</string>
     <string name="transactions">Transactions</string>
 
     <!-- Strings related to actions -->
+    <string name="send">Send</string>
     <string name="transfer">Transfer</string>
     <string name="generate_seed">Generate seed</string>
     <string name="sign">Sign</string>

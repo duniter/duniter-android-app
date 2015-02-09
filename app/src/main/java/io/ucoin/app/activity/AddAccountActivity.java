@@ -1,10 +1,15 @@
 package io.ucoin.app.activity;
 
 import android.app.Fragment;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.text.Html;
 import android.util.Log;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import io.ucoin.app.R;
@@ -21,6 +26,8 @@ public class AddAccountActivity extends ActionBarActivity  {
 
     private final String TAG = "AddAccountActivity";
 
+    private ProgressBar mProgressBar;
+    private TextView mProgressText;
     private ProgressViewAdapter mProgressViewAdapter;
     private Bundle mResultBundle;
     private Peer mPeer;
@@ -33,11 +40,17 @@ public class AddAccountActivity extends ActionBarActivity  {
 
         mResultBundle = new Bundle();
 
+        mProgressBar = (ProgressBar)findViewById(R.id.progressbar);
+        mProgressText = (TextView)findViewById(R.id.progress_text);
         mProgressViewAdapter = new ProgressViewAdapter(
                 this,
-                R.id.load_progress,
+                R.id.layout_progress,
                 R.id.frame_content
         );
+
+        // Progression welcome message (convert to HTML)
+        TextView progressionTitle = (TextView)findViewById(R.id.progress_welcome);
+        progressionTitle.setText(Html.fromHtml(getString(R.string.creating_account_welcome)));
 
         // First step : add account fragment
         Fragment fragment = AddAccountFragment.newInstance(new AddAccountFragment.OnClickListener() {
@@ -83,10 +96,10 @@ public class AddAccountActivity extends ActionBarActivity  {
     }
 
     /**
-     * Call when account created (after step 2)
+     * Call after step 2
      */
     private void onFinishSteps(){
-        AddAccountTask task = new AddAccountTask();
+        AddAccountTask task = new AddAccountTask(mProgressBar, mProgressText);
         task.execute(mResultBundle);
     }
 
@@ -94,10 +107,22 @@ public class AddAccountActivity extends ActionBarActivity  {
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
      */
-    public class AddAccountTask extends AsyncTaskHandleException<Bundle, Void, io.ucoin.app.model.Account> {
+    public class AddAccountTask extends AsyncTaskHandleException<Bundle, Integer, io.ucoin.app.model.Account> {
+
+        public AddAccountTask(ProgressBar progressBar, TextView progressText) {
+            super(progressBar, progressText);
+        }
 
         @Override
         protected void onPreExecute() {
+            // Hide the keyboard, in case we come from imeDone)
+            InputMethodManager inputManager = (InputMethodManager)
+                    getSystemService(Context.INPUT_METHOD_SERVICE);
+            inputManager.hideSoftInputFromWindow((null == getCurrentFocus())
+                            ? null
+                            : getCurrentFocus().getWindowToken(),
+                    InputMethodManager.HIDE_NOT_ALWAYS);
+            // Switch to the progress bar
             mProgressViewAdapter.showProgress(true);
         }
 
@@ -110,10 +135,12 @@ public class AddAccountActivity extends ActionBarActivity  {
             String password = bundle.getString("password");
             Peer peer = (Peer) bundle.getSerializable(Peer.class.getSimpleName());
 
-            // Create account in DB
+            // Creating account
             AccountService accountService = ServiceLocator.instance().getAccountService();
-            Account account = accountService.create(AddAccountActivity.this,
-                    uid, salt, password, peer);
+            Account account = accountService.create(
+                    AddAccountActivity.this,
+                    uid, salt, password, peer,
+                    this);
             return account;
         }
 
@@ -121,7 +148,7 @@ public class AddAccountActivity extends ActionBarActivity  {
         protected void onSuccess(io.ucoin.app.model.Account account) {
             //restart MainActivity
             Intent intent = new Intent(AddAccountActivity.this, MainActivity.class);
-            // TODO : give the wallet ?
+            // TODO : give the wallet to main activity ?
             startActivity(intent);
             finish();
         }

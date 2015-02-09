@@ -5,13 +5,16 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -31,12 +34,12 @@ import io.ucoin.app.technical.AsyncTaskHandleException;
 public class TransferFragment extends Fragment {
 
     private TextView mReceiverUidView;
-    private TextView mAmountText;
+    private EditText mAmountText;
     private TextView mConvertedText;
     private TextView mAmountUnitText;
     private TextView mConvertedUnitText;
-    private TextView mCommentText;
-    private Button   mTransferButton;
+    private EditText mCommentText;
+    private Button mSendButton;
     private ProgressViewAdapter mProgressViewAdapter;
 
     private boolean mIsCoinUnit = true;
@@ -91,7 +94,7 @@ public class TransferFragment extends Fragment {
         ((TextView) view.findViewById(R.id.receiver_uid)).setText(mReceiverIdentity.getUid());
 
         // Amount
-        mAmountText = (TextView)view.findViewById(R.id.amount);
+        mAmountText = (EditText)view.findViewById(R.id.amount);
         mAmountText.addTextChangedListener(new TextWatcher() {
            @Override
            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -140,21 +143,31 @@ public class TransferFragment extends Fragment {
         });
 
         // Comment
-        mCommentText = (TextView)view.findViewById(R.id.comment);
+        mCommentText = (EditText)view.findViewById(R.id.comment);
+        mCommentText.setOnEditorActionListener(new EditText.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId,
+                                          KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    return attemptSend();
+                }
+                return false;
+            }
+        });
 
         // Transfer button
-        mTransferButton = (Button)view.findViewById(R.id.transfer_button);
-        mTransferButton.setOnClickListener(new View.OnClickListener() {
+        mSendButton = (Button)view.findViewById(R.id.send_button);
+        mSendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                attemptTransfer();
+                attemptSend();
             }
         });
 
         // progress view
         mProgressViewAdapter = new ProgressViewAdapter(
                 view.findViewById(R.id.transfer_progress),
-                mTransferButton);
+                mSendButton);
 
         // Load data need for transfer
         loadDataTask();
@@ -187,7 +200,7 @@ public class TransferFragment extends Fragment {
         loadDataTask.execute((Void) null);
     }
 
-    protected void attemptTransfer() {
+    protected boolean attemptSend() {
 
         // Reset errors.
         mAmountText.setError(null);
@@ -214,12 +227,14 @@ public class TransferFragment extends Fragment {
             // There was an error; don't attempt login and focus the first
             // form field with an error.
             focusView.requestFocus();
+            return false;
         } else {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             mProgressViewAdapter.showProgress(true);
             mTransferTask = new TransferTask();
             mTransferTask.execute((Void) null);
+            return true;
         }
     }
 
@@ -309,7 +324,7 @@ public class TransferFragment extends Fragment {
             }
             else {
 
-                mTransferButton.setEnabled(success);
+                mSendButton.setEnabled(success);
             }
         }
     }

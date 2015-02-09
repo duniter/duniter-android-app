@@ -85,9 +85,12 @@ public class HomeFragment extends Fragment {
         mStatusImage = (ImageView) view.findViewById(R.id.status_image);
 
         // Progress
+        View progressBar = view.findViewById(R.id.load_progress);
         mProgressViewAdapter = new ProgressViewAdapter(
-                view.findViewById(R.id.load_progress),
+                progressBar,
                 tabs);
+        tabs.setVisibility(View.GONE);
+        progressBar.setVisibility(View.VISIBLE);
 
         // Load wallets
         LoadWalletsTask loadWalletsTask = new LoadWalletsTask();
@@ -141,11 +144,6 @@ public class HomeFragment extends Fragment {
     }
 
     public class LoadWalletsTask extends AsyncTaskHandleException<Void, Void, BlockchainParameter> {
-
-        @Override
-        protected void onPreExecute() {
-            mProgressViewAdapter.showProgress(true);
-        }
 
         @Override
         protected BlockchainParameter doInBackgroundHandleException(Void... param) throws PeerConnectionException{

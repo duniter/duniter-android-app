@@ -16,7 +16,9 @@ import io.ucoin.app.model.Currency;
 import io.ucoin.app.model.Peer;
 import io.ucoin.app.model.Wallet;
 import io.ucoin.app.service.remote.TransactionRemoteService;
+import io.ucoin.app.technical.DummyProgressModel;
 import io.ucoin.app.technical.ObjectUtils;
+import io.ucoin.app.technical.ProgressModel;
 import io.ucoin.app.technical.StringUtils;
 import io.ucoin.app.technical.UCoinTechnicalException;
 import io.ucoin.app.technical.crypto.Base58;
@@ -40,12 +42,33 @@ public class AccountService extends BaseService {
             String salt,
             String password,
             Peer peer) {
+        return create(
+                context,
+                uid,
+                salt,
+                password,
+                peer,
+                new DummyProgressModel());
+    }
+
+    public Account create(
+            Context context,
+            String uid,
+            String salt,
+            String password,
+            Peer peer,
+            ProgressModel progressModel) {
+
+        progressModel.setProgress(0);
+        progressModel.setMax(7);
 
         // Generate keys
+        progressModel.setMessage(context.getString(R.string.computing_keys));
         CryptoService service = ServiceLocator.instance().getCryptoService();
         KeyPair keys = service.getKeyPair(salt, password);
 
         // Create account in DB
+        progressModel.increment(context.getString(R.string.saving_account));
         AccountService accountService = ServiceLocator.instance().getAccountService();
         io.ucoin.app.model.Account account = new io.ucoin.app.model.Account();
         account.setUid(uid);
@@ -54,19 +77,23 @@ public class AccountService extends BaseService {
         account = save(context, account);
 
         // Get the currency from peer
+        progressModel.increment(context.getString(R.string.loading_currency, peer.getUrl()));
         Currency currency = ServiceLocator.instance().getBlockchainRemoteService()
                 .getCurrencyFromPeer(peer);
         currency.setAccountId(account.getId());
 
         // Create the currency in DB
+        progressModel.increment(context.getString(R.string.saving_currency, peer.getUrl()));
         CurrencyService currencyService = ServiceLocator.instance().getCurrencyService();
         currency = currencyService.save(context, currency);
 
         // Get credit
+        progressModel.increment(context.getString(R.string.loading_wallet_credit));
         TransactionRemoteService txService = ServiceLocator.instance().getTransactionRemoteService();
         Long credit = txService.getCredit(peer, account.getPubkey());
 
         // Create a main wallet
+        progressModel.increment(context.getString(R.string.saving_wallet));
         Wallet wallet = new Wallet(currency.getCurrencyName(),
                 account.getUid(),
                 keys.getPubKey(),
@@ -77,10 +104,12 @@ public class AccountService extends BaseService {
         wallet.setCurrencyId(currency.getId());
         wallet.setAccountId(account.getId());
         wallet.setCredit(credit == null ? 0 : credit.intValue());
+        progressModel.increment();
 
         // Save a new wallet
         WalletService walletService = ServiceLocator.instance().getWalletService();
         wallet = walletService.save(context, wallet);
+        progressModel.increment(context.getString(R.string.starting_home));
 
         return account;
     }

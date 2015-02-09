@@ -15,11 +15,43 @@
         android:layout_height="match_parent"/>
 
     <!-- Load progress -->
-    <ProgressBar
-        android:id="@+id/load_progress"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:visibility="gone" />
+    <LinearLayout
+        android:id="@+id/layout_progress"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/creating_account_title"
+            android:layout_gravity="center_horizontal"
+            android:textSize="@dimen/abc_text_size_display_1_material"/>
+
+        <TextView
+            android:id="@+id/progress_welcome"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/creating_account_welcome"
+            android:textSize="@dimen/abc_text_size_body_1_material"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center_horizontal|center_vertical">
+            <ProgressBar
+                android:id="@+id/progressbar"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"/>
+            <TextView
+                android:id="@+id/progress_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/loading_dots"/>
+        </LinearLayout>
+    </LinearLayout>
 
 </LinearLayout>

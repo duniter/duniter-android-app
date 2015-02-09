@@ -96,7 +96,7 @@ public class LoginFragment extends Fragment {
         });
 
         mProgressViewAdapter = new ProgressViewAdapter(
-                view.findViewById(R.id.login_progress),
+                view.findViewById(R.id.progressbar),
                 mSignInButton);
 
         // fill the UI with the default wallet
