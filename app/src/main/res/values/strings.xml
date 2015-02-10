@@ -9,12 +9,12 @@
     <string name="title_activity_account">Account</string>
 
     <!-- Strings related to account creation -->
-    <string name="creating_account_title">Hello</string>
+    <string name="creating_account_title">Hello.</string>
     <string name="creating_account_welcome"><![CDATA[Welcome to <b>uCoin</b>.<br/><small>A decentralized system for free currencies.</small>]]></string>
     <string name="loading_dots">Loading...</string>
     <string name="computing_keys">Computed keys...</string>
     <string name="saving_account">Saving account...</string>
-    <string name="loading_currency">Loading currency from %s...</string>
+    <string name="loading_currency">Loading currency from\n%s...</string>
     <string name="saving_currency">Saving currency...</string>
     <string name="loading_wallet_credit">Getting wallet credit...</string>
     <string name="saving_wallet">Saving wallet...</string>
@@ -132,7 +132,7 @@
 
 
     <string name="login_too_short">This login is too short</string>
-    <string name="email_address_invalid">This email address is invalid</string>
+    <string name="salt_too_short">This salt is too short</string>
     <string name="password_too_short">This password is too short</string>
     <string name="login_incorrect">This login is incorrect</string>
     <string name="password_incorrect">This password is incorrect</string>
@@ -143,6 +143,7 @@
     <string name="password_cannot_be_empty">Password cannot be empty</string>
     <string name="confirm_password_cannot_be_empty">Confirm password cannot be empty</string>
     <string name="passwords_dont_match">Passwords don\'t match</string>
+    <string name="insufficient_credit">Insufficient credit on wallet</string>
 
     <string-array name="drawer_items">
         <item>@string/home</item>

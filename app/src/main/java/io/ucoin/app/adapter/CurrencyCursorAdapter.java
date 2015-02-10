@@ -28,6 +28,8 @@ public class CurrencyCursorAdapter extends CursorAdapter{
 
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
+        // TODO could we use holder ??
+
         TextView name = (TextView) view.findViewById(R.id.wallet_name);
         int nameIndex = cursor.getColumnIndex(Contract.Wallet.NAME);
         name.setText(cursor.getString(nameIndex));
@@ -38,4 +40,5 @@ public class CurrencyCursorAdapter extends CursorAdapter{
                 R.string.credit,
                 cursor.getString(creditIndex)));
     }
+
 }

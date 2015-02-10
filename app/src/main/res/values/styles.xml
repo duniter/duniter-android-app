@@ -57,6 +57,13 @@
         <item name="android:textSize">@dimen/abc_text_size_subhead_material</item>
     </style>
 
+    <style name="FormHeader">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">center_horizontal</item>
+        <item name="android:layout_marginBottom">8dp</item>
+        <item name="android:textSize">@dimen/abc_text_size_display_1_material</item>
+    </style>
 
     <style name="FormLabel">
         <item name="android:layout_marginRight">10dp</item>

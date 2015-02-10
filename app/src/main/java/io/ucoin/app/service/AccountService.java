@@ -97,7 +97,7 @@ public class AccountService extends BaseService {
         Wallet wallet = new Wallet(currency.getCurrencyName(),
                 account.getUid(),
                 keys.getPubKey(),
-                keys.getSecKey()
+                null /*do no save the secret key of the main account*/
         );
         wallet.setName(account.getUid() + "@" + currency.getCurrencyName());
         wallet.setIsMember(Boolean.FALSE); // TODO : membership should be checked on server ?
@@ -110,6 +110,9 @@ public class AccountService extends BaseService {
         WalletService walletService = ServiceLocator.instance().getWalletService();
         wallet = walletService.save(context, wallet);
         progressModel.increment(context.getString(R.string.starting_home));
+
+        // Set the secret key into the wallet (will be available for this session only)
+        wallet.setSecKey(keys.getSecKey());
 
         return account;
     }

@@ -1,5 +1,7 @@
 package io.ucoin.app.model;
 
+import java.io.Serializable;
+
 import io.ucoin.app.technical.crypto.CryptoUtils;
 import io.ucoin.app.technical.crypto.KeyPair;
 
@@ -7,7 +9,7 @@ import io.ucoin.app.technical.crypto.KeyPair;
  * A wallet is a user account
  * Created by eis on 13/01/15.
  */
-public class Wallet extends KeyPair implements LocalEntity{
+public class Wallet extends KeyPair implements LocalEntity, Serializable {
 
 
     private Long id;
@@ -132,9 +134,6 @@ public class Wallet extends KeyPair implements LocalEntity{
     }
 
     public String toString() {
-        return new StringBuilder().append(identity.getUid())
-                .append('@')
-                .append(currency)
-                .toString();
+        return name;
     }
 }

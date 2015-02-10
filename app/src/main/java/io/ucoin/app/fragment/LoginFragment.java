@@ -6,7 +6,6 @@ import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
@@ -28,6 +27,16 @@ import io.ucoin.app.technical.crypto.KeyPair;
  */
 public class LoginFragment extends Fragment {
 
+    public static LoginFragment newInstance(Wallet wallet, OnClickListener listener) {
+        LoginFragment fragment = new LoginFragment();
+        Bundle newInstanceArgs = new Bundle();
+        newInstanceArgs.putSerializable(Wallet.class.getSimpleName(), wallet);
+        fragment.setArguments(newInstanceArgs);
+        fragment.setOnClickListener(listener);
+        return fragment;
+    }
+
+    private OnClickListener mListener;
 
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
@@ -66,6 +75,12 @@ public class LoginFragment extends Fragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        // Getting a given wallet
+        Bundle newInstanceArgs = getArguments();
+        final Wallet wallet = (Wallet) newInstanceArgs
+                .getSerializable(Wallet.class.getSimpleName());
+
         getActivity().setTitle(getString(R.string.sign_in));
 
         // UID
@@ -79,7 +94,7 @@ public class LoginFragment extends Fragment {
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
-                if (id == R.id.uid || id == EditorInfo.IME_NULL) {
+                if (id == EditorInfo.IME_ACTION_DONE) {
                     attemptLogin();
                     return true;
                 }
@@ -88,7 +103,7 @@ public class LoginFragment extends Fragment {
         });
 
         Button mSignInButton = (Button) view.findViewById(R.id.sign_in_button);
-        mSignInButton.setOnClickListener(new OnClickListener() {
+        mSignInButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 attemptLogin();
@@ -99,9 +114,8 @@ public class LoginFragment extends Fragment {
                 view.findViewById(R.id.progressbar),
                 mSignInButton);
 
-        // fill the UI with the default wallet
-        Wallet defaultWallet = ServiceLocator.instance().getWalletService().getDefaultWallet(getActivity().getApplication());
-        updateView(defaultWallet);
+        // fill the UI with the given wallet
+        updateView(wallet);
     }
 
     private void updateView(Wallet wallet) {
@@ -136,7 +150,7 @@ public class LoginFragment extends Fragment {
 
         // Store values at the time of the login attempt.
         String uid = mUidView.getText().toString();
-        String email = mSaltView.getText().toString();
+        String salt = mSaltView.getText().toString();
         String password = mPasswordView.getText().toString();
 
         boolean cancel = false;
@@ -147,7 +161,7 @@ public class LoginFragment extends Fragment {
             mUidView.setError(getString(R.string.field_required));
             focusView = mUidView;
             cancel = true;
-        } else if (!isUidValid(password)) {
+        } else if (!isUidValid(uid)) {
             mUidView.setError(getString(R.string.login_too_short));
             focusView = mUidView;
             cancel = true;
@@ -160,13 +174,13 @@ public class LoginFragment extends Fragment {
             cancel = true;
         }
 
-        // Check for a valid email address.
-        if (TextUtils.isEmpty(email)) {
+        // Check for a valid salt address.
+        if (TextUtils.isEmpty(salt)) {
             mSaltView.setError(getString(R.string.field_required));
             focusView = mSaltView;
             cancel = true;
-        } else if (!isEmailValid(email)) {
-            mSaltView.setError(getString(R.string.email_address_invalid));
+        } else if (!isSaltValid(salt)) {
+            mSaltView.setError(getString(R.string.salt_too_short));
             focusView = mSaltView;
             cancel = true;
         }
@@ -178,7 +192,7 @@ public class LoginFragment extends Fragment {
         } else {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
-            mAuthTask = new UserLoginTask(uid, email, password);
+            mAuthTask = new UserLoginTask(uid, salt, password);
             mAuthTask.execute((Void) null);
         }
     }
@@ -187,12 +201,12 @@ public class LoginFragment extends Fragment {
         return uid.length() >= 4;
     }
 
-    private boolean isEmailValid(String email) {
-        return email.contains("@");
+    private boolean isSaltValid(String salt) {
+        return salt.length() >= 3;
     }
 
     private boolean isPasswordValid(String password) {
-        return password.length() > 4;
+        return password.length() >= 3;
     }
 
     // TODO kimamila: use a loader to load existing Wallet, and then use this list to check is salt+password is correct
@@ -244,7 +258,7 @@ public class LoginFragment extends Fragment {
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
      */
-    public class UserLoginTask extends AsyncTaskHandleException<Void, Void, Boolean> {
+    public class UserLoginTask extends AsyncTaskHandleException<Void, Void, Wallet> {
 
         private final String mUid;
         private final String mEmail;
@@ -262,7 +276,7 @@ public class LoginFragment extends Fragment {
         }
 
         @Override
-        protected Boolean doInBackgroundHandleException(Void... params) throws Exception {
+        protected Wallet doInBackgroundHandleException(Void... params) throws Exception {
             DataContext context = ServiceLocator.instance().getDataContext();
             String currency = "??";
             if (context.getBlockchainParameter() != null) {
@@ -282,34 +296,24 @@ public class LoginFragment extends Fragment {
                 // Refresh the wallet identity with lookup info
                 wotService.toIdentity(result, wallet.getIdentity());
 
-                // Store the wallet into the data context
-                context.setWallet(wallet);
-
-                // TODO : Check is the wallet exists on DB account's wallets
-
-                return true;
+                return wallet;
             }
 
             // TODO: register the new account here.
             // send the self
 
-            return false;
+            return null;
         }
 
         @Override
-        protected void onSuccess(Boolean success) {
+        protected void onSuccess(Wallet wallet) {
             mAuthTask = null;
 
-            if (success) {
-                Fragment fragment = HomeFragment.newInstance();
-                getFragmentManager().popBackStack();
-                getFragmentManager().beginTransaction()
-                        .setCustomAnimations(
-                                R.animator.fade_in,
-                                R.animator.fade_out)
-                        .add(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
-                        .addToBackStack(fragment.getClass().getSimpleName())
-                        .commit();
+            if (wallet != null) {
+                Bundle args = new Bundle();
+                args.putSerializable(Wallet.class.getSimpleName(), wallet);
+                mListener.onPositiveClick(args);
+
             } else {
                 mUidView.setError(getString(R.string.login_incorrect));
                 mUidView.requestFocus();
@@ -328,6 +332,14 @@ public class LoginFragment extends Fragment {
             mAuthTask = null;
             mProgressViewAdapter.showProgress(false);
         }
+    }
+
+    private void setOnClickListener(OnClickListener listener) {
+        mListener = listener;
+    }
+
+    public interface OnClickListener {
+        public void onPositiveClick(Bundle args);
     }
 }
 

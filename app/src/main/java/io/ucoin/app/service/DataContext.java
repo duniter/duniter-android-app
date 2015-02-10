@@ -1,5 +1,7 @@
 package io.ucoin.app.service;
 
+import java.util.List;
+
 import io.ucoin.app.model.BlockchainParameter;
 import io.ucoin.app.model.Wallet;
 
@@ -11,7 +13,7 @@ public class DataContext extends BaseService {
     /** Logger. */
     private static final String TAG = "DataContext";
 
-    private Wallet wallet = null;
+    private List<Wallet> wallets = null;
 
     private BlockchainParameter blockchainParameter = null;
 
@@ -19,8 +21,8 @@ public class DataContext extends BaseService {
         super();
     }
 
-    public Wallet getWallet() {
-        return wallet;
+    public List<Wallet> getWallets() {
+        return wallets;
     }
 
     public BlockchainParameter getBlockchainParameter() {
@@ -31,8 +33,8 @@ public class DataContext extends BaseService {
         this.blockchainParameter = blockchainParameter;
     }
 
-    public void setWallet(Wallet currentWallet) {
-        this.wallet = currentWallet;
+    public void setWallets(List<Wallet> wallets) {
+        this.wallets = wallets;
     }
 
 }

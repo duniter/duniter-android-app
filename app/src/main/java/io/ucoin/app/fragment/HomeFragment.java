@@ -17,6 +17,8 @@ import android.widget.TabHost;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.List;
+
 import io.ucoin.app.Application;
 import io.ucoin.app.R;
 import io.ucoin.app.activity.MainActivity;
@@ -143,50 +145,44 @@ public class HomeFragment extends Fragment {
         return false;
     }
 
-    public class LoadWalletsTask extends AsyncTaskHandleException<Void, Void, BlockchainParameter> {
+    public class LoadWalletsTask extends AsyncTaskHandleException<Void, Void, List<Wallet>> {
 
         @Override
         protected BlockchainParameter doInBackgroundHandleException(Void... param) throws PeerConnectionException{
 
             DataContext dataContext = ServiceLocator.instance().getDataContext();
-            Wallet currentWallet = dataContext.getWallet();
-            BlockchainParameter result = dataContext.getBlockchainParameter();
+            List<Wallet> wallets = dataContext.getWallets();
 
-            if (currentWallet == null || result == null) {
+            if (wallets == null) {
                 ((Application)getActivity().getApplication()).getAccountId();
 
-                // Set the peer to use for network
+                // TODO : use the currency default peer instead
                 io.ucoin.app.model.Peer node = new io.ucoin.app.model.Peer(
                         Configuration.instance().getNodeHost(),
                         Configuration.instance().getNodePort()
                 );
                 ServiceLocator.instance().getHttpService().connect(node);
 
-                // Load currency
-                result = ServiceLocator.instance().getBlockchainRemoteService().getParameters();
-                dataContext.setBlockchainParameter(result);
-
-                // Load default wallet
-                Wallet defaultWallet = ServiceLocator.instance().getWalletService().getDefaultWallet(getActivity().getApplication());
-                defaultWallet.setCurrency(result.getCurrency());
-                dataContext.setWallet(defaultWallet);
+                // Load wallets
+                wallets = ServiceLocator.instance().getWalletService().getWallets(getActivity().getApplication());
+                dataContext.setWallets(wallets);
 
                 // Load the crypto service (load lib)
                 ServiceLocator.instance().getCryptoService();
             }
 
-            return result;
+            return wallets;
         }
 
         @Override
-        protected void onSuccess(final BlockchainParameter result) {
+        protected void onSuccess(final List<Wallet> result) {
             mProgressViewAdapter.showProgress(false);
             mStatusText.setText("");
 
             FragmentManager fm = getFragmentManager();
             if (fm.findFragmentByTag("tab1") == null) {
                 fm.beginTransaction()
-                        .replace(R.id.tab1, WalletListFragment.newInstance(), "tab1")
+                        .replace(R.id.tab1, WalletListFragment.newInstance(result), "tab1")
                         .commit();
             }
         }

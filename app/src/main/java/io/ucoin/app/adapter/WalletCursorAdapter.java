@@ -9,7 +9,7 @@ import android.widget.CursorAdapter;
 import android.widget.TextView;
 
 import io.ucoin.app.R;
-import io.ucoin.app.model.Wallet;
+import io.ucoin.app.database.Contract;
 
 
 public class WalletCursorAdapter extends CursorAdapter{
@@ -28,25 +28,20 @@ public class WalletCursorAdapter extends CursorAdapter{
 
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
-        TextView currencyView = (TextView) view.findViewById(R.id.currency_name);
-        //int currencyIndex = cursor.getColumnIndex(Contract.Currency.CURRENCY_NAME);
-        //currency.setText(cursor.getString(currencyIndex));
-        currencyView.setText("currency");
+        TextView nameView = (TextView) view.findViewById(R.id.name);
+        int nameIndex = cursor.getColumnIndex(Contract.Wallet.NAME);
+        nameView.setText(cursor.getString(nameIndex));
 
         TextView pubkeyView = (TextView) view.findViewById(R.id.pubkey);
-        //int membersCountIndex = cursor.getColumnIndex(Contract.Currency.MEMBERS_COUNT);
-        pubkeyView.setText("PUBKEY");
+        int pubkeyIndex = cursor.getColumnIndex(Contract.Wallet.PUBLIC_KEY);
+        pubkeyView.setText(cursor.getString(pubkeyIndex));
 
         TextView creditView = (TextView) view.findViewById(R.id.credit);
-        //int membersCountIndex = cursor.getColumnIndex(Contract.Currency.MEMBERS_COUNT);
-        pubkeyView.setText("credit");
+        int creditIndex = cursor.getColumnIndex(Contract.Wallet.CREDIT);
+        pubkeyView.setText(cursor.getString(creditIndex));
     }
 
     /* -- -- */
-
-    protected Wallet getWallet(Cursor cursor) {
-        return null;
-    }
 
 
 }

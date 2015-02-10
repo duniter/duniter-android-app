@@ -7,6 +7,9 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import io.ucoin.app.content.Provider;
 import io.ucoin.app.database.Contract;
 import io.ucoin.app.model.Wallet;
@@ -34,7 +37,6 @@ public class WalletService extends BaseService {
         ObjectUtils.checkNotNull(wallet.getAccountId());
         ObjectUtils.checkNotNull(wallet.getName());
         ObjectUtils.checkArgument(StringUtils.isNotBlank(wallet.getPubKeyHash()));
-        ObjectUtils.checkNotNull(wallet.getSecKey());
         ObjectUtils.checkNotNull(wallet.getIsMember());
         ObjectUtils.checkNotNull(wallet.getCredit());
 
@@ -45,6 +47,30 @@ public class WalletService extends BaseService {
 
         // TODO : update
         return null;
+    }
+
+    public List<Wallet> getWallets(Application application) {
+        String accountId = ((io.ucoin.app.Application) application).getAccountId();
+        return getWalletsByAccountId(application, Long.parseLong(accountId));
+    }
+
+    public List<Wallet> getWalletsByAccountId(Context context, long accountId) {
+
+        Uri uri = Uri.parse(Provider.CONTENT_URI + "/wallet/");
+        String selection = Contract.Currency.ACCOUNT_ID + "=?";
+        String[] selectionArgs = {
+                String.valueOf(accountId)
+        };
+        Cursor cursor = context.getContentResolver().query(uri, new String[]{}, selection,
+                selectionArgs, null);
+
+        List<Wallet> result = new ArrayList<Wallet>();
+        while (cursor.moveToNext()) {
+            Wallet wallet = read(cursor);
+            result.add(wallet);
+        }
+
+        return result;
     }
 
     public Wallet read(final Cursor cursor) {
@@ -58,50 +84,25 @@ public class WalletService extends BaseService {
         int secKeyIndex = cursor.getColumnIndex(Contract.Wallet.SECRET_KEY);
         String secKey = cursor.getString(secKeyIndex);
 
-        int uidIndex = cursor.getColumnIndex(Contract.Wallet.PUBLIC_KEY);
-        String uid = cursor.getString(uidIndex);
+        int nameIndex = cursor.getColumnIndex(Contract.Wallet.NAME);
+        String name = cursor.getString(nameIndex);
 
-        int isMemberKey = cursor.getColumnIndex(Contract.Wallet.IS_MEMBER);
-        boolean isMember = cursor.getInt(isMemberKey) == 1 ? true : false;
+        int isMemberIndex = cursor.getColumnIndex(Contract.Wallet.IS_MEMBER);
+        boolean isMember = cursor.getInt(isMemberIndex) == 1 ? true : false;
 
-        Wallet result = new Wallet("TODO currency", uid, pubKey, secKey);
+        int creditIndex = cursor.getColumnIndex(Contract.Wallet.CREDIT);
+        int credit = cursor.getInt(creditIndex);
+
+        // TODO get the currency name from DB (table currency)
+        Wallet result = new Wallet("meta_brouzouf", name, pubKey, secKey);
         result.setId(id);
+        result.setName(name);
+        result.setCredit(credit);
         result.getIdentity().setMember(isMember);
 
         return result;
     }
 
-    public Wallet getDefaultWallet(Application application) {
-        String accountId = ((io.ucoin.app.Application) application).getAccountId();
-        return getDefaultWallet(application, Long.parseLong(accountId));
-    }
-
-    public Wallet getDefaultWallet(Context context, long accountId) {
-
-        Uri uri = Uri.parse(Provider.CONTENT_URI + "/wallet/");
-        String selection = Contract.Currency.ACCOUNT_ID + "=?";
-        String[] selectionArgs = {
-                String.valueOf(accountId)
-        };
-        Cursor cursor = context.getContentResolver().query(uri, new String[]{}, selection,
-                selectionArgs, null);
-
-        Wallet result = null;
-        if (cursor.moveToNext()) {
-            result = read(cursor);
-        }
-
-        if (result == null) {
-
-            // FOR DEV ONLY
-            result = new Wallet();
-            result.getIdentity().setUid("kimamila");
-            result.setSalt("benoit.lavenier@e-is.pro");
-        }
-
-
-        return result;
-    }
 
     /* -- internal methods-- */
 
@@ -113,7 +114,9 @@ public class WalletService extends BaseService {
         values.put(Contract.Wallet.CURRENCY_ID, wallet.getCurrencyId());
         values.put(Contract.Wallet.NAME, wallet.getName());
         values.put(Contract.Wallet.PUBLIC_KEY, wallet.getPubKeyHash());
-        values.put(Contract.Wallet.SECRET_KEY, CryptoUtils.encodeBase58(wallet.getSecKey()));
+        if (wallet.getSecKey() != null) {
+            values.put(Contract.Wallet.SECRET_KEY, CryptoUtils.encodeBase58(wallet.getSecKey()));
+        }
         values.put(Contract.Wallet.IS_MEMBER, wallet.getIsMember().booleanValue() ? 1 : 0);
         values.put(Contract.Wallet.CREDIT, wallet.getCredit());
 

@@ -19,6 +19,8 @@ import io.ucoin.app.model.Wallet;
 import io.ucoin.app.service.CryptoService;
 import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.service.exception.InsufficientCreditException;
+import io.ucoin.app.technical.ObjectUtils;
+import io.ucoin.app.technical.StringUtils;
 import io.ucoin.app.technical.UCoinTechnicalException;
 import io.ucoin.app.technical.crypto.DigestUtils;
 
@@ -112,6 +114,9 @@ public class TransactionRemoteService extends BaseRemoteService {
 
 	public String getTransaction(Wallet wallet, String destPubKey,
 			long amount, String comments, boolean compact) throws InsufficientCreditException {
+        ObjectUtils.checkNotNull(wallet);
+        ObjectUtils.checkArgument(StringUtils.isNotBlank(wallet.getCurrency()));
+        ObjectUtils.checkArgument(StringUtils.isNotBlank(wallet.getPubKeyHash()));
 
 		// Retrieve the wallet sources
 		TxSourceResults sourceResults = getSources(wallet.getPubKeyHash());
