@@ -1,38 +1,56 @@
 package io.ucoin.app.fragment;
 
 import android.app.ListFragment;
-import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import io.ucoin.app.Application;
+import java.util.ArrayList;
+import java.util.List;
+
 import io.ucoin.app.R;
-import io.ucoin.app.adapter.CurrencyCursorAdapter;
-import io.ucoin.app.adapter.ProgressViewAdapter;
-import io.ucoin.app.content.Provider;
-import io.ucoin.app.database.Contract;
+import io.ucoin.app.adapter.WalletArrayAdapter;
+import io.ucoin.app.model.Wallet;
+import io.ucoin.app.service.ServiceLocator;
 
 
-public class WalletListFragment extends ListFragment{
-    private ProgressViewAdapter mProgressViewAdapter;
+public class WalletListFragment extends ListFragment {
 
-    static public WalletListFragment newInstance() {
-        return new WalletListFragment();
+    private static final String WALLET_LIST_ARGS_KEYS = "Wallets";
+
+    private WalletArrayAdapter mWalletArrayAdapter;
+    private OnClickListener mListener;
+
+    public static WalletListFragment newInstance(OnClickListener listener) {
+        return newInstance(listener, new ArrayList<Wallet>());
+    }
+
+    protected static WalletListFragment newInstance(OnClickListener listener, List<Wallet> wallets) {
+        WalletListFragment fragment = new WalletListFragment();
+        fragment.setOnClickListener(listener);
+        return fragment;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+
+        // list adapter
+        List<Wallet> wallets = ServiceLocator.instance().getDataContext().getWallets();
+        if(wallets != null)
+        {
+            mWalletArrayAdapter = new WalletArrayAdapter(getActivity(), wallets);
+        }
+        else {
+            mWalletArrayAdapter = new WalletArrayAdapter(getActivity());
+        }
+        setListAdapter(mWalletArrayAdapter);
     }
 
     @Override
@@ -47,34 +65,8 @@ public class WalletListFragment extends ListFragment{
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        mProgressViewAdapter = new ProgressViewAdapter(
-                view.findViewById(R.id.progressbar),
-                getListView());
-
         TextView v = (TextView) view.findViewById(android.R.id.empty);
         v.setVisibility(View.GONE);
-
-        Uri uri = Uri.parse(Provider.CONTENT_URI + "/wallet/");
-        String selection = Contract.Wallet.ACCOUNT_ID + "=?";
-        String[] selectionArgs = {
-                ((Application) getActivity().getApplication()).getAccountId()
-        };
-
-        Cursor cursor = getActivity().getContentResolver().query(uri, new String[]{}, selection,
-                selectionArgs, null);
-
-        CurrencyCursorAdapter currencyCursorAdapter =
-                new CurrencyCursorAdapter(getActivity(), cursor, 0);
-
-        setListAdapter(currencyCursorAdapter);
-    }
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-            /*inflater.inflate(R.menu.toolbar_currency_list, menu);
-            ((MainActivity) getActivity()).setBackButtonEnabled(false);
-            ((MainActivity) getActivity()).
-                    setToolbarColor(getResources().getColor(R.color.primary));*/
     }
 
     @Override
@@ -89,20 +81,21 @@ public class WalletListFragment extends ListFragment{
 
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
-        Cursor cursor = (Cursor) getListAdapter().getItem(position);
-        // TODO : open transaction with a filter on this wallet ?
-        /*Wallet wallet = ServiceLocator.instance().getWalletService().read(cursor);
-        Fragment fragment = WalletFragment.newInstance(wallet);
-        FragmentManager fragmentManager = getFragmentManager();
-        fragmentManager.beginTransaction()
-                .setCustomAnimations(
-                        R.animator.delayed_slide_in_up,
-                        R.animator.fade_out,
-                        R.animator.delayed_fade_in,
-                        R.animator.slide_out_up)
-                .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
-                .addToBackStack(fragment.getClass().getSimpleName())
-                .commit();*/
+        if (mListener == null) {
+            return;
+        }
+        Wallet wallet = (Wallet) l.getAdapter().getItem(position);
+        Bundle bundle = new Bundle();
+        bundle.putSerializable(Wallet.class.getSimpleName(), wallet);
+        mListener.onPositiveClick(bundle);
+    }
+
+    private void setOnClickListener(OnClickListener listener) {
+        mListener = listener;
+    }
+
+    public interface OnClickListener {
+        public void onPositiveClick(Bundle args);
     }
 
 }

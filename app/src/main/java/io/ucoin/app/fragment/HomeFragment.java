@@ -24,7 +24,6 @@ import io.ucoin.app.R;
 import io.ucoin.app.activity.MainActivity;
 import io.ucoin.app.adapter.ProgressViewAdapter;
 import io.ucoin.app.config.Configuration;
-import io.ucoin.app.model.BlockchainParameter;
 import io.ucoin.app.model.Wallet;
 import io.ucoin.app.service.DataContext;
 import io.ucoin.app.service.ServiceLocator;
@@ -148,7 +147,7 @@ public class HomeFragment extends Fragment {
     public class LoadWalletsTask extends AsyncTaskHandleException<Void, Void, List<Wallet>> {
 
         @Override
-        protected BlockchainParameter doInBackgroundHandleException(Void... param) throws PeerConnectionException{
+        protected List<Wallet> doInBackgroundHandleException(Void... param) throws PeerConnectionException{
 
             DataContext dataContext = ServiceLocator.instance().getDataContext();
             List<Wallet> wallets = dataContext.getWallets();
@@ -175,14 +174,25 @@ public class HomeFragment extends Fragment {
         }
 
         @Override
-        protected void onSuccess(final List<Wallet> result) {
+        protected void onSuccess(final List<Wallet> wallets) {
             mProgressViewAdapter.showProgress(false);
             mStatusText.setText("");
 
             FragmentManager fm = getFragmentManager();
             if (fm.findFragmentByTag("tab1") == null) {
+                // Manage click on wallet
+                WalletListFragment.OnClickListener walletOnClickListener = new WalletListFragment.OnClickListener() {
+                    @Override
+                    public void onPositiveClick(Bundle args) {
+                        Wallet wallet = (Wallet)args.getSerializable(Wallet.class.getSimpleName());
+                        // TODO open transaction list, filtered on this wallet
+                        Log.d("HomeFragment", "Detect click on wallet :" + wallet.toString());
+                    }
+                };
                 fm.beginTransaction()
-                        .replace(R.id.tab1, WalletListFragment.newInstance(result), "tab1")
+                        .replace(R.id.tab1, WalletListFragment.newInstance(
+                                walletOnClickListener,
+                                wallets), "tab1")
                         .commit();
             }
         }

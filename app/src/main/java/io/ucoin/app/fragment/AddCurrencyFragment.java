@@ -96,15 +96,16 @@ public class AddCurrencyFragment extends Fragment {
             focusView.requestFocus();
             return false;
         }
-        else {
+
+        // Send result to listener
+        if (mListener != null) {
             Bundle args = new Bundle();
             Peer peer = new Peer(mAddress.getText().toString().trim(),
                     Integer.parseInt(mPort.getText().toString()));
             args.putSerializable(Peer.class.getSimpleName(), peer);
             mListener.onPositiveClick(args);
-
-            return true;
         }
+        return true;
     }
 
     private void setOnClickListener(OnClickListener listener) {

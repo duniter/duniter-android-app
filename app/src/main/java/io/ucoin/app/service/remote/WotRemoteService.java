@@ -10,11 +10,14 @@ import org.apache.http.message.BasicNameValuePair;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import io.ucoin.app.model.BlockchainBlock;
 import io.ucoin.app.model.Identity;
 import io.ucoin.app.model.Wallet;
+import io.ucoin.app.model.WotCertification;
 import io.ucoin.app.model.WotIdentityCertifications;
 import io.ucoin.app.model.WotLookupResult;
 import io.ucoin.app.model.WotLookupResults;
@@ -108,6 +111,48 @@ public class WotRemoteService extends BaseRemoteService {
             return null;
         }
         return toIdentity(lookupUid);
+    }
+
+    public List<WotCertification> getCertificationsByPubkey(String pubkey) {
+        List<WotCertification> result = new ArrayList<WotCertification>();
+
+        // Certified by
+        WotIdentityCertifications certifiedByList = getCertifiedBy(pubkey);
+        boolean certifiedByIsEmpty = (certifiedByList == null
+                || certifiedByList.getCertifications() == null);
+
+        Map<String, WotCertification> certifiedByPubkeys = new HashMap<String, WotCertification>();
+        if (!certifiedByIsEmpty) {
+            for (WotCertification certifiedBy : certifiedByList.getCertifications()) {
+                certifiedByPubkeys.put(certifiedBy.getPubkey(), certifiedBy);
+                certifiedBy.setCertifiedBy(true);
+                result.add(certifiedBy);
+            }
+        }
+
+        // Certifiers of
+        WotIdentityCertifications certifiersOfList = getCertifiersOf(pubkey);
+        boolean certifiersOfIsEmpty = (certifiersOfList == null
+                || certifiersOfList.getCertifications() == null);
+        if (!certifiersOfIsEmpty) {
+            for (WotCertification certifier : certifiersOfList.getCertifications()) {
+                certifier.setCertifiedBy(false);
+
+                // If exists, link to other side certification
+                String certifierPubkey = certifier.getPubkey();
+                if (certifiedByPubkeys.containsKey(certifierPubkey)) {
+                    WotCertification certified = certifiedByPubkeys.get(certifierPubkey);
+                    certified.setOtherEnd(certifier);
+                }
+
+                // If only a certifier, just add to the list
+                else {
+                    result.add(certifier);
+                }
+            }
+        }
+
+        return result;
     }
 
     public WotIdentityCertifications getCertifiedBy(String uid) {

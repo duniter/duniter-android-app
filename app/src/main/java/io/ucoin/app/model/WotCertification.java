@@ -11,12 +11,25 @@ public class WotCertification extends Identity{
 
     private static final long serialVersionUID = 2204517069552693026L;
 
-    public WotCertificationTime cert_time;
+    private WotCertificationTime cert_time;
 
     /**
      * Indicate whether the certification is written in the blockchain or not.
      */
-    public boolean written;
+    private boolean written;
+
+    /**
+     * Give the other side certicication
+     * (not in protocol: fill by the service)
+     */
+    private WotCertification otherEnd;
+
+    /**
+     * Given the certification side. If true, certified-by,
+     * if false, certifier of
+     */
+    private boolean isCertifiedBy;
+
 
     public WotCertificationTime getCert_time() {
         return cert_time;
@@ -37,4 +50,27 @@ public class WotCertification extends Identity{
         this.written = written;
     }
 
+    public WotCertification getOtherEnd() {
+        return otherEnd;
+    }
+
+    public void setOtherEnd(WotCertification otherEnd) {
+        this.otherEnd = otherEnd;
+    }
+
+    public boolean isCertifiedBy() {
+        return isCertifiedBy;
+    }
+
+    public void setCertifiedBy(boolean isCertifiedBy) {
+        this.isCertifiedBy = isCertifiedBy;
+    }
+
+
+    public void copy(WotCertification certification) {
+        super.copy(certification);
+        this.cert_time = certification.cert_time;
+        this.written = certification.written;
+        this.isCertifiedBy = certification.isCertifiedBy;
+    }
 }

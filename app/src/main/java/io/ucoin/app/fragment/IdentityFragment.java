@@ -3,29 +3,28 @@ package io.ucoin.app.fragment;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.os.Bundle;
-import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ExpandableListView;
+import android.widget.AdapterView;
+import android.widget.ListView;
 import android.widget.TabHost;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import io.ucoin.app.R;
 import io.ucoin.app.activity.MainActivity;
+import io.ucoin.app.adapter.CertificationListAdapter;
 import io.ucoin.app.adapter.ProgressViewAdapter;
-import io.ucoin.app.adapter.WotExpandableListAdapter;
 import io.ucoin.app.config.Configuration;
 import io.ucoin.app.model.Identity;
 import io.ucoin.app.model.Wallet;
 import io.ucoin.app.model.WotCertification;
-import io.ucoin.app.model.WotIdentityCertifications;
 import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.service.remote.WotRemoteService;
 import io.ucoin.app.technical.AsyncTaskHandleException;
@@ -35,7 +34,7 @@ import io.ucoin.app.technical.DateUtils;
 public class IdentityFragment extends Fragment {
 
     private ProgressViewAdapter mProgressViewAdapter;
-    private WotExpandableListAdapter mWotListAdapter;
+    private CertificationListAdapter mCertificationListAdapter;
     private TextView mTimestampView;
 
     private boolean mSignatureSingleLine = true;
@@ -105,26 +104,20 @@ public class IdentityFragment extends Fragment {
         pubkeyView.setText(identity.getPubkey());
 
         // Wot list
-        ExpandableListView wotListView = (ExpandableListView) view.findViewById(R.id.wot_list_view);
+        ListView wotListView = (ListView) view.findViewById(R.id.wot_list);
         wotListView.setVisibility(View.GONE);
-        mWotListAdapter = new WotExpandableListAdapter(getActivity()) {
-            @Override
-            public String getGroupText(int groupPosition) {
-                return groupPosition == 0 ? getString(R.string.certified_by) : getString(R.string.certifiers_of);
-            }
-        };
-        mWotListAdapter.setItems(WotExpandableListAdapter.EMPTY_ITEMS);
-        wotListView.setAdapter(mWotListAdapter);
+        mCertificationListAdapter = new CertificationListAdapter(getActivity());
+        wotListView.setAdapter(mCertificationListAdapter);
 
         //this listener is not called unless WotExpandableListAdapter.isChildSelectable return true
         //and convertView.onClickListener is not set (in WotExpandableListAdapter)
-        wotListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
+        wotListView.setOnItemClickListener(new ListView.OnItemClickListener() {
             @Override
-            public boolean onChildClick(ExpandableListView parent, View v,
-                                        int groupPosition, int childPosition, long id) {
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
                 // Get certification
-                WotCertification cert = (WotCertification) mWotListAdapter
-                        .getChild(groupPosition, childPosition);
+                WotCertification cert = (WotCertification) mCertificationListAdapter
+                        .getItem(position);
 
                 Fragment fragment = IdentityFragment.newInstance(cert);
                 FragmentManager fragmentManager = getFragmentManager();
@@ -145,8 +138,6 @@ public class IdentityFragment extends Fragment {
                         .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
                         .addToBackStack(fragment.getClass().getSimpleName())
                         .commit();
-
-                return true;
             }
         });
 
@@ -158,7 +149,6 @@ public class IdentityFragment extends Fragment {
                 wotListView);
 
         // Load WOT data
-        mProgressViewAdapter.showProgress(true);
         LoadTask task = new LoadTask(identity);
         task.execute((Void) null);
     }
@@ -219,7 +209,7 @@ public class IdentityFragment extends Fragment {
 
     }
 
-    public class LoadTask extends AsyncTaskHandleException<Void, Void, SparseArray<WotIdentityCertifications>> {
+    public class LoadTask extends AsyncTaskHandleException<Void, Void, List<WotCertification>> {
         private final Identity mIdentity;
 
         LoadTask(Identity identity) {
@@ -227,7 +217,13 @@ public class IdentityFragment extends Fragment {
         }
 
         @Override
-        protected SparseArray<WotIdentityCertifications> doInBackgroundHandleException(Void... params) {
+        protected void onPreExecute() {
+            super.onPreExecute();
+            mProgressViewAdapter.showProgress(true);
+        }
+
+        @Override
+        protected List<WotCertification> doInBackgroundHandleException(Void... params) {
             WotRemoteService service = ServiceLocator.instance().getWotRemoteService();
 
             // Reload identity (if need)
@@ -236,48 +232,28 @@ public class IdentityFragment extends Fragment {
                 mIdentity.setTimestamp(refreshIdentity.getTimestamp());
             }
 
-            SparseArray<WotIdentityCertifications> results = new SparseArray<>();
-
-            // Certified by
-            WotIdentityCertifications certifiedBy = service.getCertifiedBy(mIdentity.getPubkey());
-            if (certifiedBy == null
-                    || certifiedBy.getCertifications() == null) {
-                certifiedBy = new WotIdentityCertifications();
-                certifiedBy.setCertifications(new ArrayList<WotCertification>());
-            }
-            results.append(0, certifiedBy);
-
-            // Certifiers of
-            WotIdentityCertifications certifiersOf = service.getCertifiersOf(mIdentity.getPubkey());
-            if (certifiersOf == null
-                    || certifiersOf.getCertifications() == null) {
-                certifiersOf = new WotIdentityCertifications();
-                certifiersOf.setCertifications(new ArrayList<WotCertification>());
-            }
-            results.append(1, certifiedBy);
-
-            return results;
+            // Get certifications
+            return service.getCertificationsByPubkey(mIdentity.getPubkey());
         }
 
         @Override
-        protected void onSuccess(SparseArray<WotIdentityCertifications> wotCertifications) {
+        protected void onSuccess(List<WotCertification> certifications) {
 
-            // Update WOT
-            if (wotCertifications == null || wotCertifications.size() == 0) {
-                mWotListAdapter.setItems(WotExpandableListAdapter.EMPTY_ITEMS);
-                return;
-            }
-            mWotListAdapter.setItems(wotCertifications);
-
-            // update timestamp
+            // Update timestamp
             mTimestampView.setText(DateUtils.format(mIdentity.getTimestamp()));
+
+            // Update certification list
+            mCertificationListAdapter.clear();
+            if (certifications != null && certifications.size() > 0) {
+                mCertificationListAdapter.addAll(certifications);
+            }
 
             mProgressViewAdapter.showProgress(false);
         }
 
         @Override
         protected void onFailed(Throwable t) {
-            mWotListAdapter.setItems(WotExpandableListAdapter.EMPTY_ITEMS);
+            mCertificationListAdapter.clear();
             mProgressViewAdapter.showProgress(false);
             onError(t);
         }
@@ -302,12 +278,13 @@ public class IdentityFragment extends Fragment {
         @Override
         protected Boolean doInBackgroundHandleException(Void... params) {
             Configuration config = Configuration.instance();
-            Wallet wallet = config.getCurrentWallet();
+            Wallet wallet = config.getCurrentWallet(); // TODO: replace with curent account identity
 
             WotRemoteService service = ServiceLocator.instance().getWotRemoteService();
 
             // Send certification
             String result = service.sendCertification(wallet, mIdentity);
+
 
             return true;
         }
@@ -315,6 +292,14 @@ public class IdentityFragment extends Fragment {
         @Override
         protected void onSuccess(Boolean success) {
             if (success) {
+                Configuration config = Configuration.instance();
+                Wallet wallet = config.getCurrentWallet(); // TODO: replace with curent account identity
+
+                WotCertification certification = new WotCertification();
+                certification.copy(wallet.getIdentity());
+                certification.setCertifiedBy(false);
+                mCertificationListAdapter.add(certification);
+
                 // TODO NLS
                 Toast.makeText(getActivity(),
                         "Successfully sign " + mIdentity.getUid(),
@@ -325,7 +310,6 @@ public class IdentityFragment extends Fragment {
 
         @Override
         protected void onFailed(Throwable t) {
-            mWotListAdapter.setItems(WotExpandableListAdapter.EMPTY_ITEMS);
             mProgressViewAdapter.showProgress(false);
             //mSignButton.setActivated(true);
             onError(t);

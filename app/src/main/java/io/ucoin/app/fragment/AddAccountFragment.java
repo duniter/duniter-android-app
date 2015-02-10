@@ -151,15 +151,17 @@ public class AddAccountFragment extends Fragment {
             focusView.requestFocus();
             return false;
         }
-        else {
+
+        // Send result to listener
+        if (mListener != null) {
             // Send the result to the listener
             Bundle args = new Bundle();
             args.putSerializable("uid", uid);
             args.putSerializable("salt", salt);
             args.putSerializable("password", password);
             mListener.onPositiveClick(args);
-            return true;
         }
+        return true;
     }
 
     private void setOnClickListener(OnClickListener listener) {

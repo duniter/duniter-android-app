@@ -1,5 +1,8 @@
 package io.ucoin.app.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.io.Serializable;
 
 import io.ucoin.app.technical.crypto.CryptoUtils;
@@ -9,7 +12,7 @@ import io.ucoin.app.technical.crypto.KeyPair;
  * A wallet is a user account
  * Created by eis on 13/01/15.
  */
-public class Wallet extends KeyPair implements LocalEntity, Serializable {
+public class Wallet extends KeyPair implements LocalEntity, Serializable, Parcelable {
 
 
     private Long id;
@@ -135,5 +138,15 @@ public class Wallet extends KeyPair implements LocalEntity, Serializable {
 
     public String toString() {
         return name;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeSerializable(this);
     }
 }

@@ -12,26 +12,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.ucoin.app.R;
-import io.ucoin.app.model.Identity;
+import io.ucoin.app.model.WotCertification;
 import io.ucoin.app.technical.DateUtils;
 
-public class IdentityArrayAdapter extends ArrayAdapter<Identity> {
+public class CertificationListAdapter extends ArrayAdapter<WotCertification> {
 
-    private static final int DEFAULT_LAYOUT_RES = R.layout.list_item_identity;
+    private static final int DEFAULT_LAYOUT_RES = R.layout.list_item_certification;
 
-    public IdentityArrayAdapter(Context context) {
-        this(context, new ArrayList<Identity>());
+    public CertificationListAdapter(Context context) {
+        this(context, new ArrayList<WotCertification>());
     }
 
-    public IdentityArrayAdapter(Context context, List<Identity> identities) {
-        super(context, DEFAULT_LAYOUT_RES, identities);
+    public CertificationListAdapter(Context context, List<WotCertification> certifications) {
+        super(context, DEFAULT_LAYOUT_RES, certifications);
     }
-
 
     @Override
     public View getView(int position, View convertView, ViewGroup container) {
         // Retrieve the item
-        Identity identity = getItem(position);
+        WotCertification certification = getItem(position);
         ViewHolder viewHolder;
 
         //inflate
@@ -49,21 +48,17 @@ public class IdentityArrayAdapter extends ArrayAdapter<Identity> {
         }
 
         // Icon
-        viewHolder.icon.setImageResource(IdentityViewUtils.getImage(identity));
+        viewHolder.icon.setImageResource(IdentityViewUtils.getCertificationImage(certification));
 
         // Uid
-        viewHolder.uid.setText(identity.getUid());
+        viewHolder.uid.setText(certification.getUid());
 
-        // pubKey
-        String pubKey = identity.getPubkey();
-        // TODO : cut if too long ??
-        //if (pubKey != null && pubKey.length() > 10) {
-        //    pubKey = pubKey.substring(0,10) + "...";
-        //}
+        // PubKey
+        String pubKey = certification.getPubkey();
         viewHolder.pubkey.setText(pubKey);
 
-        // timestamp (join date)
-        long timestamp = identity.getTimestamp();
+        // Timestamp (join date)
+        long timestamp = certification.getTimestamp();
         viewHolder.timestamp.setText(DateUtils.format(timestamp));
 
         return convertView;
@@ -76,4 +71,5 @@ public class IdentityArrayAdapter extends ArrayAdapter<Identity> {
         TextView pubkey;
         TextView timestamp;
     }
+
 }

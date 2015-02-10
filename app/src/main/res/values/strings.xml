@@ -42,6 +42,7 @@
     <string name="no_wallet">No wallet</string>
     <string name="credit">credit: %s</string>
 
+
     <!-- Strings related to transfer/transaction -->
     <string name="wallet_transmitter">Wallet</string>
     <string name="wallet_transmitter_hint">Wallet</string>
