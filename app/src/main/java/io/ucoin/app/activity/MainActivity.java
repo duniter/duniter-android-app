@@ -73,6 +73,7 @@ public class MainActivity extends ActionBarActivity
         //Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler(this));
         DateUtils.setDefaultMediumDateFormat(getMediumDateFormat());
         DateUtils.setDefaultLongDateFormat(getLongDateFormat());
+        DateUtils.setDefaultShortDateFormat(getShortDateFormat());
 
         // Init configuration
         Configuration config = new Configuration();
@@ -341,6 +342,11 @@ public class MainActivity extends ActionBarActivity
     protected DateFormat getLongDateFormat() {
         return android.text.format.DateFormat.getLongDateFormat(getApplicationContext());
     }
+
+    protected DateFormat getShortDateFormat() {
+        return android.text.format.DateFormat.getDateFormat(getApplicationContext());
+    }
+
 
     public Account loadLastAccountUsed(AccountManager accountManager, Account[] accounts) {
 

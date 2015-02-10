@@ -1,6 +1,7 @@
 package io.ucoin.app.fragment;
 
 import android.app.Fragment;
+import android.content.Context;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -13,6 +14,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
@@ -300,7 +302,7 @@ public class TransferFragment extends Fragment {
                         mWallet = authWallet;
                         // TODO : wallet has changed : so display again the transfert fragment ??
                     }
-                    getFragmentManager().popBackStack();
+                    getFragmentManager().popBackStack(); // return to transfer
                     doTransfert();
                 }
             });
@@ -411,6 +413,15 @@ public class TransferFragment extends Fragment {
 
         @Override
         protected void onPreExecute() {
+            // Hide the keyboard, in case we come from imeDone)
+            InputMethodManager inputManager = (InputMethodManager)
+                    getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            inputManager.hideSoftInputFromWindow((null == getActivity().getCurrentFocus())
+                            ? null
+                            : getActivity().getCurrentFocus().getWindowToken(),
+                    InputMethodManager.HIDE_NOT_ALWAYS);
+
+            // Show the progress bar
             mProgressViewAdapter.showProgress(true);
         }
 
@@ -442,12 +453,14 @@ public class TransferFragment extends Fragment {
             mProgressViewAdapter.showProgress(false);
             if (success == null || !success.booleanValue()) {
                 Toast.makeText(getActivity(),
-                        "Could not send transaction.",
+                        getString(R.string.transfer_error),
                         Toast.LENGTH_SHORT).show();
             }
             else {
+                getFragmentManager().popBackStack(); // return back
+
                 Toast.makeText(getActivity(),
-                        "Successfully send transaction. Waiting processing by blockchain...",
+                        getString(R.string.transfer_sended),
                         Toast.LENGTH_LONG).show();
                 // TODO smoul : could you go back to previous fragment ?
                 // Or maybe to a new transaction history fragment ?

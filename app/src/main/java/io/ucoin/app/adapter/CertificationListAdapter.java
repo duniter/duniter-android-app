@@ -41,7 +41,7 @@ public class CertificationListAdapter extends ArrayAdapter<WotCertification> {
             viewHolder.icon = (ImageView) convertView.findViewById(R.id.icon);
             viewHolder.uid = (TextView) convertView.findViewById(R.id.uid);
             viewHolder.pubkey = (TextView) convertView.findViewById(R.id.pubkey);
-            viewHolder.timestamp = (TextView) convertView.findViewById(R.id.timestamp);
+            viewHolder.cert_time = (TextView) convertView.findViewById(R.id.cert_time);
             convertView.setTag(viewHolder);
         } else {
             viewHolder = (ViewHolder) convertView.getTag();
@@ -58,8 +58,11 @@ public class CertificationListAdapter extends ArrayAdapter<WotCertification> {
         viewHolder.pubkey.setText(pubKey);
 
         // Timestamp (join date)
-        long timestamp = certification.getTimestamp();
-        viewHolder.timestamp.setText(DateUtils.format(timestamp));
+        long timestamp = -1;
+        if (certification.getCert_time() != null) {
+            timestamp = certification.getCert_time().getMedianTime();
+        }
+        viewHolder.cert_time.setText(DateUtils.format(timestamp));
 
         return convertView;
     }
@@ -69,7 +72,7 @@ public class CertificationListAdapter extends ArrayAdapter<WotCertification> {
         ImageView icon;
         TextView uid;
         TextView pubkey;
-        TextView timestamp;
+        TextView cert_time;
     }
 
 }

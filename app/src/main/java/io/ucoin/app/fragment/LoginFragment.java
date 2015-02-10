@@ -1,6 +1,7 @@
 package io.ucoin.app.fragment;
 
 import android.app.Fragment;
+import android.content.Context;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.KeyEvent;
@@ -8,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -272,6 +274,15 @@ public class LoginFragment extends Fragment {
 
         @Override
         protected void onPreExecute() {
+            // Hide the keyboard, in case we come from imeDone)
+            InputMethodManager inputManager = (InputMethodManager)
+                    getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            inputManager.hideSoftInputFromWindow((null == getActivity().getCurrentFocus())
+                            ? null
+                            : getActivity().getCurrentFocus().getWindowToken(),
+                    InputMethodManager.HIDE_NOT_ALWAYS);
+
+            // SHow the progress bar
             mProgressViewAdapter.showProgress(true);
         }
 

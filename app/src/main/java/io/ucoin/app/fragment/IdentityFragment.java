@@ -10,16 +10,16 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TabHost;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.List;
-
 import io.ucoin.app.R;
 import io.ucoin.app.activity.MainActivity;
 import io.ucoin.app.adapter.CertificationListAdapter;
+import io.ucoin.app.adapter.IdentityViewUtils;
 import io.ucoin.app.adapter.ProgressViewAdapter;
 import io.ucoin.app.config.Configuration;
 import io.ucoin.app.model.Identity;
@@ -33,9 +33,12 @@ import io.ucoin.app.technical.DateUtils;
 
 public class IdentityFragment extends Fragment {
 
+    private static String ARGS_TAB_INDEX = "tabIndex";
+
     private ProgressViewAdapter mProgressViewAdapter;
     private CertificationListAdapter mCertificationListAdapter;
     private TextView mTimestampView;
+    private TabHost mTabs;
 
     private boolean mSignatureSingleLine = true;
     private boolean mPubKeySingleLine = true;
@@ -44,6 +47,17 @@ public class IdentityFragment extends Fragment {
         IdentityFragment fragment = new IdentityFragment();
         Bundle newInstanceArgs = new Bundle();
         newInstanceArgs.putSerializable(Identity.class.getSimpleName(), identity);
+        newInstanceArgs.putInt(ARGS_TAB_INDEX, 0);
+        fragment.setArguments(newInstanceArgs);
+
+        return fragment;
+    }
+
+    public static IdentityFragment newInstance(Identity identity, int tabIndex) {
+        IdentityFragment fragment = new IdentityFragment();
+        Bundle newInstanceArgs = new Bundle();
+        newInstanceArgs.putSerializable(Identity.class.getSimpleName(), identity);
+        newInstanceArgs.putInt(ARGS_TAB_INDEX, tabIndex);
         fragment.setArguments(newInstanceArgs);
 
         return fragment;
@@ -70,26 +84,32 @@ public class IdentityFragment extends Fragment {
         Bundle newInstanceArgs = getArguments();
         final Identity identity = (Identity) newInstanceArgs
                 .getSerializable(Identity.class.getSimpleName());
+        final int tabIndex = newInstanceArgs.getInt(ARGS_TAB_INDEX);
 
         // Tab host
-        TabHost tabs = (TabHost)view.findViewById(R.id.tabHost);
-        tabs.setup();
+        mTabs = (TabHost)view.findViewById(R.id.tabHost);
+        mTabs.setup();
         {
-            TabHost.TabSpec spec = tabs.newTabSpec("tab1");
+            TabHost.TabSpec spec = mTabs.newTabSpec("tab1");
             spec.setContent(R.id.tab1);
             spec.setIndicator(getString(R.string.identity_details));
-            tabs.addTab(spec);
+            mTabs.addTab(spec);
         }
         {
-            TabHost.TabSpec spec = tabs.newTabSpec("tab2");
+            TabHost.TabSpec spec = mTabs.newTabSpec("tab2");
             spec.setContent(R.id.tab2);
             spec.setIndicator(getString(R.string.community));
-            tabs.addTab(spec);
+            mTabs.addTab(spec);
         }
+        mTabs.setCurrentTab(tabIndex);
 
         //Uid
         TextView uidView = (TextView) view.findViewById(R.id.uid);
         uidView.setText(identity.getUid());
+
+        // Icon
+        ImageView icon = (ImageView)view.findViewById(R.id.qr_code);
+        icon.setImageResource(IdentityViewUtils.getImageWhite(identity));
 
         // Timestamp
         mTimestampView = (TextView) view.findViewById(R.id.timestamp);
@@ -119,7 +139,7 @@ public class IdentityFragment extends Fragment {
                 WotCertification cert = (WotCertification) mCertificationListAdapter
                         .getItem(position);
 
-                Fragment fragment = IdentityFragment.newInstance(cert);
+                Fragment fragment = IdentityFragment.newInstance(cert, mTabs.getCurrentTab());
                 FragmentManager fragmentManager = getFragmentManager();
 
                 fragmentManager.beginTransaction()
@@ -209,7 +229,7 @@ public class IdentityFragment extends Fragment {
 
     }
 
-    public class LoadTask extends AsyncTaskHandleException<Void, Void, List<WotCertification>> {
+    public class LoadTask extends AsyncTaskHandleException<Void, Void, WotCertification[]> {
         private final Identity mIdentity;
 
         LoadTask(Identity identity) {
@@ -223,7 +243,7 @@ public class IdentityFragment extends Fragment {
         }
 
         @Override
-        protected List<WotCertification> doInBackgroundHandleException(Void... params) {
+        protected WotCertification[] doInBackgroundHandleException(Void... params) {
             WotRemoteService service = ServiceLocator.instance().getWotRemoteService();
 
             // Reload identity (if need)
@@ -237,14 +257,14 @@ public class IdentityFragment extends Fragment {
         }
 
         @Override
-        protected void onSuccess(List<WotCertification> certifications) {
+        protected void onSuccess(WotCertification[] certifications) {
 
             // Update timestamp
             mTimestampView.setText(DateUtils.format(mIdentity.getTimestamp()));
 
             // Update certification list
             mCertificationListAdapter.clear();
-            if (certifications != null && certifications.size() > 0) {
+            if (certifications != null && certifications.length  > 0) {
                 mCertificationListAdapter.addAll(certifications);
             }
 

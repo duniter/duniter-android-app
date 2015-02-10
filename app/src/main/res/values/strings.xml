@@ -92,6 +92,10 @@
     <string name="currencies">Currencies</string>
     <string name="members">Members</string>
     <string name="members_count">%s members</string>
+    <string name="transfer_sended">Transfer sended.\nWaiting network processing.</string>
+    <string name="transfer_error">Could not send transfer (technical error)</string>
+    <string name="cert_date">signature date</string>
+
 
     <!-- Strings related to peer/node -->
     <string name="enter_node_info">Enter node info</string>

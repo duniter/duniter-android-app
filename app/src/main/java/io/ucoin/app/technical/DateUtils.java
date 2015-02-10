@@ -13,6 +13,7 @@ public class DateUtils {
 
     private static DateFormat DEFAULT_MEDIUM_DATE_FORMAT = new SimpleDateFormat();
     private static DateFormat DEFAULT_LONG_DATE_FORMAT = new SimpleDateFormat();
+    private static DateFormat DEFAULT_SHORT_DATE_FORMAT = new SimpleDateFormat();
 
 	protected DateUtils() {
 		// Helper class
@@ -25,6 +26,9 @@ public class DateUtils {
     public static void setDefaultLongDateFormat(DateFormat defaultDateFormat) {
         DEFAULT_LONG_DATE_FORMAT = defaultDateFormat;
     }
+    public static void setDefaultShortDateFormat(DateFormat defaultDateFormat) {
+        DEFAULT_SHORT_DATE_FORMAT = defaultDateFormat;
+    }
 
 
     public static String format(Date date) {
@@ -34,6 +38,11 @@ public class DateUtils {
     public static String format(long timestamp) {
         return timestamp > 0
                 ? DEFAULT_MEDIUM_DATE_FORMAT.format(new Date(timestamp * 1000))
+                : null;
+    }
+    public static String formatShort(long timestamp) {
+        return timestamp > 0
+                ? DEFAULT_SHORT_DATE_FORMAT.format(new Date(timestamp * 1000))
                 : null;
     }
 

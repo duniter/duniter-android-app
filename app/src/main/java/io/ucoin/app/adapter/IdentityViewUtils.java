@@ -12,14 +12,17 @@ import io.ucoin.app.model.WotCertification;
  */
 public class IdentityViewUtils {
 
-    // IDentity
-    private static final Integer IMAGE_MEMBER = R.drawable.male12;
-    private static final Integer IMAGE_NON_MEMBER = R.drawable.ic_launcher;
+    // Identity
+    private static final Integer IMAGE_MEMBER = R.drawable.ic_member_32dp;
+    private static final Integer IMAGE_NON_MEMBER = R.drawable.ic_user_32dp;
+
+    private static final Integer IMAGE_WHITE_MEMBER = R.drawable.ic_member_white_32dp;
+    private static final Integer IMAGE_WHITE_NON_MEMBER = R.drawable.ic_user_white_32dp;
 
     // Certification
-    private static final Integer IMAGE_CERTIFIED_BY = R.drawable.male12;
-    private static final Integer IMAGE_CERTIFIER_OF = R.drawable.marketing8;
-    private static final Integer IMAGE_BOTH_CERT = R.drawable.ic_launcher;
+    private static final Integer IMAGE_CERTIFIED_BY = R.drawable.ic_certified_by;
+    private static final Integer IMAGE_CERTIFIER_OF = R.drawable.ic_certifier_of;
+    private static final Integer IMAGE_BOTH_CERT = R.drawable.ic_dual_cert;
 
     public static int getImage(Identity identity) {
         // TODO : check member state ?
@@ -27,6 +30,14 @@ public class IdentityViewUtils {
         boolean isMember = true;
 
         return isMember ? IMAGE_MEMBER : IMAGE_NON_MEMBER;
+    }
+
+    public static int getImageWhite(Identity identity) {
+        // TODO : check member state ?
+        // get if member or not
+        boolean isMember = true;
+
+        return isMember ? IMAGE_WHITE_MEMBER : IMAGE_WHITE_NON_MEMBER;
     }
 
     public static Uri getUri(Identity identity) {

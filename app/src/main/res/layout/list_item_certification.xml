@@ -25,22 +25,23 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:paddingLeft="8dp"
     android:paddingRight="8dp"
     android:minHeight="?android:listPreferredItemHeight"
     android:gravity="center_vertical">
 
     <ImageView
-        android:src="@drawable/male12"
+        android:src="@drawable/ic_dual_cert"
         android:id="@+id/icon"
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_marginLeft="5dp"
-        android:layout_marginRight="5dp"
+        android:layout_marginRight="8dp"
         android:layout_marginTop="4dp"
         android:layout_marginBottom="4dp"
-        android:duplicateParentState="true" />
+        android:duplicateParentState="true"
+        android:layout_weight="0.05" />
 
     <!--
         The duplicateParentState attribute on this TextView, along with the color state list
@@ -50,71 +51,64 @@
 
     <LinearLayout
         android:duplicateParentState="true"
-        android:layout_width="0dp"
-        android:layout_weight="1"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
-
-    <LinearLayout
-        android:duplicateParentState="true"
-        android:layout_height="wrap_content"
-        android:layout_width="fill_parent"
-        android:orientation="horizontal">
-
+        android:layout_width="wrap_content"
+        android:orientation="vertical"
+        android:layout_weight="0.7">
         <TextView
             android:id="@+id/uid"
             android:duplicateParentState="true"
-            android:layout_width="match_parent"
-            android:layout_weight="1"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:textAppearanceMedium"
             android:textColor="@color/hideable_text_color"
             android:text="uid"
-            android:layout_gravity="left|center_vertical"
+            android:layout_gravity="left|top"
             android:textSize="18sp"/>
-
-        <TextView
-            android:id="@+id/timestamp"
-            android:duplicateParentState="true"
-            android:layout_width="match_parent"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:textAppearanceMedium"
-            android:textColor="@color/hideable_text_color"
-            android:layout_gravity="right|center_vertical"
-            android:text="timestamp"
-            android:textSize="14sp"/>
-
-    </LinearLayout>
 
         <TextView
             android:id="@+id/pubkey"
             android:duplicateParentState="true"
             android:layout_width="match_parent"
-            android:layout_weight="1"
             android:layout_height="wrap_content"
             android:textAppearance="?android:textAppearanceMedium"
             android:textColor="@color/hideable_text_color"
             android:text="G2CBgZBPLe6FSFUgpx2Jf1Aqsgta6iib3vmDRA1yLiqU"
             android:textSize="12sp"
             android:singleLine="true"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:duplicateParentState="true"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:orientation="vertical"
+        android:layout_gravity="center_vertical|right"
+        android:layout_weight="0.25">
+
+        <TextView
+            android:duplicateParentState="true"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:textAppearanceMedium"
+            android:textColor="@color/hideable_text_color"
+            android:layout_gravity="top"
+            android:gravity="right"
+            android:text="@string/cert_date"
+            android:textSize="10sp"/>
+
+        <TextView
+            android:id="@+id/cert_time"
+            android:duplicateParentState="true"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:textAppearanceMedium"
+            android:textColor="@color/hideable_text_color"
+            android:layout_gravity="bottom"
+            android:gravity="right"
+            android:text="cert_time"
+            android:textSize="14sp"/>
 
     </LinearLayout>
-    <!--
-        The duplicateParentState attribute on this ImageView, along with the state list
-        drawable in the src attribute causes its image to change when its parent
-        is checked or unchecked.
-
-        To use the standard radio or checkmark image, set the src to
-        ?android:listChoiceIndicatorMultiple or ?android:listChoiceIndicatorSingle. These
-        are system theme attributes that reference a state list drawable.
-    -->
-    <ImageView
-        android:id="@+id/choiceIndicator"
-        android:src="?android:listChoiceIndicatorSingle"
-        android:duplicateParentState="true"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="16dp"/>
 
 </io.ucoin.app.layout.CheckableLinearLayout>
