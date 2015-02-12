@@ -114,7 +114,7 @@ public class TransferFragment extends Fragment {
 
            @Override
            public void onTextChanged(CharSequence s, int start, int before, int count) {
-               updateComvertedAmountView(mAmountText, mConvertedText, mIsCoinUnit);
+               updateComvertedAmountView(mIsCoinUnit);
            }
 
            @Override
@@ -128,20 +128,6 @@ public class TransferFragment extends Fragment {
 
         // Converted amount
         mConvertedText = (TextView)view.findViewById(R.id.converted_amount);
-        mConvertedText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                updateComvertedAmountView(mConvertedText, mAmountText, !mIsCoinUnit);
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-            }
-        });
 
         // Converted unit
         mConvertedUnitText = (TextView)view.findViewById(R.id.converted_amount_unit_text);
@@ -314,27 +300,22 @@ public class TransferFragment extends Fragment {
         CharSequence amountUnitText = mAmountUnitText.getText();
         mAmountUnitText.setText(mConvertedUnitText.getText());
         mConvertedUnitText.setText(amountUnitText);
-        updateComvertedAmountView(mIsCoinUnit ? mAmountText : mConvertedText,
-                mIsCoinUnit ? mConvertedText : mAmountText,
-                mIsCoinUnit
-                );
+        updateComvertedAmountView(mIsCoinUnit);
     }
 
-    protected void updateComvertedAmountView(TextView amountView,
-                                             TextView convertedAmountView,
-                                             boolean isCoinUnit) {
+    protected void updateComvertedAmountView(boolean isCoinUnit) {
         // If data not loaded: do nothing
         if (mUniversalDividend == null || mIsRunningConvertion) {
             return;
         }
         mIsRunningConvertion = true;
 
-        CharSequence amountStr = amountView.getText();
+        String amountStr = mAmountText.getText().toString();
         if (TextUtils.isEmpty(amountStr)) {
-            convertedAmountView.setText("");
+            mConvertedText.setText("");
         }
         else {
-            double amount = Double.parseDouble(amountStr.toString());
+            double amount = Double.parseDouble(amountStr);
 
             double convertedAmount;
             // if amount unit = coins
@@ -346,11 +327,8 @@ public class TransferFragment extends Fragment {
                 convertedAmount = amount * mUniversalDividend;
             }
 
-            convertedAmountView.setText(Double.toString(convertedAmount));
-            convertedAmountView.setTextAppearance(getActivity(), R.style.FormText_Computed);
+            mConvertedText.setText(Double.toString(convertedAmount));
 
-            // make the amount has the normal style
-            amountView.setTextAppearance(getActivity(), R.style.FormText_Editable);
         }
         mIsRunningConvertion = false;
     }
