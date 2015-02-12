@@ -1,15 +1,9 @@
 package io.ucoin.app.database;
 
 
-import android.app.Activity;
-import android.content.ContentUris;
-import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.net.Uri;
-
-import io.ucoin.app.content.Provider;
 
 public class DatabaseHelper extends SQLiteOpenHelper implements Contract {
 
@@ -163,40 +157,4 @@ public class DatabaseHelper extends SQLiteOpenHelper implements Contract {
         onCreate(db);
     }
 
-    public static io.ucoin.app.model.Currency insertCurrency(Activity activity,
-                                      String accountId,
-                                      io.ucoin.app.model.Currency currency
-                                      ) {
-
-        io.ucoin.app.model.Peer[] peers = currency.getPeers();
-
-        //add Currency to database
-        ContentValues values = new ContentValues();
-        values.put(Contract.Currency.ACCOUNT_ID, accountId);
-        values.put(Contract.Currency.CURRENCY_NAME, currency.getCurrencyName());
-        values.put(Contract.Currency.MEMBERS_COUNT, currency.getMembersCount());
-        values.put(Contract.Currency.FIRST_BLOCK_SIGNATURE, currency.getFirstBlockSignature());
-
-        Uri uri = Uri.parse(Provider.CONTENT_URI + "/currency/");
-        uri = activity.getContentResolver().insert(uri, values);
-        Long currencyId = ContentUris.parseId(uri);
-        currency.setId(currencyId);
-
-        //add Peer to database
-        io.ucoin.app.model.Peer peer = peers[0];
-
-        if (peer != null) {
-
-            values = new ContentValues();
-            values.put(Contract.Peer.CURRENCY_ID, Long.toString(currencyId));
-            values.put(Contract.Peer.HOST, peer.getHost());
-            values.put(Contract.Peer.PORT, Integer.toString(peer.getPort()));
-            uri = Uri.parse(Provider.CONTENT_URI + "/peer/");
-            uri = activity.getContentResolver().insert(uri, values);
-            Long peerId = ContentUris.parseId(uri);
-            peer.setId(peerId);
-        }
-
-        return currency;
-    }
 }

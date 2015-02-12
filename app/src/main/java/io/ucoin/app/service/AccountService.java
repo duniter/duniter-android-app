@@ -15,6 +15,7 @@ import io.ucoin.app.model.Account;
 import io.ucoin.app.model.Currency;
 import io.ucoin.app.model.Peer;
 import io.ucoin.app.model.Wallet;
+import io.ucoin.app.service.exception.DuplicatePubkeyException;
 import io.ucoin.app.service.remote.TransactionRemoteService;
 import io.ucoin.app.technical.DummyProgressModel;
 import io.ucoin.app.technical.ObjectUtils;
@@ -41,7 +42,7 @@ public class AccountService extends BaseService {
             String uid,
             String salt,
             String password,
-            Peer peer) {
+            Peer peer) throws DuplicatePubkeyException {
         return create(
                 context,
                 uid,
@@ -57,7 +58,7 @@ public class AccountService extends BaseService {
             String salt,
             String password,
             Peer peer,
-            ProgressModel progressModel) {
+            ProgressModel progressModel) throws DuplicatePubkeyException {
 
         progressModel.setProgress(0);
         progressModel.setMax(7);

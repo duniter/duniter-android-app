@@ -4,6 +4,15 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+    <ProgressBar
+        android:id="@+id/search_progress"
+        style="?android:attr/progressBarStyleInverse"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_gravity="center_horizontal|center_vertical"
+        android:visibility="gone" />
+
     <ListView
         android:id="@android:id/list"
         android:layout_width="match_parent"
@@ -21,8 +30,6 @@
         android:textColor="@color/hideable_text_color"
         android:textSize="18sp"
         android:layout_margin="8dp"/>
-
-
 
     <!-- Bottom toolbar -->
     <LinearLayout

@@ -1,18 +1,23 @@
 package io.ucoin.app.service;
 
+import android.app.Activity;
 import android.app.Application;
+import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+import android.provider.BaseColumns;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import io.ucoin.app.R;
 import io.ucoin.app.content.Provider;
 import io.ucoin.app.database.Contract;
 import io.ucoin.app.model.Wallet;
+import io.ucoin.app.service.exception.DuplicatePubkeyException;
 import io.ucoin.app.technical.ObjectUtils;
 import io.ucoin.app.technical.StringUtils;
 import io.ucoin.app.technical.UCoinTechnicalException;
@@ -23,15 +28,21 @@ import io.ucoin.app.technical.crypto.CryptoUtils;
  */
 public class WalletService extends BaseService {
 
-    /** Logger. */
+    /**
+     * Logger.
+     */
     private static final String TAG = "WalletService";
+
+    // a cache instance of the wallet Uri
+    // Could NOT be static, because Uri is initialize in Provider.onCreate() method ;(
+    private Uri mWalletUri = null;
 
     public WalletService() {
         super();
     }
 
 
-    public Wallet save(final Context context, final Wallet wallet) {
+    public Wallet save(final Context context, final Wallet wallet) throws DuplicatePubkeyException {
         ObjectUtils.checkNotNull(wallet);
         ObjectUtils.checkNotNull(wallet.getCurrencyId());
         ObjectUtils.checkNotNull(wallet.getAccountId());
@@ -40,40 +51,153 @@ public class WalletService extends BaseService {
         ObjectUtils.checkNotNull(wallet.getIsMember());
         ObjectUtils.checkNotNull(wallet.getCredit());
 
-        // Create
+        // Make sure public key is unique
+        checkPubKeyUnique(context, wallet);
+
+        // create if not exists
         if (wallet.getId() == null) {
-            return insert(context, wallet);
+
+            insert(context.getContentResolver(), wallet);
         }
 
-        // TODO : update
-        return null;
+        // or update
+        else {
+            update(context.getContentResolver(), wallet);
+        }
+
+        // return the updated wallet (id could have change)
+        return wallet;
+    }
+
+    public List<Wallet> getWallets(Activity activity) {
+        return getWallets(activity.getApplication());
     }
 
     public List<Wallet> getWallets(Application application) {
         String accountId = ((io.ucoin.app.Application) application).getAccountId();
-        return getWalletsByAccountId(application, Long.parseLong(accountId));
+        return getWalletsByAccountId(application.getContentResolver(), Long.parseLong(accountId));
     }
 
-    public List<Wallet> getWalletsByAccountId(Context context, long accountId) {
+    /* -- internal methods-- */
 
-        Uri uri = Uri.parse(Provider.CONTENT_URI + "/wallet/");
+    private List<Wallet> getWalletsByAccountId(ContentResolver resolver, long accountId) {
+
         String selection = Contract.Currency.ACCOUNT_ID + "=?";
         String[] selectionArgs = {
                 String.valueOf(accountId)
         };
-        Cursor cursor = context.getContentResolver().query(uri, new String[]{}, selection,
+        Cursor cursor = resolver.query(getContentUri(), new String[]{}, selection,
                 selectionArgs, null);
 
         List<Wallet> result = new ArrayList<Wallet>();
         while (cursor.moveToNext()) {
-            Wallet wallet = read(cursor);
+            Wallet wallet = toWallet(cursor);
             result.add(wallet);
         }
+        cursor.close();
 
         return result;
     }
 
-    public Wallet read(final Cursor cursor) {
+    private void checkPubKeyUnique(
+            final Context context,
+            final Wallet wallet) throws DuplicatePubkeyException {
+        if (!isDuplicatePubKeyExists(
+                context.getContentResolver(),
+                wallet.getPubKeyHash(),
+                wallet.getAccountId(),
+                wallet.getId())) {
+            throw new DuplicatePubkeyException(context.getString(R.string.duplicate_pubkey,
+                    wallet.getPubKeyHash()));
+        }
+    }
+
+    private boolean isDuplicatePubKeyExists(
+            final ContentResolver resolver,
+            final String pubkey,
+            final long accountId,
+            final Long excludedWalletId) {
+        String[] projection = new String[]{BaseColumns._ID};
+
+        String selection;
+        String[] selectionArgs;
+        if (excludedWalletId != null) {
+            selection = String.format("%s=? and %s=? and %s<>?",
+                    Contract.Wallet.ACCOUNT_ID,
+                    Contract.Wallet.PUBLIC_KEY,
+                    Contract.Wallet._ID
+            );
+            selectionArgs = new String[] {
+                    String.valueOf(accountId),
+                    String.valueOf(pubkey),
+                    String.valueOf(excludedWalletId)
+            };
+        }
+        else {
+            selection = String.format("%s=? and %s=?",
+                    Contract.Wallet.ACCOUNT_ID,
+                    Contract.Wallet.PUBLIC_KEY
+            );
+            selectionArgs = new String[] {
+                    String.valueOf(accountId),
+                    String.valueOf(pubkey)
+            };
+        }
+        Cursor cursor = resolver.query(getContentUri(),
+                projection,
+                selection,
+                selectionArgs,
+                null);
+        boolean exists = cursor.moveToFirst();
+        cursor.close();
+
+        return exists;
+    }
+
+    public void insert(final ContentResolver resolver, final Wallet source) {
+
+        ContentValues target = toContentValues(source);
+
+        Uri uri = resolver.insert(getContentUri(), target);
+        Long walletId = ContentUris.parseId(uri);
+        if (walletId < 0) {
+            throw new UCoinTechnicalException("Error while inserting wallet");
+        }
+
+        // Refresh the inserted account
+        source.setId(walletId);
+    }
+
+    public void update(final ContentResolver resolver, final Wallet source) {
+        ObjectUtils.checkNotNull(source.getId());
+
+        ContentValues target = toContentValues(source);
+
+        Uri uri = ContentUris.withAppendedId(getContentUri(), source.getId());
+        int rowsUpdated = resolver.update(uri, target, null, null);
+        if (rowsUpdated != 1) {
+            throw new UCoinTechnicalException(String.format("Error while updating wallet. %s rows updated.", rowsUpdated));
+        }
+    }
+
+    private ContentValues toContentValues(final Wallet source) {
+        //Create account in database
+        ContentValues target = new ContentValues();
+        target.put(Contract.Wallet.ACCOUNT_ID, source.getAccountId());
+        target.put(Contract.Wallet.CURRENCY_ID, source.getCurrencyId());
+        target.put(Contract.Wallet.NAME, source.getName());
+        target.put(Contract.Wallet.PUBLIC_KEY, source.getPubKeyHash());
+        if (source.getSecKey() != null) {
+            target.put(Contract.Wallet.SECRET_KEY, CryptoUtils.encodeBase58(source.getSecKey()));
+        }
+        target.put(Contract.Wallet.IS_MEMBER, source.getIsMember().booleanValue() ? 1 : 0);
+        target.put(Contract.Wallet.CREDIT, source.getCredit());
+
+        return target;
+    }
+
+
+    private Wallet toWallet(final Cursor cursor) {
         // TODO kimamila: use holder for index
         int idIndex = cursor.getColumnIndex(Contract.Wallet._ID);
         Long id = cursor.getLong(idIndex);
@@ -103,34 +227,11 @@ public class WalletService extends BaseService {
         return result;
     }
 
-
-    /* -- internal methods-- */
-
-    public Wallet insert(final Context context, final Wallet wallet) {
-
-        //Create account in database
-        ContentValues values = new ContentValues();
-        values.put(Contract.Wallet.ACCOUNT_ID, wallet.getAccountId());
-        values.put(Contract.Wallet.CURRENCY_ID, wallet.getCurrencyId());
-        values.put(Contract.Wallet.NAME, wallet.getName());
-        values.put(Contract.Wallet.PUBLIC_KEY, wallet.getPubKeyHash());
-        if (wallet.getSecKey() != null) {
-            values.put(Contract.Wallet.SECRET_KEY, CryptoUtils.encodeBase58(wallet.getSecKey()));
+    private Uri getContentUri() {
+        if (mWalletUri != null){
+            return mWalletUri;
         }
-        values.put(Contract.Wallet.IS_MEMBER, wallet.getIsMember().booleanValue() ? 1 : 0);
-        values.put(Contract.Wallet.CREDIT, wallet.getCredit());
-
-        Uri uri = Uri.parse(Provider.CONTENT_URI + "/wallet/");
-        uri = context.getContentResolver().insert(uri, values);
-        Long walletId = ContentUris.parseId(uri);
-        if (walletId < 0) {
-            throw new UCoinTechnicalException("Error while inserting wallet");
-        }
-
-        // Refresh the inserted account
-        wallet.setId(walletId);
-
-        return wallet;
+        mWalletUri = Uri.parse(Provider.CONTENT_URI + "/wallet/");
+        return mWalletUri;
     }
-
 }

@@ -1,7 +1,6 @@
 package io.ucoin.app.fragment;
 
 import android.app.Fragment;
-import android.app.FragmentManager;
 import android.app.SearchManager;
 import android.os.Bundle;
 import android.support.v7.widget.SearchView;
@@ -19,13 +18,10 @@ import android.widget.Toast;
 
 import java.util.List;
 
-import io.ucoin.app.Application;
 import io.ucoin.app.R;
 import io.ucoin.app.activity.MainActivity;
-import io.ucoin.app.adapter.ProgressViewAdapter;
-import io.ucoin.app.config.Configuration;
+import io.ucoin.app.adapter.Views;
 import io.ucoin.app.model.Wallet;
-import io.ucoin.app.service.DataContext;
 import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.service.exception.PeerConnectionException;
 import io.ucoin.app.technical.AsyncTaskHandleException;
@@ -35,8 +31,9 @@ public class HomeFragment extends Fragment {
 
     private View mStatusPanel;
     private TextView mStatusText;
-    private ProgressViewAdapter mProgressViewAdapter;
     private ImageView mStatusImage;
+    private TabHost mTabs;
+    private MainActivity.QueryResultListener<Wallet> mWalletResultListener;
 
     public static HomeFragment newInstance() {
         return new HomeFragment();
@@ -61,19 +58,19 @@ public class HomeFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         // Tab host
-        TabHost tabs = (TabHost)view.findViewById(R.id.tabHost);
-        tabs.setup();
+        mTabs = (TabHost)view.findViewById(R.id.tabHost);
+        mTabs.setup();
         {
-            TabHost.TabSpec spec = tabs.newTabSpec("tab1");
+            TabHost.TabSpec spec = mTabs.newTabSpec("tab1");
             spec.setContent(R.id.tab1);
             spec.setIndicator(getString(R.string.wallets));
-            tabs.addTab(spec);
+            mTabs.addTab(spec);
         }
         {
-            TabHost.TabSpec spec = tabs.newTabSpec("tab2");
+            TabHost.TabSpec spec = mTabs.newTabSpec("tab2");
             spec.setContent(R.id.tab2);
             spec.setIndicator(getString(R.string.favorites));
-            tabs.addTab(spec);
+            mTabs.addTab(spec);
         }
 
         mStatusPanel = view.findViewById(R.id.status_panel);
@@ -85,13 +82,21 @@ public class HomeFragment extends Fragment {
         // Image
         mStatusImage = (ImageView) view.findViewById(R.id.status_image);
 
-        // Progress
-        View progressBar = view.findViewById(R.id.load_progress);
-        mProgressViewAdapter = new ProgressViewAdapter(
-                progressBar,
-                tabs);
-        tabs.setVisibility(View.GONE);
-        progressBar.setVisibility(View.VISIBLE);
+        // Tab 1: wallet list
+        WalletListFragment fragment = WalletListFragment.newInstance(
+                // Manage click on wallet
+                new WalletListFragment.OnClickListener() {
+                    @Override
+                    public void onPositiveClick(Bundle args) {
+                        Wallet wallet = (Wallet)args.getSerializable(Wallet.class.getSimpleName());
+                        // TODO open transaction list, filtered on this wallet
+                        Log.d("HomeFragment", "Detect click on wallet :" + wallet.toString());
+                    }
+                });
+        mWalletResultListener = fragment;
+        getFragmentManager().beginTransaction()
+                .replace(R.id.tab1, fragment, "tab1")
+                .commit();
 
         // Load wallets
         LoadWalletsTask loadWalletsTask = new LoadWalletsTask();
@@ -148,53 +153,14 @@ public class HomeFragment extends Fragment {
 
         @Override
         protected List<Wallet> doInBackgroundHandleException(Void... param) throws PeerConnectionException{
-
-            DataContext dataContext = ServiceLocator.instance().getDataContext();
-            List<Wallet> wallets = dataContext.getWallets();
-
-            if (wallets == null) {
-                ((Application)getActivity().getApplication()).getAccountId();
-
-                // TODO : use the currency default peer instead
-                io.ucoin.app.model.Peer node = new io.ucoin.app.model.Peer(
-                        Configuration.instance().getNodeHost(),
-                        Configuration.instance().getNodePort()
-                );
-                ServiceLocator.instance().getHttpService().connect(node);
-
-                // Load wallets
-                wallets = ServiceLocator.instance().getWalletService().getWallets(getActivity().getApplication());
-                dataContext.setWallets(wallets);
-
-                // Load the crypto service (load lib)
-                ServiceLocator.instance().getCryptoService();
-            }
-
-            return wallets;
+            // Load wallets
+            return ServiceLocator.instance().getWalletService()
+                    .getWallets(getActivity().getApplication());
         }
 
         @Override
         protected void onSuccess(final List<Wallet> wallets) {
-            mProgressViewAdapter.showProgress(false);
-            mStatusText.setText("");
-
-            FragmentManager fm = getFragmentManager();
-            if (fm.findFragmentByTag("tab1") == null) {
-                // Manage click on wallet
-                WalletListFragment.OnClickListener walletOnClickListener = new WalletListFragment.OnClickListener() {
-                    @Override
-                    public void onPositiveClick(Bundle args) {
-                        Wallet wallet = (Wallet)args.getSerializable(Wallet.class.getSimpleName());
-                        // TODO open transaction list, filtered on this wallet
-                        Log.d("HomeFragment", "Detect click on wallet :" + wallet.toString());
-                    }
-                };
-                fm.beginTransaction()
-                        .replace(R.id.tab1, WalletListFragment.newInstance(
-                                walletOnClickListener,
-                                wallets), "tab1")
-                        .commit();
-            }
+            mWalletResultListener.onQuerySuccess(wallets);
         }
 
         @Override
@@ -202,6 +168,10 @@ public class HomeFragment extends Fragment {
             final String errorMessage = getString(R.string.connected_error, t.getMessage());
             Log.e(getClass().getSimpleName(), errorMessage, t);
 
+            // TODO send a message ?
+            mWalletResultListener.onQueryFailed(null);
+
+            // TODO: should never append here (no network connection)
             mStatusText.setText(getString(R.string.not_connected));
             mStatusImage.setImageResource(R.drawable.warning45);
             mStatusImage.setOnClickListener(new View.OnClickListener() {
@@ -214,8 +184,7 @@ public class HomeFragment extends Fragment {
                             .show();
                 }
             });
-            mProgressViewAdapter.showProgress(false);
-            mStatusPanel.setVisibility(View.VISIBLE);
+            Views.toogleViews(mTabs, mStatusPanel);
 
             // Display the error
             Toast.makeText(HomeFragment.this.getActivity(),

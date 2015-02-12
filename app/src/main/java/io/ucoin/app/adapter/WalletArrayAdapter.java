@@ -27,6 +27,13 @@ public class WalletArrayAdapter extends ArrayAdapter<Wallet> {
         this(context, DEFAULT_LAYOUT_RES, wallets);
     }
 
+    public WalletArrayAdapter(Context context, int resource) {
+        super(context, resource);
+        mResource = resource;
+        mDropDownResource = resource;
+        setDropDownViewResource(resource);
+    }
+
     public WalletArrayAdapter(Context context, int resource, List<Wallet> wallets) {
         super(context, resource, wallets);
         mResource = resource;
@@ -45,7 +52,7 @@ public class WalletArrayAdapter extends ArrayAdapter<Wallet> {
         if (mResource != DEFAULT_LAYOUT_RES) {
             return super.getView(position, convertView, container);
         }
-        return computeView(position, convertView, container);
+        return computeView(position, convertView, container, mResource);
     }
 
     @Override
@@ -53,7 +60,7 @@ public class WalletArrayAdapter extends ArrayAdapter<Wallet> {
         if (mDropDownResource != DEFAULT_LAYOUT_RES) {
             return super.getDropDownView(position, convertView, container);
         }
-        return computeView(position, convertView, container);
+        return computeView(position, convertView, container, mDropDownResource);
     }
 
     public void setError(View v, CharSequence s) {
@@ -66,7 +73,7 @@ public class WalletArrayAdapter extends ArrayAdapter<Wallet> {
 
     /* -- internal method -- */
 
-    protected View computeView(int position, View convertView, ViewGroup container) {
+    protected View computeView(int position, View convertView, ViewGroup container, int resource) {
 
         // Retrieve the item
         Wallet wallet = getItem(position);
@@ -75,7 +82,7 @@ public class WalletArrayAdapter extends ArrayAdapter<Wallet> {
         //inflate
         if (convertView == null) {
             convertView = LayoutInflater.from(this.getContext())
-                    .inflate(mResource, container, false);
+                    .inflate(resource, container, false);
             viewHolder = new ViewHolder();
             viewHolder.name = (TextView) convertView.findViewById(R.id.name);
             viewHolder.pubkey = (TextView) convertView.findViewById(R.id.pubkey);

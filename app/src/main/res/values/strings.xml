@@ -79,7 +79,7 @@
     <string name="remove">Remove</string>
 
     <!-- Strings related to currency -->
-    <string name="favorites">Favorites</string>
+    <string name="favorites">Contacts</string>
     <string name="lookup">Lookup</string>
     <string name="add_currency">Add currency</string>
     <string name="node_address">Node address</string>
@@ -149,6 +149,8 @@
     <string name="confirm_password_cannot_be_empty">Confirm password cannot be empty</string>
     <string name="passwords_dont_match">Passwords don\'t match</string>
     <string name="insufficient_credit">Insufficient credit on wallet</string>
+    <string name="duplicate_pubkey">A wallet with the same public key already exists.</string>
+    <string name="query_too_short">%s characters minimum</string>
 
     <string-array name="drawer_items">
         <item>@string/home</item>

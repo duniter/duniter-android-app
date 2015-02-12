@@ -15,7 +15,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -32,7 +31,6 @@ import io.ucoin.app.adapter.WalletArrayAdapter;
 import io.ucoin.app.model.BlockchainParameter;
 import io.ucoin.app.model.Identity;
 import io.ucoin.app.model.Wallet;
-import io.ucoin.app.service.DataContext;
 import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.service.exception.InsufficientCreditException;
 import io.ucoin.app.service.remote.TransactionRemoteService;
@@ -56,7 +54,6 @@ public class TransferFragment extends Fragment {
     private Integer mUniversalDividend = null;
     private boolean mIsRunningConvertion = false;
 
-    private Wallet mWallet;
     private Identity mReceiverIdentity;
 
     private TransferTask mTransferTask = null;
@@ -74,6 +71,14 @@ public class TransferFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+
+        final List<Wallet> wallets = ServiceLocator.instance().getWalletService().getWallets(getActivity().getApplication());
+        mWalletAdapter = new WalletArrayAdapter(
+                getActivity(),
+                android.R.layout.simple_spinner_item,
+                wallets
+        );
+        mWalletAdapter.setDropDownViewResource(R.layout.list_item_wallet);
     }
 
     @Override
@@ -93,28 +98,8 @@ public class TransferFragment extends Fragment {
         mReceiverIdentity = (Identity) newInstanceArgs
                 .getSerializable(Identity.class.getSimpleName());
 
-        DataContext dataContext = ServiceLocator.instance().getDataContext();
-        final List<Wallet> wallets = dataContext.getWallets();
-        mWalletAdapter = new WalletArrayAdapter(
-                getActivity(),
-                android.R.layout.simple_spinner_item,
-                wallets
-                );
-        mWalletAdapter.setDropDownViewResource(R.layout.list_item_wallet);
-
         // Source wallet
         mWalletSpinner = ((Spinner) view.findViewById(R.id.wallet));
-        mWalletSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                mWallet = wallets.get(position);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-                mWallet = null;
-            }
-        });
         mWalletSpinner.setAdapter(mWalletAdapter);
 
         // target uid
@@ -240,9 +225,9 @@ public class TransferFragment extends Fragment {
 
         boolean cancel = false;
         View focusView = null;
-
+        Wallet wallet = (Wallet)mWalletSpinner.getSelectedItem();
         // Check wallet selected
-        if (mWallet == null) {
+        if (wallet == null) {
             mWalletAdapter.setError(mWalletSpinner.getSelectedView(), getString(R.string.field_required));
             focusView = mWalletSpinner;
             cancel = true;
@@ -264,7 +249,7 @@ public class TransferFragment extends Fragment {
             else {
                 amountStr = mConvertedText.getText().toString();
             }
-            if (mWallet.getCredit() < Long.parseLong(amountStr)) {
+            if (wallet.getCredit() < Long.parseLong(amountStr)) {
                 mWalletAdapter.setError(mWalletSpinner.getSelectedView(), getString(R.string.insufficient_credit));
                 focusView = mWalletSpinner;
                 cancel = true;
@@ -277,33 +262,30 @@ public class TransferFragment extends Fragment {
             focusView.requestFocus();
             return false;
         } else {
-            doTransfert();
+            doTransfert(wallet);
             return true;
         }
     }
 
-    protected void doTransfert() {
+    protected void doTransfert(final Wallet wallet) {
         // If user is authenticate on wallet : perform the transfer
-        if (mWallet.isAuthenticate()) {
+        if (wallet.isAuthenticate()) {
             mTransferTask = new TransferTask();
-            mTransferTask.execute((Void) null);
+            mTransferTask.execute(wallet);
         }
         else {
             // Second step: add currency
-            LoginFragment fragment = LoginFragment.newInstance(mWallet, new LoginFragment.OnClickListener() {
+            LoginFragment fragment = LoginFragment.newInstance(wallet, new LoginFragment.OnClickListener() {
                 public void onPositiveClick(Bundle bundle) {
                     Wallet authWallet = (Wallet)bundle.getSerializable(Wallet.class.getSimpleName());
-                    // If wallet is still the same : everything fine
-                    if (ObjectUtils.equals(authWallet.getPubKeyHash(), mWallet.getPubKeyHash())) {
-                        mWallet.setPubKey(authWallet.getPubKey());
-                        mWallet.setSecKey(authWallet.getSecKey());
+                    // Make sure this is the same wallet returned
+                    if (ObjectUtils.equals(authWallet.getPubKeyHash(), wallet.getPubKeyHash())) {
+                        getFragmentManager().popBackStack(); // back to transfer fragment
+                        doTransfert(authWallet);
                     }
                     else {
-                        mWallet = authWallet;
-                        // TODO : wallet has changed : so display again the transfert fragment ??
+                        // TODO : show a message: wrong password ?
                     }
-                    getFragmentManager().popBackStack(); // return to transfer
-                    doTransfert();
                 }
             });
             getFragmentManager().beginTransaction()
@@ -409,7 +391,7 @@ public class TransferFragment extends Fragment {
         }
     }
 
-    public class TransferTask extends AsyncTaskHandleException<Void, Void, Boolean>{
+    public class TransferTask extends AsyncTaskHandleException<Wallet, Void, Boolean>{
 
         @Override
         protected void onPreExecute() {
@@ -426,7 +408,7 @@ public class TransferFragment extends Fragment {
         }
 
         @Override
-        protected Boolean doInBackgroundHandleException(Void... strings) throws Exception {
+        protected Boolean doInBackgroundHandleException(Wallet... wallets) throws Exception {
             TransactionRemoteService txService = ServiceLocator.instance().getTransactionRemoteService();
 
             CharSequence amountStr;
@@ -439,7 +421,7 @@ public class TransferFragment extends Fragment {
             long amount = Long.parseLong(amountStr.toString());
 
             txService.transfert(
-                    mWallet,
+                    wallets[0],
                     mReceiverIdentity.getPubkey(),
                     amount,
                     mCommentText.getText().toString()

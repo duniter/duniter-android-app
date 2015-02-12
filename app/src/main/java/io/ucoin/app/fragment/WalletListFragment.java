@@ -10,27 +10,24 @@ import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import io.ucoin.app.R;
+import io.ucoin.app.activity.MainActivity;
+import io.ucoin.app.adapter.ProgressViewAdapter;
 import io.ucoin.app.adapter.WalletArrayAdapter;
 import io.ucoin.app.model.Wallet;
-import io.ucoin.app.service.ServiceLocator;
 
 
-public class WalletListFragment extends ListFragment {
+public class WalletListFragment extends ListFragment implements MainActivity.QueryResultListener<Wallet>{
 
     private static final String WALLET_LIST_ARGS_KEYS = "Wallets";
 
     private WalletArrayAdapter mWalletArrayAdapter;
+    private ProgressViewAdapter mProgressViewAdapter;
     private OnClickListener mListener;
 
-    public static WalletListFragment newInstance(OnClickListener listener) {
-        return newInstance(listener, new ArrayList<Wallet>());
-    }
-
-    protected static WalletListFragment newInstance(OnClickListener listener, List<Wallet> wallets) {
+    protected static WalletListFragment newInstance(OnClickListener listener) {
         WalletListFragment fragment = new WalletListFragment();
         fragment.setOnClickListener(listener);
         return fragment;
@@ -42,14 +39,7 @@ public class WalletListFragment extends ListFragment {
         setHasOptionsMenu(true);
 
         // list adapter
-        List<Wallet> wallets = ServiceLocator.instance().getDataContext().getWallets();
-        if(wallets != null)
-        {
-            mWalletArrayAdapter = new WalletArrayAdapter(getActivity(), wallets);
-        }
-        else {
-            mWalletArrayAdapter = new WalletArrayAdapter(getActivity());
-        }
+        mWalletArrayAdapter = new WalletArrayAdapter(getActivity());
         setListAdapter(mWalletArrayAdapter);
     }
 
@@ -64,6 +54,13 @@ public class WalletListFragment extends ListFragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        // load progress
+        mProgressViewAdapter = new ProgressViewAdapter(
+                view.findViewById(R.id.search_progress),
+                getListView());
+        // Display the progress by default (onQuerySuccess will disable it)
+        mProgressViewAdapter.showProgress(true);
 
         TextView v = (TextView) view.findViewById(android.R.id.empty);
         v.setVisibility(View.GONE);
@@ -96,6 +93,25 @@ public class WalletListFragment extends ListFragment {
 
     public interface OnClickListener {
         public void onPositiveClick(Bundle args);
+    }
+
+    @Override
+    public void onQuerySuccess(List<? extends Wallet> wallets) {
+        mWalletArrayAdapter.clear();
+        mWalletArrayAdapter.addAll(wallets);
+        mWalletArrayAdapter.notifyDataSetChanged();
+        mProgressViewAdapter.showProgress(false);
+    }
+
+    @Override
+    public void onQueryFailed(String message) {
+        mProgressViewAdapter.showProgress(false);
+        // TODO display the message
+    }
+
+    @Override
+    public void onQueryCancelled() {
+        mProgressViewAdapter.showProgress(false);
     }
 
 }

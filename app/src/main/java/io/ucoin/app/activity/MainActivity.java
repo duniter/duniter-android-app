@@ -46,7 +46,9 @@ import io.ucoin.app.fragment.TransferListFragment;
 import io.ucoin.app.fragment.WotSearchFragment;
 import io.ucoin.app.model.Identity;
 import io.ucoin.app.model.WotLookupResults;
+import io.ucoin.app.service.HttpService;
 import io.ucoin.app.service.ServiceLocator;
+import io.ucoin.app.service.exception.PeerConnectionException;
 import io.ucoin.app.service.remote.WotRemoteService;
 import io.ucoin.app.technical.AsyncTaskHandleException;
 import io.ucoin.app.technical.DateUtils;
@@ -59,7 +61,7 @@ public class MainActivity extends ActionBarActivity
     private static final int MIN_SEARCH_CHARACTERS = 2;
     private ActionBarDrawerToggle mToggle;
     private DrawerLayout mDrawerLayout;
-    private QueryResultListener mQueryResultListener;
+    private QueryResultListener<Identity> mQueryResultListener;
 
     private TextView mUidView;
     private TextView mPubkeyView;
@@ -226,21 +228,34 @@ public class MainActivity extends ActionBarActivity
     public boolean onQueryTextSubmit(MenuItem searchItem, String query) {
 
         searchItem.getActionView().clearFocus();
-        WotSearchFragment fragment = WotSearchFragment.newInstance(query);
-        mQueryResultListener = fragment;
-        getFragmentManager().beginTransaction()
-                .setCustomAnimations(
-                        R.animator.delayed_fade_in,
-                        R.animator.fade_out,
-                        R.animator.delayed_fade_in,
-                        R.animator.fade_out)
-                .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
-                .addToBackStack(fragment.getClass().getSimpleName())
-                .commit();
+        FragmentManager fm = getFragmentManager();
+        Fragment fragment = fm.findFragmentById(R.id.frame_content);
+        boolean isWotFragmentExists = fragment == mQueryResultListener;
 
-        if (query.length() > MIN_SEARCH_CHARACTERS) {
-            SearchTask searchTask = new SearchTask(query);
-            searchTask.execute((Void) null);
+        // If fragment already visible, just refresh the arguments (to update title)
+        if (!isWotFragmentExists) {
+            fragment = WotSearchFragment.newInstance(query);
+            mQueryResultListener = (WotSearchFragment)fragment;
+            getFragmentManager().beginTransaction()
+                    .setCustomAnimations(
+                            R.animator.delayed_fade_in,
+                            R.animator.fade_out,
+                            R.animator.delayed_fade_in,
+                            R.animator.fade_out)
+                    .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
+                    .addToBackStack(fragment.getClass().getSimpleName())
+                    .commit();
+        }
+        else {
+            WotSearchFragment.setArguments((WotSearchFragment) fragment, query);
+        }
+
+        if (query.length() >= MIN_SEARCH_CHARACTERS) {
+            SearchTask searchTask = new SearchTask();
+            searchTask.execute(query);
+        }
+        else {
+            mQueryResultListener.onQueryFailed(getString(R.string.query_too_short, MIN_SEARCH_CHARACTERS));
         }
 
         return true;
@@ -393,26 +408,33 @@ public class MainActivity extends ActionBarActivity
         public boolean onBackPressed();
     }
 
-    public interface QueryResultListener {
-        public void onQuerySuccess(List<Identity> identities);
+    public interface QueryResultListener<T> {
+        public void onQuerySuccess(List<? extends T> identities);
 
-        public void onQueryFailed();
+        public void onQueryFailed(String message);
 
         public void onQueryCancelled();
     }
 
-    public class SearchTask extends AsyncTaskHandleException<Void, Void, List<Identity>> {
-
-        private final String mSearchQuery;
-
-        SearchTask(String mSearchQuery) {
-            this.mSearchQuery = mSearchQuery;
-        }
+    public class SearchTask extends AsyncTaskHandleException<String, Void, List<Identity>> {
 
         @Override
-        protected List<Identity> doInBackgroundHandleException(Void... params) {
+        protected List<Identity> doInBackgroundHandleException(String... queries) throws PeerConnectionException {
+
+            // First, make sure to have a peer available
+            HttpService httpService = ServiceLocator.instance().getHttpService();
+            if (!httpService.isConnected()) {
+                    // TODO : use the currency default peer instead
+                    io.ucoin.app.model.Peer node = new io.ucoin.app.model.Peer(
+                            Configuration.instance().getNodeHost(),
+                            Configuration.instance().getNodePort()
+                    );
+                httpService.connect(node);
+            }
+
+            // TODO : manage connection probleme : if error reconnect with another peer ?
             WotRemoteService service = ServiceLocator.instance().getWotRemoteService();
-            WotLookupResults results = service.find(mSearchQuery);
+            WotLookupResults results = service.find(queries[0]);
 
             if (results == null) {
                 return null;
@@ -428,7 +450,7 @@ public class MainActivity extends ActionBarActivity
 
         @Override
         protected void onFailed(Throwable t) {
-            mQueryResultListener.onQueryFailed();
+            mQueryResultListener.onQueryFailed(null);
         }
 
         @Override
@@ -436,5 +458,6 @@ public class MainActivity extends ActionBarActivity
             mQueryResultListener.onQueryCancelled();
         }
     }
+
 
 }

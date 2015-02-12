@@ -3,56 +3,83 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:paddingBottom="8dp"
-    android:paddingLeft="8dp"
-    android:paddingRight="8dp"
-    android:paddingTop="8dp"
     tools:context=".AddAccountActivity">
+
 
     <io.ucoin.app.layout.FrameLayout
         android:id="@+id/frame_content"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        android:paddingBottom="8dp"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
+        android:paddingTop="8dp"/>
 
     <!-- Load progress -->
-    <LinearLayout
+    <RelativeLayout
         android:id="@+id/layout_progress"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:visibility="gone">
+
+       <ImageView
+           android:layout_width="match_parent"
+           android:layout_height="match_parent"
+           android:src="@drawable/bg_creating_account"
+           android:scaleType="centerCrop"
+           />
 
         <TextView
+            android:id="@+id/title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/creating_account_title"
             android:layout_gravity="center_horizontal"
-            android:textSize="@dimen/abc_text_size_display_1_material"/>
+            android:textSize="@dimen/abc_text_size_display_3_material"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_marginLeft="8dp"
+            android:layout_marginTop="16dp"
+            android:textColor="@color/abc_input_method_navigation_guard" />
 
         <TextView
             android:id="@+id/progress_welcome"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/creating_account_welcome"
-            android:textSize="@dimen/abc_text_size_body_1_material"/>
+            android:textSize="@dimen/abc_text_size_large_material"
+            android:layout_below="@+id/title"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp" />
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:layout_gravity="center_vertical">
-            <ProgressBar
-                android:id="@+id/progressbar"
-                style="?android:attr/progressBarStyleHorizontal"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"/>
+            android:layout_gravity="center_vertical"
+            android:layout_alignParentBottom="true">
+
             <TextView
                 android:id="@+id/progress_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/loading_dots"
-                android:gravity="left"/>
+                android:gravity="left"
+                android:layout_marginLeft="16dp"
+                android:layout_marginRight="16dp" />
+
+            <ProgressBar
+                android:id="@+id/progressbar"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp"
+                />
+
         </LinearLayout>
-    </LinearLayout>
+    </RelativeLayout>
 
 </LinearLayout>

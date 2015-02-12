@@ -48,15 +48,6 @@
         </LinearLayout>
     </TabHost>
 
-    <ProgressBar
-        android:id="@+id/load_progress"
-        style="?android:attr/progressBarStyleLargeInverse"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        android:layout_gravity="center_horizontal|center_vertical"
-        />
-
     <LinearLayout
         android:id="@+id/status_panel"
         android:orientation="horizontal"

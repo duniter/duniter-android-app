@@ -65,12 +65,18 @@ public class HttpService extends BaseService implements Closeable{
         try {
             isPeerAlive = executeRequest(httpClient, httpGet);
         } catch(UCoinTechnicalException e) {
+           this.defaultPeer = null;
            throw new PeerConnectionException(e);
         }
         if (!isPeerAlive) {
+            this.defaultPeer = null;
             throw new PeerConnectionException("Unable to connect to peer: " + peer.toString());
         }
         this.defaultPeer = peer;
+    }
+
+    public boolean isConnected() {
+        return this.defaultPeer != null;
     }
 
     @Override

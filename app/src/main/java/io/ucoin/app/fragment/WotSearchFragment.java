@@ -27,20 +27,25 @@ import io.ucoin.app.model.Identity;
 
 
 public class WotSearchFragment extends ListFragment
-        implements MainActivity.QueryResultListener{
+        implements MainActivity.QueryResultListener<Identity>{
 
 
     private IdentityArrayAdapter mIdentityArrayAdapter;
     private ProgressViewAdapter mProgressViewAdapter;
+    private SearchView mSearchView;
+    private boolean isWaitingResult = true;
 
     static public WotSearchFragment newInstance(String query) {
+        WotSearchFragment fragment = new WotSearchFragment();
         Bundle newInstanceArgs = new Bundle();
         newInstanceArgs.putString("query", query);
-
-        WotSearchFragment fragment = new WotSearchFragment();
         fragment.setArguments(newInstanceArgs);
-
         return fragment;
+    }
+
+    static public void setArguments(WotSearchFragment fragment, String query) {
+        Bundle newInstanceArgs = fragment.getArguments();
+        newInstanceArgs.putString("query", query);
     }
 
     @Override
@@ -64,12 +69,18 @@ public class WotSearchFragment extends ListFragment
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        mProgressViewAdapter = new ProgressViewAdapter(
-                view.findViewById(R.id.search_progress),
-                getListView());
+        // Only display progress is waiting query result
+        // (could false when user return here using the back menu)
+        if (isWaitingResult) {
+            mProgressViewAdapter = new ProgressViewAdapter(
+                    view.findViewById(R.id.search_progress),
+                    getListView());
+            // Display the progress by default (onQuerySuccess will disable it)
+            mProgressViewAdapter.showProgress(isWaitingResult);
 
-        TextView v = (TextView) view.findViewById(android.R.id.empty);
-        v.setVisibility(View.GONE);
+            TextView v = (TextView) view.findViewById(android.R.id.empty);
+            v.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -90,20 +101,24 @@ public class WotSearchFragment extends ListFragment
                 .getSystemService(Activity.SEARCH_SERVICE);
         final MenuItem searchItem = menu.findItem(R.id.action_search);
 
-        SearchView searchView = (SearchView)searchItem.getActionView();
-        searchView.setSearchableInfo(searchManager
+        mSearchView = (SearchView)searchItem.getActionView();
+        mSearchView.setSearchableInfo(searchManager
                 .getSearchableInfo(getActivity().getComponentName()));
-        searchView.setIconified(false);
-        searchView.setQuery(query, false);
+        mSearchView.setIconified(false);
+        mSearchView.setQuery(query, false);
 
         //hide the keyboard and remove focus
-        searchView.clearFocus();
+        mSearchView.clearFocus();
 
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+        mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
-            public boolean onQueryTextSubmit(String s) {
-                getFragmentManager().popBackStack();
-                return ((MainActivity) getActivity()).onQueryTextSubmit(searchItem, s);
+            public boolean onQueryTextSubmit(String query) {
+                // DO not pop, because this will reload the home fragment
+                //getFragmentManager().popBackStack();
+
+                mProgressViewAdapter.showProgress(true);
+                isWaitingResult = true;
+                return ((MainActivity) getActivity()).onQueryTextSubmit(searchItem, query);
             }
 
             @Override
@@ -138,20 +153,24 @@ public class WotSearchFragment extends ListFragment
     }
 
     @Override
-    public void onQuerySuccess(List<Identity> identities) {
-        mProgressViewAdapter.showProgress(false);
+    public void onQuerySuccess(List<? extends Identity> identities) {
         mIdentityArrayAdapter.clear();
         mIdentityArrayAdapter.addAll(identities);
         mIdentityArrayAdapter.notifyDataSetChanged();
+        mProgressViewAdapter.showProgress(false);
+        isWaitingResult = false;
     }
 
     @Override
-    public void onQueryFailed() {
+    public void onQueryFailed(String message) {
         mProgressViewAdapter.showProgress(false);
+        isWaitingResult = false;
+        // TODO: display the message
     }
 
     @Override
     public void onQueryCancelled() {
         mProgressViewAdapter.showProgress(false);
+        isWaitingResult = false;
     }
 }
