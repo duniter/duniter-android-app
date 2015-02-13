@@ -25,7 +25,7 @@ public class Identity extends BasicIdentity {
     /**
      * Indicate whether the certification is written in the blockchain or not.
      */
-    public Boolean isMember() {
+    public Boolean getIsMember() {
         return isMember;
     }
 

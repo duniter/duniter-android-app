@@ -16,6 +16,9 @@ import io.ucoin.app.model.Currency;
 import io.ucoin.app.model.Peer;
 import io.ucoin.app.model.Wallet;
 import io.ucoin.app.service.exception.DuplicatePubkeyException;
+import io.ucoin.app.service.exception.PeerConnectionException;
+import io.ucoin.app.service.exception.UidMatchAnotherPubkeyException;
+import io.ucoin.app.service.remote.BlockchainRemoteService;
 import io.ucoin.app.service.remote.TransactionRemoteService;
 import io.ucoin.app.technical.DummyProgressModel;
 import io.ucoin.app.technical.ObjectUtils;
@@ -42,7 +45,7 @@ public class AccountService extends BaseService {
             String uid,
             String salt,
             String password,
-            Peer peer) throws DuplicatePubkeyException {
+            Peer peer) throws DuplicatePubkeyException, UidMatchAnotherPubkeyException, PeerConnectionException {
         return create(
                 context,
                 uid,
@@ -58,61 +61,70 @@ public class AccountService extends BaseService {
             String salt,
             String password,
             Peer peer,
-            ProgressModel progressModel) throws DuplicatePubkeyException {
+            ProgressModel progressModel) throws DuplicatePubkeyException, UidMatchAnotherPubkeyException, PeerConnectionException {
 
         progressModel.setProgress(0);
-        progressModel.setMax(7);
+        progressModel.setMax(8);
+
 
         // Generate keys
         progressModel.setMessage(context.getString(R.string.computing_keys));
         CryptoService service = ServiceLocator.instance().getCryptoService();
         KeyPair keys = service.getKeyPair(salt, password);
+        String pubKeyHash = Base58.encode(keys.getPubKey());
+
+        // Connecting to peer
+        progressModel.increment(context.getString(R.string.connecting_peer, peer.getUrl()));
+        HttpService httpService = ServiceLocator.instance().getHttpService();
+        httpService.connect(peer);
+
+        // Get the currency from peer
+        progressModel.increment(context.getString(R.string.loading_currency, peer.getUrl()));
+        BlockchainRemoteService blockchainService = ServiceLocator.instance().getBlockchainRemoteService();
+        Currency currency = blockchainService.getCurrencyFromPeer(peer);
+
+        // Get if identity is a member, and get the self cert timestamp
+        progressModel.increment(context.getString(R.string.loading_membership));
+        Wallet wallet = new Wallet(currency.getCurrencyName(),
+                uid,
+                keys.getPubKey(),
+                null /*do no save the secret key of the main account*/
+        );
+        blockchainService.loadAndCheckMembership(wallet);
+
+        // Get credit
+        progressModel.increment(context.getString(R.string.loading_wallet_credit));
+        TransactionRemoteService txService = ServiceLocator.instance().getTransactionRemoteService();
+        Long credit = txService.getCredit(peer, pubKeyHash);
 
         // Create account in DB
         progressModel.increment(context.getString(R.string.saving_account));
         AccountService accountService = ServiceLocator.instance().getAccountService();
         io.ucoin.app.model.Account account = new io.ucoin.app.model.Account();
         account.setUid(uid);
-        account.setPubkey(Base58.encode(keys.getPubKey()));
+        account.setPubkey(pubKeyHash);
         account.setSalt(salt);
         account = save(context, account);
-
-        // Get the currency from peer
-        progressModel.increment(context.getString(R.string.loading_currency, peer.getUrl()));
-        Currency currency = ServiceLocator.instance().getBlockchainRemoteService()
-                .getCurrencyFromPeer(peer);
-        currency.setAccountId(account.getId());
 
         // Create the currency in DB
         progressModel.increment(context.getString(R.string.saving_currency, peer.getUrl()));
         CurrencyService currencyService = ServiceLocator.instance().getCurrencyService();
+        currency.setAccountId(account.getId());
         currency = currencyService.save(context, currency);
 
-        // Get credit
-        progressModel.increment(context.getString(R.string.loading_wallet_credit));
-        TransactionRemoteService txService = ServiceLocator.instance().getTransactionRemoteService();
-        Long credit = txService.getCredit(peer, account.getPubkey());
-
-        // Create a main wallet
+        // Create the main wallet in DB
         progressModel.increment(context.getString(R.string.saving_wallet));
-        Wallet wallet = new Wallet(currency.getCurrencyName(),
-                account.getUid(),
-                keys.getPubKey(),
-                null /*do no save the secret key of the main account*/
-        );
+        wallet.setUid(account.getUid());
         wallet.setName(account.getUid() + "@" + currency.getCurrencyName());
-        wallet.setIsMember(Boolean.FALSE); // TODO : membership should be checked on server ?
         wallet.setCurrencyId(currency.getId());
         wallet.setAccountId(account.getId());
         wallet.setCredit(credit == null ? 0 : credit.intValue());
-        progressModel.increment();
-
-        // Save a new wallet
         WalletService walletService = ServiceLocator.instance().getWalletService();
         wallet = walletService.save(context, wallet);
         progressModel.increment(context.getString(R.string.starting_home));
 
         // Set the secret key into the wallet (will be available for this session only)
+        // (must be done AFTER the walletService.save(), to avoid to write in DB)
         wallet.setSecKey(keys.getSecKey());
 
         return account;

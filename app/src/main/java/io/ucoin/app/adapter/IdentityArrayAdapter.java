@@ -49,7 +49,7 @@ public class IdentityArrayAdapter extends ArrayAdapter<Identity> {
         }
 
         // Icon
-        viewHolder.icon.setImageResource(IdentityViewUtils.getImage(identity));
+        viewHolder.icon.setImageResource(ImageAdapterHelper.getImage(identity));
 
         // Uid
         viewHolder.uid.setText(identity.getUid());

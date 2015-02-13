@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -84,6 +85,7 @@ public class WalletArrayAdapter extends ArrayAdapter<Wallet> {
             convertView = LayoutInflater.from(this.getContext())
                     .inflate(resource, container, false);
             viewHolder = new ViewHolder();
+            viewHolder.icon = (ImageView) convertView.findViewById(R.id.icon);
             viewHolder.name = (TextView) convertView.findViewById(R.id.name);
             viewHolder.pubkey = (TextView) convertView.findViewById(R.id.pubkey);
             viewHolder.credit = (TextView) convertView.findViewById(R.id.credit);
@@ -92,6 +94,9 @@ public class WalletArrayAdapter extends ArrayAdapter<Wallet> {
             viewHolder = (ViewHolder) convertView.getTag();
         }
 
+        // Icon
+        viewHolder.icon.setImageResource(ImageAdapterHelper.getImage(wallet));
+
         // Name
         viewHolder.name.setText(wallet.getName());
 
@@ -99,15 +104,14 @@ public class WalletArrayAdapter extends ArrayAdapter<Wallet> {
         viewHolder.pubkey.setText(wallet.getPubKeyHash());
 
         // Credit
-        viewHolder.credit.setText(
-                getContext().getString(R.string.credit,
-                        wallet.getCredit()));
+        viewHolder.credit.setText(String.valueOf(wallet.getCredit()));
 
         return convertView;
     }
 
     // View lookup cache
     private static class ViewHolder {
+        ImageView icon;
         TextView name;
         TextView credit;
         TextView pubkey;

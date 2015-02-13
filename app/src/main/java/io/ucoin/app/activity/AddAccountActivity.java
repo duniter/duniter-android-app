@@ -160,6 +160,9 @@ public class AddAccountActivity extends ActionBarActivity  {
             Toast.makeText(AddAccountActivity.this,
                     "Error: " + t.getMessage(),
                     Toast.LENGTH_SHORT).show();
+
+            // TODO : manage exception type, between :
+            // DuplicatePubkeyException, UidMatchAnotherPubkeyException, PeerConnectionException
         }
 
         @Override

@@ -10,6 +10,10 @@ public class WotLookupSignature {
     
     private String signature;
 
+    private String isMember;
+
+    private String wasMember;
+
     public String getPubkey() {
         return pubkey;
     }
@@ -32,5 +36,21 @@ public class WotLookupSignature {
 
     public void setSignature(String signature) {
         this.signature = signature;
+    }
+
+    public String isMember() {
+        return isMember;
+    }
+
+    public void setIsMember(String isMember) {
+        this.isMember = isMember;
+    }
+
+    public String wasMember() {
+        return wasMember;
+    }
+
+    public void setWasMember(String wasMember) {
+        this.wasMember = wasMember;
     }
 }

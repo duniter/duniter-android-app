@@ -1,8 +1,5 @@
 package io.ucoin.app.model;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
 import java.io.Serializable;
 
 import io.ucoin.app.technical.crypto.CryptoUtils;
@@ -12,18 +9,17 @@ import io.ucoin.app.technical.crypto.KeyPair;
  * A wallet is a user account
  * Created by eis on 13/01/15.
  */
-public class Wallet extends KeyPair implements LocalEntity, Serializable, Parcelable {
+public class Wallet extends KeyPair implements LocalEntity, Serializable {
 
 
     private Long id;
     private Long currencyId;
     private Long accountId;
     private String name;
-    private Boolean isMember;
     private Integer credit;
-
-    // TODO : voir si besoin de les garder
     private Identity identity;
+
+    // TODO : voir si besoin de les garder ou pas
     private String salt;
     private String currency;
 
@@ -86,6 +82,10 @@ public class Wallet extends KeyPair implements LocalEntity, Serializable, Parcel
         return secretKey != null && identity != null && identity.getPubkey() != null;
     }
 
+    public boolean isSelfSend() {
+        return identity.getTimestamp() != -1;
+    }
+
     public Long getCurrencyId() {
         return currencyId;
     }
@@ -100,14 +100,6 @@ public class Wallet extends KeyPair implements LocalEntity, Serializable, Parcel
 
     public void setAccountId(Long accountId) {
         this.accountId = accountId;
-    }
-
-    public Boolean getIsMember() {
-        return isMember;
-    }
-
-    public void setIsMember(Boolean isMember) {
-        this.isMember = isMember;
     }
 
     public String getName() {
@@ -140,13 +132,28 @@ public class Wallet extends KeyPair implements LocalEntity, Serializable, Parcel
         return name;
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
+    public String getUid() {
+        return identity.getUid();
     }
 
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeSerializable(this);
+    public void setUid(String uid) {
+        identity.setUid(uid);
     }
+
+    public long getCertTimestamp() {
+        return identity.getTimestamp();
+    }
+
+    public void setCertTimestamp(long timestamp) {
+        identity.setTimestamp(timestamp);
+    }
+
+    public void setMember(Boolean isMember) {
+        identity.setMember(isMember);
+    }
+
+    public Boolean getIsMember() {
+        return identity.getIsMember();
+    }
+
 }

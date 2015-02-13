@@ -1,44 +1,87 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:minHeight="?android:listPreferredItemHeight"
     android:gravity="center_vertical"
     android:duplicateParentState="true"
-    android:paddingLeft="16dp"
-    android:paddingRight="16dp">
+    android:paddingLeft="8dp"
+    android:paddingRight="8dp">
 
-    <TextView
-        android:id="@+id/name"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
+
+    <ImageView
+        android:src="@drawable/ic_user_32dp"
+        android:id="@+id/icon"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp"
         android:duplicateParentState="true"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:textAppearanceMedium"
-        android:textColor="@color/hideable_text_color"
-        android:textSize="@dimen/abc_text_size_title_material"
-        android:singleLine="true"
-        />
+        android:layout_weight="0.05" />
 
-    <TextView
-        android:id="@+id/pubkey"
+    <LinearLayout
+        android:duplicateParentState="true"
+        android:layout_height="wrap_content"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="@color/hideable_text_color"
-        android:textSize="@dimen/abc_text_size_caption_material"
-        android:singleLine="true"
-        android:layout_below="@id/name"
-        android:layout_alignParentLeft="true"/>
+        android:orientation="vertical"
+        android:layout_weight="0.7">
+        <TextView
+            android:id="@+id/name"
+            android:duplicateParentState="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:textAppearanceMedium"
+            android:textColor="@color/hideable_text_color"
+            android:text="uid"
+            android:layout_gravity="left|top"
+            android:textSize="18sp"/>
 
-    <TextView
-        android:id="@+id/credit"
+        <TextView
+            android:id="@+id/pubkey"
+            android:duplicateParentState="true"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:textAppearanceMedium"
+            android:textColor="@color/hideable_text_color"
+            android:text="G2CBgZBPLe6FSFUgpx2Jf1Aqsgta6iib3vmDRA1yLiqU"
+            android:textSize="12sp"
+            android:singleLine="true"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:duplicateParentState="true"
+        android:layout_height="wrap_content"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="@color/hideable_text_color"
-        android:textSize="@dimen/abc_text_size_caption_material"
-        android:layout_below="@id/pubkey"
-        android:layout_alignParentLeft="true"
-        />
+        android:orientation="vertical"
+        android:layout_gravity="center_vertical|right"
+        android:layout_weight="0.25">
+
+        <TextView
+            android:duplicateParentState="true"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:textAppearanceMedium"
+            android:textColor="@color/hideable_text_color"
+            android:layout_gravity="top"
+            android:gravity="right"
+            android:text="@string/credit"
+            android:textSize="10sp"/>
+
+        <TextView
+            android:id="@+id/credit"
+            android:duplicateParentState="true"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:textAppearanceMedium"
+            android:textColor="@color/hideable_text_color"
+            android:layout_gravity="bottom"
+            android:gravity="right"
+            android:text="credit"
+            android:textSize="16sp"/>
+
+    </LinearLayout>
 
 
-</RelativeLayout>
+</LinearLayout>

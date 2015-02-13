@@ -56,7 +56,7 @@ public class TransactionRemoteService extends BaseRemoteService {
 
 		// compute transaction
 		String transaction = getTransaction(wallet, destPubKey, amount,
-                comments, false);
+                comments);
 
         Log.d(TAG, String.format(
                 "Will send transaction document: \n------\n%s------",
@@ -113,7 +113,7 @@ public class TransactionRemoteService extends BaseRemoteService {
 	/* -- internal methods -- */
 
 	public String getTransaction(Wallet wallet, String destPubKey,
-			long amount, String comments, boolean compact) throws InsufficientCreditException {
+			long amount, String comments) throws InsufficientCreditException {
         ObjectUtils.checkNotNull(wallet);
         ObjectUtils.checkArgument(StringUtils.isNotBlank(wallet.getCurrency()));
         ObjectUtils.checkArgument(StringUtils.isNotBlank(wallet.getPubKeyHash()));
@@ -140,12 +140,6 @@ public class TransactionRemoteService extends BaseRemoteService {
 				comments);
 
 		String signature = cryptoService.sign(transaction, wallet.getSecKey());
-
-		if (compact) {
-			transaction = getCompactTransaction(wallet.getCurrency(),
-					wallet.getPubKeyHash(), destPubKey, txInputs, txOutputs,
-					comments);
-		}
 
 		return new StringBuilder().append(transaction).append(signature)
 				.append('\n').toString();

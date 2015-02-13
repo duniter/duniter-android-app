@@ -41,8 +41,7 @@
             android:layout_alignParentTop="true"
             android:layout_alignParentLeft="true"
             android:layout_marginLeft="8dp"
-            android:layout_marginTop="16dp"
-            android:textColor="@color/abc_input_method_navigation_guard" />
+            android:layout_marginTop="16dp"/>
 
         <TextView
             android:id="@+id/progress_welcome"

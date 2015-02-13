@@ -19,13 +19,14 @@ import android.widget.Toast;
 import io.ucoin.app.R;
 import io.ucoin.app.activity.MainActivity;
 import io.ucoin.app.adapter.CertificationListAdapter;
-import io.ucoin.app.adapter.IdentityViewUtils;
+import io.ucoin.app.adapter.ImageAdapterHelper;
 import io.ucoin.app.adapter.ProgressViewAdapter;
 import io.ucoin.app.config.Configuration;
 import io.ucoin.app.model.Identity;
 import io.ucoin.app.model.Wallet;
 import io.ucoin.app.model.WotCertification;
 import io.ucoin.app.service.ServiceLocator;
+import io.ucoin.app.service.remote.BlockchainRemoteService;
 import io.ucoin.app.service.remote.WotRemoteService;
 import io.ucoin.app.technical.AsyncTaskHandleException;
 import io.ucoin.app.technical.DateUtils;
@@ -37,6 +38,7 @@ public class IdentityFragment extends Fragment {
 
     private ProgressViewAdapter mProgressViewAdapter;
     private CertificationListAdapter mCertificationListAdapter;
+    private ImageView mIcon;
     private TextView mTimestampView;
     private TabHost mTabs;
 
@@ -108,8 +110,8 @@ public class IdentityFragment extends Fragment {
         uidView.setText(identity.getUid());
 
         // Icon
-        ImageView icon = (ImageView)view.findViewById(R.id.qr_code);
-        icon.setImageResource(IdentityViewUtils.getImageWhite(identity));
+        mIcon = (ImageView)view.findViewById(R.id.qr_code);
+        mIcon.setImageResource(ImageAdapterHelper.getImageWhite(identity));
 
         // Timestamp
         mTimestampView = (TextView) view.findViewById(R.id.timestamp);
@@ -246,11 +248,9 @@ public class IdentityFragment extends Fragment {
         protected WotCertification[] doInBackgroundHandleException(Void... params) {
             WotRemoteService service = ServiceLocator.instance().getWotRemoteService();
 
-            // Reload identity (if need)
-            if (mIdentity.getTimestamp() == -1) {
-                Identity refreshIdentity = service.getIdentity(mIdentity.getUid(), mIdentity.getPubkey());
-                mIdentity.setTimestamp(refreshIdentity.getTimestamp());
-            }
+            // Refresh the membership data
+            BlockchainRemoteService bcService = ServiceLocator.instance().getBlockchainRemoteService();
+            bcService.loadMembership(mIdentity);
 
             // Get certifications
             return service.getCertificationsByPubkey(mIdentity.getPubkey());
@@ -259,13 +259,17 @@ public class IdentityFragment extends Fragment {
         @Override
         protected void onSuccess(WotCertification[] certifications) {
 
-            // Update timestamp
+            // Refresh timestamp
             mTimestampView.setText(DateUtils.format(mIdentity.getTimestamp()));
+
+            // Refresh icon
+            mIcon.setImageResource(ImageAdapterHelper.getImageWhite(mIdentity));
 
             // Update certification list
             mCertificationListAdapter.clear();
             if (certifications != null && certifications.length  > 0) {
                 mCertificationListAdapter.addAll(certifications);
+                mCertificationListAdapter.notifyDataSetChanged();
             }
 
             mProgressViewAdapter.showProgress(false);

@@ -9,7 +9,6 @@ import android.widget.BaseExpandableListAdapter;
 import android.widget.CheckedTextView;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import io.ucoin.app.R;
 import io.ucoin.app.model.WotCertification;
@@ -111,7 +110,7 @@ public abstract class WotExpandableListAdapter extends BaseExpandableListAdapter
 
         // Icon
         ImageView icon = (ImageView) convertView.findViewById(R.id.icon);
-        icon.setImageResource(IdentityViewUtils.getImage(item));
+        icon.setImageResource(ImageAdapterHelper.getImage(item));
 
         // Uid
         ((TextView) convertView.findViewById(R.id.uid))

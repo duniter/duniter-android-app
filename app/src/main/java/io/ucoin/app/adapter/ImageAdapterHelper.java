@@ -1,16 +1,14 @@
 package io.ucoin.app.adapter;
 
-import android.net.Uri;
-
 import io.ucoin.app.R;
-import io.ucoin.app.config.Configuration;
 import io.ucoin.app.model.Identity;
+import io.ucoin.app.model.Wallet;
 import io.ucoin.app.model.WotCertification;
 
 /**
  * Created by eis on 12/01/15.
  */
-public class IdentityViewUtils {
+public class ImageAdapterHelper {
 
     // Identity
     private static final Integer IMAGE_MEMBER = R.drawable.ic_member_32dp;
@@ -25,24 +23,22 @@ public class IdentityViewUtils {
     private static final Integer IMAGE_BOTH_CERT = R.drawable.ic_dual_cert;
 
     public static int getImage(Identity identity) {
-        // TODO : check member state ?
-        // get if member or not
-        boolean isMember = true;
+        return Boolean.TRUE.equals(identity.getIsMember())
+                ? IMAGE_MEMBER
+                : IMAGE_NON_MEMBER;
+    }
 
-        return isMember ? IMAGE_MEMBER : IMAGE_NON_MEMBER;
+    public static int getImage(Wallet wallet) {
+        return Boolean.TRUE.equals(wallet.getIsMember())
+                ? IMAGE_MEMBER
+                : IMAGE_NON_MEMBER;
     }
 
     public static int getImageWhite(Identity identity) {
-        // TODO : check member state ?
-        // get if member or not
-        boolean isMember = true;
-
-        return isMember ? IMAGE_WHITE_MEMBER : IMAGE_WHITE_NON_MEMBER;
-    }
-
-    public static Uri getUri(Identity identity) {
-        Configuration config = Configuration.instance();
-        return Uri.parse("http://" + config.getNodeHost() + ":" + config.getNodePort() + "/wot/lookup/" + identity.getUid());
+        boolean isMember = Boolean.TRUE.equals(identity.getIsMember());
+        return isMember
+                ? IMAGE_WHITE_MEMBER
+                : IMAGE_WHITE_NON_MEMBER;
     }
 
     public static int getCertificationImage(WotCertification certification) {

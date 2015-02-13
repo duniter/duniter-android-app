@@ -14,6 +14,9 @@ public abstract class BaseRemoteService extends BaseService{
 
     protected HttpService httpService;
 
+    public static final String PROTOCOL_VERSION = "1";
+
+
     @Override
     public void initialize() {
         super.initialize();

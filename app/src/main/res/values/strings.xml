@@ -13,11 +13,13 @@
     <string name="creating_account_welcome"><![CDATA[Welcome to <b>uCoin</b>.<br/><small>A decentralized system for free currencies.</small>]]></string>
     <string name="loading_dots">Loading...</string>
     <string name="computing_keys">Computed keys...</string>
-    <string name="saving_account">Saving account...</string>
+    <string name="saving_account">Saving account locally...</string>
+    <string name="connecting_peer">Connecting to node\n%s...</string>
     <string name="loading_currency">Loading currency from\n%s...</string>
-    <string name="saving_currency">Saving currency...</string>
+    <string name="saving_currency">Saving currency locally...</string>
+    <string name="loading_membership">Getting membership...</string>
     <string name="loading_wallet_credit">Getting wallet credit...</string>
-    <string name="saving_wallet">Saving wallet...</string>
+    <string name="saving_wallet">Saving wallet locally...</string>
     <string name="starting_home">Initializing app...</string>
 
     <!-- Strings related to connection -->
@@ -40,7 +42,8 @@
     <!-- Strings related to wallet -->
     <string name="wallets">Wallets</string>
     <string name="no_wallet">No wallet</string>
-    <string name="credit">credit: %s</string>
+    <string name="credit_message">credit: %s</string>
+    <string name="credit">credit</string>
 
 
     <!-- Strings related to transfer/transaction -->

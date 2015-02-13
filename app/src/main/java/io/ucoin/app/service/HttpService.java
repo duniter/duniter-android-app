@@ -59,6 +59,9 @@ public class HttpService extends BaseService implements Closeable{
         if (httpClient == null) {
             httpClient = createHttpClient();
         }
+        if (peer == defaultPeer) {
+            return;
+        }
 
         HttpGet httpGet = new HttpGet(getPath(peer, URL_PEER_ALIVE));
         boolean isPeerAlive = false;
@@ -114,7 +117,7 @@ public class HttpService extends BaseService implements Closeable{
 
     protected void checkDefaultPeer() {
         if (defaultPeer == null) {
-            throw new IllegalStateException("No default peer defined");
+            throw new IllegalStateException("No peer to connect");
         }
     }
 

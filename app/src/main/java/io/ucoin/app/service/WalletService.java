@@ -37,6 +37,8 @@ public class WalletService extends BaseService {
     // Could NOT be static, because Uri is initialize in Provider.onCreate() method ;(
     private Uri mWalletUri = null;
 
+    private SelectCursorHolder mSelectHolder = null;
+
     public WalletService() {
         super();
     }
@@ -102,7 +104,7 @@ public class WalletService extends BaseService {
     private void checkPubKeyUnique(
             final Context context,
             final Wallet wallet) throws DuplicatePubkeyException {
-        if (!isDuplicatePubKeyExists(
+        if (isDuplicatePubKeyExists(
                 context.getContentResolver(),
                 wallet.getPubKeyHash(),
                 wallet.getAccountId(),
@@ -186,7 +188,11 @@ public class WalletService extends BaseService {
         target.put(Contract.Wallet.ACCOUNT_ID, source.getAccountId());
         target.put(Contract.Wallet.CURRENCY_ID, source.getCurrencyId());
         target.put(Contract.Wallet.NAME, source.getName());
+        target.put(Contract.Wallet.UID, source.getUid());
         target.put(Contract.Wallet.PUBLIC_KEY, source.getPubKeyHash());
+        if (source.getCertTimestamp() != -1) {
+            target.put(Contract.Wallet.CERT_TS, source.getCertTimestamp());
+        }
         if (source.getSecKey() != null) {
             target.put(Contract.Wallet.SECRET_KEY, CryptoUtils.encodeBase58(source.getSecKey()));
         }
@@ -196,33 +202,23 @@ public class WalletService extends BaseService {
         return target;
     }
 
-
     private Wallet toWallet(final Cursor cursor) {
-        // TODO kimamila: use holder for index
-        int idIndex = cursor.getColumnIndex(Contract.Wallet._ID);
-        Long id = cursor.getLong(idIndex);
+        // Init the holder is need
+        if (mSelectHolder == null) {
+            mSelectHolder = new SelectCursorHolder(cursor);
+        }
 
-        int pubKeyIndex = cursor.getColumnIndex(Contract.Wallet.PUBLIC_KEY);
-        String pubKey = cursor.getString(pubKeyIndex);
-
-        int secKeyIndex = cursor.getColumnIndex(Contract.Wallet.SECRET_KEY);
-        String secKey = cursor.getString(secKeyIndex);
-
-        int nameIndex = cursor.getColumnIndex(Contract.Wallet.NAME);
-        String name = cursor.getString(nameIndex);
-
-        int isMemberIndex = cursor.getColumnIndex(Contract.Wallet.IS_MEMBER);
-        boolean isMember = cursor.getInt(isMemberIndex) == 1 ? true : false;
-
-        int creditIndex = cursor.getColumnIndex(Contract.Wallet.CREDIT);
-        int credit = cursor.getInt(creditIndex);
+        String pubKey = cursor.getString(mSelectHolder.pubKeyIndex);
+        String secKey = cursor.getString(mSelectHolder.secKeyIndex);
+        String uid = cursor.getString(mSelectHolder.uidIndex);
 
         // TODO get the currency name from DB (table currency)
-        Wallet result = new Wallet("meta_brouzouf", name, pubKey, secKey);
-        result.setId(id);
-        result.setName(name);
-        result.setCredit(credit);
-        result.getIdentity().setMember(isMember);
+        Wallet result = new Wallet("meta_brouzouf", uid, pubKey, secKey);
+        result.setId(cursor.getLong(mSelectHolder.idIndex));
+        result.setName(cursor.getString(mSelectHolder.nameIndex));
+        result.setCredit(cursor.getInt(mSelectHolder.creditIndex));
+        result.setMember(cursor.getInt(mSelectHolder.isMemberIndex) == 1 ? true : false);
+        result.setCertTimestamp(cursor.getLong(mSelectHolder.certTimestampIndex));
 
         return result;
     }
@@ -233,5 +229,28 @@ public class WalletService extends BaseService {
         }
         mWalletUri = Uri.parse(Provider.CONTENT_URI + "/wallet/");
         return mWalletUri;
+    }
+
+    private class SelectCursorHolder {
+
+        int idIndex;
+        int pubKeyIndex;
+        int secKeyIndex;
+        int nameIndex;
+        int isMemberIndex;
+        int creditIndex;
+        int uidIndex;
+        int certTimestampIndex;
+
+        private SelectCursorHolder(final Cursor cursor ) {
+            idIndex = cursor.getColumnIndex(Contract.Wallet._ID);
+            nameIndex = cursor.getColumnIndex(Contract.Wallet.NAME);
+            pubKeyIndex = cursor.getColumnIndex(Contract.Wallet.PUBLIC_KEY);
+            uidIndex= cursor.getColumnIndex(Contract.Wallet.UID);
+            certTimestampIndex= cursor.getColumnIndex(Contract.Wallet.CERT_TS);
+            secKeyIndex = cursor.getColumnIndex(Contract.Wallet.SECRET_KEY);
+            isMemberIndex = cursor.getColumnIndex(Contract.Wallet.IS_MEMBER);
+            creditIndex = cursor.getColumnIndex(Contract.Wallet.CREDIT);
+        }
     }
 }

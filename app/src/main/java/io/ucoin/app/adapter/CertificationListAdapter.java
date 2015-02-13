@@ -48,7 +48,7 @@ public class CertificationListAdapter extends ArrayAdapter<WotCertification> {
         }
 
         // Icon
-        viewHolder.icon.setImageResource(IdentityViewUtils.getCertificationImage(certification));
+        viewHolder.icon.setImageResource(ImageAdapterHelper.getCertificationImage(certification));
 
         // Uid
         viewHolder.uid.setText(certification.getUid());
