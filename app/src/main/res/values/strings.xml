@@ -50,15 +50,16 @@
     <string name="wallet_transmitter">Wallet</string>
     <string name="wallet_transmitter_hint">Wallet</string>
     <string name="receiver">To</string>
-    <string name="receiver_hint">UID or public keyZ</string>
+    <string name="receiver_hint">Receiver</string>
     <string name="amount">Amount</string>
-    <string name="amount_hint">Amount</string>
+    <string name="amount_hint"></string>
     <string name="universal_dividend_acronym">UD</string>
     <string name="unit_coins_label">coins</string>
     <string name="main_wallet">Main wallet</string>
-    <string name="comment">Comment</string>
-    <string name="comment_hint">Comment</string>
-    <string name="amount_not_integer">Amount must a valid integer</string>
+    <string name="comment_optional">Comment (optional)</string>
+    <string name="comment_hint"></string>
+    <string name="amount_not_long">Amount must a valid integer</string>
+    <string name="amount_not_decimal">Amount must a valid decimal</string>
     <string name="transactions">Transactions</string>
 
     <!-- Strings related to actions -->
@@ -154,6 +155,7 @@
     <string name="insufficient_credit">Insufficient credit on wallet</string>
     <string name="duplicate_pubkey">A wallet with the same public key already exists.</string>
     <string name="query_too_short">%s characters minimum</string>
+    <string name="transfer_to">Transfer to %s</string>
 
     <string-array name="drawer_items">
         <item>@string/home</item>

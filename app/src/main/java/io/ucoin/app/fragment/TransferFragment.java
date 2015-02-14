@@ -35,7 +35,6 @@ import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.service.exception.InsufficientCreditException;
 import io.ucoin.app.service.remote.TransactionRemoteService;
 import io.ucoin.app.technical.AsyncTaskHandleException;
-import io.ucoin.app.technical.ObjectUtils;
 
 public class TransferFragment extends Fragment {
 
@@ -123,6 +122,10 @@ public class TransferFragment extends Fragment {
         });
         mAmountText.requestFocus();
 
+        // Force the keyboard to be open
+        ((InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE))
+                .toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
+
         // Unit
         mAmountUnitText = (TextView)view.findViewById(R.id.amount_unit_text);
 
@@ -183,7 +186,7 @@ public class TransferFragment extends Fragment {
         Bundle newInstanceArgs = getArguments();
         final Identity identity = (Identity) newInstanceArgs
                 .getSerializable(Identity.class.getSimpleName());
-        getActivity().setTitle(identity.getUid());
+        getActivity().setTitle(getString(R.string.transfer_to, identity.getUid()));
         ((MainActivity)getActivity()).setBackButtonEnabled(true);
     }
 
@@ -224,18 +227,23 @@ public class TransferFragment extends Fragment {
             mAmountText.setError(getString(R.string.field_required));
             focusView = mAmountText;
             cancel = true;
-        } else if (!isAmountValid(amountStr)) {
-            mAmountText.setError(getString(R.string.amount_not_integer));
+        } else if (mIsCoinUnit && !isAmountValidLong(amountStr)) {
+            mAmountText.setError(getString(R.string.amount_not_long));
+            focusView = mAmountText;
+            cancel = true;
+        } else if (!mIsCoinUnit && !isAmountValidDecimal(amountStr)) {
+            mAmountText.setError(getString(R.string.amount_not_decimal));
             focusView = mAmountText;
             cancel = true;
         } else {
+            Double value;
             if (mIsCoinUnit) {
-                amountStr = mAmountText.getText().toString();
+                value = Double.valueOf(mAmountText.getText().toString());
             }
             else {
-                amountStr = mConvertedText.getText().toString();
+                value = Double.valueOf(mConvertedText.getText().toString());
             }
-            if (wallet.getCredit() < Long.parseLong(amountStr)) {
+            if (wallet.getCredit() < value) {
                 mWalletAdapter.setError(mWalletSpinner.getSelectedView(), getString(R.string.insufficient_credit));
                 focusView = mWalletSpinner;
                 cancel = true;
@@ -260,35 +268,41 @@ public class TransferFragment extends Fragment {
             mTransferTask.execute(wallet);
         }
         else {
-            // Second step: add currency
+            // Ask for authentication
             LoginFragment fragment = LoginFragment.newInstance(wallet, new LoginFragment.OnClickListener() {
                 public void onPositiveClick(Bundle bundle) {
                     Wallet authWallet = (Wallet)bundle.getSerializable(Wallet.class.getSimpleName());
                     // Make sure this is the same wallet returned
-                    if (ObjectUtils.equals(authWallet.getPubKeyHash(), wallet.getPubKeyHash())) {
-                        getFragmentManager().popBackStack(); // back to transfer fragment
-                        doTransfert(authWallet);
-                    }
-                    else {
-                        // TODO : show a message: wrong password ?
-                    }
+                    //getFragmentManager().popBackStack(); // back to transfer fragment
+
+                    // Launch the transfer
+                    mTransferTask = new TransferTask();
+                    mTransferTask.execute(wallet);
                 }
             });
             getFragmentManager().beginTransaction()
-                    .setCustomAnimations(
-                            R.animator.delayed_fade_in,
-                            R.animator.fade_out,
-                            R.animator.delayed_fade_in,
-                            R.animator.fade_out)
+                    .setCustomAnimations(R.animator.slide_in_down,
+                            R.animator.slide_out_up,
+                            R.animator.slide_in_up,
+                            R.animator.slide_out_down)
                     .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
                     .addToBackStack(fragment.getClass().getSimpleName())
                     .commit();
         }
     }
 
-    protected boolean isAmountValid(String amountStr) {
+    protected boolean isAmountValidLong(String amountStr) {
         try {
             Long.parseLong(amountStr);
+            return true;
+        } catch(NumberFormatException e) {
+            return false;
+        }
+    }
+
+    protected boolean isAmountValidDecimal(String amountStr) {
+        try {
+            Double.parseDouble(amountStr);
             return true;
         } catch(NumberFormatException e) {
             return false;
@@ -358,8 +372,9 @@ public class TransferFragment extends Fragment {
         @Override
         protected void onSuccess(Boolean success) {
             if (success == null || !success.booleanValue()) {
+                // TODO NLS
                 Toast.makeText(getActivity(),
-                        "Could not load data. Blockchain parameter not loaded.",
+                        "Could not load currency parameter. conversion to UD disable.",
                         Toast.LENGTH_SHORT).show();
             }
             else {
