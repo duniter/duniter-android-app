@@ -10,7 +10,7 @@ public class WotLookupUId {
     private Map<String, String> meta;
     
     private String self;
-    
+
     private List<WotLookupSignature> others;
 
     public String getUid() {

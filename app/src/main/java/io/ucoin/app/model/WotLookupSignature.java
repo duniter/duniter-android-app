@@ -4,15 +4,22 @@ import java.util.Map;
 
 public class WotLookupSignature {
 
+    public static final String META_KEY_TS = "timestamp";
+    public static final String META_KEY_BLOCK_NUMBER = "block_number";
+
     private String pubkey;
     
-    private Map<String, String> meta;
+    private Map<String, Integer> meta;
     
     private String signature;
 
-    private String isMember;
+    private boolean isMember;
 
-    private String wasMember;
+    private boolean wasMember;
+
+    private String[] uids;
+
+    private String uid;
 
     public String getPubkey() {
         return pubkey;
@@ -22,11 +29,11 @@ public class WotLookupSignature {
         this.pubkey = pubkey;
     }
 
-    public Map<String, String> getMeta() {
+    public Map<String, Integer> getMeta() {
         return meta;
     }
 
-    public void setMeta(Map<String, String> meta) {
+    public void setMeta(Map<String, Integer> meta) {
         this.meta = meta;
     }
 
@@ -38,19 +45,35 @@ public class WotLookupSignature {
         this.signature = signature;
     }
 
-    public String isMember() {
+    public boolean isMember() {
         return isMember;
     }
 
-    public void setIsMember(String isMember) {
+    public void setIsMember(boolean isMember) {
         this.isMember = isMember;
     }
 
-    public String wasMember() {
+    public boolean wasMember() {
         return wasMember;
     }
 
-    public void setWasMember(String wasMember) {
+    public void setWasMember(boolean wasMember) {
         this.wasMember = wasMember;
+    }
+
+    public String[] getUids() {
+        return uids;
+    }
+
+    public void setUids(String[] uids) {
+        this.uids = uids;
+    }
+
+    public String getUid() {
+        return uid;
+    }
+
+    public void setUid(String uid) {
+        this.uid = uid;
     }
 }

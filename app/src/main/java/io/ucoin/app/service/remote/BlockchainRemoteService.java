@@ -20,6 +20,7 @@ import io.ucoin.app.model.Wallet;
 import io.ucoin.app.model.remote.BlockchainMembershipResults;
 import io.ucoin.app.service.CryptoService;
 import io.ucoin.app.service.ServiceLocator;
+import io.ucoin.app.service.exception.HttpBadRequestException;
 import io.ucoin.app.service.exception.UidMatchAnotherPubkeyException;
 import io.ucoin.app.technical.ObjectUtils;
 import io.ucoin.app.technical.StringUtils;
@@ -158,7 +159,7 @@ public class BlockchainRemoteService extends BaseRemoteService {
         ObjectUtils.checkNotNull(wallet);
 
         // Load membership data
-        loadMembership(wallet.getIdentity());
+        loadMembership(wallet.getIdentity(), true);
 
         // Something wrong on pubkey : uid already used by another pubkey !
         if (wallet.getIdentity().getIsMember() == null) {
@@ -171,7 +172,7 @@ public class BlockchainRemoteService extends BaseRemoteService {
      * @param identity
      * @throws UidMatchAnotherPubkeyException
      */
-    public void loadMembership(Identity identity) {
+    public void loadMembership(Identity identity, boolean checkLookupForNonMember) {
         ObjectUtils.checkNotNull(identity);
         ObjectUtils.checkArgument(StringUtils.isNotBlank(identity.getUid()));
         ObjectUtils.checkArgument(StringUtils.isNotBlank(identity.getPubkey()));
@@ -183,18 +184,24 @@ public class BlockchainRemoteService extends BaseRemoteService {
         if (result == null) {
             identity.setMember(false);
 
-            // Try to find a self certification
-            WotRemoteService wotService = ServiceLocator.instance().getWotRemoteService();
-            Identity lookupIdentity = wotService.getIdentity(identity.getUid(), identity.getPubkey());
-
-            // Self certification exists, update the cert timestamp
-            if (lookupIdentity != null) {
-                identity.setTimestamp(lookupIdentity.getTimestamp());
+            if (!checkLookupForNonMember) {
+                //identity.setTimestamp(-1);
             }
 
-            // Self certitification not exists: make sure the cert time is reseted
+            // Try to find a self certification
             else {
-                identity.setTimestamp(-1);
+                WotRemoteService wotService = ServiceLocator.instance().getWotRemoteService();
+                Identity lookupIdentity = wotService.getIdentity(identity.getUid(), identity.getPubkey());
+
+                // Self certification exists, update the cert timestamp
+                if (lookupIdentity != null) {
+                    identity.setTimestamp(lookupIdentity.getTimestamp());
+                }
+
+                // Self certitification not exists: make sure the cert time is cleaning
+                else {
+                    identity.setTimestamp(-1);
+                }
             }
         }
 
@@ -240,7 +247,7 @@ public class BlockchainRemoteService extends BaseRemoteService {
 
         BlockchainBlock block = getCurrentBlock();
 
-        // Compute memebership document
+        // Compute membership document
         String membership = getMembership(wallet,
                 block,
                 true /*sideIn*/);
@@ -273,8 +280,14 @@ public class BlockchainRemoteService extends BaseRemoteService {
         String path = String.format(URL_MEMBERSHIP_SEARCH, uidOrPubkey);
 
         // search blockchain membership
-        BlockchainMembershipResults result = executeRequest(path, BlockchainMembershipResults.class);
-        return result;
+        try {
+            BlockchainMembershipResults result = executeRequest(path, BlockchainMembershipResults.class);
+            return result;
+        }
+        catch(HttpBadRequestException e) {
+            Log.d(TAG, "No member matching this pubkey or uid: " + uidOrPubkey);
+            return null;
+        }
     }
 
     public String getMembership(Wallet wallet,

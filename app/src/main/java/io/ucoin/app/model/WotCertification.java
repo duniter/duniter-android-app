@@ -1,6 +1,8 @@
 package io.ucoin.app.model;
 
 
+import io.ucoin.app.technical.ObjectUtils;
+
 /**
  * A certification, return by <code>/wot/certified-by/[uid]</code> or <code>/wot/certifiers-of/[uid]</code>
  * @author Benoit Lavenier <benoit.lavenier@e-is.pro>
@@ -30,6 +32,14 @@ public class WotCertification extends Identity  {
      */
     private boolean isCertifiedBy;
 
+    public WotCertification() {
+        super();
+    }
+
+    public WotCertification(WotCertification otherBean) {
+        super();
+        this.copy(otherBean);
+    }
 
     public WotCertificationTime getCert_time() {
         return cert_time;
@@ -66,6 +76,22 @@ public class WotCertification extends Identity  {
         this.isCertifiedBy = isCertifiedBy;
     }
 
+    public long getTimestamp() {
+        if (cert_time != null){
+            return cert_time.getMedianTime();
+        }
+        return -1;
+    }
+
+    public void setTimestamp(long certTime) {
+        if (certTime < 0) {
+            return;
+        }
+        if (cert_time == null){
+            cert_time = new WotCertificationTime();
+        }
+        cert_time.setMedianTime(certTime);
+    }
 
     public void copy(WotCertification certification) {
         super.copy(certification);
@@ -74,4 +100,15 @@ public class WotCertification extends Identity  {
         this.isCertifiedBy = certification.isCertifiedBy;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (!super.equals(o)) {
+            return false;
+        }
+        if (o instanceof  WotCertification) {
+            WotCertification wc = (WotCertification)o;
+            return ObjectUtils.equals(cert_time, wc.cert_time);
+        }
+        return false;
+    }
 }

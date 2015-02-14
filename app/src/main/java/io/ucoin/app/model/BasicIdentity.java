@@ -2,6 +2,8 @@ package io.ucoin.app.model;
 
 import java.io.Serializable;
 
+import io.ucoin.app.technical.ObjectUtils;
+
 /**
  * Basic information on a identity.
  * 
@@ -64,5 +66,19 @@ public class BasicIdentity implements Serializable {
         this.uid = identity.uid;
         this.pubkey = identity.pubkey;
         this.signature = identity.signature;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null) {
+            return false;
+        }
+        if (o instanceof  BasicIdentity) {
+            BasicIdentity bi = (BasicIdentity)o;
+            return  ObjectUtils.equals(this.pubkey, bi.pubkey)
+                    && ObjectUtils.equals(this.uid, bi.uid)
+                    && ObjectUtils.equals(this.signature, bi.signature);
+        }
+        return false;
     }
 }

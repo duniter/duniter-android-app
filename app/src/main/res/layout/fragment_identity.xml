@@ -22,17 +22,16 @@
             android:text="User"
             android:textSize="@dimen/abc_text_size_display_3_material" />
 
-        <ImageView
-            android:id="@+id/qr_code"
+
+        <ImageButton android:id="@+id/favorite_button"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
-            android:contentDescription="@string/identity_icon"
-            android:src="@drawable/ic_user_white_32dp"
             android:layout_width="32dp"
             android:layout_height="32dp"
-            android:scaleType="fitXY"
-            />
+            android:src="@drawable/star"
+            android:background="#00ffffff"
+            android:scaleType="fitXY"/>
 
         <TextView
             android:id="@+id/timestamp_label"

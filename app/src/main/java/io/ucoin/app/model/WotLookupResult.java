@@ -11,6 +11,8 @@ public class WotLookupResult implements Serializable{
     
     private List<WotLookupUId> uids;
 
+    private List<WotLookupSignature> signed;
+
     public String getPubkey() {
         return pubkey;
     }
@@ -25,5 +27,13 @@ public class WotLookupResult implements Serializable{
 
     public void setUids(List<WotLookupUId> uids) {
         this.uids = uids;
+    }
+
+    public List<WotLookupSignature> getSigned() {
+        return signed;
+    }
+
+    public void setSigned(List<WotLookupSignature> signed) {
+        this.signed = signed;
     }
 }

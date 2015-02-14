@@ -21,6 +21,7 @@ import java.net.ConnectException;
 
 import io.ucoin.app.config.Configuration;
 import io.ucoin.app.model.Peer;
+import io.ucoin.app.service.exception.HttpBadRequestException;
 import io.ucoin.app.service.exception.PeerConnectionException;
 import io.ucoin.app.technical.StandardCharsets;
 import io.ucoin.app.technical.UCoinTechnicalException;
@@ -148,6 +149,8 @@ public class HttpService extends BaseService implements Closeable{
                 case HttpStatus.SC_UNAUTHORIZED:
                 case HttpStatus.SC_FORBIDDEN:
                     throw new UCoinTechnicalException("ucoin.client.authentication");
+                case HttpStatus.SC_BAD_REQUEST:
+                    throw new HttpBadRequestException("ucoin.client.status" + response.getStatusLine().toString());
                 default:
                     throw new UCoinTechnicalException("ucoin.client.status" + response.getStatusLine().toString());
             }

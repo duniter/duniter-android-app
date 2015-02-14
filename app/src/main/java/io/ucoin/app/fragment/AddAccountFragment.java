@@ -98,10 +98,10 @@ public class AddAccountFragment extends Fragment {
 
         // TODO FOR DEV ONLY (to remove later)
         {
-            mUidView.setText("cgeek");
-            mSaltView.setText("abc");
-            mPasswordView.setText("def");
-            mConfirmPasswordView.setText("def");
+            mUidView.setText("kimamila");
+            mSaltView.setText("benoit.lavenier@e-is.pro");
+            mPasswordView.setText("priezPourMoi!");
+            mConfirmPasswordView.setText("priezPourMoi!");
         }
     }
 

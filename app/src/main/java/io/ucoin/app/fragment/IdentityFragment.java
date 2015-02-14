@@ -10,16 +10,17 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ImageView;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TabHost;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.Date;
+
 import io.ucoin.app.R;
 import io.ucoin.app.activity.MainActivity;
 import io.ucoin.app.adapter.CertificationListAdapter;
-import io.ucoin.app.adapter.ImageAdapterHelper;
 import io.ucoin.app.adapter.ProgressViewAdapter;
 import io.ucoin.app.config.Configuration;
 import io.ucoin.app.model.Identity;
@@ -38,7 +39,7 @@ public class IdentityFragment extends Fragment {
 
     private ProgressViewAdapter mProgressViewAdapter;
     private CertificationListAdapter mCertificationListAdapter;
-    private ImageView mIcon;
+    private ImageButton mFavorite;
     private TextView mTimestampView;
     private TabHost mTabs;
 
@@ -110,8 +111,7 @@ public class IdentityFragment extends Fragment {
         uidView.setText(identity.getUid());
 
         // Icon
-        mIcon = (ImageView)view.findViewById(R.id.qr_code);
-        mIcon.setImageResource(ImageAdapterHelper.getImageWhite(identity));
+        mFavorite = (ImageButton)view.findViewById(R.id.favorite_button);
 
         // Timestamp
         mTimestampView = (TextView) view.findViewById(R.id.timestamp);
@@ -246,15 +246,18 @@ public class IdentityFragment extends Fragment {
 
         @Override
         protected WotCertification[] doInBackgroundHandleException(Void... params) {
-            WotRemoteService service = ServiceLocator.instance().getWotRemoteService();
 
             // Refresh the membership data
             BlockchainRemoteService bcService = ServiceLocator.instance().getBlockchainRemoteService();
-            bcService.loadMembership(mIdentity);
+            bcService.loadMembership(mIdentity, false);
 
             // Get certifications
-            return service.getCertificationsByPubkey(mIdentity.getPubkey());
-        }
+            WotRemoteService wotService = ServiceLocator.instance().getWotRemoteService();
+            return wotService.getCertifications(
+                    mIdentity.getUid(),
+                    mIdentity.getPubkey(),
+                    mIdentity.isMember());
+         }
 
         @Override
         protected void onSuccess(WotCertification[] certifications) {
@@ -262,8 +265,8 @@ public class IdentityFragment extends Fragment {
             // Refresh timestamp
             mTimestampView.setText(DateUtils.format(mIdentity.getTimestamp()));
 
-            // Refresh icon
-            mIcon.setImageResource(ImageAdapterHelper.getImageWhite(mIdentity));
+            // Refresh star
+            //mFavorite.setImageResource(ImageAdapterHelper.getImageWhite(mIdentity));
 
             // Update certification list
             mCertificationListAdapter.clear();
@@ -319,9 +322,11 @@ public class IdentityFragment extends Fragment {
                 Configuration config = Configuration.instance();
                 Wallet wallet = config.getCurrentWallet(); // TODO: replace with curent account identity
 
+                // Add the new certification to the list
                 WotCertification certification = new WotCertification();
                 certification.copy(wallet.getIdentity());
                 certification.setCertifiedBy(false);
+                certification.setTimestamp(DateUtils.toTimestamp(new Date()));
                 mCertificationListAdapter.add(certification);
 
                 // TODO NLS

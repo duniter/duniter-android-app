@@ -1,6 +1,7 @@
 package io.ucoin.app.model;
 
 import io.ucoin.app.technical.DateUtils;
+import io.ucoin.app.technical.ObjectUtils;
 
 public class Identity extends BasicIdentity {
 
@@ -33,6 +34,14 @@ public class Identity extends BasicIdentity {
         this.isMember = isMember;
     }
 
+    /**
+     * like getIsMember, but never return <code>null</code> but <code>false</code> instead
+     * @return true if member
+     */
+    public boolean isMember() {
+        return Boolean.TRUE.equals(isMember);
+    }
+
     @Override
     public String toString() {
         return new StringBuilder().append(super.toString())
@@ -47,5 +56,18 @@ public class Identity extends BasicIdentity {
         super.copy(identity);
         this.timestamp = identity.timestamp;
         this.isMember = identity.isMember;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!super.equals(o)) {
+            return false;
+        }
+        if (o instanceof  Identity) {
+            Identity i = (Identity)o;
+            return  ObjectUtils.equals(this.isMember, i.isMember)
+                    && timestamp == timestamp;
+        }
+        return false;
     }
 }

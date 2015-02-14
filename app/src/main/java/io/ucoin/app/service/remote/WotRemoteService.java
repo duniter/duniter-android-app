@@ -10,10 +10,11 @@ import org.apache.http.message.BasicNameValuePair;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeSet;
 
 import io.ucoin.app.model.BlockchainBlock;
 import io.ucoin.app.model.Identity;
@@ -22,11 +23,14 @@ import io.ucoin.app.model.WotCertification;
 import io.ucoin.app.model.WotIdentityCertifications;
 import io.ucoin.app.model.WotLookupResult;
 import io.ucoin.app.model.WotLookupResults;
+import io.ucoin.app.model.WotLookupSignature;
 import io.ucoin.app.model.WotLookupUId;
-import io.ucoin.app.model.comparator.WotCertificationComparator;
+import io.ucoin.app.model.comparator.WotCertificationComparators;
 import io.ucoin.app.service.CryptoService;
 import io.ucoin.app.service.ServiceLocator;
+import io.ucoin.app.technical.CollectionUtils;
 import io.ucoin.app.technical.DateUtils;
+import io.ucoin.app.technical.ObjectUtils;
 import io.ucoin.app.technical.UCoinTechnicalException;
 import io.ucoin.app.technical.crypto.CryptoUtils;
 
@@ -62,11 +66,11 @@ public class WotRemoteService extends BaseRemoteService {
         cryptoService = ServiceLocator.instance().getCryptoService();
     }
 
-    public WotLookupResults find(String uidPattern) {
-        Log.d(TAG, String.format("Try to find user info by uid: %s", uidPattern));
+    public WotLookupResults find(String uidOrPubKey) {
+        Log.d(TAG, String.format("Try to find user by looking up on [%s]", uidOrPubKey));
 
         // get parameter
-        String path = String.format(URL_LOOKUP, uidPattern);
+        String path = String.format(URL_LOOKUP, uidOrPubKey);
         WotLookupResults lookupResult = executeRequest(path, WotLookupResults.class);
 
         return lookupResult;
@@ -115,51 +119,18 @@ public class WotRemoteService extends BaseRemoteService {
         return toIdentity(lookupUid);
     }
 
-    public WotCertification[] getCertificationsByPubkey(String pubkey) {
-        List<WotCertification> result = new ArrayList<WotCertification>();
+    public WotCertification[] getCertifications(String uid, String pubkey, boolean isMember) {
+        ObjectUtils.checkNotNull(uid);
+        ObjectUtils.checkNotNull(pubkey);
 
-        // Certifiers of
-        WotIdentityCertifications certifiersOfList = getCertifiersOf(pubkey);
-        boolean certifiersOfIsEmpty = (certifiersOfList == null
-                || certifiersOfList.getCertifications() == null);
-        Map<String, WotCertification> certifierByPubkeys = new HashMap<String, WotCertification>();
-        if (!certifiersOfIsEmpty) {
-            for (WotCertification certifier : certifiersOfList.getCertifications()) {
-                certifier.setCertifiedBy(false);
-                certifierByPubkeys.put(certifier.getPubkey(), certifier);
-                result.add(certifier);
-            }
+        if (isMember) {
+            return getCertificationsByPubkeyForMember(pubkey);
         }
-
-        // Certified by
-        WotIdentityCertifications certifiedByList = getCertifiedBy(pubkey);
-        boolean certifiedByIsEmpty = (certifiedByList == null
-                || certifiedByList.getCertifications() == null);
-
-        if (!certifiedByIsEmpty) {
-            for (WotCertification certifiedBy : certifiedByList.getCertifications()) {
-
-                certifiedBy.setCertifiedBy(true);
-
-                // If exists, link to other side certification
-                String certifiedByPubkey = certifiedBy.getPubkey();
-                if (certifierByPubkeys.containsKey(certifiedByPubkey)) {
-                    WotCertification certified = certifierByPubkeys.get(certifiedByPubkey);
-                    certified.setOtherEnd(certifiedBy);
-                }
-
-                // If only a certifier, just add to the list
-                else {
-                    result.add(certifiedBy);
-                }
-            }
+        else {
+            return getCertificationsByPubkeyForNonMember(uid, pubkey);
         }
-
-        WotCertification[] array = result.toArray(new WotCertification[result.size()]);
-        Arrays.sort(array, new WotCertificationComparator());
-
-        return array;
     }
+
 
     public WotIdentityCertifications getCertifiedBy(String uid) {
         Log.d(TAG, String.format("Try to get certifications done by uid: %s", uid));
@@ -311,6 +282,101 @@ public class WotRemoteService extends BaseRemoteService {
 
     /* -- Internal methods -- */
 
+
+    public WotCertification[] getCertificationsByPubkeyForMember(String pubkey) {
+        Collection<WotCertification> result = new TreeSet<WotCertification>(WotCertificationComparators.newComparator());
+
+        // Certifiers of
+        WotIdentityCertifications certifiersOfList = getCertifiersOf(pubkey);
+        boolean certifiersOfIsEmpty = (certifiersOfList == null
+                || certifiersOfList.getCertifications() == null);
+        //Map<String, WotCertification> certifierByPubkeys = new HashMap<String, WotCertification>();
+        if (!certifiersOfIsEmpty) {
+            for (WotCertification certifier : certifiersOfList.getCertifications()) {
+                certifier.setCertifiedBy(false);
+                //certifierByPubkeys.put(certifier.getPubkey(), certifier);
+                result.add(certifier);
+            }
+        }
+
+        // Certified by
+        WotIdentityCertifications certifiedByList = getCertifiedBy(pubkey);
+        boolean certifiedByIsEmpty = (certifiedByList == null
+                || certifiedByList.getCertifications() == null);
+
+        if (!certifiedByIsEmpty) {
+            for (WotCertification certifiedBy : certifiedByList.getCertifications()) {
+
+                certifiedBy.setCertifiedBy(true);
+
+                // If exists, link to other side certification
+                String certifiedByPubkey = certifiedBy.getPubkey();
+                //if (certifierByPubkeys.containsKey(certifiedByPubkey)) {
+                //    WotCertification certified = certifierByPubkeys.get(certifiedByPubkey);
+                //    certified.setOtherEnd(certifiedBy);
+                //}
+
+                // If only a certifier, just add to the list
+                //else {
+                    result.add(certifiedBy);
+                //}
+            }
+        }
+
+        // Group certifications  by [uid, pubKey] and keep last timestamp
+        result = groupByUidAndPubKey(result);
+
+        return result.toArray(new WotCertification[result.size()]);
+    }
+
+    public WotCertification[] getCertificationsByPubkeyForNonMember(final String uid, final String pubkey) {
+        // Ordered list, by uid/pubkey/cert time
+        TreeSet<WotCertification> result = new TreeSet<WotCertification>(WotCertificationComparators.newComparator());
+
+        Log.d(TAG, String.format("Get non member WOT, by uid [%s] and pubKey [%s]", uid, pubkey));
+
+        // call lookup
+        String path = String.format(URL_LOOKUP, pubkey);
+        WotLookupResults lookupResults = executeRequest(path, WotLookupResults.class);
+
+        // Retrieve the exact uid
+        WotLookupUId lookupUId = getUidByUidAndPublicKey(lookupResults, uid, pubkey);
+
+        // Read certifiers, if any
+        Map<String, WotCertification> certifierByPubkeys = new HashMap<String, WotCertification>();
+        if (lookupUId != null && lookupUId.getOthers() != null) {
+            for(WotLookupSignature lookupSignature: lookupUId.getOthers()) {
+                Collection<WotCertification> certifiers = toCertifierCertifications(lookupSignature);
+                result.addAll(certifiers);
+            }
+        }
+
+        // Read certified-by
+        if (CollectionUtils.isNotEmpty(lookupResults.getResults())) {
+            for (WotLookupResult lookupResult: lookupResults.getResults()) {
+                if (lookupResult.getSigned() != null) {
+                    for(WotLookupSignature lookupSignature : lookupResult.getSigned()) {
+                        WotCertification certifiedBy = toCertifiedByCerticication(lookupSignature);
+
+                        // If exists, link to other side certification
+                        String certifiedByPubkey = certifiedBy.getPubkey();
+                        if (certifierByPubkeys.containsKey(certifiedByPubkey)) {
+                            WotCertification certified = certifierByPubkeys.get(certifiedByPubkey);
+                            certified.setOtherEnd(certifiedBy);
+                        }
+
+                        // If only a certifier, just add to the list
+                        else {
+                            result.add(certifiedBy);
+                        }
+                    }
+                }
+            }
+        }
+
+        return result.toArray(new WotCertification[result.size()]);
+    }
+
     protected String getSelfCertification(byte[] secKey, String uid, long timestamp) {
         // Create the self part to sign
         StringBuilder buffer = new StringBuilder()
@@ -459,4 +525,150 @@ public class WotRemoteService extends BaseRemoteService {
         return null;
     }
 
+    private Collection<WotCertification> toCertifierCertifications(final WotLookupSignature source) {
+        List<WotCertification> result = new ArrayList<WotCertification>();
+        // If only one uid
+        if (source.getUids().length == 1) {
+            WotCertification target = new WotCertification();
+
+            // uid
+            target.setUid(source.getUids()[0]);
+
+            // certifier
+            target.setCertifiedBy(false);
+
+            // Pubkey
+            target.setPubkey(source.getPubkey());
+
+            // Is member
+            target.setMember(source.isMember());
+
+            result.add(target);
+        }
+        else {
+            for(String uid: source.getUids()) {
+                WotCertification target = new WotCertification();
+
+                // uid
+                target.setUid(uid);
+
+                // certified by
+                target.setCertifiedBy(false);
+
+                // Pubkey
+                target.setPubkey(source.getPubkey());
+
+                // Is member
+                target.setMember(source.isMember());
+
+                result.add(target);
+            }
+        }
+        return result;
+    }
+
+    private WotCertification toCertifiedByCerticication(final WotLookupSignature source) {
+
+        WotCertification target = new WotCertification();
+        // uid
+        target.setUid(source.getUid());
+
+        // certifieb by
+        target.setCertifiedBy(true);
+
+        if (source.getMeta() != null) {
+
+            // timestamp
+            Integer timestamp = source.getMeta().get(WotLookupSignature.META_KEY_TS);
+            if (timestamp != null) {
+                target.setTimestamp(timestamp.longValue());
+            }
+        }
+
+        // Pubkey
+        target.setPubkey(source.getPubkey());
+
+        // Is member
+        target.setMember(source.isMember());
+
+        // add to result list
+        return target;
+    }
+
+    /**
+     *
+     * @param orderedCertifications a list, ordered by uid, pubkey, timestamp (DESC)
+     * @return
+     */
+    private Collection<WotCertification> groupByUidAndPubKey(Collection<WotCertification> orderedCertifications) {
+        if (CollectionUtils.isEmpty(orderedCertifications)) {
+            return orderedCertifications;
+        }
+
+        List<WotCertification> result = new ArrayList<WotCertification>();
+
+        StringBuilder keyBuilder = new StringBuilder();
+        String previousIdentityKey = null;
+        WotCertification previousCert = null;
+        for (WotCertification cert : orderedCertifications) {
+            String identityKey = keyBuilder.append(cert.getUid())
+                    .append("~~")
+                    .append(cert.getPubkey())
+                    .toString();
+            boolean certifiedBy = cert.isCertifiedBy();
+
+            // Seems to be the same identity as previous entry
+            if (identityKey.equals(previousIdentityKey)) {
+
+                if (certifiedBy != previousCert.isCertifiedBy()) {
+                    // merge with existing other End (if exists)
+                    merge(cert, previousCert.getOtherEnd());
+
+                    // previousCert = certifier, so keep it and link the current cert
+                    if (!certifiedBy) {
+                        previousCert.setOtherEnd(cert);
+                    }
+
+                    // previousCert = certified-by, so prefer the current cert
+                    else {
+                        cert.setOtherEnd(previousCert);
+                        previousCert = cert;
+                    }
+                }
+
+                // Merge
+                else {
+                    merge(previousCert, cert);
+                }
+            }
+
+            // if identity changed
+            else {
+                // So add the previous cert to result
+                if (previousCert != null) {
+                    result.add(previousCert);
+                }
+
+                // And prepare next iteration
+                previousIdentityKey = identityKey;
+                previousCert = cert;
+            }
+
+            // prepare the next loop
+            keyBuilder.setLength(0);
+
+        }
+
+        if (previousCert != null) {
+            result.add(previousCert);
+        }
+
+        return result;
+    }
+
+    private void merge(WotCertification previousCert, WotCertification cert) {
+        if (cert != null && cert.getTimestamp() >  previousCert.getTimestamp()) {
+            previousCert.setTimestamp(cert.getTimestamp());
+        }
+    }
 }
