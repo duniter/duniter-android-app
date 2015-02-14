@@ -25,6 +25,10 @@ You should install
 - [Android Studio](https://developer.android.com/sdk/index.html)
 - [NDK (Native Developpement Kit)](https://developer.android.com/tools/sdk/ndk/index.html): use android-ndk-r10d (64bit)
 - Configure the Android Studio project : edit the local.properties file, use by Gradle
+```
+sdk.dir=/path/to/android-sdks
+ndk.dir=/path/to/android-ndks/android-ndk-r10d
+```
 
 - Install dependencies for needed for kalium-jni compilation
 ```
