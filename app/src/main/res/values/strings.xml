@@ -157,7 +157,6 @@
 
     <string-array name="drawer_items">
         <item>@string/home</item>
-        <item>@string/login</item>
         <item>@string/currencies</item>
         <item>@string/transactions</item>
         <item>@string/settings</item>

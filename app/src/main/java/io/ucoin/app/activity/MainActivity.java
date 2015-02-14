@@ -41,7 +41,6 @@ import io.ucoin.app.database.Contract;
 import io.ucoin.app.fragment.CurrencyListFragment;
 import io.ucoin.app.fragment.DevFragment;
 import io.ucoin.app.fragment.HomeFragment;
-import io.ucoin.app.fragment.LoginFragment;
 import io.ucoin.app.fragment.TransferListFragment;
 import io.ucoin.app.fragment.WotSearchFragment;
 import io.ucoin.app.model.Identity;
@@ -269,20 +268,17 @@ public class MainActivity extends ActionBarActivity
             case 1: //0 is home we only pop back, no need for new fragment
                 break;
             case 2:
-                fragment = LoginFragment.newInstance();
-                break;
-            case 3:
                 fragment = CurrencyListFragment.newInstance();
                 break;
-            case 4:
+            case 3:
                 fragment = TransferListFragment.newInstance();
                 break;
-            case 5:
+            case 4:
                 Intent intent = new Intent(MainActivity.this,
                         SettingsActivity.class);
                 startActivity(intent);
                 break;
-            case 6:
+            case 5:
                 fragment = DevFragment.newInstance();
                 break;
             default:
