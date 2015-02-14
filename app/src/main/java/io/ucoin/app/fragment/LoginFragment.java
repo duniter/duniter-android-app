@@ -17,17 +17,25 @@ import android.widget.TextView;
 import io.ucoin.app.R;
 import io.ucoin.app.adapter.ProgressViewAdapter;
 import io.ucoin.app.model.Wallet;
-import io.ucoin.app.model.WotLookupUId;
 import io.ucoin.app.service.DataContext;
 import io.ucoin.app.service.ServiceLocator;
-import io.ucoin.app.service.remote.WotRemoteService;
 import io.ucoin.app.technical.AsyncTaskHandleException;
+import io.ucoin.app.technical.ObjectUtils;
 import io.ucoin.app.technical.crypto.KeyPair;
 
 /**
  * A login screen that offers login via email/password.
  */
 public class LoginFragment extends Fragment {
+
+
+    public static LoginFragment newInstance() {
+        LoginFragment fragment = new LoginFragment();
+        Bundle args = new Bundle();
+        fragment.setArguments(args);
+
+        return fragment;
+    }
 
     public static LoginFragment newInstance(Wallet wallet, OnClickListener listener) {
         LoginFragment fragment = new LoginFragment();
@@ -51,13 +59,6 @@ public class LoginFragment extends Fragment {
     private EditText mPasswordView;
     private ProgressViewAdapter mProgressViewAdapter;
 
-    public static LoginFragment newInstance() {
-        LoginFragment fragment = new LoginFragment();
-        Bundle args = new Bundle();
-        fragment.setArguments(args);
-
-        return fragment;
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -97,7 +98,7 @@ public class LoginFragment extends Fragment {
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
                 if (id == EditorInfo.IME_ACTION_DONE) {
-                    attemptLogin();
+                    attemptLogin(wallet);
                     return true;
                 }
                 return false;
@@ -108,7 +109,7 @@ public class LoginFragment extends Fragment {
         mSignInButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                attemptLogin();
+                attemptLogin(wallet);
             }
         });
 
@@ -140,7 +141,7 @@ public class LoginFragment extends Fragment {
      * If there are form errors (invalid email, missing fields, etc.), the
      * errors are presented and no actual login attempt is made.
      */
-    public void attemptLogin() {
+    public void attemptLogin(Wallet wallet) {
         if (mAuthTask != null) {
             return;
         }
@@ -194,8 +195,8 @@ public class LoginFragment extends Fragment {
         } else {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
-            mAuthTask = new UserLoginTask(uid, salt, password);
-            mAuthTask.execute((Void) null);
+            mAuthTask = new UserLoginTask(salt, password);
+            mAuthTask.execute(wallet);
         }
     }
 
@@ -260,14 +261,12 @@ public class LoginFragment extends Fragment {
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
      */
-    public class UserLoginTask extends AsyncTaskHandleException<Void, Void, Wallet> {
+    public class UserLoginTask extends AsyncTaskHandleException<Wallet, Void, Wallet> {
 
-        private final String mUid;
         private final String mEmail;
         private final String mPassword;
 
-        UserLoginTask(String uid, String email, String password) {
-            mUid = uid;
+        UserLoginTask(String email, String password) {
             mEmail = email;
             mPassword = password;
         }
@@ -287,8 +286,9 @@ public class LoginFragment extends Fragment {
         }
 
         @Override
-        protected Wallet doInBackgroundHandleException(Void... params) throws Exception {
+        protected Wallet doInBackgroundHandleException(Wallet... wallets) throws Exception {
             DataContext context = ServiceLocator.instance().getDataContext();
+            Wallet wallet = wallets[0];
             String currency = "??";
             if (context.getBlockchainParameter() != null) {
                 currency = context.getBlockchainParameter().getCurrency();
@@ -297,23 +297,15 @@ public class LoginFragment extends Fragment {
             // Create a seed from salt and password
             KeyPair keyPair = ServiceLocator.instance().getCryptoService().getKeyPair(mEmail, mPassword);
 
-            // Create the wallet
-            Wallet wallet = new Wallet(currency, mUid, keyPair.publicKey, keyPair.secretKey);
-
-            WotRemoteService wotService = ServiceLocator.instance().getWotRemoteService();
-            WotLookupUId result = wotService.findByUidAndPublicKey(mUid, wallet.getPubKeyHash());
-            if (result != null) {
-
-                // Refresh the wallet identity with lookup info
-                wotService.toIdentity(result, wallet.getIdentity());
-
-                return wallet;
+            if (ObjectUtils.equals(wallet.getPubKeyHash(), wallet.getPubKeyHash())) {
+                return null; // wrong salt/password
             }
 
-            // TODO: register the new account here.
-            // send the self
+            // Update the wallet
+            wallet.setPubKey(keyPair.publicKey);
+            wallet.setSecKey(keyPair.secretKey);
 
-            return null;
+            return wallet;
         }
 
         @Override
@@ -326,8 +318,8 @@ public class LoginFragment extends Fragment {
                 mListener.onPositiveClick(args);
 
             } else {
-                mUidView.setError(getString(R.string.login_incorrect));
-                mUidView.requestFocus();
+                mPasswordView.setError(getString(R.string.password_incorrect));
+                mPasswordView.requestFocus();
                 mProgressViewAdapter.showProgress(false);
             }
         }

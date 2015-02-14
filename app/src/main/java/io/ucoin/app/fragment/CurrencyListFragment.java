@@ -117,7 +117,7 @@ public class CurrencyListFragment extends ListFragment {
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         Cursor cursor = (Cursor) getListAdapter().getItem(position);
-        Currency currency = ServiceLocator.instance().getCurrencyService().read(cursor);
+        Currency currency = ServiceLocator.instance().getCurrencyService().toCurrency(cursor);
         Fragment fragment = CurrencyFragment.newInstance(currency);
         FragmentManager fragmentManager = getFragmentManager();
         fragmentManager.beginTransaction()

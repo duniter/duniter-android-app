@@ -160,7 +160,7 @@ public class CurrencyFragment extends Fragment {
         //add Currency to database
         ContentValues values = new ContentValues();
         values.put(Contract.Currency.ACCOUNT_ID, account_id);
-        values.put(Contract.Currency.CURRENCY_NAME, currency.getCurrencyName());
+        values.put(Contract.Currency.NAME, currency.getCurrencyName());
         values.put(Contract.Currency.MEMBERS_COUNT, currency.getMembersCount());
         values.put(Contract.Currency.FIRST_BLOCK_SIGNATURE, currency.getFirstBlockSignature());
 

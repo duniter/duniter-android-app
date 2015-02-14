@@ -2,7 +2,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center_horizontal"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:paddingBottom="8dp"
+    android:paddingLeft="8dp"
+    android:paddingRight="8dp"
+    android:paddingTop="8dp">
 
     <TextView
         android:layout_width="match_parent"
@@ -33,7 +37,8 @@
             android:imeOptions="actionNext"
             android:inputType="textNoSuggestions"
             android:singleLine="true"
-            android:textSize="@dimen/abc_text_size_body_2_material" />
+            android:textSize="@dimen/abc_text_size_body_2_material"
+            android:editable="false"/>
     </LinearLayout>
 
     <LinearLayout
@@ -58,7 +63,8 @@
             android:paddingLeft="8dp"
             android:paddingRight="8dp"
             android:singleLine="true"
-            android:textSize="@dimen/abc_text_size_body_2_material" />
+            android:textSize="@dimen/abc_text_size_body_2_material"
+            android:editable="false"/>
     </LinearLayout>
 
     <LinearLayout

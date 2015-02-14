@@ -112,6 +112,8 @@ public class IdentityFragment extends Fragment {
 
         // Icon
         mFavorite = (ImageButton)view.findViewById(R.id.favorite_button);
+        // TODO: implement favorite button
+        mFavorite.setVisibility(View.GONE);
 
         // Timestamp
         mTimestampView = (TextView) view.findViewById(R.id.timestamp);

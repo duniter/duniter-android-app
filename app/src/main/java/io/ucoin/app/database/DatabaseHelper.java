@@ -37,6 +37,7 @@ public class DatabaseHelper extends SQLiteOpenHelper implements Contract {
                 Wallet._ID + " INTEGER PRIMARY KEY AUTOINCREMENT" + COMMA +
                 Wallet.NAME + TEXT + COMMA +
                 Wallet.UID + TEXT + COMMA +
+                Wallet.SALT + TEXT + COMMA +
                 Wallet.PUBLIC_KEY + TEXT + NOTNULL + COMMA +
                 Wallet.CERT_TS + TEXT + COMMA +
                 // TODO : change SECRET_KEY type to BLOB
@@ -54,7 +55,7 @@ public class DatabaseHelper extends SQLiteOpenHelper implements Contract {
 
         String CREATE_TABLE_CURRENCY = "CREATE TABLE " + Currency.TABLE_NAME + "(" +
                 Currency._ID + " INTEGER PRIMARY KEY AUTOINCREMENT" + COMMA +
-                Currency.CURRENCY_NAME + TEXT + NOTNULL + UNIQUE + COMMA +
+                Currency.NAME + TEXT + NOTNULL + UNIQUE + COMMA +
                 Currency.ACCOUNT_ID + TEXT + NOTNULL + COMMA +
                 Currency.MEMBERS_COUNT + INTEGER + NOTNULL + COMMA +
                 Currency.FIRST_BLOCK_SIGNATURE + TEXT + UNIQUE + NOTNULL + COMMA +
@@ -85,7 +86,7 @@ public class DatabaseHelper extends SQLiteOpenHelper implements Contract {
                 Source.BLOCK + INTEGER + NOTNULL + COMMA +
                 UNIQUE + "(" + Source.FINGERPRINT + ")" + COMMA +
                 "FOREIGN KEY (" + Source.CURRENCY_NAME + ") REFERENCES " +
-                Currency.TABLE_NAME + "(" + Currency.CURRENCY_NAME + ")" + COMMA +
+                Currency.TABLE_NAME + "(" + Currency.NAME + ")" + COMMA +
                 "FOREIGN KEY (" + Source.WALLET_PUBLIC_KEY + ") REFERENCES " +
                 Wallet.TABLE_NAME + "(" + Wallet.PUBLIC_KEY + ")" +
                 ")";
@@ -97,7 +98,7 @@ public class DatabaseHelper extends SQLiteOpenHelper implements Contract {
                 Tx.COMMENT + TEXT + NOTNULL + COMMA +
                 Tx.BLOCK + INTEGER +  COMMA +
                 "FOREIGN KEY (" + Tx.CURRENCY_NAME + ") REFERENCES " +
-                Currency.TABLE_NAME + "(" + Currency.CURRENCY_NAME + ")" +
+                Currency.TABLE_NAME + "(" + Currency.NAME + ")" +
                 ")";
         db.execSQL(CREATE_TABLE_TX);
 

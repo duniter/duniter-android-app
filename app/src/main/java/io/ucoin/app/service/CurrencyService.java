@@ -1,10 +1,16 @@
 package io.ucoin.app.service;
 
+import android.app.Activity;
+import android.app.Application;
+import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import io.ucoin.app.content.Provider;
 import io.ucoin.app.database.Contract;
@@ -20,6 +26,13 @@ public class CurrencyService extends BaseService {
 
     /** Logger. */
     private static final String TAG = "CurrencyService";
+
+    // a cache instance of the wallet Uri
+    // Could NOT be static, because Uri is initialize in Provider.onCreate() method ;(
+    private Uri mContentUri = null;
+
+    private SelectCursorHolder mSelectHolder = null;
+
 
     public CurrencyService() {
         super();
@@ -44,27 +57,70 @@ public class CurrencyService extends BaseService {
         return null;
     }
 
-    public Currency read(final Cursor cursor) {
+    public Currency toCurrency(final Cursor cursor) {
         Currency result = new Currency();
 
-        // TODO kimamila: use holder for index
-        int idIndex = cursor.getColumnIndex(Contract.Currency._ID);
-        result.setId(cursor.getLong(idIndex));
-
-        int currencyNameIndex = cursor.getColumnIndex(Contract.Currency.CURRENCY_NAME);
-        result.setCurrencyName(cursor.getString(currencyNameIndex));
-
-        int membersCountIndex = cursor.getColumnIndex(Contract.Currency.MEMBERS_COUNT);
-        result.setMembersCount(cursor.getInt(membersCountIndex));
-
-        int firstBlockSignatureIndex = cursor
-                .getColumnIndex(Contract.Currency.FIRST_BLOCK_SIGNATURE);
-        result.setFirstBlockSignature(cursor.getString(firstBlockSignatureIndex));
+        if (mSelectHolder == null) {
+            mSelectHolder = new SelectCursorHolder(cursor);
+        }
+        result.setId(cursor.getLong(mSelectHolder.idIndex));
+        result.setCurrencyName(cursor.getString(mSelectHolder.nameIndex));
+        result.setMembersCount(cursor.getInt(mSelectHolder.membersCountIndex));
+        result.setFirstBlockSignature(cursor.getString(mSelectHolder.firstBlockSignatureIndex));
 
         return result;
     }
 
+    public List<Currency> getCurrencies(Activity activity) {
+        return getCurrencies(activity.getApplication());
+    }
+
+    public List<Currency> getCurrencies(Application application) {
+        String accountId = ((io.ucoin.app.Application) application).getAccountId();
+        return getCurrenciesByAccountId(application.getContentResolver(), Long.parseLong(accountId));
+    }
+
+    public Currency getCurrencyById(Context context, int currencyId) {
+        String selection = Contract.Currency._ID + "=?";
+        String[] selectionArgs = {
+                String.valueOf(currencyId)
+        };
+        Cursor cursor = context.getContentResolver()
+                .query(getContentUri(),
+                        new String[]{},
+                        selection,
+                        selectionArgs, null);
+
+        if (!cursor.moveToNext()) {
+            throw new UCoinTechnicalException("Could not load currency with id="+currencyId);
+        }
+
+        Currency currency = toCurrency(cursor);
+        cursor.close();
+        return currency;
+    }
+
+
     /* -- internal methods-- */
+
+    private List<Currency> getCurrenciesByAccountId(ContentResolver resolver, long accountId) {
+
+        String selection = Contract.Currency.ACCOUNT_ID + "=?";
+        String[] selectionArgs = {
+                String.valueOf(accountId)
+        };
+        Cursor cursor = resolver.query(getContentUri(), new String[]{}, selection,
+                selectionArgs, null);
+
+        List<Currency> result = new ArrayList<Currency>();
+        while (cursor.moveToNext()) {
+            Currency currency = toCurrency(cursor);
+            result.add(currency);
+        }
+        cursor.close();
+
+        return result;
+    }
 
     public Currency insert(final Context context, final Currency currency) {
 
@@ -77,7 +133,7 @@ public class CurrencyService extends BaseService {
             accountId = currency.getAccount().getId();
         }
         values.put(Contract.Currency.ACCOUNT_ID, accountId);
-        values.put(Contract.Currency.CURRENCY_NAME, currency.getCurrencyName());
+        values.put(Contract.Currency.NAME, currency.getCurrencyName());
         values.put(Contract.Currency.FIRST_BLOCK_SIGNATURE, currency.getFirstBlockSignature());
         values.put(Contract.Currency.MEMBERS_COUNT, currency.getMembersCount());
 
@@ -94,4 +150,26 @@ public class CurrencyService extends BaseService {
         return currency;
     }
 
+    private Uri getContentUri() {
+        if (mContentUri != null){
+            return mContentUri;
+        }
+        mContentUri = Uri.parse(Provider.CONTENT_URI + "/currency/");
+        return mContentUri;
+    }
+
+    private class SelectCursorHolder {
+
+        int idIndex;
+        int membersCountIndex;
+        int nameIndex;
+        int firstBlockSignatureIndex;
+
+        private SelectCursorHolder(final Cursor cursor ) {
+            idIndex = cursor.getColumnIndex(Contract.Currency._ID);
+            nameIndex = cursor.getColumnIndex(Contract.Currency.NAME);
+            membersCountIndex = cursor.getColumnIndex(Contract.Currency.MEMBERS_COUNT);
+            firstBlockSignatureIndex = cursor.getColumnIndex(Contract.Currency.FIRST_BLOCK_SIGNATURE);
+        }
+    }
 }

@@ -35,7 +35,7 @@ public class WalletService extends BaseService {
 
     // a cache instance of the wallet Uri
     // Could NOT be static, because Uri is initialize in Provider.onCreate() method ;(
-    private Uri mWalletUri = null;
+    private Uri mContentUri = null;
 
     private SelectCursorHolder mSelectHolder = null;
 
@@ -189,6 +189,9 @@ public class WalletService extends BaseService {
         target.put(Contract.Wallet.CURRENCY_ID, source.getCurrencyId());
         target.put(Contract.Wallet.NAME, source.getName());
         target.put(Contract.Wallet.UID, source.getUid());
+        if (source.getSalt() != null) {
+            target.put(Contract.Wallet.SALT, source.getSalt());
+        }
         target.put(Contract.Wallet.PUBLIC_KEY, source.getPubKeyHash());
         if (source.getCertTimestamp() != -1) {
             target.put(Contract.Wallet.CERT_TS, source.getCertTimestamp());
@@ -219,16 +222,17 @@ public class WalletService extends BaseService {
         result.setCredit(cursor.getInt(mSelectHolder.creditIndex));
         result.setMember(cursor.getInt(mSelectHolder.isMemberIndex) == 1 ? true : false);
         result.setCertTimestamp(cursor.getLong(mSelectHolder.certTimestampIndex));
+        result.setSalt(cursor.getString(mSelectHolder.saltIndex));
 
         return result;
     }
 
     private Uri getContentUri() {
-        if (mWalletUri != null){
-            return mWalletUri;
+        if (mContentUri != null){
+            return mContentUri;
         }
-        mWalletUri = Uri.parse(Provider.CONTENT_URI + "/wallet/");
-        return mWalletUri;
+        mContentUri = Uri.parse(Provider.CONTENT_URI + "/wallet/");
+        return mContentUri;
     }
 
     private class SelectCursorHolder {
@@ -241,6 +245,7 @@ public class WalletService extends BaseService {
         int creditIndex;
         int uidIndex;
         int certTimestampIndex;
+        int saltIndex;
 
         private SelectCursorHolder(final Cursor cursor ) {
             idIndex = cursor.getColumnIndex(Contract.Wallet._ID);
@@ -251,6 +256,7 @@ public class WalletService extends BaseService {
             secKeyIndex = cursor.getColumnIndex(Contract.Wallet.SECRET_KEY);
             isMemberIndex = cursor.getColumnIndex(Contract.Wallet.IS_MEMBER);
             creditIndex = cursor.getColumnIndex(Contract.Wallet.CREDIT);
+            saltIndex = cursor.getColumnIndex(Contract.Wallet.SALT);
         }
     }
 }
