@@ -13,6 +13,9 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import java.util.Arrays;
 
 import io.ucoin.app.R;
 import io.ucoin.app.adapter.ProgressViewAdapter;
@@ -20,7 +23,6 @@ import io.ucoin.app.model.Wallet;
 import io.ucoin.app.service.DataContext;
 import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.technical.AsyncTaskHandleException;
-import io.ucoin.app.technical.ObjectUtils;
 import io.ucoin.app.technical.crypto.KeyPair;
 
 /**
@@ -297,8 +299,10 @@ public class LoginFragment extends Fragment {
             // Create a seed from salt and password
             KeyPair keyPair = ServiceLocator.instance().getCryptoService().getKeyPair(mEmail, mPassword);
 
-            if (ObjectUtils.equals(wallet.getPubKeyHash(), wallet.getPubKeyHash())) {
-                return null; // wrong salt/password
+            // Make sure the password is correct
+            if (!Arrays.equals(wallet.getPubKey(), keyPair.getPubKey())) {
+                // wrong salt/password
+                return null;
             }
 
             // Update the wallet
@@ -326,8 +330,11 @@ public class LoginFragment extends Fragment {
 
         @Override
         protected void onFailed(Throwable t) {
-            mPasswordView.setError(t.getMessage());
+
             mProgressViewAdapter.showProgress(false);
+            Toast.makeText(getActivity(),
+                    t.getMessage(),
+                    Toast.LENGTH_LONG).show();
         }
 
         @Override

@@ -10,7 +10,9 @@ import android.database.Cursor;
 import android.net.Uri;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import io.ucoin.app.content.Provider;
 import io.ucoin.app.database.Contract;
@@ -33,6 +35,8 @@ public class CurrencyService extends BaseService {
 
     private SelectCursorHolder mSelectHolder = null;
 
+    private Map<Long, String> currencyNameByIdCache;
+
 
     public CurrencyService() {
         super();
@@ -50,10 +54,19 @@ public class CurrencyService extends BaseService {
 
         // Create
         if (currency.getId() == null) {
-            return insert(context, currency);
+            return insert(context.getContentResolver(), currency);
         }
 
-        // TODO : update
+        // or update
+        else {
+            insert(context.getContentResolver(), currency);
+        }
+
+        // update cache (if already loaded)
+        if (currencyNameByIdCache != null) {
+            currencyNameByIdCache.put(currency.getId(), currency.getCurrencyName());
+        }
+
         return null;
     }
 
@@ -101,6 +114,38 @@ public class CurrencyService extends BaseService {
     }
 
 
+    /**
+     * Return a (cached) currency name, by id
+     * @param currencyId
+     * @return
+     */
+    public String getCurrencyNameById(long currencyId) {
+        // Check if cache as been loaded
+        if (currencyNameByIdCache == null) {
+            throw new UCoinTechnicalException("Cache not initialize. Please call loadCache() before getCurrencyNameById().");
+        }
+        // Get it from cache
+        return currencyNameByIdCache.get(currencyId);
+    }
+
+    /**
+     * Fill all cache need for currencies
+     * @param application
+     */
+    public void loadCache(Application application) {
+        if (currencyNameByIdCache != null) {
+            return;
+        }
+
+        currencyNameByIdCache = new HashMap<Long, String>();
+
+        String accountId = ((io.ucoin.app.Application) application).getAccountId();
+        List<Currency> currencies = getCurrencies(application);
+        for (Currency currency: currencies) {
+            currencyNameByIdCache.put(currency.getId(), currency.getCurrencyName());
+        }
+    }
+
     /* -- internal methods-- */
 
     private List<Currency> getCurrenciesByAccountId(ContentResolver resolver, long accountId) {
@@ -122,26 +167,15 @@ public class CurrencyService extends BaseService {
         return result;
     }
 
-    public Currency insert(final Context context, final Currency currency) {
+    public Currency insert(final ContentResolver contentResolver, final Currency currency) {
 
-        //Create account in database
-        ContentValues values = new ContentValues();
+        // Convert to contentValues
+        ContentValues values = toContentValues(currency);
 
-        // account id
-        Long accountId = currency.getAccountId();
-        if (accountId == null) {
-            accountId = currency.getAccount().getId();
-        }
-        values.put(Contract.Currency.ACCOUNT_ID, accountId);
-        values.put(Contract.Currency.NAME, currency.getCurrencyName());
-        values.put(Contract.Currency.FIRST_BLOCK_SIGNATURE, currency.getFirstBlockSignature());
-        values.put(Contract.Currency.MEMBERS_COUNT, currency.getMembersCount());
-
-        Uri uri = Uri.parse(Provider.CONTENT_URI + "/currency/");
-        uri = context.getContentResolver().insert(uri, values);
+        Uri uri = contentResolver.insert(getContentUri(), values);
         Long currencyId = ContentUris.parseId(uri);
         if (currencyId < 0) {
-            throw new UCoinTechnicalException("Error while inserting currency");
+            throw new UCoinTechnicalException("Error while inserting currency.");
         }
 
         // Refresh the inserted account
@@ -149,6 +183,40 @@ public class CurrencyService extends BaseService {
 
         return currency;
     }
+
+    public void update(final ContentResolver resolver, final Currency source) {
+        ObjectUtils.checkNotNull(source.getId());
+
+        ContentValues target = toContentValues(source);
+
+        Uri uri = ContentUris.withAppendedId(getContentUri(), source.getId());
+        int rowsUpdated = resolver.update(uri, target, null, null);
+        if (rowsUpdated != 1) {
+            throw new UCoinTechnicalException(String.format("Error while updating currency. %s rows updated.", rowsUpdated));
+        }
+    }
+
+    /**
+     * Convert a model currency to ContentValues
+     * @param source a not null Currency
+     * @return
+     */
+    private ContentValues toContentValues(final Currency source) {
+        ContentValues target = new ContentValues();
+
+        Long accountId = source.getAccountId();
+        if (accountId == null) {
+            accountId = source.getAccount().getId();
+        }
+        target.put(Contract.Currency.ACCOUNT_ID, accountId);
+
+        target.put(Contract.Currency.NAME, source.getCurrencyName());
+        target.put(Contract.Currency.MEMBERS_COUNT, source.getMembersCount());
+        target.put(Contract.Currency.FIRST_BLOCK_SIGNATURE, source.getFirstBlockSignature());
+
+        return target;
+    }
+
 
     private Uri getContentUri() {
         if (mContentUri != null){

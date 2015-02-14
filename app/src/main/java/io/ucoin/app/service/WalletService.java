@@ -39,10 +39,17 @@ public class WalletService extends BaseService {
 
     private SelectCursorHolder mSelectHolder = null;
 
+    private CurrencyService currencyService;
+
     public WalletService() {
         super();
     }
 
+    @Override
+    public void initialize() {
+        super.initialize();
+        currencyService = ServiceLocator.instance().getCurrencyService();
+    }
 
     public Wallet save(final Context context, final Wallet wallet) throws DuplicatePubkeyException {
         ObjectUtils.checkNotNull(wallet);
@@ -211,12 +218,15 @@ public class WalletService extends BaseService {
             mSelectHolder = new SelectCursorHolder(cursor);
         }
 
+        long currencyId = cursor.getLong(mSelectHolder.currencyIdIndex);
+        String currencyName = currencyService.getCurrencyNameById(currencyId);
+
         String pubKey = cursor.getString(mSelectHolder.pubKeyIndex);
         String secKey = cursor.getString(mSelectHolder.secKeyIndex);
         String uid = cursor.getString(mSelectHolder.uidIndex);
 
-        // TODO get the currency name from DB (table currency)
-        Wallet result = new Wallet("meta_brouzouf", uid, pubKey, secKey);
+
+        Wallet result = new Wallet(currencyName, uid, pubKey, secKey);
         result.setId(cursor.getLong(mSelectHolder.idIndex));
         result.setName(cursor.getString(mSelectHolder.nameIndex));
         result.setCredit(cursor.getInt(mSelectHolder.creditIndex));
@@ -238,6 +248,8 @@ public class WalletService extends BaseService {
     private class SelectCursorHolder {
 
         int idIndex;
+        int currencyIdIndex;
+        int accountIdIndex;
         int pubKeyIndex;
         int secKeyIndex;
         int nameIndex;
@@ -249,6 +261,8 @@ public class WalletService extends BaseService {
 
         private SelectCursorHolder(final Cursor cursor ) {
             idIndex = cursor.getColumnIndex(Contract.Wallet._ID);
+            accountIdIndex = cursor.getColumnIndex(Contract.Wallet.ACCOUNT_ID);
+            currencyIdIndex = cursor.getColumnIndex(Contract.Wallet.CURRENCY_ID);
             nameIndex = cursor.getColumnIndex(Contract.Wallet.NAME);
             pubKeyIndex = cursor.getColumnIndex(Contract.Wallet.PUBLIC_KEY);
             uidIndex= cursor.getColumnIndex(Contract.Wallet.UID);

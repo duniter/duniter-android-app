@@ -115,6 +115,7 @@ public class AccountService extends BaseService {
         // Create the main wallet in DB
         progressModel.increment(context.getString(R.string.saving_wallet));
         wallet.setUid(account.getUid());
+        wallet.setSalt(salt);
         wallet.setName(account.getUid() + "@" + currency.getCurrencyName());
         wallet.setCurrencyId(currency.getId());
         wallet.setAccountId(account.getId());

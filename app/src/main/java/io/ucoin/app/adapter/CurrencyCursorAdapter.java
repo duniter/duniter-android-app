@@ -30,15 +30,20 @@ public class CurrencyCursorAdapter extends CursorAdapter{
     public void bindView(View view, Context context, Cursor cursor) {
         // TODO could we use holder ??
 
-        TextView name = (TextView) view.findViewById(R.id.wallet_name);
-        int nameIndex = cursor.getColumnIndex(Contract.Wallet.NAME);
+        TextView name = (TextView) view.findViewById(R.id.currency_name);
+        int nameIndex = cursor.getColumnIndex(Contract.Currency.NAME);
         name.setText(cursor.getString(nameIndex));
 
-        TextView credit = (TextView) view.findViewById(R.id.credit);
-        int creditIndex = cursor.getColumnIndex(Contract.Wallet.CREDIT);
-        credit.setText(view.getContext().getString(
-                R.string.credit,
-                cursor.getString(creditIndex)));
+        TextView memberCount = (TextView) view.findViewById(R.id.member_count);
+        int memberCountIndex = cursor.getColumnIndex(Contract.Currency.MEMBERS_COUNT);
+        memberCount.setText(view.getContext().getString(
+                R.string.members_count,
+                cursor.getString(memberCountIndex)));
     }
 
+    // View lookup cache
+    private static class ViewHolder {
+        TextView name;
+        TextView memberCount;
+    }
 }
