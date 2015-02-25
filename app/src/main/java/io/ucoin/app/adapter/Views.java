@@ -3,8 +3,11 @@ package io.ucoin.app.adapter;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.app.Activity;
+import android.content.Context;
 import android.os.Build;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 
 /**
  * Created by eis on 12/02/15.
@@ -68,6 +71,28 @@ public class Views {
             view2.setVisibility(showView2 ? View.VISIBLE : View.GONE);
             view1.setVisibility(showView2 ? View.GONE : View.VISIBLE);
         }
+    }
+
+    public static void showKeyboard(Activity activity) {
+
+        // Hide the keyboard, in case we come from imeDone)
+        InputMethodManager inputManager = (InputMethodManager)
+                activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+        inputManager.hideSoftInputFromWindow((null == activity.getCurrentFocus())
+                        ? null
+                        : activity.getCurrentFocus().getWindowToken(),
+                InputMethodManager.HIDE_NOT_ALWAYS);
+    }
+
+    public static void hideKeyboard(Activity activity) {
+
+        // Hide the keyboard, in case we come from imeDone)
+        InputMethodManager inputManager = (InputMethodManager)
+                activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+        inputManager.hideSoftInputFromWindow((null == activity.getCurrentFocus())
+                        ? null
+                        : activity.getCurrentFocus().getWindowToken(),
+                InputMethodManager.HIDE_NOT_ALWAYS);
     }
 
     /* -- Internal methods -- */

@@ -67,9 +67,11 @@ public class WalletArrayAdapter extends ArrayAdapter<Wallet> {
     public void setError(View v, CharSequence s) {
         ViewHolder viewHolder = (ViewHolder) v.getTag();
         if (viewHolder == null) {
-            viewHolder.name = (TextView) v.findViewById(R.id.name);
+            viewHolder = new ViewHolder(v);
         }
-        viewHolder.name.setError(s);
+        if (viewHolder.viewForError != null) {
+            viewHolder.viewForError.setError(s);
+        }
     }
 
     /* -- internal method -- */
@@ -84,11 +86,7 @@ public class WalletArrayAdapter extends ArrayAdapter<Wallet> {
         if (convertView == null) {
             convertView = LayoutInflater.from(this.getContext())
                     .inflate(resource, container, false);
-            viewHolder = new ViewHolder();
-            viewHolder.icon = (ImageView) convertView.findViewById(R.id.icon);
-            viewHolder.name = (TextView) convertView.findViewById(R.id.name);
-            viewHolder.pubkey = (TextView) convertView.findViewById(R.id.pubkey);
-            viewHolder.credit = (TextView) convertView.findViewById(R.id.credit);
+            viewHolder = new ViewHolder(convertView);
             convertView.setTag(viewHolder);
         } else {
             viewHolder = (ViewHolder) convertView.getTag();
@@ -115,5 +113,17 @@ public class WalletArrayAdapter extends ArrayAdapter<Wallet> {
         TextView name;
         TextView credit;
         TextView pubkey;
+        TextView viewForError;
+
+        ViewHolder(View convertView) {
+            icon = (ImageView) convertView.findViewById(R.id.icon);
+            name = (TextView) convertView.findViewById(R.id.name);
+            pubkey = (TextView) convertView.findViewById(R.id.pubkey);
+            credit = (TextView) convertView.findViewById(R.id.credit);
+
+            if (name == null && convertView instanceof TextView) {
+                viewForError = (TextView)convertView;
+            }
+        }
     }
 }

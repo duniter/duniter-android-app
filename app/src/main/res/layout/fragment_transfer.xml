@@ -128,7 +128,7 @@
             android:layout_marginTop="5dip"
             android:singleLine="true"
             android:hint="@string/comment_hint"
-            android:imeOptions="actionDone|flagForceAscii"/>
+            android:imeOptions="flagForceAscii|actionSend"/>
 
         <!-- bottom toolbar -->
         <LinearLayout

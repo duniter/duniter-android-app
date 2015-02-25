@@ -150,7 +150,7 @@ public class TransferFragment extends Fragment {
             @Override
             public boolean onEditorAction(TextView v, int actionId,
                                           KeyEvent event) {
-                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                if (actionId == EditorInfo.IME_ACTION_SEND) {
                     return attemptTransfer();
                 }
                 return false;
@@ -205,16 +205,18 @@ public class TransferFragment extends Fragment {
     protected boolean attemptTransfer() {
 
         // Reset errors.
+        mWalletAdapter.setError(mWalletSpinner.getSelectedView(), null);
         mAmountText.setError(null);
         mCommentText.setError(null);
 
         // Store values
         String amountStr = mAmountText.getText().toString();
-        // TODO : get from converted is unit has been inversed
+        // TODO : get from converted amount if unit has been inversed ?
 
         boolean cancel = false;
         View focusView = null;
         Wallet wallet = (Wallet)mWalletSpinner.getSelectedItem();
+
         // Check wallet selected
         if (wallet == null) {
             mWalletAdapter.setError(mWalletSpinner.getSelectedView(), getString(R.string.field_required));
@@ -222,7 +224,7 @@ public class TransferFragment extends Fragment {
             cancel = true;
         }
 
-        // Check for a valid uid
+        // Check for a valid amount
         if (TextUtils.isEmpty(amountStr)) {
             mAmountText.setError(getString(R.string.field_required));
             focusView = mAmountText;
@@ -454,6 +456,11 @@ public class TransferFragment extends Fragment {
                         Toast.LENGTH_SHORT).show();
             }
 
+            mProgressViewAdapter.showProgress(false);
+        }
+
+        @Override
+        protected void onCancelled() {
             mProgressViewAdapter.showProgress(false);
         }
     }

@@ -87,6 +87,25 @@ public class WalletService extends BaseService {
         return getWalletsByAccountId(application.getContentResolver(), Long.parseLong(accountId));
     }
 
+    /**
+     * Return wallets that have a uid (e.g. that could be used to sign another identity)
+     * @param application
+     * @return
+     */
+    public List<Wallet> getWalletsWithUid(Application application) {
+        String accountId = ((io.ucoin.app.Application) application).getAccountId();
+        List<Wallet> allWallets = getWalletsByAccountId(application.getContentResolver(), Long.parseLong(accountId));
+
+        List<Wallet> result = new ArrayList<Wallet>();
+        for (Wallet wallet: allWallets) {
+            if (StringUtils.isNotBlank(wallet.getUid())) {
+                result.add(wallet);
+            }
+        }
+
+        return result;
+    }
+
     /* -- internal methods-- */
 
     private List<Wallet> getWalletsByAccountId(ContentResolver resolver, long accountId) {

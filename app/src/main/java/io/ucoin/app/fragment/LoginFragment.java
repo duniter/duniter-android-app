@@ -203,7 +203,8 @@ public class LoginFragment extends Fragment {
     }
 
     private boolean isUidValid(String uid) {
-        return uid.length() >= 4;
+        // TODO : voir s'il y a une taille mininum
+        return uid.length() >= 2;
     }
 
     private boolean isSaltValid(String salt) {
@@ -211,6 +212,7 @@ public class LoginFragment extends Fragment {
     }
 
     private boolean isPasswordValid(String password) {
+        // TODO : voir s'il y a une taille mininum
         return password.length() >= 3;
     }
 

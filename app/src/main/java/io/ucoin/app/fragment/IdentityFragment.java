@@ -16,15 +16,11 @@ import android.widget.TabHost;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.Date;
-
 import io.ucoin.app.R;
 import io.ucoin.app.activity.MainActivity;
 import io.ucoin.app.adapter.CertificationListAdapter;
 import io.ucoin.app.adapter.ProgressViewAdapter;
-import io.ucoin.app.config.Configuration;
 import io.ucoin.app.model.Identity;
-import io.ucoin.app.model.Wallet;
 import io.ucoin.app.model.WotCertification;
 import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.service.remote.BlockchainRemoteService;
@@ -190,40 +186,47 @@ public class IdentityFragment extends Fragment {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-
-        Bundle newInstanceArgs = getArguments();
-        Identity identity = (Identity)
-                newInstanceArgs.getSerializable(Identity.class.getSimpleName());
-
         switch (item.getItemId()) {
             case R.id.action_transfer:
-                Fragment fragment = TransferFragment.newInstance(identity);
-                FragmentManager fragmentManager = getFragmentManager();
-                fragmentManager.beginTransaction()
-                        .setCustomAnimations(R.animator.slide_in_down,
-                                R.animator.slide_out_up,
-                                R.animator.slide_in_up,
-                                R.animator.slide_out_down)
-                        .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
-                        .addToBackStack(fragment.getClass().getSimpleName())
-                        .commit();
+                onTransferClick();
                 return true;
             case R.id.action_sign:
-                doSign(identity);
+                onSignClick();
                 return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
+    protected void onTransferClick() {
+        Bundle newInstanceArgs = getArguments();
+        Identity identity = (Identity)
+                newInstanceArgs.getSerializable(Identity.class.getSimpleName());
 
-    protected void doSign(Identity identity) {
+        Fragment fragment = TransferFragment.newInstance(identity);
+        getFragmentManager().beginTransaction()
+                .setCustomAnimations(R.animator.slide_in_down,
+                        R.animator.slide_out_up,
+                        R.animator.slide_in_up,
+                        R.animator.slide_out_down)
+                .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
+                .addToBackStack(fragment.getClass().getSimpleName())
+                .commit();
+    }
 
-        // Disable sign button
-        //mSignButton.setActivated(false);
+    protected void onSignClick() {
+        Bundle newInstanceArgs = getArguments();
+        Identity identity = (Identity)
+                newInstanceArgs.getSerializable(Identity.class.getSimpleName());
 
-        // Execute sign task
-        SignTask task = new SignTask(identity);
-        task.execute((Void) null);
+        Fragment fragment = SignFragment.newInstance(identity);
+        getFragmentManager().beginTransaction()
+                .setCustomAnimations(R.animator.slide_in_down,
+                        R.animator.slide_out_up,
+                        R.animator.slide_in_up,
+                        R.animator.slide_out_down)
+                .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
+                .addToBackStack(fragment.getClass().getSimpleName())
+                .commit();
     }
 
     protected void onError(Throwable t) {
@@ -293,62 +296,4 @@ public class IdentityFragment extends Fragment {
         }
     }
 
-    /**
-     * Sign a user
-     */
-    public class SignTask extends AsyncTaskHandleException<Void, Void, Boolean> {
-
-        private final Identity mIdentity;
-
-        SignTask(Identity identity) {
-            mIdentity = identity;
-        }
-
-        @Override
-        protected Boolean doInBackgroundHandleException(Void... params) {
-            Configuration config = Configuration.instance();
-            Wallet wallet = config.getCurrentWallet(); // TODO: replace with curent account identity
-
-            WotRemoteService service = ServiceLocator.instance().getWotRemoteService();
-
-            // Send certification
-            String result = service.sendCertification(wallet, mIdentity);
-
-
-            return true;
-        }
-
-        @Override
-        protected void onSuccess(Boolean success) {
-            if (success) {
-                Configuration config = Configuration.instance();
-                Wallet wallet = config.getCurrentWallet(); // TODO: replace with curent account identity
-
-                // Add the new certification to the list
-                WotCertification certification = new WotCertification();
-                certification.copy(wallet.getIdentity());
-                certification.setCertifiedBy(false);
-                certification.setTimestamp(DateUtils.toTimestamp(new Date()));
-                mCertificationListAdapter.add(certification);
-
-                // TODO NLS
-                Toast.makeText(getActivity(),
-                        "Successfully sign " + mIdentity.getUid(),
-                        Toast.LENGTH_SHORT).show();
-            }
-            mProgressViewAdapter.showProgress(false);
-        }
-
-        @Override
-        protected void onFailed(Throwable t) {
-            mProgressViewAdapter.showProgress(false);
-            //mSignButton.setActivated(true);
-            onError(t);
-        }
-
-        @Override
-        protected void onCancelled() {
-            mProgressViewAdapter.showProgress(false);
-        }
-    }
 }

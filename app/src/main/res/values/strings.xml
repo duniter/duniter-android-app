@@ -98,6 +98,8 @@
     <string name="members_count">%s members</string>
     <string name="transfer_sended">Transfer sended.\nWaiting network processing.</string>
     <string name="transfer_error">Could not send transfer (technical error)</string>
+    <string name="cert_error">Could not send certification (technical error)</string>
+    <string name="cert_sended">Certification sended.\nWaiting network processing.</string>
     <string name="cert_date">signature date</string>
 
 
@@ -156,6 +158,7 @@
     <string name="duplicate_pubkey">A wallet with the same public key already exists.</string>
     <string name="query_too_short">%s characters minimum</string>
     <string name="transfer_to">Transfer to %s</string>
+    <string name="sign_to">Sign %s</string>
 
     <string-array name="drawer_items">
         <item>@string/home</item>
