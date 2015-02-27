@@ -33,6 +33,17 @@ public class DatabaseHelper extends SQLiteOpenHelper implements Contract {
                 ");";
         db.execSQL(CREATE_TABLE_ACCOUNT);
 
+        String CREATE_TABLE_CURRENCY = "CREATE TABLE " + Currency.TABLE_NAME + "(" +
+                Currency._ID + " INTEGER PRIMARY KEY AUTOINCREMENT" + COMMA +
+                Currency.NAME + TEXT + NOTNULL + UNIQUE + COMMA +
+                Currency.ACCOUNT_ID + TEXT + NOTNULL + COMMA +
+                Currency.MEMBERS_COUNT + INTEGER + NOTNULL + COMMA +
+                Currency.FIRST_BLOCK_SIGNATURE + TEXT + UNIQUE + NOTNULL + COMMA +
+                "FOREIGN KEY (" + Currency.ACCOUNT_ID + ") REFERENCES " +
+                Account.TABLE_NAME + "(" + Account._ID + ")" +
+                ")";
+        db.execSQL(CREATE_TABLE_CURRENCY);
+
         String CREATE_TABLE_WALLET = "CREATE TABLE " + Wallet.TABLE_NAME + "(" +
                 Wallet._ID + " INTEGER PRIMARY KEY AUTOINCREMENT" + COMMA +
                 Wallet.NAME + TEXT + COMMA +
@@ -52,17 +63,6 @@ public class DatabaseHelper extends SQLiteOpenHelper implements Contract {
                 UNIQUE + "(" + Wallet.CURRENCY_ID + COMMA + Wallet.NAME + ")" +
                 ")";
         db.execSQL(CREATE_TABLE_WALLET);
-
-        String CREATE_TABLE_CURRENCY = "CREATE TABLE " + Currency.TABLE_NAME + "(" +
-                Currency._ID + " INTEGER PRIMARY KEY AUTOINCREMENT" + COMMA +
-                Currency.NAME + TEXT + NOTNULL + UNIQUE + COMMA +
-                Currency.ACCOUNT_ID + TEXT + NOTNULL + COMMA +
-                Currency.MEMBERS_COUNT + INTEGER + NOTNULL + COMMA +
-                Currency.FIRST_BLOCK_SIGNATURE + TEXT + UNIQUE + NOTNULL + COMMA +
-                "FOREIGN KEY (" + Currency.ACCOUNT_ID + ") REFERENCES " +
-                Account.TABLE_NAME + "(" + Account._ID + ")" +
-                ")";
-        db.execSQL(CREATE_TABLE_CURRENCY);
 
         String CREATE_TABLE_PEER = "CREATE TABLE " + Peer.TABLE_NAME + "(" +
                 Peer._ID + " INTEGER PRIMARY KEY AUTOINCREMENT" + COMMA +

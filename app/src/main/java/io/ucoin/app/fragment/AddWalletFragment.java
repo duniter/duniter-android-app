@@ -267,13 +267,13 @@ public class AddWalletFragment extends Fragment {
             String accountId = ((io.ucoin.app.Application) getActivity().getApplication()).getAccountId();
 
             // Create a seed from salt and password
-            KeyPair keyPair = ServiceLocator.instance().getCryptoService().getKeyPair(mSalt, mPassword);
+            KeyPair keyPair = ServiceLocator.instance().getCryptoService().getKeyPair(salt, password);
 
             // Create a new wallet
-            Wallet wallet = new Wallet(currency.getCurrencyName(), mUid, keyPair.publicKey, keyPair.secretKey);
+            Wallet wallet = new Wallet(currency.getCurrencyName(), uid, keyPair.publicKey, keyPair.secretKey);
             wallet.setCurrencyId(currency.getId());
             wallet.setAccountId(Long.parseLong(accountId));
-            wallet.setName(mUid + "@" + currency.getCurrencyName());
+            wallet.setName(uid + "@" + currency.getCurrencyName());
 
             // Load a peer
             List<Peer> peers = ServiceLocator.instance().getPeerService().getPeersByCurrencyId(currency.getId());
