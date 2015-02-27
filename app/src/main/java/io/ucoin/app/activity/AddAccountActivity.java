@@ -86,9 +86,9 @@ public class AddAccountActivity extends ActionBarActivity  {
         });
         getFragmentManager().beginTransaction()
                 .setCustomAnimations(
-                        R.animator.delayed_fade_in,
+                        R.animator.slide_in_left,
                         R.animator.fade_out,
-                        R.animator.delayed_fade_in,
+                        R.animator.slide_in_right,
                         R.animator.fade_out)
                 .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
                 .addToBackStack(fragment.getClass().getSimpleName())

@@ -23,13 +23,14 @@ import io.ucoin.app.adapter.CurrencyCursorAdapter;
 import io.ucoin.app.adapter.ProgressViewAdapter;
 import io.ucoin.app.content.Provider;
 import io.ucoin.app.database.Contract;
+import io.ucoin.app.model.Wallet;
 
 
 public class TransferListFragment extends ListFragment {
     private CurrencyCursorAdapter mCurrencyCursorAdapter;
     private ProgressViewAdapter mProgressViewAdapter;
 
-    static public TransferListFragment newInstance() {
+    static public TransferListFragment newInstance(Wallet wallet) {
         TransferListFragment fragment = new TransferListFragment();
         return fragment;
     }

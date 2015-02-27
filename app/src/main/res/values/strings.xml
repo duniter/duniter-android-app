@@ -111,8 +111,8 @@
 
     <!-- Strings related to identities -->
     <string name="identity">Identity</string>
-    <string name="uid_or_public_key">UID or public key</string>
-    <string name="user_id">User ID</string>
+    <string name="uid_or_public_key">user or public key</string>
+    <string name="user_id">User</string>
     <string name="identity_icon">Identity icon</string>
     <string name="certified_by">Certified by</string>
     <string name="certifiers_of">Certifiers of</string>
@@ -138,7 +138,6 @@
         remember.</string>
     <string name="password_instructions">Password: Choose a very strong password, so no one
         can find it. This password can\'t be changed thereafter, so choose it carefully.</string>
-
     <string name="test">Test</string>
 
 
@@ -163,7 +162,6 @@
     <string-array name="drawer_items">
         <item>@string/home</item>
         <item>@string/currencies</item>
-        <item>@string/transactions</item>
         <item>@string/settings</item>
         <item>@string/dev</item>
     </string-array>

@@ -1,30 +1,30 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+        config {
+        }
+    }
     compileSdkVersion 21
     buildToolsVersion "21.1.2"
-
     defaultConfig {
         applicationId "io.ucoin.ucoin"
         minSdkVersion 14
         targetSdkVersion 21
-        versionCode 1
-        versionName "1.0"
+        versionCode 2
+        versionName '0.2'
+        signingConfig signingConfigs.config
     }
-
     sourceSets.main {
         jniLibs.srcDir 'src/main/libs'
         jni.srcDirs = [] //disable automatic ndk-build call
     }
-
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-
-
     packagingOptions {
         exclude 'META-INF/DEPENDENCIES.txt'
         exclude 'META-INF/LICENSE.txt'
@@ -39,9 +39,8 @@ android {
         exclude 'THIRD-PARTY.txt'
         exclude 'LICENSE.txt'
     }
-
-    project.ext.versionCodes = ['armeabi':1, 'armeabi-v7a':2, 'arm64-v8a':3, 'mips':5, 'mips64':6, 'x86':8, 'x86_64':9] //versionCode digit for each supported ABI, with 64bit>32bit and x86>armeabi-*
-
+    project.ext.versionCodes = ['armeabi': 1, 'armeabi-v7a': 2, 'arm64-v8a': 3, 'mips': 5, 'mips64': 6, 'x86': 8, 'x86_64': 9]
+    //versionCode digit for each supported ABI, with 64bit>32bit and x86>armeabi-*
     applicationVariants.all { variant ->
         // assign different version code for each output
         variant.outputs.each { output ->
@@ -49,15 +48,14 @@ android {
                     project.ext.versionCodes.get(output.getFilter(com.android.build.OutputFile.ABI), 0) * 1000000 + defaultConfig.versionCode
         }
     }
-
     splits {
         abi {
             enable true // enable ABI split feature to create one APK per ABI
             universalApk true //generate an additional APK that targets all the ABIs
         }
     }
-
-
+    productFlavors {
+    }
 }
 
 repositories {

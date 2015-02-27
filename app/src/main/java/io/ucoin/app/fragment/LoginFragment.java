@@ -20,7 +20,6 @@ import java.util.Arrays;
 import io.ucoin.app.R;
 import io.ucoin.app.adapter.ProgressViewAdapter;
 import io.ucoin.app.model.Wallet;
-import io.ucoin.app.service.DataContext;
 import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.technical.AsyncTaskHandleException;
 import io.ucoin.app.technical.crypto.KeyPair;
@@ -56,7 +55,7 @@ public class LoginFragment extends Fragment {
     private UserLoginTask mAuthTask = null;
 
     // UI references.
-    private EditText mUidView;
+    private TextView mUidView;
     private EditText mSaltView;
     private EditText mPasswordView;
     private ProgressViewAdapter mProgressViewAdapter;
@@ -89,7 +88,7 @@ public class LoginFragment extends Fragment {
         getActivity().setTitle(getString(R.string.sign_in));
 
         // UID
-        mUidView = (EditText) view.findViewById(R.id.uid);
+        mUidView = (TextView) view.findViewById(R.id.uid);
 
         // Salt
         mSaltView = (EditText) view.findViewById(R.id.salt);
@@ -291,12 +290,7 @@ public class LoginFragment extends Fragment {
 
         @Override
         protected Wallet doInBackgroundHandleException(Wallet... wallets) throws Exception {
-            DataContext context = ServiceLocator.instance().getDataContext();
             Wallet wallet = wallets[0];
-            String currency = "??";
-            if (context.getBlockchainParameter() != null) {
-                currency = context.getBlockchainParameter().getCurrency();
-            }
 
             // Create a seed from salt and password
             KeyPair keyPair = ServiceLocator.instance().getCryptoService().getKeyPair(mEmail, mPassword);

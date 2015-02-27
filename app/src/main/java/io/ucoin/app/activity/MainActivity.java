@@ -38,10 +38,10 @@ import io.ucoin.app.R;
 import io.ucoin.app.config.Configuration;
 import io.ucoin.app.content.Provider;
 import io.ucoin.app.database.Contract;
+import io.ucoin.app.exception.UncaughtExceptionHandler;
 import io.ucoin.app.fragment.CurrencyListFragment;
 import io.ucoin.app.fragment.DevFragment;
 import io.ucoin.app.fragment.HomeFragment;
-import io.ucoin.app.fragment.TransferListFragment;
 import io.ucoin.app.fragment.WotSearchFragment;
 import io.ucoin.app.model.Identity;
 import io.ucoin.app.model.WotLookupResults;
@@ -71,7 +71,7 @@ public class MainActivity extends ActionBarActivity
         super.onCreate(savedInstanceState);
 
         // Prepare some utilities
-        //Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler(this));
+        Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler(this));
         DateUtils.setDefaultMediumDateFormat(getMediumDateFormat());
         DateUtils.setDefaultLongDateFormat(getLongDateFormat());
         DateUtils.setDefaultShortDateFormat(getShortDateFormat());
@@ -125,7 +125,6 @@ public class MainActivity extends ActionBarActivity
         ListView drawerListView = (ListView) findViewById(R.id.drawer_listview);
 
         drawerListView.addHeaderView(listHeader);
-
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         // Set the adapter for the drawer list view
@@ -271,14 +270,11 @@ public class MainActivity extends ActionBarActivity
                 fragment = CurrencyListFragment.newInstance();
                 break;
             case 3:
-                fragment = TransferListFragment.newInstance();
-                break;
-            case 4:
                 Intent intent = new Intent(MainActivity.this,
                         SettingsActivity.class);
                 startActivity(intent);
                 break;
-            case 5:
+            case 4:
                 fragment = DevFragment.newInstance();
                 break;
             default:

@@ -1,6 +1,7 @@
 package io.ucoin.app.fragment;
 
 import android.app.Fragment;
+import android.app.FragmentManager;
 import android.content.Context;
 import android.os.Bundle;
 import android.text.Editable;
@@ -264,9 +265,15 @@ public class TransferFragment extends Fragment {
     }
 
     protected void doTransfert(final Wallet wallet) {
+        // Retrieve the fragment to pop after transfer
+        FragmentManager fragmentManager = getFragmentManager();
+        FragmentManager.BackStackEntry backStackEntry = fragmentManager.getBackStackEntryAt(
+                fragmentManager.getBackStackEntryCount() - 2);
+        final String popBackStackName = backStackEntry.getName();
+
         // If user is authenticate on wallet : perform the transfer
         if (wallet.isAuthenticate()) {
-            mTransferTask = new TransferTask();
+            mTransferTask = new TransferTask(popBackStackName);
             mTransferTask.execute(wallet);
         }
         else {
@@ -274,11 +281,9 @@ public class TransferFragment extends Fragment {
             LoginFragment fragment = LoginFragment.newInstance(wallet, new LoginFragment.OnClickListener() {
                 public void onPositiveClick(Bundle bundle) {
                     Wallet authWallet = (Wallet)bundle.getSerializable(Wallet.class.getSimpleName());
-                    // Make sure this is the same wallet returned
-                    //getFragmentManager().popBackStack(); // back to transfer fragment
 
                     // Launch the transfer
-                    mTransferTask = new TransferTask();
+                    mTransferTask = new TransferTask(popBackStackName);
                     mTransferTask.execute(wallet);
                 }
             });
@@ -388,6 +393,12 @@ public class TransferFragment extends Fragment {
 
     public class TransferTask extends AsyncTaskHandleException<Wallet, Void, Boolean>{
 
+        private String popStackTraceName;
+
+        public TransferTask(String popStackTraceName) {
+            this.popStackTraceName = popStackTraceName;
+        }
+
         @Override
         protected void onPreExecute() {
             // Hide the keyboard, in case we come from imeDone)
@@ -434,13 +445,12 @@ public class TransferFragment extends Fragment {
                         Toast.LENGTH_SHORT).show();
             }
             else {
-                getFragmentManager().popBackStack(); // return back
+                getFragmentManager().popBackStack(popStackTraceName, 0); // return back
 
                 Toast.makeText(getActivity(),
                         getString(R.string.transfer_sended),
                         Toast.LENGTH_LONG).show();
-                // TODO smoul : could you go back to previous fragment ?
-                // Or maybe to a new transaction history fragment ?
+
             }
         }
 

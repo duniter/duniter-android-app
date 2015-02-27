@@ -28,17 +28,14 @@
             android:layout_weight="0.25"
             android:text="@string/user_id" />
 
-        <EditText
+        <TextView
             android:id="@+id/uid"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="0.75"
             android:hint="@string/user_id"
-            android:imeOptions="actionNext"
-            android:inputType="textNoSuggestions"
             android:singleLine="true"
-            android:textSize="@dimen/abc_text_size_body_2_material"
-            android:editable="false"/>
+            android:textSize="@dimen/abc_text_size_body_2_material"/>
     </LinearLayout>
 
     <LinearLayout

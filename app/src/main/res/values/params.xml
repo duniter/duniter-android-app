@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">uCoin</string>
-    <string name="ucoin">uCoin</string>
+    <string name="app_name">uCoin Apps</string>
+    <string name="ucoin">uCoin Apps</string>
     <string name="ACCOUNT_TYPE">io.ucoin</string>
     <string name="AUTHORITY">io.ucoin.provider</string>
     <string name="DBNAME">ucoin.db</string>

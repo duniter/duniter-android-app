@@ -1,6 +1,7 @@
 package io.ucoin.app.fragment;
 
 import android.app.Fragment;
+import android.app.FragmentManager;
 import android.app.SearchManager;
 import android.os.Bundle;
 import android.support.v7.widget.SearchView;
@@ -89,8 +90,19 @@ public class HomeFragment extends Fragment {
                     @Override
                     public void onPositiveClick(Bundle args) {
                         Wallet wallet = (Wallet)args.getSerializable(Wallet.class.getSimpleName());
-                        // TODO open transaction list, filtered on this wallet
-                        Log.d("HomeFragment", "Detect click on wallet :" + wallet.toString());
+                        Fragment fragment = TransferListFragment.newInstance(wallet);
+                        FragmentManager fragmentManager = getFragmentManager();
+                        // Insert the Home at the first place in back stack
+                        fragmentManager.popBackStack(HomeFragment.class.getSimpleName(), 0);
+                        fragmentManager.beginTransaction()
+                                .setCustomAnimations(
+                                        R.animator.delayed_slide_in_up,
+                                        R.animator.fade_out,
+                                        R.animator.delayed_fade_in,
+                                        R.animator.slide_out_up)
+                                .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
+                                .addToBackStack(fragment.getClass().getSimpleName())
+                                .commit();
                     }
                 });
         mWalletResultListener = fragment;
