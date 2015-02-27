@@ -91,6 +91,9 @@ public class ServiceLocator implements Closeable {
     public WalletService getWalletService() {
         return getService(WalletService.class);
     }
+    public PeerService getPeerService() {
+        return getService(PeerService.class);
+    }
 
 
     /* -- Internal methods -- */

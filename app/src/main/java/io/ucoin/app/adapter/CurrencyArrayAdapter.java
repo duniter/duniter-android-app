@@ -5,38 +5,37 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import io.ucoin.app.R;
-import io.ucoin.app.model.Wallet;
+import io.ucoin.app.model.Currency;
 
-public class WalletArrayAdapter extends ArrayAdapter<Wallet> {
+public class CurrencyArrayAdapter extends ArrayAdapter<Currency> {
 
-    public static int DEFAULT_LAYOUT_RES = R.layout.list_item_wallet;
+    public static int DEFAULT_LAYOUT_RES = R.layout.list_item_currency;
     private int mResource;
     private int mDropDownResource;
 
-    public WalletArrayAdapter(Context context) {
-        this(context, new ArrayList<Wallet>());
+    public CurrencyArrayAdapter(Context context) {
+        this(context, new ArrayList<Currency>());
     }
 
-    public WalletArrayAdapter(Context context, List<Wallet> wallets) {
-        this(context, DEFAULT_LAYOUT_RES, wallets);
+    public CurrencyArrayAdapter(Context context, List<Currency> currencies) {
+        this(context, DEFAULT_LAYOUT_RES, currencies);
     }
 
-    public WalletArrayAdapter(Context context, int resource) {
+    public CurrencyArrayAdapter(Context context, int resource) {
         super(context, resource);
         mResource = resource;
         mDropDownResource = resource;
         setDropDownViewResource(resource);
     }
 
-    public WalletArrayAdapter(Context context, int resource, List<Wallet> wallets) {
-        super(context, resource, wallets);
+    public CurrencyArrayAdapter(Context context, int resource, List<Currency> currencies) {
+        super(context, resource, currencies);
         mResource = resource;
         mDropDownResource = resource;
         setDropDownViewResource(resource);
@@ -79,7 +78,7 @@ public class WalletArrayAdapter extends ArrayAdapter<Wallet> {
     protected View computeView(int position, View convertView, ViewGroup container, int resource) {
 
         // Retrieve the item
-        Wallet wallet = getItem(position);
+        Currency currency = getItem(position);
         ViewHolder viewHolder;
 
         //inflate
@@ -92,34 +91,26 @@ public class WalletArrayAdapter extends ArrayAdapter<Wallet> {
             viewHolder = (ViewHolder) convertView.getTag();
         }
 
-        // Icon
-        viewHolder.icon.setImageResource(ImageAdapterHelper.getImage(wallet));
+        // name
+        viewHolder.name.setText(currency.getCurrencyName());
 
-        // Name
-        viewHolder.name.setText(wallet.getName());
-
-        // pubKey
-        viewHolder.pubkey.setText(wallet.getPubKeyHash());
-
-        // Credit
-        viewHolder.credit.setText(String.valueOf(wallet.getCredit()));
+        // member count
+        viewHolder.memberCount.setText(convertView.getContext().getString(
+                R.string.members_count,
+                currency.getMembersCount()));
 
         return convertView;
     }
 
     // View lookup cache
     private static class ViewHolder {
-        ImageView icon;
         TextView name;
-        TextView credit;
-        TextView pubkey;
+        TextView memberCount;
         TextView viewForError;
 
         ViewHolder(View convertView) {
-            icon = (ImageView) convertView.findViewById(R.id.icon);
-            name = (TextView) convertView.findViewById(R.id.name);
-            pubkey = (TextView) convertView.findViewById(R.id.pubkey);
-            credit = (TextView) convertView.findViewById(R.id.credit);
+            name = (TextView) convertView.findViewById(R.id.currency_name);
+            memberCount = (TextView) convertView.findViewById(R.id.member_count);
 
             if (name == null && convertView instanceof TextView) {
                 viewForError = (TextView)convertView;

@@ -1,5 +1,7 @@
 package io.ucoin.app.fragment;
 
+import android.app.Fragment;
+import android.app.FragmentManager;
 import android.app.ListFragment;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -7,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -64,17 +67,28 @@ public class WalletListFragment extends ListFragment implements MainActivity.Que
 
         TextView v = (TextView) view.findViewById(android.R.id.empty);
         v.setVisibility(View.GONE);
+
+        // add button
+        Button addButton = (Button) view.findViewById(R.id.add_button);
+        addButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                doOpenAddWalletFragment();
+            }
+        });
+
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_add:
-                // TODO : show a "new wallet fragment"
+                doOpenAddWalletFragment();
                 return true;
         }
         return super.onOptionsItemSelected(item);
     }
+
 
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
@@ -87,9 +101,6 @@ public class WalletListFragment extends ListFragment implements MainActivity.Que
         mListener.onPositiveClick(bundle);
     }
 
-    private void setOnClickListener(OnClickListener listener) {
-        mListener = listener;
-    }
 
     public interface OnClickListener {
         public void onPositiveClick(Bundle args);
@@ -114,4 +125,25 @@ public class WalletListFragment extends ListFragment implements MainActivity.Que
         mProgressViewAdapter.showProgress(false);
     }
 
+     /* -- Internal methods -- */
+
+    private void setOnClickListener(OnClickListener listener) {
+         mListener = listener;
+     }
+
+    protected void doOpenAddWalletFragment() {
+        Fragment fragment = AddWalletFragment.newInstance();
+        FragmentManager fragmentManager = getFragmentManager();
+        // Insert the Home at the first place in back stack
+        fragmentManager.popBackStack(HomeFragment.class.getSimpleName(), 0);
+        fragmentManager.beginTransaction()
+                .setCustomAnimations(
+                        R.animator.delayed_slide_in_up,
+                        R.animator.fade_out,
+                        R.animator.delayed_fade_in,
+                        R.animator.slide_out_up)
+                .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
+                .addToBackStack(fragment.getClass().getSimpleName())
+                .commit();
+    }
 }

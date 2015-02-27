@@ -5,6 +5,7 @@ import java.io.Serializable;
 public class Peer implements Serializable {
 
     private Long id;
+    private Long currencyId;
     private String host;
     private int port;
     private String url;
@@ -35,11 +36,30 @@ public class Peer implements Serializable {
         this.id = id;
     }
 
+    public Long getCurrencyId() {
+        return currencyId;
+    }
+
+    public void setCurrencyId(Long currencyId) {
+        this.currencyId = currencyId;
+    }
+
     public String toString() {
         return new StringBuilder().append("url=").append(url).append(",")
                 .append("host=").append(host).append(",")
                 .append("port=").append(port)
                 .toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null) {
+            return false;
+        }
+        if (id != null && o instanceof Peer) {
+            return id.equals(((Peer)o).getId());
+        }
+        return super.equals(o);
     }
 
     /* -- Internal methods -- */

@@ -25,7 +25,7 @@ import io.ucoin.app.technical.AsyncTaskHandleException;
 import io.ucoin.app.technical.crypto.KeyPair;
 
 /**
- * A login screen that offers login via email/password.
+ * A login screen that offers login via salt and password.
  */
 public class LoginFragment extends Fragment {
 
@@ -266,11 +266,11 @@ public class LoginFragment extends Fragment {
      */
     public class UserLoginTask extends AsyncTaskHandleException<Wallet, Void, Wallet> {
 
-        private final String mEmail;
+        private final String mSalt;
         private final String mPassword;
 
-        UserLoginTask(String email, String password) {
-            mEmail = email;
+        UserLoginTask(String salt, String password) {
+            mSalt = salt;
             mPassword = password;
         }
 
@@ -293,7 +293,7 @@ public class LoginFragment extends Fragment {
             Wallet wallet = wallets[0];
 
             // Create a seed from salt and password
-            KeyPair keyPair = ServiceLocator.instance().getCryptoService().getKeyPair(mEmail, mPassword);
+            KeyPair keyPair = ServiceLocator.instance().getCryptoService().getKeyPair(mSalt, mPassword);
 
             // Make sure the password is correct
             if (!Arrays.equals(wallet.getPubKey(), keyPair.getPubKey())) {

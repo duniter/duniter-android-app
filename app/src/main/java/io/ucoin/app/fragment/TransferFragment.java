@@ -78,7 +78,7 @@ public class TransferFragment extends Fragment {
                 android.R.layout.simple_spinner_item,
                 wallets
         );
-        mWalletAdapter.setDropDownViewResource(R.layout.list_item_wallet);
+        mWalletAdapter.setDropDownViewResource(WalletArrayAdapter.DEFAULT_LAYOUT_RES);
     }
 
     @Override

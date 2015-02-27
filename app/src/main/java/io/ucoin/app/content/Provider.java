@@ -42,8 +42,8 @@ public class Provider extends ContentProvider implements Contract {
         uriMatcher.addURI(AUTHORITY, "account/", ACCOUNT);
         uriMatcher.addURI(AUTHORITY, "account/#", ACCOUNT_ID);
         uriMatcher.addURI(AUTHORITY, "currency/", CURRENCY);
-        uriMatcher.addURI(AUTHORITY, "peer/", PEER);
         uriMatcher.addURI(AUTHORITY, "wallet/", WALLET);
+        uriMatcher.addURI(AUTHORITY, "peer/", PEER);
 
         return true;
     }
@@ -86,6 +86,12 @@ public class Provider extends ContentProvider implements Contract {
                 break;
             case WALLET :
                 queryBuilder.setTables(Wallet.TABLE_NAME);
+                cursor = queryBuilder.query(db, projection, selection,
+                        selectionArgs, null, null, sortOrder);
+                cursor.setNotificationUri(getContext().getContentResolver(), uri);
+                break;
+            case PEER :
+                queryBuilder.setTables(Peer.TABLE_NAME);
                 cursor = queryBuilder.query(db, projection, selection,
                         selectionArgs, null, null, sortOrder);
                 cursor.setNotificationUri(getContext().getContentResolver(), uri);

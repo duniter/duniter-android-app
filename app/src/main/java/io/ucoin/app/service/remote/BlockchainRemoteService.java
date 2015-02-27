@@ -184,12 +184,7 @@ public class BlockchainRemoteService extends BaseRemoteService {
         if (result == null) {
             identity.setMember(false);
 
-            if (!checkLookupForNonMember) {
-                //identity.setTimestamp(-1);
-            }
-
-            // Try to find a self certification
-            else {
+            if (checkLookupForNonMember) {
                 WotRemoteService wotService = ServiceLocator.instance().getWotRemoteService();
                 Identity lookupIdentity = wotService.getIdentity(identity.getUid(), identity.getPubkey());
 

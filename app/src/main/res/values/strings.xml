@@ -20,6 +20,7 @@
     <string name="loading_membership">Getting membership...</string>
     <string name="loading_wallet_credit">Getting wallet credit...</string>
     <string name="saving_wallet">Saving wallet locally...</string>
+    <string name="saving_peer">Saving node address locally...</string>
     <string name="starting_home">Initializing app...</string>
 
     <!-- Strings related to connection -->
@@ -131,6 +132,7 @@
     <string name="confirm_password">Confirm password</string>
     <string name="pin_code">PIN code</string>
     <string name="add_account">Add account</string>
+    <string name="add_wallet">Add wallet</string>
     <string name="salt">Salt</string>
     <string name="salt_instructions">Salt: We advice you to choose your personal e-mail as value for this
         field. But you can put any other value: it only has to carry enough entropy to avoid key
@@ -147,6 +149,7 @@
     <string name="login_incorrect">This login is incorrect</string>
     <string name="password_incorrect">This password is incorrect</string>
     <string name="field_required">This field is required</string>
+    <string name="duplicate_wallet_pubkey">Salt and password already used by another wallet</string>
     <string name="uid_instructions">User ID: If you choose an UID which is already used inside a community, you won\'t be able to join this community. So ensure not to collide with someone else\'s UID.</string>
     <string name="uid_cannot_be_empty">UID cannot be empty</string>
     <string name="salt_cannot_be_empty">Salt cannot be empty</string>

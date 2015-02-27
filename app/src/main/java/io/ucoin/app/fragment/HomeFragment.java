@@ -165,8 +165,11 @@ public class HomeFragment extends Fragment {
 
         @Override
         protected List<Wallet> doInBackgroundHandleException(Void... param) throws PeerConnectionException{
-            // Load caches
+            // Load currencies cache
             ServiceLocator.instance().getCurrencyService().loadCache(getActivity().getApplication());
+
+            // Load peers cache
+            ServiceLocator.instance().getPeerService().loadCache(getActivity().getApplication());
 
             // Load wallets
             return ServiceLocator.instance().getWalletService()

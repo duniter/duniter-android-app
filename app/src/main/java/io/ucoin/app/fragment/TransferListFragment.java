@@ -79,7 +79,7 @@ public class TransferListFragment extends ListFragment {
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
         getActivity().setTitle(R.string.transactions);
-        ((MainActivity) getActivity()).setBackButtonEnabled(false);
+        ((MainActivity) getActivity()).setBackButtonEnabled(true);
     }
 
     @Override

@@ -64,7 +64,7 @@ public class AccountService extends BaseService {
             ProgressModel progressModel) throws DuplicatePubkeyException, UidMatchAnotherPubkeyException, PeerConnectionException {
 
         progressModel.setProgress(0);
-        progressModel.setMax(8);
+        progressModel.setMax(9);
 
 
         // Generate keys
@@ -98,30 +98,45 @@ public class AccountService extends BaseService {
         Long credit = txService.getCredit(peer, pubKeyHash);
 
         // Create account in DB
-        progressModel.increment(context.getString(R.string.saving_account));
-        AccountService accountService = ServiceLocator.instance().getAccountService();
-        io.ucoin.app.model.Account account = new io.ucoin.app.model.Account();
-        account.setUid(uid);
-        account.setPubkey(pubKeyHash);
-        account.setSalt(salt);
-        account = save(context, account);
+        io.ucoin.app.model.Account account;
+        {
+            progressModel.increment(context.getString(R.string.saving_account));
+            AccountService accountService = ServiceLocator.instance().getAccountService();
+            account = new io.ucoin.app.model.Account();
+            account.setUid(uid);
+            account.setPubkey(pubKeyHash);
+            account.setSalt(salt);
+            account = save(context, account);
+        }
 
         // Create the currency in DB
-        progressModel.increment(context.getString(R.string.saving_currency, peer.getUrl()));
-        CurrencyService currencyService = ServiceLocator.instance().getCurrencyService();
-        currency.setAccountId(account.getId());
-        currency = currencyService.save(context, currency);
+        {
+            progressModel.increment(context.getString(R.string.saving_currency, peer.getUrl()));
+            CurrencyService currencyService = ServiceLocator.instance().getCurrencyService();
+            currency.setAccountId(account.getId());
+            currency = currencyService.save(context, currency);
+        }
 
         // Create the main wallet in DB
-        progressModel.increment(context.getString(R.string.saving_wallet));
-        wallet.setUid(account.getUid());
-        wallet.setSalt(salt);
-        wallet.setName(account.getUid() + "@" + currency.getCurrencyName());
-        wallet.setCurrencyId(currency.getId());
-        wallet.setAccountId(account.getId());
-        wallet.setCredit(credit == null ? 0 : credit.intValue());
-        WalletService walletService = ServiceLocator.instance().getWalletService();
-        wallet = walletService.save(context, wallet);
+        {
+            progressModel.increment(context.getString(R.string.saving_wallet));
+            wallet.setUid(account.getUid());
+            wallet.setSalt(salt);
+            wallet.setName(account.getUid() + "@" + currency.getCurrencyName());
+            wallet.setCurrencyId(currency.getId());
+            wallet.setAccountId(account.getId());
+            wallet.setCredit(credit == null ? 0 : credit.intValue());
+            WalletService walletService = ServiceLocator.instance().getWalletService();
+            wallet = walletService.save(context, wallet);
+        }
+
+        // Create the peer in DB
+        {
+            progressModel.increment(context.getString(R.string.saving_peer));
+            peer.setCurrencyId(currency.getId());
+            ServiceLocator.instance().getPeerService().save(context, peer);
+        }
+
         progressModel.increment(context.getString(R.string.starting_home));
 
         // Set the secret key into the wallet (will be available for this session only)

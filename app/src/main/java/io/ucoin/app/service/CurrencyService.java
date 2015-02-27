@@ -59,7 +59,7 @@ public class CurrencyService extends BaseService {
 
         // or update
         else {
-            insert(context.getContentResolver(), currency);
+            update(context.getContentResolver(), currency);
         }
 
         // update cache (if already loaded)
@@ -178,7 +178,7 @@ public class CurrencyService extends BaseService {
             throw new UCoinTechnicalException("Error while inserting currency.");
         }
 
-        // Refresh the inserted account
+        // Refresh the inserted entity
         currency.setId(currencyId);
 
         return currency;

@@ -85,4 +85,8 @@ public class Currency implements Serializable {
     public void setAccountId(Long accountId) {
         this.accountId = accountId;
     }
+
+    public String toString() {
+        return currencyName;
+    }
 }
