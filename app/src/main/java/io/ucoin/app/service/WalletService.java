@@ -9,6 +9,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.BaseColumns;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,8 +17,11 @@ import java.util.List;
 import io.ucoin.app.R;
 import io.ucoin.app.content.Provider;
 import io.ucoin.app.database.Contract;
+import io.ucoin.app.model.Peer;
 import io.ucoin.app.model.Wallet;
 import io.ucoin.app.service.exception.DuplicatePubkeyException;
+import io.ucoin.app.service.remote.TransactionRemoteService;
+import io.ucoin.app.technical.CollectionUtils;
 import io.ucoin.app.technical.ObjectUtils;
 import io.ucoin.app.technical.StringUtils;
 import io.ucoin.app.technical.UCoinTechnicalException;
@@ -40,6 +44,8 @@ public class WalletService extends BaseService {
     private SelectCursorHolder mSelectHolder = null;
 
     private CurrencyService currencyService;
+    private PeerService peerService;
+    private TransactionRemoteService transactionRemoteService;
 
     public WalletService() {
         super();
@@ -49,6 +55,8 @@ public class WalletService extends BaseService {
     public void initialize() {
         super.initialize();
         currencyService = ServiceLocator.instance().getCurrencyService();
+        transactionRemoteService = ServiceLocator.instance().getTransactionRemoteService();
+        peerService = ServiceLocator.instance().getPeerService();
     }
 
     public Wallet save(final Context context, final Wallet wallet) throws DuplicatePubkeyException {
@@ -104,6 +112,41 @@ public class WalletService extends BaseService {
         }
 
         return result;
+    }
+
+    public void updateWallet(Context context, Wallet wallet) {
+        ObjectUtils.checkNotNull(wallet);
+        ObjectUtils.checkNotNull(wallet.getCurrencyId());
+
+        Log.d(TAG, String.format("updating wallet [%s]", wallet.toString()));
+
+        Long currencyId = wallet.getCurrencyId();
+        boolean dirty = false;
+
+        List<Peer> peers = peerService.getPeersByCurrencyId(currencyId);
+
+        if (CollectionUtils.isEmpty(peers)) {
+            throw new UCoinTechnicalException(String.format("No peer has been configured for the currency [id=%s]", currencyId));
+        }
+
+        Long creditObj = transactionRemoteService.getCredit(peers.get(0), wallet.getPubKeyHash());
+        int updatedCredit = creditObj == null ? 0 : creditObj.intValue();
+        if (wallet.getCredit() == null || updatedCredit != wallet.getCredit().intValue()) {
+            wallet.setCredit(updatedCredit);
+            dirty = true;
+        }
+
+        if (dirty) {
+            // Save updated wallet to DB
+            try {
+                save(context, wallet);
+            } catch (DuplicatePubkeyException e) {
+                // Should never happen
+            }
+
+            // Mark as dirty (let's the UI known that something changed)
+            wallet.setDirty(true);
+        }
     }
 
     /* -- internal methods-- */
@@ -201,8 +244,9 @@ public class WalletService extends BaseService {
 
         ContentValues target = toContentValues(source);
 
-        Uri uri = ContentUris.withAppendedId(getContentUri(), source.getId());
-        int rowsUpdated = resolver.update(uri, target, null, null);
+        String whereClause = "_id=?";
+        String[] whereArgs = new String[]{String.valueOf(source.getId())};
+        int rowsUpdated = resolver.update(getContentUri(), target, whereClause, whereArgs);
         if (rowsUpdated != 1) {
             throw new UCoinTechnicalException(String.format("Error while updating wallet. %s rows updated.", rowsUpdated));
         }
@@ -247,6 +291,8 @@ public class WalletService extends BaseService {
 
         Wallet result = new Wallet(currencyName, uid, pubKey, secKey);
         result.setId(cursor.getLong(mSelectHolder.idIndex));
+        result.setAccountId(cursor.getLong(mSelectHolder.accountIdIndex));
+        result.setCurrencyId(currencyId);
         result.setName(cursor.getString(mSelectHolder.nameIndex));
         result.setCredit(cursor.getInt(mSelectHolder.creditIndex));
         result.setMember(cursor.getInt(mSelectHolder.isMemberIndex) == 1 ? true : false);

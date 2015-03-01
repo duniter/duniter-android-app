@@ -18,71 +18,77 @@
         android:layout_marginRight="8dp"
         android:layout_marginTop="4dp"
         android:layout_marginBottom="4dp"
-        android:duplicateParentState="true"
-        android:layout_weight="0.05" />
+        android:duplicateParentState="true" />
 
     <LinearLayout
         android:duplicateParentState="true"
         android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:orientation="vertical"
-        android:layout_weight="0.65">
-        <TextView
-            android:id="@+id/name"
-            android:duplicateParentState="true"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:textAppearanceMedium"
-            android:textColor="@color/hideable_text_color"
-            android:singleLine="true"
-            android:text="uid"
-            android:layout_gravity="left|top"
-            android:textSize="18sp"/>
+        android:layout_width="match_parent"
+        android:orientation="horizontal">
 
-        <TextView
-            android:id="@+id/pubkey"
+        <LinearLayout
             android:duplicateParentState="true"
-            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:textAppearanceMedium"
-            android:textColor="@color/hideable_text_color"
-            android:text="G2CBgZBPLe6FSFUgpx2Jf1Aqsgta6iib3vmDRA1yLiqU"
-            android:textSize="12sp"
-            android:singleLine="true"/>
+            android:orientation="vertical"
+            android:layout_weight="0.65"
+            android:layout_width="0dp">
+            <TextView
+                android:id="@+id/name"
+                android:duplicateParentState="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:textAppearanceMedium"
+                android:textColor="@color/hideable_text_color"
+                android:singleLine="true"
+                android:text="uid"
+                android:layout_gravity="left|top"
+                android:textSize="18sp"/>
+
+            <TextView
+                android:id="@+id/pubkey"
+                android:duplicateParentState="true"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:textAppearanceMedium"
+                android:textColor="@color/hideable_text_color"
+                android:text="G2CBgZBPLe6FSFUgpx2Jf1Aqsgta6iib3vmDRA1yLiqU"
+                android:textSize="12sp"
+                android:singleLine="true"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:duplicateParentState="true"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_gravity="center_vertical|right"
+            android:layout_weight="0.35"
+            android:layout_width="0dp">
+
+            <TextView
+                android:duplicateParentState="true"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:textAppearanceMedium"
+                android:textColor="@color/hideable_text_color"
+                android:layout_gravity="top"
+                android:gravity="end"
+                android:text="@string/credit"
+                android:textSize="10sp"/>
+
+            <TextView
+                android:id="@+id/credit"
+                android:duplicateParentState="true"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:textAppearanceMedium"
+                android:textColor="@color/wallet_holo_blue_light"
+                android:layout_gravity="bottom|right"
+                android:text="credit"
+                android:textSize="16sp"
+                android:elegantTextHeight="false"
+                android:gravity="end" />
+
+        </LinearLayout>
     </LinearLayout>
-
-    <LinearLayout
-        android:duplicateParentState="true"
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:orientation="vertical"
-        android:layout_gravity="center_vertical|right"
-        android:layout_weight="0.3">
-
-        <TextView
-            android:duplicateParentState="true"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:textAppearanceMedium"
-            android:textColor="@color/hideable_text_color"
-            android:layout_gravity="top"
-            android:gravity="right"
-            android:text="@string/credit"
-            android:textSize="10sp"/>
-
-        <TextView
-            android:id="@+id/credit"
-            android:duplicateParentState="true"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:textAppearanceMedium"
-            android:textColor="@color/hideable_text_color"
-            android:layout_gravity="bottom"
-            android:gravity="right"
-            android:text="credit"
-            android:textSize="16sp"/>
-
-    </LinearLayout>
-
 
 </LinearLayout>

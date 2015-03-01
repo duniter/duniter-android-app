@@ -15,8 +15,11 @@ TODO - in french, sorry ;/
     - après le transfer retour à identity fragment
 
 - sur les Wallets (home) :
-   * pouvoir ajouter une wallet
-   * gérer le rafraichissement du solde, en tache de fond à l'ouverture et après un transfert (il faudra un "credit" et un "expected_credit" calculé localement)
+   * gérer le rafraichissement du solde, en tache de fond à l'ouverture et après un transfert
+     - fait, mais il manque un délai avant de recommencer la mise à jour. et un bouton pour le déclencher
+     - il faudrai un progress bar pendant la rafraichissement
+   * il faudra un "credit" et un "expected_credit" calculé localement
+   * Mettre une icon différente pour les Wallet non member
 
 - gérer les transactions :
     * ajouter les transactions en attente après un transfert,

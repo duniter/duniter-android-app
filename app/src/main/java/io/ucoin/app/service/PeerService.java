@@ -184,8 +184,9 @@ public class PeerService extends BaseService {
 
         ContentValues target = toContentValues(source);
 
-        Uri uri = ContentUris.withAppendedId(getContentUri(), source.getId());
-        int rowsUpdated = resolver.update(uri, target, null, null);
+        String whereClause = "_id=?";
+        String[] whereArgs = new String[]{String.valueOf(source.getId())};
+        int rowsUpdated = resolver.update(getContentUri(), target, null, null);
         if (rowsUpdated != 1) {
             throw new UCoinTechnicalException(String.format("Error while updating peer. %s rows updated.", rowsUpdated));
         }

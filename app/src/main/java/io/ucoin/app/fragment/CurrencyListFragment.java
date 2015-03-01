@@ -29,6 +29,7 @@ import io.ucoin.app.model.Currency;
 import io.ucoin.app.model.Peer;
 import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.technical.AsyncTaskHandleException;
+import io.ucoin.app.technical.ExceptionUtils;
 
 
 public class CurrencyListFragment extends ListFragment {
@@ -168,7 +169,7 @@ public class CurrencyListFragment extends ListFragment {
         protected void onFailed(Throwable t) {
             mProgressViewAdapter.showProgress(false);
             Toast.makeText(mActivity,
-                    t.getMessage(),
+                    ExceptionUtils.getMessage(t),
                     Toast.LENGTH_LONG)
                     .show();
         }

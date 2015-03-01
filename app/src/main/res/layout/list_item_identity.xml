@@ -5,8 +5,8 @@
     android:layout_height="match_parent"
     android:minHeight="?android:listPreferredItemHeight"
     android:gravity="center_vertical"
-    android:paddingLeft="16dp"
-    android:paddingRight="16dp">
+    android:paddingLeft="8dp"
+    android:paddingRight="8dp">
 
     <ImageView
         android:src="@drawable/ic_user_32dp"
@@ -35,7 +35,7 @@
             android:layout_height="wrap_content"
             android:textAppearance="?android:textAppearanceMedium"
             android:textColor="@color/hideable_text_color"
-            android:textSize="@dimen/abc_text_size_title_material"/>
+            android:textSize="@dimen/abc_text_size_medium_material"/>
 
         <TextView
             android:id="@+id/timestamp"
@@ -44,7 +44,7 @@
             android:layout_height="wrap_content"
             android:textAppearance="?android:textAppearanceMedium"
             android:textColor="@color/hideable_text_color"
-            android:textSize="@dimen/abc_text_size_body_2_material"/>
+            android:textSize="@dimen/abc_text_size_caption_material"/>
 
         <TextView
             android:id="@+id/pubkey"
@@ -53,7 +53,7 @@
             android:layout_height="wrap_content"
             android:textAppearance="?android:textAppearanceMedium"
             android:textColor="@color/hideable_text_color"
-            android:textSize="@dimen/abc_text_size_body_2_material"
+            android:textSize="@dimen/abc_text_size_caption_material"
             android:singleLine="true"/>
 
 

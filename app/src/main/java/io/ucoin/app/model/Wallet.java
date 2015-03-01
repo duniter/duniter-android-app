@@ -19,6 +19,11 @@ public class Wallet extends KeyPair implements LocalEntity, Serializable {
     private Integer credit;
     private Identity identity;
 
+    /**
+     * Use for UI, when some properties has not been displayed yet
+     */
+    private boolean isDirty = false;
+
     // TODO : voir si besoin de les garder ou pas
     private String salt;
     private String currency;
@@ -156,4 +161,11 @@ public class Wallet extends KeyPair implements LocalEntity, Serializable {
         return identity.getIsMember();
     }
 
+    public boolean isDirty() {
+        return isDirty;
+    }
+
+    public void setDirty(boolean isDirty) {
+        this.isDirty = isDirty;
+    }
 }

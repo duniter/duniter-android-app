@@ -119,7 +119,7 @@ public class CurrencyFragment extends Fragment {
         Cursor cursor = getActivity().getContentResolver().query(uri, new String[]{}, selection,
                 selectionArgs, null);
 
-        //todo handle join action action button
+        //todo handle join action button
         if (cursor.getCount() > 0) {
             menu.removeItem(R.id.action_add);
         } else {

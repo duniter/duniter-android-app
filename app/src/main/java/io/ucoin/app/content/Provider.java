@@ -1,6 +1,7 @@
 package io.ucoin.app.content;
 
 import android.content.ContentProvider;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.UriMatcher;
@@ -138,16 +139,61 @@ public class Provider extends ContentProvider implements Contract {
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
-        return 0;
+        SQLiteDatabase db = mDatabaseHelper.getWritableDatabase();
+        int uriType = uriMatcher.match(uri);
+        int nbRowsUpdated;
+        String whereClause = "_id=?";
+        String[] whereArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
+        switch (uriType) {
+            case ACCOUNT:
+                nbRowsUpdated = db.delete(Account.TABLE_NAME, whereClause, whereArgs);
+                break;
+            case CURRENCY:
+                nbRowsUpdated = db.delete(Currency.TABLE_NAME, whereClause, whereArgs);
+                break;
+            case PEER:
+                nbRowsUpdated = db.delete(Peer.TABLE_NAME, whereClause, whereArgs);
+                break;
+            case WALLET:
+                nbRowsUpdated = db.delete(Wallet.TABLE_NAME, whereClause, whereArgs);
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown URI: " + uri);
+        }
+        getContext().getContentResolver().notifyChange(uri, null);
+        return nbRowsUpdated;
     }
+
     /*
-     * update() always returns "no rows affected" (0)
+     * update rows
      */
     public int update(
             Uri uri,
             ContentValues values,
-            String selection,
-            String[] selectionArgs) {
-        return 0;
+            String whereClause,
+            String[] whereArgs) {
+
+        SQLiteDatabase db = mDatabaseHelper.getWritableDatabase();
+        int uriType = uriMatcher.match(uri);
+        int nbRowsUpdated;
+        switch (uriType) {
+            case ACCOUNT:
+                nbRowsUpdated = db.update(Account.TABLE_NAME, values, whereClause, whereArgs);
+                break;
+            case CURRENCY:
+                nbRowsUpdated = db.update(Currency.TABLE_NAME, values, whereClause, whereArgs);
+                break;
+            case PEER:
+                nbRowsUpdated = db.update(Peer.TABLE_NAME, values, whereClause, whereArgs);
+                break;
+            case WALLET:
+                nbRowsUpdated = db.update(Wallet.TABLE_NAME, values, whereClause, whereArgs);
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown URI: " + uri);
+        }
+        getContext().getContentResolver().notifyChange(uri, null);
+        return nbRowsUpdated;
     }
+
 }
