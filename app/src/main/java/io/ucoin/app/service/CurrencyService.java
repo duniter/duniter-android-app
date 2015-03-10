@@ -37,6 +37,7 @@ public class CurrencyService extends BaseService {
 
     private Map<Long, String> currencyNameByIdCache;
 
+    private List<Long> currencyIdsCache;
 
     public CurrencyService() {
         super();
@@ -52,22 +53,29 @@ public class CurrencyService extends BaseService {
         ObjectUtils.checkArgument((currency.getAccount() != null && currency.getAccount().getId() != null)
             || currency.getAccountId() != null, "One of 'currency.account.id' or 'currency.accountId' is mandatory.");
 
+        Currency result;
+
         // Create
         if (currency.getId() == null) {
-            return insert(context.getContentResolver(), currency);
+            result = insert(context.getContentResolver(), currency);
+
+            // update cache (if already loaded)
+            if (currencyNameByIdCache != null) {
+                currencyNameByIdCache.put(currency.getId(), currency.getCurrencyName());
+            }
+            if (currencyIdsCache != null) {
+                currencyIdsCache.add(currency.getId());
+            }
         }
 
         // or update
         else {
             update(context.getContentResolver(), currency);
+
+            result = currency;
         }
 
-        // update cache (if already loaded)
-        if (currencyNameByIdCache != null) {
-            currencyNameByIdCache.put(currency.getId(), currency.getCurrencyName());
-        }
-
-        return null;
+        return result;
     }
 
     public Currency toCurrency(final Cursor cursor) {
@@ -129,20 +137,30 @@ public class CurrencyService extends BaseService {
     }
 
     /**
+     * Return a (cached) list of currency ids
+     * @return
+     */
+    public List<Long> getCurrencyIds() {
+        return currencyIdsCache;
+    }
+
+    /**
      * Fill all cache need for currencies
      * @param application
      */
     public void loadCache(Application application) {
-        if (currencyNameByIdCache != null) {
+        if (currencyNameByIdCache != null && currencyIdsCache != null) {
             return;
         }
 
-        currencyNameByIdCache = new HashMap<Long, String>();
-
-        String accountId = ((io.ucoin.app.Application) application).getAccountId();
         List<Currency> currencies = getCurrencies(application);
-        for (Currency currency: currencies) {
+
+        currencyNameByIdCache = new HashMap<Long, String>();
+        currencyIdsCache = new ArrayList<Long>();
+
+        for (Currency currency : currencies) {
             currencyNameByIdCache.put(currency.getId(), currency.getCurrencyName());
+            currencyIdsCache.add(currency.getId());
         }
     }
 

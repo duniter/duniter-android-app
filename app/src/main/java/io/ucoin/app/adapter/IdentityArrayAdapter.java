@@ -27,7 +27,6 @@ public class IdentityArrayAdapter extends ArrayAdapter<Identity> {
         super(context, DEFAULT_LAYOUT_RES, identities);
     }
 
-
     @Override
     public View getView(int position, View convertView, ViewGroup container) {
         // Retrieve the item

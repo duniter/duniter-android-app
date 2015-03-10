@@ -24,15 +24,13 @@ import io.ucoin.app.adapter.CurrencyArrayAdapter;
 import io.ucoin.app.adapter.ProgressViewAdapter;
 import io.ucoin.app.adapter.Views;
 import io.ucoin.app.model.Currency;
-import io.ucoin.app.model.Peer;
 import io.ucoin.app.model.Wallet;
 import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.service.exception.DuplicatePubkeyException;
 import io.ucoin.app.service.remote.TransactionRemoteService;
 import io.ucoin.app.technical.AsyncTaskHandleException;
-import io.ucoin.app.technical.CollectionUtils;
 import io.ucoin.app.technical.ObjectUtils;
-import io.ucoin.app.technical.UCoinTechnicalException;
+import io.ucoin.app.technical.StringUtils;
 import io.ucoin.app.technical.crypto.KeyPair;
 
 /**
@@ -53,6 +51,7 @@ public class AddWalletFragment extends Fragment {
     // UI references.
     private CurrencyArrayAdapter mCurrencyAdapter;
     private Spinner mCurrencySpinner;
+    private TextView mNameView;
     private TextView mUidView;
     private EditText mSaltView;
     private EditText mPasswordView;
@@ -95,6 +94,10 @@ public class AddWalletFragment extends Fragment {
         // currency
         mCurrencySpinner = (Spinner) view.findViewById(R.id.currency);
         mCurrencySpinner.setAdapter(mCurrencyAdapter);
+
+        // Name
+        mNameView = (TextView) view.findViewById(R.id.name);
+        mNameView.requestFocus();
 
         // user ID
         mUidView = (TextView) view.findViewById(R.id.uid);
@@ -164,6 +167,7 @@ public class AddWalletFragment extends Fragment {
 
         // Store values at the time of the login attempt.
         Currency currency = (Currency)mCurrencySpinner.getSelectedItem();
+        String name = mNameView.getText().toString();
         String uid = mUidView.getText().toString();
         String salt = mSaltView.getText().toString();
         String password = mPasswordView.getText().toString();
@@ -172,19 +176,25 @@ public class AddWalletFragment extends Fragment {
         boolean cancel = false;
         View focusView = null;
 
-        // Check for a valid uid
+
+        // Check for a valid currency
         if (currency == null) {
             mCurrencyAdapter.setError(mCurrencySpinner, getString(R.string.field_required));
-            focusView = mCurrencySpinner;
+            if (focusView == null) focusView = mCurrencySpinner;
             cancel = true;
         }
-        else if (TextUtils.isEmpty(uid)) {
-            mUidView.setError(getString(R.string.field_required));
-            focusView = mUidView;
+
+        // Check for a valid name (mandatory if uid is not set)
+        if (TextUtils.isEmpty(name) && TextUtils.isEmpty(uid)) {
+            mNameView.setError(getString(R.string.name_or_uid_required));
+            if (focusView == null) focusView = mNameView;
             cancel = true;
-        } else if (!isUidValid(uid)) {
+        }
+
+        // Check for a valid uid
+        if (!TextUtils.isEmpty(uid) && !isUidValid(uid)) {
             mUidView.setError(getString(R.string.login_too_short));
-            focusView = mUidView;
+            if (focusView == null) focusView = mUidView;
             cancel = true;
         }
 
@@ -192,7 +202,7 @@ public class AddWalletFragment extends Fragment {
         // Check for a valid password, if the user entered one.
         if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
             mPasswordView.setError(getString(R.string.password_too_short));
-            focusView = mPasswordView;
+            if (focusView == null) focusView = mPasswordView;
             cancel = true;
         }
         // Check if password match
@@ -200,18 +210,18 @@ public class AddWalletFragment extends Fragment {
                 password,
                 mConfirmPasswordView.getText().toString())) {
             mConfirmPasswordView.setError(getString(R.string.passwords_dont_match));
-            focusView = mConfirmPasswordView;
+            if (focusView == null) focusView = mConfirmPasswordView;
             cancel = true;
         }
 
         // Check for a valid salt
         if (TextUtils.isEmpty(salt)) {
             mSaltView.setError(getString(R.string.field_required));
-            focusView = mSaltView;
+            if (focusView == null) focusView = mSaltView;
             cancel = true;
         } else if (!isSaltValid(salt)) {
             mSaltView.setError(getString(R.string.salt_too_short));
-            focusView = mSaltView;
+            if (focusView == null) focusView = mSaltView;
             cancel = true;
         }
 
@@ -222,7 +232,7 @@ public class AddWalletFragment extends Fragment {
         } else {
             // Will show the progress bar, and create the wallet
             AddWalletTask task = new AddWalletTask();
-            task.execute(currency, uid, salt, password);
+            task.execute(currency, name, uid, salt, password);
         }
     }
 
@@ -257,12 +267,18 @@ public class AddWalletFragment extends Fragment {
         @Override
         protected Wallet doInBackgroundHandleException(Object... args) throws Exception {
             ObjectUtils.checkNotNull(args);
-            ObjectUtils.checkArgument(args.length == 4);
+            ObjectUtils.checkArgument(args.length == 5);
 
             Currency currency = (Currency)args[0];
-            String uid = (String)args[1];
-            String salt = (String)args[2];
-            String password = (String)args[3];
+            String name = (String)args[1];
+            String uid = (String)args[2];
+            String salt = (String)args[3];
+            String password = (String)args[4];
+
+            // Compute a name is not set
+            if (StringUtils.isBlank(name)) {
+                name = uid;
+            }
 
             String accountId = ((io.ucoin.app.Application) getActivity().getApplication()).getAccountId();
 
@@ -273,23 +289,19 @@ public class AddWalletFragment extends Fragment {
             Wallet wallet = new Wallet(currency.getCurrencyName(), uid, keyPair.publicKey, keyPair.secretKey);
             wallet.setCurrencyId(currency.getId());
             wallet.setAccountId(Long.parseLong(accountId));
-            wallet.setName(uid + "@" + currency.getCurrencyName());
-
-            // Load a peer
-            List<Peer> peers = ServiceLocator.instance().getPeerService().getPeersByCurrencyId(currency.getId());
-            if (CollectionUtils.isEmpty(peers)) {
-                throw new UCoinTechnicalException(String.format("No peers define on currency [%s]. Please add peer first.", currency.getCurrencyName()));
-            }
+            wallet.setName(name);
 
             // Load membership
-            ServiceLocator.instance().getBlockchainRemoteService().loadMembership(wallet.getIdentity(), true);
+            ServiceLocator.instance().getBlockchainRemoteService().loadMembership(currency.getId(), wallet.getIdentity(), true);
 
             // Get credit
             TransactionRemoteService txService = ServiceLocator.instance().getTransactionRemoteService();
-            Long credit = txService.getCredit(peers.get(0), wallet.getPubKeyHash());
+            Long credit = txService.getCredit(currency.getId(), wallet.getPubKeyHash());
             wallet.setCredit(credit != null ? credit.intValue() : 0);
 
             // Save the wallet in DB
+            // (reset private key first)
+            wallet.setSecKey(null);
             ServiceLocator.instance().getWalletService().save(getActivity(), wallet);
 
             return wallet;

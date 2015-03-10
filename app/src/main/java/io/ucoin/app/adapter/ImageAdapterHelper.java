@@ -10,17 +10,38 @@ import io.ucoin.app.model.WotCertification;
  */
 public class ImageAdapterHelper {
 
+    // Wallet
+    private static final Integer WALLET_MEMBER = R.drawable.ic_member_32dp;
+    private static final Integer WALLET_NON_MEMBER = R.drawable.ic_wallet;
+
+    private static final Integer WALLET_WHITE_MEMBER = R.drawable.ic_member_white_32dp;
+    private static final Integer WALLET_WHITE_NON_MEMBER = R.drawable.ic_wallet_white;
+
     // Identity
     private static final Integer IMAGE_MEMBER = R.drawable.ic_member_32dp;
-    private static final Integer IMAGE_NON_MEMBER = R.drawable.ic_user_32dp;
+    private static final Integer IMAGE_NON_MEMBER = R.drawable.ic_wallet;
 
     private static final Integer IMAGE_WHITE_MEMBER = R.drawable.ic_member_white_32dp;
-    private static final Integer IMAGE_WHITE_NON_MEMBER = R.drawable.ic_user_white_32dp;
+    private static final Integer IMAGE_WHITE_NON_MEMBER = R.drawable.ic_wallet_white;
+
 
     // Certification
     private static final Integer IMAGE_CERTIFIED_BY = R.drawable.ic_certified_by;
     private static final Integer IMAGE_CERTIFIER_OF = R.drawable.ic_certifier_of;
     private static final Integer IMAGE_BOTH_CERT = R.drawable.ic_dual_cert;
+
+    public static int getImage(Wallet wallet) {
+        return Boolean.TRUE.equals(wallet.getIsMember())
+                ? WALLET_MEMBER
+                : WALLET_NON_MEMBER;
+    }
+
+    public static int getImageWhite(Wallet wallet) {
+        return Boolean.TRUE.equals(wallet.getIsMember())
+                ? WALLET_WHITE_MEMBER
+                : WALLET_WHITE_NON_MEMBER;
+    }
+
 
     public static int getImage(Identity identity) {
         return Boolean.TRUE.equals(identity.getIsMember())
@@ -28,11 +49,6 @@ public class ImageAdapterHelper {
                 : IMAGE_NON_MEMBER;
     }
 
-    public static int getImage(Wallet wallet) {
-        return Boolean.TRUE.equals(wallet.getIsMember())
-                ? IMAGE_MEMBER
-                : IMAGE_NON_MEMBER;
-    }
 
     public static int getImageWhite(Identity identity) {
         boolean isMember = Boolean.TRUE.equals(identity.getIsMember());

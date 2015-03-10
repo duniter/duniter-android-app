@@ -5,6 +5,7 @@ import org.apache.http.client.methods.HttpUriRequest;
 import io.ucoin.app.model.Peer;
 import io.ucoin.app.service.BaseService;
 import io.ucoin.app.service.HttpService;
+import io.ucoin.app.service.PeerService;
 import io.ucoin.app.service.ServiceLocator;
 
 /**
@@ -13,6 +14,7 @@ import io.ucoin.app.service.ServiceLocator;
 public abstract class BaseRemoteService extends BaseService{
 
     protected HttpService httpService;
+    protected PeerService peerService;
 
     public static final String PROTOCOL_VERSION = "1";
 
@@ -21,13 +23,15 @@ public abstract class BaseRemoteService extends BaseService{
     public void initialize() {
         super.initialize();
         httpService = ServiceLocator.instance().getHttpService();
-    }
-
-    public <T> T executeRequest(String absolutePath, Class<? extends T> resultClass)  {
-        return httpService.executeRequest(absolutePath, resultClass);
+        peerService = ServiceLocator.instance().getPeerService();
     }
 
     public <T> T executeRequest(Peer peer, String absolutePath, Class<? extends T> resultClass)  {
+        return httpService.executeRequest(peer, absolutePath, resultClass);
+    }
+
+    public <T> T executeRequest(long currencyId, String absolutePath, Class<? extends T> resultClass)  {
+        Peer peer = peerService.getActivePeerByCurrencyId(currencyId);
         return httpService.executeRequest(peer, absolutePath, resultClass);
     }
 
@@ -35,9 +39,9 @@ public abstract class BaseRemoteService extends BaseService{
         return httpService.executeRequest(request, resultClass);
     }
 
-
-    public String getPath(String aPath) {
-        return httpService.getPath(aPath);
+    public String getPath(long currencyId, String aPath) {
+        Peer peer = peerService.getActivePeerByCurrencyId(currencyId);
+        return httpService.getPath(peer, aPath);
     }
 
     public String getPath(Peer peer, String aPath) {

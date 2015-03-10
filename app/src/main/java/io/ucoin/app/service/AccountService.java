@@ -90,7 +90,7 @@ public class AccountService extends BaseService {
                 keys.getPubKey(),
                 null /*do no save the secret key of the main account*/
         );
-        blockchainService.loadAndCheckMembership(wallet);
+        blockchainService.loadAndCheckMembership(peer, wallet);
 
         // Get credit
         progressModel.increment(context.getString(R.string.loading_wallet_credit));
@@ -122,7 +122,7 @@ public class AccountService extends BaseService {
             progressModel.increment(context.getString(R.string.saving_wallet));
             wallet.setUid(account.getUid());
             wallet.setSalt(salt);
-            wallet.setName(account.getUid() + "@" + currency.getCurrencyName());
+            wallet.setName(account.getUid());
             wallet.setCurrencyId(currency.getId());
             wallet.setAccountId(account.getId());
             wallet.setCredit(credit == null ? 0 : credit.intValue());

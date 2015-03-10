@@ -21,6 +21,7 @@ public class BasicIdentity implements Serializable {
 
     private String uid;
 
+
     public String getPubkey() {
         return pubkey;
     }
@@ -52,7 +53,8 @@ public class BasicIdentity implements Serializable {
     public void setUid(String uid) {
         this.uid = uid;
     }
-    
+
+
     @Override
     public String toString() {
         return new StringBuilder()

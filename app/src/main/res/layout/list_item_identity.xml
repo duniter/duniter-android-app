@@ -6,7 +6,7 @@
     android:minHeight="?android:listPreferredItemHeight"
     android:gravity="center_vertical"
     android:paddingLeft="8dp"
-    android:paddingRight="8dp">
+    android:paddingRight="8dp" >
 
     <ImageView
         android:src="@drawable/ic_user_32dp"
@@ -18,33 +18,25 @@
         android:layout_marginTop="4dp"
         android:layout_marginBottom="4dp"
         android:duplicateParentState="true"
-        android:layout_weight="0.05"
-        android:contentDescription="@string/identity_icon" />
+        android:layout_weight="0.05"/>
 
     <LinearLayout
         android:duplicateParentState="true"
-        android:layout_width="0dp"
-        android:layout_weight="1"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:layout_width="wrap_content"
+        android:orientation="vertical"
+        android:layout_weight="0.7">
 
         <TextView
             android:id="@+id/uid"
             android:duplicateParentState="true"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:textAppearanceMedium"
             android:textColor="@color/hideable_text_color"
+            android:singleLine="true"
+            android:text="kimamila"
             android:textSize="@dimen/abc_text_size_medium_material"/>
-
-        <TextView
-            android:id="@+id/timestamp"
-            android:duplicateParentState="true"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:textAppearanceMedium"
-            android:textColor="@color/hideable_text_color"
-            android:textSize="@dimen/abc_text_size_caption_material"/>
 
         <TextView
             android:id="@+id/pubkey"
@@ -53,9 +45,41 @@
             android:layout_height="wrap_content"
             android:textAppearance="?android:textAppearanceMedium"
             android:textColor="@color/hideable_text_color"
+            android:text="G2CBgZBPLe6FSFUgpx2Jf1Aqsgta6iib3vmDRA1yLiqU"
             android:textSize="@dimen/abc_text_size_caption_material"
             android:singleLine="true"/>
 
+    </LinearLayout>
+
+    <LinearLayout
+        android:duplicateParentState="true"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:orientation="vertical"
+        android:layout_gravity="center_vertical|right"
+        android:layout_weight="0.25">
+
+        <TextView
+            android:duplicateParentState="true"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:textAppearanceMedium"
+            android:textColor="@color/hideable_text_color"
+            android:layout_gravity="top"
+            android:gravity="right"
+            android:text="@string/registration_date"
+            android:textSize="10sp"/>
+
+        <TextView
+            android:id="@+id/timestamp"
+            android:duplicateParentState="true"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:textAppearanceMedium"
+            android:textColor="@color/hideable_text_color"
+            android:layout_gravity="bottom"
+            android:gravity="right"
+            android:textSize="@dimen/abc_text_size_small_material"/>
 
     </LinearLayout>
 

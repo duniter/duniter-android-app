@@ -1,7 +1,6 @@
 package io.ucoin.app.content;
 
 import android.content.ContentProvider;
-import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.UriMatcher;
@@ -27,6 +26,8 @@ public class Provider extends ContentProvider implements Contract {
     private static final int CURRENCY = 20;
     private static final int PEER = 30;
     private static final int WALLET = 40;
+    private static final int MOVEMENT = 50;
+    private static final int CONTACT = 60;
 
 
     public static Uri CONTENT_URI;
@@ -45,6 +46,8 @@ public class Provider extends ContentProvider implements Contract {
         uriMatcher.addURI(AUTHORITY, "currency/", CURRENCY);
         uriMatcher.addURI(AUTHORITY, "wallet/", WALLET);
         uriMatcher.addURI(AUTHORITY, "peer/", PEER);
+        uriMatcher.addURI(AUTHORITY, "movement/", MOVEMENT);
+        uriMatcher.addURI(AUTHORITY, "contact/", CONTACT);
 
         return true;
     }
@@ -85,18 +88,32 @@ public class Provider extends ContentProvider implements Contract {
                         selectionArgs, null, null, sortOrder);
                 cursor.setNotificationUri(getContext().getContentResolver(), uri);
                 break;
-            case WALLET :
-                queryBuilder.setTables(Wallet.TABLE_NAME);
-                cursor = queryBuilder.query(db, projection, selection,
-                        selectionArgs, null, null, sortOrder);
-                cursor.setNotificationUri(getContext().getContentResolver(), uri);
-                break;
             case PEER :
                 queryBuilder.setTables(Peer.TABLE_NAME);
                 cursor = queryBuilder.query(db, projection, selection,
                         selectionArgs, null, null, sortOrder);
                 cursor.setNotificationUri(getContext().getContentResolver(), uri);
                 break;
+            case WALLET :
+                queryBuilder.setTables(Wallet.TABLE_NAME);
+                cursor = queryBuilder.query(db, projection, selection,
+                        selectionArgs, null, null, sortOrder);
+                cursor.setNotificationUri(getContext().getContentResolver(), uri);
+                break;
+            case MOVEMENT :
+                queryBuilder.setTables(Movement.TABLE_NAME);
+                cursor = queryBuilder.query(db, projection, selection,
+                        selectionArgs, null, null, sortOrder);
+                cursor.setNotificationUri(getContext().getContentResolver(), uri);
+                break;
+            case CONTACT :
+                queryBuilder.setTables(Contact.TABLE_NAME);
+                cursor = queryBuilder.query(db, projection, selection,
+                        selectionArgs, null, null, sortOrder);
+                cursor.setNotificationUri(getContext().getContentResolver(), uri);
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown URI: " + uri);
         }
         return cursor;
     }
@@ -128,6 +145,14 @@ public class Provider extends ContentProvider implements Contract {
                 id = db.insert(Wallet.TABLE_NAME, null, values);
                 uri = Uri.parse("wallet/" + id);
                 break;
+            case MOVEMENT:
+                id = db.insert(Movement.TABLE_NAME, null, values);
+                uri = Uri.parse("movement/" + id);
+                break;
+            case CONTACT:
+                id = db.insert(Contact.TABLE_NAME, null, values);
+                uri = Uri.parse("contact/" + id);
+                break;
             default:
                 throw new IllegalArgumentException("Unknown URI: " + uri);
 
@@ -138,12 +163,10 @@ public class Provider extends ContentProvider implements Contract {
 
 
     @Override
-    public int delete(Uri uri, String selection, String[] selectionArgs) {
+    public int delete(Uri uri, String whereClause, String[] whereArgs) {
         SQLiteDatabase db = mDatabaseHelper.getWritableDatabase();
         int uriType = uriMatcher.match(uri);
         int nbRowsUpdated;
-        String whereClause = "_id=?";
-        String[] whereArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
         switch (uriType) {
             case ACCOUNT:
                 nbRowsUpdated = db.delete(Account.TABLE_NAME, whereClause, whereArgs);
@@ -156,6 +179,12 @@ public class Provider extends ContentProvider implements Contract {
                 break;
             case WALLET:
                 nbRowsUpdated = db.delete(Wallet.TABLE_NAME, whereClause, whereArgs);
+                break;
+            case MOVEMENT:
+                nbRowsUpdated = db.delete(Movement.TABLE_NAME, whereClause, whereArgs);
+                break;
+            case CONTACT:
+                nbRowsUpdated = db.delete(Contact.TABLE_NAME, whereClause, whereArgs);
                 break;
             default:
                 throw new IllegalArgumentException("Unknown URI: " + uri);
@@ -188,6 +217,12 @@ public class Provider extends ContentProvider implements Contract {
                 break;
             case WALLET:
                 nbRowsUpdated = db.update(Wallet.TABLE_NAME, values, whereClause, whereArgs);
+                break;
+            case MOVEMENT:
+                nbRowsUpdated = db.update(Movement.TABLE_NAME, values, whereClause, whereArgs);
+                break;
+            case CONTACT:
+                nbRowsUpdated = db.update(Contact.TABLE_NAME, values, whereClause, whereArgs);
                 break;
             default:
                 throw new IllegalArgumentException("Unknown URI: " + uri);

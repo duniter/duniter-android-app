@@ -90,19 +90,7 @@ public class HomeFragment extends Fragment {
                     @Override
                     public void onPositiveClick(Bundle args) {
                         Wallet wallet = (Wallet)args.getSerializable(Wallet.class.getSimpleName());
-                        Fragment fragment = TransferListFragment.newInstance(wallet);
-                        FragmentManager fragmentManager = getFragmentManager();
-                        // Insert the Home at the first place in back stack
-                        fragmentManager.popBackStack(HomeFragment.class.getSimpleName(), 0);
-                        fragmentManager.beginTransaction()
-                                .setCustomAnimations(
-                                        R.animator.delayed_slide_in_up,
-                                        R.animator.fade_out,
-                                        R.animator.delayed_fade_in,
-                                        R.animator.slide_out_up)
-                                .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
-                                .addToBackStack(fragment.getClass().getSimpleName())
-                                .commit();
+                        onWalletClick(wallet);
                     }
                 });
         mWalletResultListener = fragment;
@@ -159,6 +147,22 @@ public class HomeFragment extends Fragment {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         return false;
+    }
+
+    protected void onWalletClick(Wallet wallet) {
+        Fragment fragment = WalletFragment.newInstance(wallet);
+        FragmentManager fragmentManager = getFragmentManager();
+        // Insert the Home at the first place in back stack
+        fragmentManager.popBackStack(HomeFragment.class.getSimpleName(), 0);
+        fragmentManager.beginTransaction()
+                .setCustomAnimations(
+                        R.animator.delayed_slide_in_up,
+                        R.animator.fade_out,
+                        R.animator.delayed_fade_in,
+                        R.animator.slide_out_up)
+                .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
+                .addToBackStack(fragment.getClass().getSimpleName())
+                .commit();
     }
 
     public class LoadWalletsTask extends AsyncTaskHandleException<Void, Void, List<Wallet>> {

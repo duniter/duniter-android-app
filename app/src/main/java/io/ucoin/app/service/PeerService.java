@@ -37,10 +37,19 @@ public class PeerService extends BaseService {
     private SelectCursorHolder mSelectHolder = null;
 
     private Map<Long, List<Peer>> peersByCurrencyIdCache;
+    private Map<Long, Peer> activePeerByCurrencyIdCache;
+
+    private CurrencyService currencyService;
 
 
     public PeerService() {
         super();
+    }
+
+    @Override
+    public void initialize() {
+        super.initialize();
+        currencyService = ServiceLocator.instance().getCurrencyService();
     }
 
     public Peer save(final Context context, final Peer peer) {
@@ -96,6 +105,35 @@ public class PeerService extends BaseService {
         return result;
     }
 
+
+    /**
+     * Return a (cached) active peer, by currency id
+     * @param currencyId
+     * @return
+     */
+    public Peer getActivePeerByCurrencyId(long currencyId) {
+        // Check if cache as been loaded
+        if (activePeerByCurrencyIdCache == null) {
+
+            activePeerByCurrencyIdCache = new HashMap<Long, Peer>();
+        }
+
+        Peer peer = activePeerByCurrencyIdCache.get(currencyId);
+        if (peer == null) {
+
+            List<Peer> peers = getPeersByCurrencyId(currencyId);
+            if (CollectionUtils.isEmpty(peers)) {
+                throw new UCoinTechnicalException(String.format(
+                        "No peers configure for currency [%s]",
+                        currencyService.getCurrencyNameById(currencyId)));
+            }
+
+            peer = peers.get(0);
+            activePeerByCurrencyIdCache.put(currencyId, peer);
+        }
+
+        return peer;
+    }
 
     /**
      * Return a (cached) peer list, by currency id

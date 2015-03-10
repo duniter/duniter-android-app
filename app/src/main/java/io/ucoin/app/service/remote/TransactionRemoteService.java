@@ -52,7 +52,7 @@ public class TransactionRemoteService extends BaseRemoteService {
 		
 		// http post /tx/process
 		HttpPost httpPost = new HttpPost(
-				getPath(URL_TX_PROCESS));
+				getPath(wallet.getCurrencyId(), URL_TX_PROCESS));
 
 		// compute transaction
 		String transaction = getTransaction(wallet, destPubKey, amount,
@@ -82,12 +82,12 @@ public class TransactionRemoteService extends BaseRemoteService {
         return fingerprint;
 	}
 
-	public TxSourceResults getSources(String pubKey) {
+	public TxSourceResults getSources(long currencyId, String pubKey) {
 		Log.d(TAG, String.format("Get sources by pubKey [%s]", pubKey));
 
 		// get parameter
 		String path = String.format(URL_TX_SOURCES, pubKey);
-		TxSourceResults result = executeRequest(path, TxSourceResults.class);
+		TxSourceResults result = executeRequest(currencyId, path, TxSourceResults.class);
 
 		// Compute the balance
 		result.setBalance(computeBalance(result.getSources()));
@@ -95,8 +95,23 @@ public class TransactionRemoteService extends BaseRemoteService {
 		return result;
 	}
 
+    public Long getCredit(long currencyId, String pubKey) {
+        Log.d(TAG, String.format("Get credit by pubKey [%s] for currency [id=%s]", pubKey, currencyId));
+
+        // get parameter
+        String path = String.format(URL_TX_SOURCES, pubKey);
+        TxSourceResults result = executeRequest(currencyId, path, TxSourceResults.class);
+
+        if (result == null) {
+            return null;
+        }
+
+        // Compute the balance
+        return computeBalance(result.getSources());
+    }
+
     public Long getCredit(Peer peer, String pubKey) {
-        Log.d(TAG, String.format("Get credit by pubKey [%s] from [%s]", pubKey, peer.getUrl()));
+        Log.d(TAG, String.format("Get credit by pubKey [%s] from peer [%s]", pubKey, peer.getUrl()));
 
         // get parameter
         String path = String.format(URL_TX_SOURCES, pubKey);
@@ -119,7 +134,7 @@ public class TransactionRemoteService extends BaseRemoteService {
         ObjectUtils.checkArgument(StringUtils.isNotBlank(wallet.getPubKeyHash()));
 
 		// Retrieve the wallet sources
-		TxSourceResults sourceResults = getSources(wallet.getPubKeyHash());
+		TxSourceResults sourceResults = getSources(wallet.getCurrencyId(), wallet.getPubKeyHash());
 		if (sourceResults == null) {
 			throw new UCoinTechnicalException("Unable to load user sources.");
 		}

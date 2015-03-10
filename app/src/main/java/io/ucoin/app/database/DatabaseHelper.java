@@ -44,9 +44,21 @@ public class DatabaseHelper extends SQLiteOpenHelper implements Contract {
                 ")";
         db.execSQL(CREATE_TABLE_CURRENCY);
 
+        String CREATE_TABLE_PEER = "CREATE TABLE " + Peer.TABLE_NAME + "(" +
+                Peer._ID + " INTEGER PRIMARY KEY AUTOINCREMENT" + COMMA +
+                Peer.CURRENCY_ID + INTEGER + NOTNULL + COMMA +
+                Peer.HOST + TEXT + COMMA +
+                //Peer.IPV4 + TEXT + COMMA +
+                //Peer.IPV6 + TEXT + COMMA +
+                Peer.PORT + INTEGER + COMMA +
+                "FOREIGN KEY (" + Peer.CURRENCY_ID + ") REFERENCES " +
+                Currency.TABLE_NAME + "(" + Currency._ID + ")" +
+                ")";
+        db.execSQL(CREATE_TABLE_PEER);
+
         String CREATE_TABLE_WALLET = "CREATE TABLE " + Wallet.TABLE_NAME + "(" +
                 Wallet._ID + " INTEGER PRIMARY KEY AUTOINCREMENT" + COMMA +
-                Wallet.NAME + TEXT + COMMA +
+                Wallet.NAME + TEXT + NOTNULL + COMMA +
                 Wallet.UID + TEXT + COMMA +
                 Wallet.SALT + TEXT + COMMA +
                 Wallet.PUBLIC_KEY + TEXT + NOTNULL + COMMA +
@@ -64,17 +76,44 @@ public class DatabaseHelper extends SQLiteOpenHelper implements Contract {
                 ")";
         db.execSQL(CREATE_TABLE_WALLET);
 
-        String CREATE_TABLE_PEER = "CREATE TABLE " + Peer.TABLE_NAME + "(" +
-                Peer._ID + " INTEGER PRIMARY KEY AUTOINCREMENT" + COMMA +
-                Peer.CURRENCY_ID + INTEGER + NOTNULL + COMMA +
-                Peer.HOST + TEXT + COMMA +
-                //Peer.IPV4 + TEXT + COMMA +
-                //Peer.IPV6 + TEXT + COMMA +
-                Peer.PORT + INTEGER + COMMA +
-                "FOREIGN KEY (" + Peer.CURRENCY_ID + ") REFERENCES " +
-                Currency.TABLE_NAME + "(" + Currency._ID + ")" +
+        String CREATE_TABLE_MOVEMENT = "CREATE TABLE " + Movement.TABLE_NAME + "(" +
+                Movement._ID + " INTEGER PRIMARY KEY AUTOINCREMENT" + COMMA +
+                Movement.WALLET_ID + INTEGER + NOTNULL + COMMA +
+                Movement.FINGERPRINT + TEXT + NOTNULL + COMMA +
+                Movement.IS_UD + INTEGER + NOTNULL + COMMA +
+                Movement.AMOUNT + INTEGER + NOTNULL + COMMA +
+                Movement.TIME + INTEGER + COMMA +
+                Movement.BLOCK + INTEGER + COMMA +
+                UNIQUE + "(" + Movement.FINGERPRINT + ")" + COMMA +
+                "FOREIGN KEY (" + Movement.WALLET_ID + ") REFERENCES " +
+                Wallet.TABLE_NAME + "(" + Wallet._ID + ")" +
                 ")";
-        db.execSQL(CREATE_TABLE_PEER);
+        db.execSQL(CREATE_TABLE_MOVEMENT);
+
+        String CREATE_TABLE_CONTACT = "CREATE TABLE " + Contact.TABLE_NAME + "(" +
+                Contact._ID + " INTEGER PRIMARY KEY AUTOINCREMENT" + COMMA +
+                Contact.ACCOUNT_ID + INTEGER + NOTNULL + COMMA +
+                Contact.NAME + TEXT + NOTNULL + COMMA +
+                UNIQUE + "(" + Contact.NAME + ")" + COMMA +
+                "FOREIGN KEY (" + Contact.ACCOUNT_ID + ") REFERENCES " +
+                Account.TABLE_NAME + "(" + Account._ID + ")" +
+                ")";
+        db.execSQL(CREATE_TABLE_CONTACT);
+
+        String CREATE_TABLE_CONTACT2CURRENCY = "CREATE TABLE " + Contact2Currency.TABLE_NAME + "(" +
+                Contact2Currency.CONTACT_ID + INTEGER + NOTNULL + COMMA +
+                Contact2Currency.CURRENCY_ID + TEXT + NOTNULL + COMMA +
+                Contact2Currency.PUBLIC_KEY + TEXT + NOTNULL + COMMA +
+                UNIQUE + "(" + Contact2Currency.CONTACT_ID + COMMA + Contact2Currency.PUBLIC_KEY + ")" + COMMA +
+                "PRIMARY KEY (" + Contact2Currency.CONTACT_ID + COMMA + Contact2Currency.CURRENCY_ID + ")" + COMMA +
+                "FOREIGN KEY (" + Contact2Currency.CURRENCY_ID + ") REFERENCES " +
+                Currency.TABLE_NAME + "(" + Currency._ID + ")" + COMMA +
+                "FOREIGN KEY (" + Contact2Currency.CONTACT_ID + ") REFERENCES " +
+                Contact.TABLE_NAME + "(" + Contact._ID + ")" +
+                ")";
+        db.execSQL(CREATE_TABLE_CONTACT2CURRENCY);
+
+        /*
 
         String CREATE_TABLE_SOURCE = "CREATE TABLE " + Source.TABLE_NAME + "(" +
                 Source._ID + " INTEGER PRIMARY KEY AUTOINCREMENT" + COMMA +
@@ -139,6 +178,7 @@ public class DatabaseHelper extends SQLiteOpenHelper implements Contract {
                 Tx.TABLE_NAME + "(" + Tx._ID + ")" +
                 ")";
         db.execSQL(CREATE_TABLE_TX_OUTPUT);
+        */
     }
 
     @Override
@@ -146,11 +186,18 @@ public class DatabaseHelper extends SQLiteOpenHelper implements Contract {
 
         // TODO: for DEV only :
         // Drop all tables
+
+        /* -- not used tables --*/
         db.execSQL("DROP TABLE IF EXISTS " + TxOutput.TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + TxInput.TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + TxSignature.TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + Tx.TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + Source.TABLE_NAME);
+
+        /* -- used tables --*/
+        db.execSQL("DROP TABLE IF EXISTS " + Contact2Currency.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + Contact.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + Movement.TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + Peer.TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + Currency.TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + Wallet.TABLE_NAME);

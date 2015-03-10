@@ -22,13 +22,6 @@ import io.ucoin.app.R;
 import io.ucoin.app.activity.MainActivity;
 import io.ucoin.app.content.Provider;
 import io.ucoin.app.database.Contract;
-import io.ucoin.app.service.CryptoService;
-import io.ucoin.app.service.ServiceLocator;
-import io.ucoin.app.service.remote.WotRemoteService;
-import io.ucoin.app.technical.AsyncTaskHandleException;
-import io.ucoin.app.technical.crypto.CryptoUtils;
-import io.ucoin.app.technical.crypto.KeyPair;
-import io.ucoin.app.technical.crypto.TestFixtures;
 
 public class DevFragment extends Fragment implements
         LoaderManager.LoaderCallbacks<Cursor>{
@@ -88,94 +81,12 @@ public class DevFragment extends Fragment implements
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.action_generate_seed:
-                generate();
-                return true;
-                case R.id.action_sign:
-                sign();
-                return true;
-            case R.id.action_self:
-                self();
-                return true;
             case R.id.action_test:
                 test();
                 return true;
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    private void generate() {
-        TestFixtures fixtures = new TestFixtures();
-        resultText.setText("waiting...");
-        try {
-
-            String salt = fixtures.getUserSalt();
-            String password = fixtures.getUserPassword();
-            String expectedBase64Hash = fixtures.getUserSeedHash();
-            String expectedBase58SecretKey = fixtures.getUserPrivateKey();
-            String expectedBase58PubKey = fixtures.getUserPublicKey();
-            byte[] pubKey = CryptoUtils.decodeBase58(expectedBase58PubKey);
-
-            CryptoService service = ServiceLocator.instance().getCryptoService();
-
-            byte[] seed = service.getSeed(salt, password);
-            String seedHash = CryptoUtils.encodeBase64(seed);
-            boolean seedSuccess =  isEquals(expectedBase64Hash, seedHash);
-
-            KeyPair keyPair = service.getKeyPairFromSeed(seed);
-            byte[] secretKey = keyPair.secretKey;
-            String secKeyHash = CryptoUtils.encodeBase58(secretKey);
-            boolean keyPairSuccess =  isEquals(expectedBase58SecretKey, secKeyHash);
-
-            resultText.setText(String.format("seed: %s, keyPair: %s",
-                    seedSuccess, keyPairSuccess));
-        }
-        catch (Exception e) {
-            resultText.setText(e.getMessage());
-            Log.e(getClass().getSimpleName(), e.getMessage(), e);
-        }
-
-    }
-
-    private void sign() {
-        TestFixtures fixtures = new TestFixtures();
-        resultText.setText("waiting...");
-        try {
-
-            String rawPub = fixtures.getUserPublicKey();
-            String rawSec = fixtures.getUserPrivateKey();
-            byte[] pub = CryptoUtils.decodeBase58(rawPub);
-            byte[] sec = CryptoUtils.decodeBase58(rawSec);
-            String rawMsg = "UID:"+fixtures.getUid()+"\n"
-                    + "META:TS:1420881879\n";
-            String rawSig = "TMgQysT7JwY8XwemskwWb8LBDJybLUsnxqaaUvSteIYpOxRiB92gkFQQcGpBwq4hAwhEiqBAiFkiXIozppDDDg==";
-
-            CryptoService service = ServiceLocator.instance().getCryptoService();
-            String signature = service.sign(rawMsg, sec);
-
-            boolean isSuccess =  isEquals(rawSig, signature);
-
-            resultText.setText("result: " + isSuccess);
-        }
-        catch (Exception e) {
-            resultText.setText(e.getMessage());
-            Log.e(getClass().getSimpleName(), e.getMessage(), e);
-        }
-    }
-
-    private void self() {
-        TestFixtures fixtures = new TestFixtures();
-        resultText.setText("waiting...");
-
-        String rawPub = fixtures.getUserPublicKey();
-        String rawSec = fixtures.getUserPrivateKey();
-        String uid = fixtures.getUid();
-        byte[] pub = CryptoUtils.decodeBase58(rawPub);
-        byte[] sec = CryptoUtils.decodeBase58(rawSec);
-
-        SendSelfTask task = new SendSelfTask(pub, sec, uid, 1420881879);
-        task.execute((Void) null);
     }
 
     private void test() {
@@ -239,47 +150,5 @@ public class DevFragment extends Fragment implements
         Log.d("DEVFRAGMENT", "onLoaderReset");
     }
 
-    /**
-     * Represents an asynchronous task used to send self certification
-     * the user.
-     */
-    public class SendSelfTask extends AsyncTaskHandleException<Void, Void, String> {
 
-        private final String mUid;
-        private final byte[] mPubKey;
-        private final byte[] mSecKey;
-        private final long mTimestamp;
-
-        SendSelfTask(byte[] pubKey, byte[] secKey, String uid, long timestamp) {
-            mPubKey = pubKey;
-            mSecKey = secKey;
-            mUid = uid;
-            mTimestamp = timestamp;
-        }
-
-        @Override
-        protected String doInBackgroundHandleException(Void... params) {
-
-            WotRemoteService service = ServiceLocator.instance().getWotRemoteService();
-            return service.sendSelf(mPubKey, mSecKey, mUid);
-        }
-
-        @Override
-        protected void onSuccess(String result) {
-            if (result == null || result.trim().length() == 0) {
-                result = "successfully send self";
-            }
-            resultText.setText(result);
-        }
-
-        @Override
-        protected void onFailed(Throwable t) {
-            resultText.setText(t.getMessage());
-            Log.e(getClass().getSimpleName(), t.getMessage(), t);
-        }
-
-        @Override
-        protected void onCancelled() {
-        }
-    }
 }

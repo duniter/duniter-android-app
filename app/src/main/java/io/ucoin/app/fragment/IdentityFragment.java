@@ -254,15 +254,16 @@ public class IdentityFragment extends Fragment {
 
             // Refresh the membership data
             BlockchainRemoteService bcService = ServiceLocator.instance().getBlockchainRemoteService();
-            bcService.loadMembership(mIdentity, false);
+            bcService.loadMembership(mIdentity.getCurrencyId(), mIdentity, false);
 
             // Get certifications
             WotRemoteService wotService = ServiceLocator.instance().getWotRemoteService();
             return wotService.getCertifications(
+                    mIdentity.getCurrencyId(),
                     mIdentity.getUid(),
                     mIdentity.getPubkey(),
                     mIdentity.isMember());
-         }
+        }
 
         @Override
         protected void onSuccess(WotCertification[] certifications) {

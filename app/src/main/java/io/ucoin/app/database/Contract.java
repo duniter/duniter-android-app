@@ -20,6 +20,13 @@ public interface Contract {
         public static final String FIRST_BLOCK_SIGNATURE = "first_block_signature";
     }
 
+    public static final class Peer implements BaseColumns {
+        public static final String TABLE_NAME = "peer";
+        public static final String CURRENCY_ID = "currency_id";
+        public static final String HOST = "host";
+        public static final String PORT = "port";
+    }
+
     public static final class Wallet implements BaseColumns {
         public static final String TABLE_NAME = "wallet";
         public static final String NAME = "name";
@@ -34,19 +41,39 @@ public interface Contract {
         public static final String CREDIT = "credit";
     }
 
-    public static final class Contact implements BaseColumns {
-        public static final String TABLE_NAME = "contact";
-        public static final String NAME = "name";
-        public static final String UID = "uid";
-        public static final String PUBLIC_KEY = "public_key";
-        public static final String CERT_TS = "cert_ts";
-        public static final String IS_MEMBER = "is_member";
-        public static final String CURRENCY_ID = "currency_id";
-        public static final String ACCOUNT_ID = "account_id";
+    public static final class Movement implements BaseColumns {
+        public static final String TABLE_NAME = "movement";
+        public static final String WALLET_ID = "wallet_id";
+        public static final String IS_UD = "is_ud";
+        public static final String FINGERPRINT = "fingerprint";
+        public static final String AMOUNT = "amount";
+        public static final String BLOCK = "block";
+        public static final String TIME = "time";
     }
 
+    public static final class Contact implements BaseColumns {
+        public static final String TABLE_NAME = "contact";
+        public static final String ACCOUNT_ID = "account_id";
+        public static final String NAME = "name";
+        /**
+         * The count of rows in a directory.
+         * <P>Type: INTEGER</P>
+         */
+        public static final String _COUNT = "_count";
+    }
 
-     public static final class Source implements BaseColumns {
+    public static final class Contact2Currency {
+        public static final String TABLE_NAME = "contact2currency";
+        public static final String CONTACT_ID = "contact_id";
+        public static final String CURRENCY_ID = "currency_id";
+        public static final String PUBLIC_KEY = "public_key";
+    }
+
+    /* -- not used yet --*/
+
+
+
+    public static final class Source implements BaseColumns {
         public static final String TABLE_NAME = "source";
         public static final String CURRENCY_NAME = "currency_name";
         public static final String WALLET_PUBLIC_KEY = "wallet_public_key";
@@ -54,13 +81,6 @@ public interface Contract {
         public static final String FINGERPRINT = "fingerprint";
         public static final String AMOUNT = "amount";
         public static final String BLOCK = "block";
-    }
-
-    public static final class Peer implements BaseColumns {
-        public static final String TABLE_NAME = "peer";
-        public static final String CURRENCY_ID = "currency_id";
-        public static final String HOST = "host";
-        public static final String PORT = "port";
     }
 
     public static final class Tx implements BaseColumns {

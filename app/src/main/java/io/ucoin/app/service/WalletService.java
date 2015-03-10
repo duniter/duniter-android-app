@@ -17,11 +17,10 @@ import java.util.List;
 import io.ucoin.app.R;
 import io.ucoin.app.content.Provider;
 import io.ucoin.app.database.Contract;
-import io.ucoin.app.model.Peer;
 import io.ucoin.app.model.Wallet;
 import io.ucoin.app.service.exception.DuplicatePubkeyException;
 import io.ucoin.app.service.remote.TransactionRemoteService;
-import io.ucoin.app.technical.CollectionUtils;
+import io.ucoin.app.technical.DateUtils;
 import io.ucoin.app.technical.ObjectUtils;
 import io.ucoin.app.technical.StringUtils;
 import io.ucoin.app.technical.UCoinTechnicalException;
@@ -123,13 +122,7 @@ public class WalletService extends BaseService {
         Long currencyId = wallet.getCurrencyId();
         boolean dirty = false;
 
-        List<Peer> peers = peerService.getPeersByCurrencyId(currencyId);
-
-        if (CollectionUtils.isEmpty(peers)) {
-            throw new UCoinTechnicalException(String.format("No peer has been configured for the currency [id=%s]", currencyId));
-        }
-
-        Long creditObj = transactionRemoteService.getCredit(peers.get(0), wallet.getPubKeyHash());
+        Long creditObj = transactionRemoteService.getCredit(wallet.getCurrencyId(), wallet.getPubKeyHash());
         int updatedCredit = creditObj == null ? 0 : creditObj.intValue();
         if (wallet.getCredit() == null || updatedCredit != wallet.getCredit().intValue()) {
             wallet.setCredit(updatedCredit);
@@ -146,6 +139,48 @@ public class WalletService extends BaseService {
 
             // Mark as dirty (let's the UI known that something changed)
             wallet.setDirty(true);
+        }
+    }
+
+    /**
+     * Send a self certification, from an wallet
+     * @param wallet
+     * @return the updated wallet (with a new cert timestamp)
+     */
+    public Wallet sendSelfAndSave(final Context context, final Wallet wallet) {
+        ObjectUtils.checkNotNull(wallet);
+        ObjectUtils.checkNotNull(wallet.getId());
+        ObjectUtils.checkNotNull(wallet.getCurrencyId());
+        ObjectUtils.checkNotNull(wallet.getPubKey());
+        ObjectUtils.checkNotNull(wallet.getSecKey());
+        ObjectUtils.checkNotNull(wallet.getUid());
+
+        long certTimestamp = DateUtils.getCurrentTimestamp();
+
+        // Send self to node
+        ServiceLocator.instance().getWotRemoteService().sendSelf(
+                wallet.getCurrencyId(),
+                wallet.getPubKey(),
+                wallet.getSecKey(),
+                wallet.getUid(),
+                certTimestamp);
+
+        // Then save the wallet
+        wallet.setCertTimestamp(certTimestamp);
+        update(context.getContentResolver(), wallet);
+
+        return wallet;
+    }
+
+    public void delete(final Context context, final long walletId) {
+
+        ContentResolver resolver = context.getContentResolver();
+
+        String whereClause = "_id=?";
+        String[] whereArgs = new String[]{String.valueOf(walletId)};
+        int rowsUpdated = resolver.delete(getContentUri(), whereClause, whereArgs);
+        if (rowsUpdated != 1) {
+            throw new UCoinTechnicalException(String.format("Error while deleting wallet [id=%s]. %s rows updated.", walletId, rowsUpdated));
         }
     }
 

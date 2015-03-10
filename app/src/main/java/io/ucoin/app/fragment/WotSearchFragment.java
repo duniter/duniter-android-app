@@ -30,7 +30,7 @@ public class WotSearchFragment extends ListFragment
         implements MainActivity.QueryResultListener<Identity>{
 
 
-    private IdentityArrayAdapter mIdentityArrayAdapter;
+    private IdentityArrayAdapter mIdentityAdapter;
     private ProgressViewAdapter mProgressViewAdapter;
     private SearchView mSearchView;
     private boolean isWaitingResult = true;
@@ -53,8 +53,8 @@ public class WotSearchFragment extends ListFragment
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
-        mIdentityArrayAdapter = new IdentityArrayAdapter(getActivity());
-        setListAdapter(mIdentityArrayAdapter);
+        mIdentityAdapter = new IdentityArrayAdapter(getActivity());
+        setListAdapter(mIdentityAdapter);
     }
 
     @Override
@@ -154,9 +154,9 @@ public class WotSearchFragment extends ListFragment
 
     @Override
     public void onQuerySuccess(List<? extends Identity> identities) {
-        mIdentityArrayAdapter.clear();
-        mIdentityArrayAdapter.addAll(identities);
-        mIdentityArrayAdapter.notifyDataSetChanged();
+        mIdentityAdapter.clear();
+        mIdentityAdapter.addAll(identities);
+        mIdentityAdapter.notifyDataSetChanged();
         mProgressViewAdapter.showProgress(false);
         isWaitingResult = false;
     }

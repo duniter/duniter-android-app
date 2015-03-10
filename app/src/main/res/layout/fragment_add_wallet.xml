@@ -25,6 +25,24 @@
             android:imeOptions="actionNext"
             android:textSize="@dimen/abc_text_size_body_2_material" />
 
+        <!-- wallet name -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/wallet_name" />
+
+        <EditText
+            android:id="@+id/name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dip"
+            android:layout_marginTop="5dip"
+            android:hint="@string/wallet_name"
+            android:imeOptions="actionNext"
+            android:inputType="textNoSuggestions"
+            android:singleLine="true"
+            android:textSize="@dimen/abc_text_size_body_2_material"/>
+
         <!-- user ID -->
         <TextView
             android:layout_width="match_parent"
@@ -144,9 +162,9 @@
             style="?android:attr/progressBarStyleInverse"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
             android:layout_marginTop="16dp"
             android:visibility="gone" />
-
     </LinearLayout>
 
 </ScrollView>

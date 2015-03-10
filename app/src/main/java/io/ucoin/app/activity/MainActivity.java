@@ -43,8 +43,6 @@ import io.ucoin.app.fragment.DevFragment;
 import io.ucoin.app.fragment.HomeFragment;
 import io.ucoin.app.fragment.WotSearchFragment;
 import io.ucoin.app.model.Identity;
-import io.ucoin.app.model.WotLookupResults;
-import io.ucoin.app.service.HttpService;
 import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.service.exception.PeerConnectionException;
 import io.ucoin.app.service.remote.WotRemoteService;
@@ -412,26 +410,17 @@ public class MainActivity extends ActionBarActivity
         @Override
         protected List<Identity> doInBackgroundHandleException(String... queries) throws PeerConnectionException {
 
-            // First, make sure to have a peer available
-            HttpService httpService = ServiceLocator.instance().getHttpService();
-            if (!httpService.isConnected()) {
-                    // TODO : use the currency default peer instead
-                    io.ucoin.app.model.Peer node = new io.ucoin.app.model.Peer(
-                            Configuration.instance().getNodeHost(),
-                            Configuration.instance().getNodePort()
-                    );
-                httpService.connect(node);
-            }
+            // Get list of currencies
+            List<Long> currenciesIds = ServiceLocator.instance().getCurrencyService().getCurrencyIds();
 
-            // TODO : manage connection probleme : if error reconnect with another peer ?
             WotRemoteService service = ServiceLocator.instance().getWotRemoteService();
-            WotLookupResults results = service.find(queries[0]);
+            List<Identity> results = service.findIdentities(currenciesIds, queries[0]);
 
             if (results == null) {
                 return null;
             }
 
-            return service.toIdentities(results);
+            return results;
         }
 
         @Override

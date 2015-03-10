@@ -65,7 +65,7 @@
             android:singleLine="true"
             android:text="uid"
             android:layout_gravity="left|top"
-            android:textSize="18sp"/>
+            android:textSize="@dimen/abc_text_size_medium_material"/>
 
         <TextView
             android:id="@+id/pubkey"
@@ -75,7 +75,7 @@
             android:textAppearance="?android:textAppearanceMedium"
             android:textColor="@color/hideable_text_color"
             android:text="G2CBgZBPLe6FSFUgpx2Jf1Aqsgta6iib3vmDRA1yLiqU"
-            android:textSize="12sp"
+            android:textSize="@dimen/abc_text_size_caption_material"
             android:singleLine="true"/>
     </LinearLayout>
 
@@ -109,7 +109,7 @@
             android:layout_gravity="bottom"
             android:gravity="right"
             android:text="cert_time"
-            android:textSize="14sp"/>
+            android:textSize="@dimen/abc_text_size_small_material"/>
 
     </LinearLayout>
 

@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -16,6 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -27,21 +29,34 @@ import java.util.List;
 
 import io.ucoin.app.R;
 import io.ucoin.app.activity.MainActivity;
+import io.ucoin.app.adapter.ContactArrayAdapter;
 import io.ucoin.app.adapter.ProgressViewAdapter;
+import io.ucoin.app.adapter.Views;
 import io.ucoin.app.adapter.WalletArrayAdapter;
 import io.ucoin.app.model.BlockchainParameter;
+import io.ucoin.app.model.Contact;
 import io.ucoin.app.model.Identity;
 import io.ucoin.app.model.Wallet;
 import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.service.exception.InsufficientCreditException;
 import io.ucoin.app.service.remote.TransactionRemoteService;
 import io.ucoin.app.technical.AsyncTaskHandleException;
+import io.ucoin.app.technical.ObjectUtils;
+import io.ucoin.app.technical.StringUtils;
 
 public class TransferFragment extends Fragment {
 
+    public static final String TAG = "TransferFragment";
+
+    public static final String BUNDLE_WALLET = "Wallet";
+    public static final String BUNDLE_RECEIVER_ITENTITY = "ReceiverIdentity";
+
     private TextView mReceiverUidView;
     private Spinner  mWalletSpinner;
+    private Spinner  mContactSpinner;
     private WalletArrayAdapter mWalletAdapter;
+    private ContactArrayAdapter mContactAdapter;
+    private EditText mReceiverPubkeyText;
     private EditText mAmountText;
     private TextView mConvertedText;
     private TextView mAmountUnitText;
@@ -51,6 +66,7 @@ public class TransferFragment extends Fragment {
     private ProgressViewAdapter mProgressViewAdapter;
 
     private boolean mIsCoinUnit = true;
+    private Long mCurrencyId = null;
     private Integer mUniversalDividend = null;
     private boolean mIsRunningConvertion = false;
 
@@ -61,7 +77,16 @@ public class TransferFragment extends Fragment {
     public static TransferFragment newInstance(Identity identity) {
         TransferFragment fragment = new TransferFragment();
         Bundle args = new Bundle();
-        args.putSerializable(Identity.class.getSimpleName(), identity);
+        args.putSerializable(BUNDLE_RECEIVER_ITENTITY, identity);
+        fragment.setArguments(args);
+
+        return fragment;
+    }
+
+    public static TransferFragment newInstance(Wallet wallet) {
+        TransferFragment fragment = new TransferFragment();
+        Bundle args = new Bundle();
+        args.putSerializable(BUNDLE_WALLET, wallet);
         fragment.setArguments(args);
 
         return fragment;
@@ -79,6 +104,14 @@ public class TransferFragment extends Fragment {
                 wallets
         );
         mWalletAdapter.setDropDownViewResource(WalletArrayAdapter.DEFAULT_LAYOUT_RES);
+
+        final List<Contact> contacts = ServiceLocator.instance().getContactService().getContacts(getActivity().getApplication());
+        mContactAdapter = new ContactArrayAdapter(
+                getActivity(),
+                android.R.layout.simple_spinner_item,
+                contacts
+        );
+        mContactAdapter.setDropDownViewResource(ContactArrayAdapter.DEFAULT_LAYOUT_RES);
     }
 
     @Override
@@ -96,14 +129,57 @@ public class TransferFragment extends Fragment {
 
         Bundle newInstanceArgs = getArguments();
         mReceiverIdentity = (Identity) newInstanceArgs
-                .getSerializable(Identity.class.getSimpleName());
+                .getSerializable(BUNDLE_RECEIVER_ITENTITY);
+        Wallet wallet = (Wallet) newInstanceArgs
+                .getSerializable(BUNDLE_WALLET);
 
         // Source wallet
         mWalletSpinner = ((Spinner) view.findViewById(R.id.wallet));
         mWalletSpinner.setAdapter(mWalletAdapter);
+        mWalletSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+                loadCurrencyData();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parentView) {
+                resetCurrencyData();
+            }
+        });
+        if (wallet != null) {
+            int walletPosition = mWalletAdapter.getPosition(wallet);
+            mWalletSpinner.setSelection(walletPosition);
+        }
 
         // target uid
-        ((TextView) view.findViewById(R.id.receiver_uid)).setText(mReceiverIdentity.getUid());
+        if (mReceiverIdentity != null) {
+            ((TextView) view.findViewById(R.id.receiver_uid)).setText(mReceiverIdentity.getUid());
+
+            // Mask unused field
+            view.findViewById(R.id.receiver_contact).setVisibility(View.GONE);
+            view.findViewById(R.id.receiver_pubkey).setVisibility(View.GONE);
+        }
+        else {
+            mReceiverPubkeyText = (EditText)view.findViewById(R.id.receiver_pubkey);
+
+            mContactSpinner = ((Spinner) view.findViewById(R.id.receiver_contact));
+            mContactSpinner.setAdapter(mContactAdapter);
+            mContactSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+                    // TODO : update mReceiverPubkeyText
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> parentView) {
+                    resetCurrencyData();
+                }
+            });
+
+            // Mask unused field
+            view.findViewById(R.id.receiver_uid).setVisibility(View.GONE);
+        }
 
         // Amount
         mAmountText = (EditText)view.findViewById(R.id.amount);
@@ -173,7 +249,7 @@ public class TransferFragment extends Fragment {
                 mSendButton);
 
         // Load data need for transfer
-        loadDataTask();
+        loadCurrencyData();
     }
 
 
@@ -184,10 +260,12 @@ public class TransferFragment extends Fragment {
 
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
-        Bundle newInstanceArgs = getArguments();
-        final Identity identity = (Identity) newInstanceArgs
-                .getSerializable(Identity.class.getSimpleName());
-        getActivity().setTitle(getString(R.string.transfer_to, identity.getUid()));
+        if (mReceiverIdentity != null) {
+            getActivity().setTitle(getString(R.string.transfer_to, mReceiverIdentity.getUid()));
+        }
+        else {
+            getActivity().setTitle(getString(R.string.transfer));
+        }
         ((MainActivity)getActivity()).setBackButtonEnabled(true);
     }
 
@@ -198,9 +276,14 @@ public class TransferFragment extends Fragment {
 
     /* -- Internal methods -- */
 
-    protected void loadDataTask() {
-        LoadDataTask loadDataTask = new LoadDataTask();
-        loadDataTask.execute((Void) null);
+    protected void loadCurrencyData() {
+        LoadCurrencyDataTask loadCurrencyDataTask = new LoadCurrencyDataTask();
+        loadCurrencyDataTask.execute((Void) null);
+    }
+
+    protected void resetCurrencyData() {
+        mUniversalDividend = null;
+        mCurrencyId = null;
     }
 
     protected boolean attemptTransfer() {
@@ -222,6 +305,14 @@ public class TransferFragment extends Fragment {
         if (wallet == null) {
             mWalletAdapter.setError(mWalletSpinner.getSelectedView(), getString(R.string.field_required));
             focusView = mWalletSpinner;
+            cancel = true;
+        }
+
+        // Check public key (if no given receiver identity)
+        if (mReceiverIdentity == null
+                && StringUtils.isBlank(mReceiverPubkeyText.getText().toString())) {
+            mReceiverPubkeyText.setError(getString(R.string.field_required));
+            focusView = mReceiverPubkeyText;
             cancel = true;
         }
 
@@ -355,23 +446,28 @@ public class TransferFragment extends Fragment {
     }
 
 
-    public class LoadDataTask extends AsyncTaskHandleException<Void, Void, Boolean>{
+    public class LoadCurrencyDataTask extends AsyncTaskHandleException<Void, Void, Boolean>{
         @Override
         protected Boolean doInBackgroundHandleException(Void... strings) {
-            BlockchainParameter p = ServiceLocator.instance().getDataContext().getBlockchainParameter();
-            if (p == null) {
-                p = ServiceLocator.instance().getBlockchainRemoteService().getParameters();
+            Wallet selectedWallet = (Wallet)mWalletSpinner.getSelectedItem();
+            Long selectedCurrencyId = selectedWallet.getCurrencyId();
+
+            // Already loaded for this currency: exit
+            if (ObjectUtils.equals(selectedCurrencyId, mCurrencyId)) {
+                return true;
             }
 
+
+            mCurrencyId = selectedCurrencyId;
+
+            // Get the blockchain parameter
+            BlockchainParameter p = ServiceLocator.instance().getBlockchainRemoteService().getParameters(selectedCurrencyId);
             if (p == null) {
                 return false;
             }
 
-            // load UD
+            // set data
             mUniversalDividend = p.getUd0();
-
-            // TODO: load other variables
-
 
             return true;
         }
@@ -401,13 +497,9 @@ public class TransferFragment extends Fragment {
 
         @Override
         protected void onPreExecute() {
+            super.onPreExecute();
             // Hide the keyboard, in case we come from imeDone)
-            InputMethodManager inputManager = (InputMethodManager)
-                    getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-            inputManager.hideSoftInputFromWindow((null == getActivity().getCurrentFocus())
-                            ? null
-                            : getActivity().getCurrentFocus().getWindowToken(),
-                    InputMethodManager.HIDE_NOT_ALWAYS);
+            Views.hideKeyboard(getActivity());
 
             // Show the progress bar
             mProgressViewAdapter.showProgress(true);
@@ -458,11 +550,14 @@ public class TransferFragment extends Fragment {
         protected void onFailed(Throwable error) {
             super.onFailed(error);
             if (error instanceof InsufficientCreditException) {
-                mAmountText.setError("Not enough money in wallet.");
+                mAmountText.setError(getString(R.string.not_enough_credit));
             }
             else {
+                Log.d(TAG, "Could not send transaction: " + error.getMessage(), error);
                 Toast.makeText(getActivity(),
-                        "Could not send transaction: " + error.getMessage(),
+                        getString(R.string.transfer_error)
+                        + "\n"
+                        + error.getMessage(),
                         Toast.LENGTH_SHORT).show();
             }
 

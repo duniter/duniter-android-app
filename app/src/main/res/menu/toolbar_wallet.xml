@@ -1,0 +1,27 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:ucoin="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".MainActivity">
+
+    <item
+        android:id="@+id/action_self"
+        android:title="@string/self"
+        ucoin:showAsAction="ifRoom|withText" />
+
+    <item
+        android:id="@+id/action_join"
+        android:title="@string/join"
+        ucoin:showAsAction="ifRoom|withText" />
+
+    <item
+        android:id="@+id/action_transfer"
+        android:title="@string/transfer"
+        ucoin:showAsAction="ifRoom|withText" />
+
+    <item
+        android:id="@+id/action_delete"
+        android:title="@string/delete"/>
+
+</menu>
+
+

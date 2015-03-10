@@ -27,9 +27,9 @@ import io.ucoin.app.model.WotLookupSignature;
 import io.ucoin.app.model.WotLookupUId;
 import io.ucoin.app.model.comparator.WotCertificationComparators;
 import io.ucoin.app.service.CryptoService;
+import io.ucoin.app.service.PeerService;
 import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.technical.CollectionUtils;
-import io.ucoin.app.technical.DateUtils;
 import io.ucoin.app.technical.ObjectUtils;
 import io.ucoin.app.technical.UCoinTechnicalException;
 import io.ucoin.app.technical.crypto.CryptoUtils;
@@ -54,7 +54,8 @@ public class WotRemoteService extends BaseRemoteService {
      */
     public static final String BLOCK_ZERO_HASH = "DA39A3EE5E6B4B0D3255BFEF95601890AFD80709";
 
-    public CryptoService cryptoService;
+    private CryptoService cryptoService;
+    private PeerService peerService;
 
     public WotRemoteService() {
         super();
@@ -64,25 +65,41 @@ public class WotRemoteService extends BaseRemoteService {
     public void initialize() {
         super.initialize();
         cryptoService = ServiceLocator.instance().getCryptoService();
+        peerService = ServiceLocator.instance().getPeerService();
     }
 
-    public WotLookupResults find(String uidOrPubKey) {
+    public List<Identity> findIdentities(List<Long> currenciesIds, String uidOrPubKey) {
+        List<Identity> result = new ArrayList<Identity>();
+
+        String path = String.format(URL_LOOKUP, uidOrPubKey);
+
+        for (Long currencyId: currenciesIds) {
+
+            WotLookupResults lookupResult = executeRequest(currencyId, path, WotLookupResults.class);
+
+            addAllIdentities(result, lookupResult, currencyId);
+        }
+
+        return result;
+    }
+
+    public WotLookupResults find(long currencyId, String uidOrPubKey) {
         Log.d(TAG, String.format("Try to find user by looking up on [%s]", uidOrPubKey));
 
         // get parameter
         String path = String.format(URL_LOOKUP, uidOrPubKey);
-        WotLookupResults lookupResult = executeRequest(path, WotLookupResults.class);
+        WotLookupResults lookupResult = executeRequest(currencyId, path, WotLookupResults.class);
 
         return lookupResult;
 
     }
 
-    public WotLookupUId findByUid(String uid) {
+    public WotLookupUId findByUid(long currencyId, String uid) {
         Log.d(TAG, String.format("Try to find user info by uid: %s", uid));
 
         // call lookup
         String path = String.format(URL_LOOKUP, uid);
-        WotLookupResults lookupResults = executeRequest(path, WotLookupResults.class);
+        WotLookupResults lookupResults = executeRequest(currencyId, path, WotLookupResults.class);
 
         // Retrieve the exact uid
         WotLookupUId uniqueResult = getUid(lookupResults, uid);
@@ -93,12 +110,12 @@ public class WotRemoteService extends BaseRemoteService {
         return uniqueResult;
     }
 
-    public WotLookupUId findByUidAndPublicKey(String uid, String pubKey) {
+    public WotLookupUId findByUidAndPublicKey(long currencyId, String uid, String pubKey) {
         Log.d(TAG, String.format("Try to find user info by uid [%s] and pubKey [%s]", uid, pubKey));
 
         // call lookup
         String path = String.format(URL_LOOKUP, uid);
-        WotLookupResults lookupResults = executeRequest(path, WotLookupResults.class);
+        WotLookupResults lookupResults = executeRequest(currencyId, path, WotLookupResults.class);
 
         // Retrieve the exact uid
         WotLookupUId uniqueResult = getUidByUidAndPublicKey(lookupResults, uid, pubKey);
@@ -109,72 +126,65 @@ public class WotRemoteService extends BaseRemoteService {
         return uniqueResult;
     }
 
-    public Identity getIdentity(String uid, String pubKey) {
+    public Identity getIdentity(long currencyId, String uid, String pubKey) {
         Log.d(TAG, String.format("Get identity by uid [%s] and pubKey [%s]", uid, pubKey));
 
-        WotLookupUId lookupUid = findByUidAndPublicKey(uid, pubKey);
+        WotLookupUId lookupUid = findByUidAndPublicKey(currencyId, uid, pubKey);
         if (lookupUid == null) {
             return null;
         }
         return toIdentity(lookupUid);
     }
 
-    public WotCertification[] getCertifications(String uid, String pubkey, boolean isMember) {
+    public WotCertification[] getCertifications(long currencyId, String uid, String pubkey, boolean isMember) {
         ObjectUtils.checkNotNull(uid);
         ObjectUtils.checkNotNull(pubkey);
 
         if (isMember) {
-            return getCertificationsByPubkeyForMember(pubkey);
+            return getCertificationsByPubkeyForMember(currencyId, pubkey);
         }
         else {
-            return getCertificationsByPubkeyForNonMember(uid, pubkey);
+            return getCertificationsByPubkeyForNonMember(currencyId, uid, pubkey);
         }
     }
 
 
-    public WotIdentityCertifications getCertifiedBy(String uid) {
+    public WotIdentityCertifications getCertifiedBy(long currencyId, String uid) {
         Log.d(TAG, String.format("Try to get certifications done by uid: %s", uid));
 
         // call certified-by
         String path = String.format(URL_CERTIFIED_BY, uid);
-        WotIdentityCertifications result = executeRequest(path, WotIdentityCertifications.class);
+        WotIdentityCertifications result = executeRequest(currencyId, path, WotIdentityCertifications.class);
         
         return result;
 
     }
     
-    public WotIdentityCertifications getCertifiersOf(String uid) {
+    public WotIdentityCertifications getCertifiersOf(long currencyId, String uid) {
         Log.d(TAG, String.format("Try to get certifications done to uid: %s", uid));
 
         // call certifiers-of
         String path = String.format(URL_CERTIFIERS_OF, uid);
-        WotIdentityCertifications result = executeRequest(path, WotIdentityCertifications.class);
+        WotIdentityCertifications result = executeRequest(currencyId, path, WotIdentityCertifications.class);
         
         return result;
     }
 
-    public String sendSelf(byte[] pubKey, byte[] secKey, String uid) {
-        return sendSelf(
-                    pubKey,
-                    secKey,
-                    uid,
-                    DateUtils.getCurrentTimestamp());
-    }
 
-	public String sendSelf(byte[] pubKey, byte[] secKey, String uid, long timestamp) {
-		// http post /wot/add
-        HttpPost httpPost = new HttpPost(getPath(URL_ADD));
+    public void sendSelf(long currencyId, byte[] pubKey, byte[] secKey, String uid, long timestamp) {
+        // http post /wot/add
+        HttpPost httpPost = new HttpPost(getPath(currencyId, URL_ADD));
 
         // Compute the pub key hash
         String pubKeyHash = CryptoUtils.encodeBase58(pubKey);
 
         // compute the self-certification
-		String selfCertification = getSelfCertification(secKey, uid, timestamp);
+        String selfCertification = getSelfCertification(secKey, uid, timestamp);
 
         List<NameValuePair> urlParameters = new ArrayList<NameValuePair>();
-		urlParameters.add(new BasicNameValuePair("pubkey", pubKeyHash));
-		urlParameters.add(new BasicNameValuePair("self", selfCertification));
-		urlParameters.add(new BasicNameValuePair("other", ""));
+        urlParameters.add(new BasicNameValuePair("pubkey", pubKeyHash));
+        urlParameters.add(new BasicNameValuePair("self", selfCertification));
+        urlParameters.add(new BasicNameValuePair("other", ""));
 
         try {
             httpPost.setEntity(new UrlEncodedFormEntity(urlParameters));
@@ -182,15 +192,15 @@ public class WotRemoteService extends BaseRemoteService {
         catch(UnsupportedEncodingException e) {
             throw new UCoinTechnicalException(e);
         }
-        String selfResult = executeRequest(httpPost, String.class);
-        Log.d(TAG, "received from /add: " + selfResult);
 
-        return selfResult;
-	}
+        // Execute the request
+        executeRequest(httpPost, String.class);
+    }
 
     public String sendCertification(Wallet wallet,
                                     Identity identity) {
         return sendCertification(
+                    wallet.getCurrencyId(),
                     wallet.getPubKey(),
                     wallet.getSecKey(),
                     wallet.getIdentity().getUid(),
@@ -201,16 +211,17 @@ public class WotRemoteService extends BaseRemoteService {
                     identity.getSignature());
     }
 
-    public String sendCertification(byte[] pubKey, byte[] secKey,
+    public String sendCertification(long currencyId,
+                                    byte[] pubKey, byte[] secKey,
                                   String uid, long timestamp,
                                   String userUid, String userPubKeyHash,
                                   long userTimestamp, String userSignature) {
         // http post /wot/add
-        HttpPost httpPost = new HttpPost(getPath(URL_ADD));
+        HttpPost httpPost = new HttpPost(getPath(currencyId, URL_ADD));
 
         // Read the current block (number and hash)
         BlockchainRemoteService blockchainService = ServiceLocator.instance().getBlockchainRemoteService();
-        BlockchainBlock currentBlock = blockchainService.getCurrentBlock();
+        BlockchainBlock currentBlock = blockchainService.getCurrentBlock(currencyId);
         int blockNumber = currentBlock.getNumber();
         String blockHash = (blockNumber != 0)
                 ? currentBlock.getHash()
@@ -245,8 +256,11 @@ public class WotRemoteService extends BaseRemoteService {
         return selfResult;
     }
 
-    public List<Identity> toIdentities(WotLookupResults lookupResults) {
-        List<Identity> result = new ArrayList<>();
+    public void addAllIdentities(List<Identity> result, WotLookupResults lookupResults, Long currencyId) {
+        String currencyName = null;
+        if (currencyId != null) {
+            currencyName = ServiceLocator.instance().getCurrencyService().getCurrencyNameById(currencyId);
+        }
 
         for (WotLookupResult lookupResult: lookupResults.getResults()) {
             String pubKey = lookupResult.getPubkey();
@@ -258,10 +272,13 @@ public class WotRemoteService extends BaseRemoteService {
                 // fill the pub key
                 target.setPubkey(pubKey);
 
+                // Fill currency id and name
+                target.setCurrencyId(currencyId);
+                target.setCurrency(currencyName);
+
                 result.add(target);
             }
         }
-        return result;
     }
 
     public Identity toIdentity(WotLookupUId source) {
@@ -283,11 +300,12 @@ public class WotRemoteService extends BaseRemoteService {
     /* -- Internal methods -- */
 
 
-    public WotCertification[] getCertificationsByPubkeyForMember(String pubkey) {
+    protected WotCertification[] getCertificationsByPubkeyForMember(long currencyId, String pubkey) {
+
         Collection<WotCertification> result = new TreeSet<WotCertification>(WotCertificationComparators.newComparator());
 
         // Certifiers of
-        WotIdentityCertifications certifiersOfList = getCertifiersOf(pubkey);
+        WotIdentityCertifications certifiersOfList = getCertifiersOf(currencyId, pubkey);
         boolean certifiersOfIsEmpty = (certifiersOfList == null
                 || certifiersOfList.getCertifications() == null);
         //Map<String, WotCertification> certifierByPubkeys = new HashMap<String, WotCertification>();
@@ -300,7 +318,7 @@ public class WotRemoteService extends BaseRemoteService {
         }
 
         // Certified by
-        WotIdentityCertifications certifiedByList = getCertifiedBy(pubkey);
+        WotIdentityCertifications certifiedByList = getCertifiedBy(currencyId, pubkey);
         boolean certifiedByIsEmpty = (certifiedByList == null
                 || certifiedByList.getCertifications() == null);
 
@@ -311,15 +329,7 @@ public class WotRemoteService extends BaseRemoteService {
 
                 // If exists, link to other side certification
                 String certifiedByPubkey = certifiedBy.getPubkey();
-                //if (certifierByPubkeys.containsKey(certifiedByPubkey)) {
-                //    WotCertification certified = certifierByPubkeys.get(certifiedByPubkey);
-                //    certified.setOtherEnd(certifiedBy);
-                //}
-
-                // If only a certifier, just add to the list
-                //else {
-                    result.add(certifiedBy);
-                //}
+                result.add(certifiedBy);
             }
         }
 
@@ -329,7 +339,7 @@ public class WotRemoteService extends BaseRemoteService {
         return result.toArray(new WotCertification[result.size()]);
     }
 
-    public WotCertification[] getCertificationsByPubkeyForNonMember(final String uid, final String pubkey) {
+    protected WotCertification[] getCertificationsByPubkeyForNonMember(long currencyId, final String uid, final String pubkey) {
         // Ordered list, by uid/pubkey/cert time
         TreeSet<WotCertification> result = new TreeSet<WotCertification>(WotCertificationComparators.newComparator());
 
@@ -337,7 +347,7 @@ public class WotRemoteService extends BaseRemoteService {
 
         // call lookup
         String path = String.format(URL_LOOKUP, pubkey);
-        WotLookupResults lookupResults = executeRequest(path, WotLookupResults.class);
+        WotLookupResults lookupResults = executeRequest(currencyId, path, WotLookupResults.class);
 
         // Retrieve the exact uid
         WotLookupUId lookupUId = getUidByUidAndPublicKey(lookupResults, uid, pubkey);

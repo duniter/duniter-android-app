@@ -12,6 +12,16 @@ public class Identity extends BasicIdentity {
     private Boolean isMember = null;
 
     /**
+     * local ID of the currency
+     */
+    private Long currencyId;
+
+    /**
+     * name of the currency
+     */
+    private String currency;
+
+    /**
      * The timestamp value of the signature date
      * @return
      */
@@ -42,6 +52,21 @@ public class Identity extends BasicIdentity {
         return Boolean.TRUE.equals(isMember);
     }
 
+    public Long getCurrencyId() {
+        return currencyId;
+    }
+
+    public void setCurrencyId(Long currencyId) {
+        this.currencyId = currencyId;
+    }
+
+    public String getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(String currency) {
+        this.currency = currency;
+    }
     @Override
     public String toString() {
         return new StringBuilder().append(super.toString())

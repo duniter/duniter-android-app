@@ -32,6 +32,22 @@
             android:text="@string/receiver"
             android:textColor="#372c24" />
 
+        <Spinner
+            android:id="@+id/receiver_contact"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dip"
+            android:layout_marginTop="5dip"
+            android:hint="@string/receiver_hint"
+            android:imeOptions="actionNext"
+            android:textSize="@dimen/abc_text_size_body_2_material" />
+        <EditText
+            android:id="@+id/receiver_pubkey"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/public_key"
+            android:textColor="#372c24" />
+
         <TextView
             android:id="@+id/receiver_uid"
             android:layout_width="match_parent"
@@ -41,6 +57,7 @@
             android:hint="@string/receiver_hint"
             android:singleLine="true"
             android:textSize="@dimen/abc_text_size_body_2_material" />
+
 
         <!-- amount label -->
         <TextView

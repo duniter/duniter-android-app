@@ -8,7 +8,6 @@
     android:paddingLeft="8dp"
     android:paddingRight="8dp">
 
-
     <ImageView
         android:src="@drawable/ic_user_32dp"
         android:id="@+id/icon"
@@ -67,41 +66,6 @@
                 android:text="G2CBgZBPLe6FSFUgpx2Jf1Aqsgta6iib3vmDRA1yLiqU"
                 android:textSize="12sp"
                 android:singleLine="true"/>
-        </LinearLayout>
-
-        <LinearLayout
-            android:duplicateParentState="true"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_gravity="center_vertical|right"
-            android:layout_weight="0.35"
-            android:layout_width="0dp">
-
-
-            <TextView
-                android:id="@+id/credit"
-                android:duplicateParentState="true"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:textAppearanceMedium"
-                android:textColor="@color/wallet_holo_blue_light"
-                android:layout_gravity="top"
-                android:text="credit"
-                android:textSize="16sp"
-                android:elegantTextHeight="false"
-                android:gravity="end" />
-
-            <TextView
-                android:id="@+id/currency"
-                android:duplicateParentState="true"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:textAppearanceMedium"
-                android:textColor="@color/hideable_text_color"
-                android:gravity="end"
-                android:layout_gravity="bottom|right"
-                android:text="currency"
-                android:textSize="10sp"/>
         </LinearLayout>
     </LinearLayout>
 

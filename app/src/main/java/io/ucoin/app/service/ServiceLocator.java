@@ -94,6 +94,12 @@ public class ServiceLocator implements Closeable {
     public PeerService getPeerService() {
         return getService(PeerService.class);
     }
+    public ContactService getContactService() {
+        return getService(ContactService.class);
+    }
+    public MovementService getMovementService() {
+        return getService(MovementService.class);
+    }
 
 
     /* -- Internal methods -- */

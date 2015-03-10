@@ -12,33 +12,31 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.ucoin.app.R;
-import io.ucoin.app.model.Wallet;
-import io.ucoin.app.technical.ObjectUtils;
-import io.ucoin.app.technical.StringUtils;
+import io.ucoin.app.model.Contact;
 
-public class WalletArrayAdapter extends ArrayAdapter<Wallet> {
+public class ContactArrayAdapter extends ArrayAdapter<Contact> {
 
-    public static int DEFAULT_LAYOUT_RES = R.layout.list_item_wallet;
+    public static int DEFAULT_LAYOUT_RES = R.layout.list_item_contact;
     private int mResource;
     private int mDropDownResource;
 
-    public WalletArrayAdapter(Context context) {
-        this(context, new ArrayList<Wallet>());
+    public ContactArrayAdapter(Context context) {
+        this(context, new ArrayList<Contact>());
     }
 
-    public WalletArrayAdapter(Context context, List<Wallet> wallets) {
-        this(context, DEFAULT_LAYOUT_RES, wallets);
+    public ContactArrayAdapter(Context context, List<Contact> contacts) {
+        this(context, DEFAULT_LAYOUT_RES, contacts);
     }
 
-    public WalletArrayAdapter(Context context, int resource) {
+    public ContactArrayAdapter(Context context, int resource) {
         super(context, resource);
         mResource = resource;
         mDropDownResource = resource;
         setDropDownViewResource(resource);
     }
 
-    public WalletArrayAdapter(Context context, int resource, List<Wallet> wallets) {
-        super(context, resource, wallets);
+    public ContactArrayAdapter(Context context, int resource, List<Contact> contacts) {
+        super(context, resource, contacts);
         mResource = resource;
         mDropDownResource = resource;
         setDropDownViewResource(resource);
@@ -81,7 +79,7 @@ public class WalletArrayAdapter extends ArrayAdapter<Wallet> {
     protected View computeView(int position, View convertView, ViewGroup container, int resource) {
 
         // Retrieve the item
-        Wallet wallet = getItem(position);
+        Contact contact = getItem(position);
         ViewHolder viewHolder;
 
         //inflate
@@ -94,18 +92,15 @@ public class WalletArrayAdapter extends ArrayAdapter<Wallet> {
             viewHolder = (ViewHolder) convertView.getTag();
         }
 
-        // Icon
-        viewHolder.icon.setImageResource(ImageAdapterHelper.getImage(wallet));
-
         // Name
-        viewHolder.name.setText(wallet.getName());
+        viewHolder.name.setText(contact.getName());
 
         // Uid
-        if (StringUtils.isNotBlank(wallet.getUid())
-                && !ObjectUtils.equals(wallet.getName(), wallet.getUid())) {
+        /*if (StringUtils.isNotBlank(contact.getUid())
+                && !ObjectUtils.equals(contact.getName(), contact.getUid())) {
             viewHolder.uid.setText(convertView.getContext().getString(
-                    R.string.wallet_uid,
-                    wallet.getUid()));
+                    R.string.contact_uid,
+                    contact.getUid()));
             viewHolder.uid.setVisibility(View.VISIBLE);
         }
         else {
@@ -113,13 +108,8 @@ public class WalletArrayAdapter extends ArrayAdapter<Wallet> {
         }
 
         // pubKey
-        viewHolder.pubkey.setText(wallet.getPubKeyHash());
-
-        // Credit
-        viewHolder.credit.setText(String.valueOf(wallet.getCredit()));
-
-        // Currency name
-        viewHolder.currency.setText(wallet.getCurrency());
+        viewHolder.pubkey.setText(contact.getPubKeyHash());
+        */
 
         return convertView;
     }

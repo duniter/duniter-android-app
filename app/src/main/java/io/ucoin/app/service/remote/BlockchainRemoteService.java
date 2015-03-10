@@ -60,9 +60,9 @@ public class BlockchainRemoteService extends BaseRemoteService {
      * @return
      * @throws Exception
      */
-    public BlockchainParameter getParameters() {
+    public BlockchainParameter getParameters(long currencyId) {
         // get blockchain parameter
-        BlockchainParameter result = executeRequest(URL_PARAMETERS, BlockchainParameter.class);
+        BlockchainParameter result = executeRequest(currencyId, URL_PARAMETERS, BlockchainParameter.class);
         return result;
     }
 
@@ -84,10 +84,10 @@ public class BlockchainRemoteService extends BaseRemoteService {
      * @return
      * @throws Exception
      */
-    public BlockchainBlock getBlock(int number) {
+    public BlockchainBlock getBlock(long currencyId, int number) {
         // get blockchain parameter
         String path = String.format(URL_BLOCK, number);
-        BlockchainBlock result = executeRequest(path, BlockchainBlock.class);
+        BlockchainBlock result = executeRequest(currencyId, path, BlockchainBlock.class);
         return result;
     }
 
@@ -110,9 +110,9 @@ public class BlockchainRemoteService extends BaseRemoteService {
      * @return
      * @throws Exception
      */
-    public BlockchainBlock getCurrentBlock() {
+    public BlockchainBlock getCurrentBlock(long currencyId) {
         // get blockchain parameter
-        BlockchainBlock result = executeRequest(URL_BLOCK_CURRENT, BlockchainBlock.class);
+        BlockchainBlock result = executeRequest(currencyId, URL_BLOCK_CURRENT, BlockchainBlock.class);
         return result;
     }
 
@@ -143,9 +143,6 @@ public class BlockchainRemoteService extends BaseRemoteService {
         result.setFirstBlockSignature(firstBlock.getSignature());
         result.setMembersCount(lastBlock.getMembersCount());
 
-        // TODO make getPeers works
-        //networkRemoteService.getPeers(peer);
-
         return result;
     }
 
@@ -153,13 +150,13 @@ public class BlockchainRemoteService extends BaseRemoteService {
      /**
      * Check is a wallet is a member, and load its attribute isMember and certTimestamp
       * @param wallet
-     * @throws UidMatchAnotherPubkeyException
+     * @throws UidMatchAnotherPubkeyException is uid already used by another pubkey
      */
-    public void loadAndCheckMembership(Wallet wallet) throws UidMatchAnotherPubkeyException {
+    public void loadAndCheckMembership(Peer peer, Wallet wallet) throws UidMatchAnotherPubkeyException {
         ObjectUtils.checkNotNull(wallet);
 
         // Load membership data
-        loadMembership(wallet.getIdentity(), true);
+        loadMembership(null, peer, wallet.getIdentity(), true);
 
         // Something wrong on pubkey : uid already used by another pubkey !
         if (wallet.getIdentity().getIsMember() == null) {
@@ -170,15 +167,80 @@ public class BlockchainRemoteService extends BaseRemoteService {
     /**
      * Load identity attribute isMember and timestamp
      * @param identity
-     * @throws UidMatchAnotherPubkeyException
      */
-    public void loadMembership(Identity identity, boolean checkLookupForNonMember) {
+    public void loadMembership(long currencyId, Identity identity, boolean checkLookupForNonMember) {
+        loadMembership(currencyId, null, identity, checkLookupForNonMember);
+    }
+
+
+    public BlockchainMembershipResults getMembershipByUid(long currencyId, String uid) {
+        ObjectUtils.checkArgument(StringUtils.isNotBlank(uid));
+
+        BlockchainMembershipResults result = getMembershipByPubkeyOrUid(currencyId, uid);
+        if (result == null || !uid.equals(result.getUid())) {
+            return null;
+        }
+        return result;
+    }
+
+    public BlockchainMembershipResults getMembershipByPublicKey(long currencyId, String pubkey) {
+        ObjectUtils.checkArgument(StringUtils.isNotBlank(pubkey));
+
+        BlockchainMembershipResults result = getMembershipByPubkeyOrUid(currencyId, pubkey);
+        if (result == null || !pubkey.equals(result.getPubkey())) {
+            return null;
+        }
+        return result;
+    }
+
+    /**
+     * Request to integrate the wot
+     */
+    public void requestMembership(Wallet wallet) {
+        ObjectUtils.checkNotNull(wallet);
+        ObjectUtils.checkNotNull(wallet.getCurrencyId());
+
+        BlockchainBlock block = getCurrentBlock(wallet.getCurrencyId());
+
+        // Compute membership document
+        String membership = getMembership(wallet,
+                block,
+                true /*sideIn*/);
+
+        Log.d(TAG, String.format(
+                "Will send membership document: \n------\n%s------",
+                membership));
+
+        List<NameValuePair> urlParameters = new ArrayList<NameValuePair>();
+        urlParameters.add(new BasicNameValuePair("membership", membership));
+
+        HttpPost httpPost = new HttpPost(getPath(wallet.getCurrencyId(), URL_MEMBERSHIP));
+        try {
+            httpPost.setEntity(new UrlEncodedFormEntity(urlParameters));
+        } catch (UnsupportedEncodingException e) {
+            throw new UCoinTechnicalException(e);
+        }
+
+        String membershipResult = executeRequest(httpPost, String.class);
+        Log.d(TAG, "received from /tx/process: " + membershipResult);
+
+
+        executeRequest(httpPost, null);
+    }
+
+
+    /* -- Internal methods -- */
+
+    protected void loadMembership(Long currencyId, Peer peer, Identity identity, boolean checkLookupForNonMember) {
         ObjectUtils.checkNotNull(identity);
         ObjectUtils.checkArgument(StringUtils.isNotBlank(identity.getUid()));
         ObjectUtils.checkArgument(StringUtils.isNotBlank(identity.getPubkey()));
+        ObjectUtils.checkArgument(peer != null || currencyId != null);
 
         // Read membership data from the UID
-        BlockchainMembershipResults result = getMembershipByPubkeyOrUid(identity.getUid());
+        BlockchainMembershipResults result = peer != null
+                ? getMembershipByPubkeyOrUid(peer, identity.getUid())
+                : getMembershipByPubkeyOrUid(currencyId, identity.getUid());
 
         // uid not used = not a member
         if (result == null) {
@@ -186,7 +248,7 @@ public class BlockchainRemoteService extends BaseRemoteService {
 
             if (checkLookupForNonMember) {
                 WotRemoteService wotService = ServiceLocator.instance().getWotRemoteService();
-                Identity lookupIdentity = wotService.getIdentity(identity.getUid(), identity.getPubkey());
+                Identity lookupIdentity = wotService.getIdentity(currencyId, identity.getUid(), identity.getPubkey());
 
                 // Self certification exists, update the cert timestamp
                 if (lookupIdentity != null) {
@@ -213,70 +275,26 @@ public class BlockchainRemoteService extends BaseRemoteService {
 
     }
 
-
-    public BlockchainMembershipResults getMembershipByUid(Peer peer, String uid) {
-        ObjectUtils.checkArgument(StringUtils.isNotBlank(uid));
-
-        BlockchainMembershipResults result = getMembershipByPubkeyOrUid(uid);
-        if (result == null || !uid.equals(result.getUid())) {
-            return null;
-        }
-        return result;
-    }
-
-    public BlockchainMembershipResults getMembershipByPublicKey(String pubkey) {
-        ObjectUtils.checkArgument(StringUtils.isNotBlank(pubkey));
-
-        BlockchainMembershipResults result = getMembershipByPubkeyOrUid(pubkey);
-        if (result == null || !pubkey.equals(result.getPubkey())) {
-            return null;
-        }
-        return result;
-    }
-
-    /**
-     * Request to integrate the wot
-     * @throws Exception
-     */
-    public void requestMembership(Wallet wallet) {
-
-        BlockchainBlock block = getCurrentBlock();
-
-        // Compute membership document
-        String membership = getMembership(wallet,
-                block,
-                true /*sideIn*/);
-
-        Log.d(TAG, String.format(
-                "Will send membership document: \n------\n%s------",
-                membership));
-
-        List<NameValuePair> urlParameters = new ArrayList<NameValuePair>();
-        urlParameters.add(new BasicNameValuePair("membership", membership));
-
-        HttpPost httpPost = new HttpPost(getPath(URL_MEMBERSHIP));
-        try {
-            httpPost.setEntity(new UrlEncodedFormEntity(urlParameters));
-        } catch (UnsupportedEncodingException e) {
-            throw new UCoinTechnicalException(e);
-        }
-
-        String membershipResult = executeRequest(httpPost, String.class);
-        Log.d(TAG, "received from /tx/process: " + membershipResult);
-
-
-        executeRequest(httpPost, null);
-    }
-
-
-    /* -- Internal methods -- */
-
-    public BlockchainMembershipResults getMembershipByPubkeyOrUid(String uidOrPubkey) {
+    public BlockchainMembershipResults getMembershipByPubkeyOrUid(long currencyId, String uidOrPubkey) {
         String path = String.format(URL_MEMBERSHIP_SEARCH, uidOrPubkey);
 
         // search blockchain membership
         try {
-            BlockchainMembershipResults result = executeRequest(path, BlockchainMembershipResults.class);
+            BlockchainMembershipResults result = executeRequest(currencyId, path, BlockchainMembershipResults.class);
+            return result;
+        }
+        catch(HttpBadRequestException e) {
+            Log.d(TAG, "No member matching this pubkey or uid: " + uidOrPubkey);
+            return null;
+        }
+    }
+
+    public BlockchainMembershipResults getMembershipByPubkeyOrUid(Peer peer, String uidOrPubkey) {
+        String path = String.format(URL_MEMBERSHIP_SEARCH, uidOrPubkey);
+
+        // search blockchain membership
+        try {
+            BlockchainMembershipResults result = executeRequest(peer, path, BlockchainMembershipResults.class);
             return result;
         }
         catch(HttpBadRequestException e) {
