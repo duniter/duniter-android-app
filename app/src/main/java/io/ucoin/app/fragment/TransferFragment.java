@@ -1,5 +1,6 @@
 package io.ucoin.app.fragment;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Context;
@@ -36,7 +37,9 @@ import io.ucoin.app.adapter.WalletArrayAdapter;
 import io.ucoin.app.model.BlockchainParameter;
 import io.ucoin.app.model.Contact;
 import io.ucoin.app.model.Identity;
+import io.ucoin.app.model.Movement;
 import io.ucoin.app.model.Wallet;
+import io.ucoin.app.service.MovementService;
 import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.service.exception.InsufficientCreditException;
 import io.ucoin.app.service.remote.TransactionRemoteService;
@@ -125,13 +128,21 @@ public class TransferFragment extends Fragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        //getActivity().setTitle(R.string.transfer);
 
+        // Read fragment arguments
         Bundle newInstanceArgs = getArguments();
         mReceiverIdentity = (Identity) newInstanceArgs
                 .getSerializable(BUNDLE_RECEIVER_ITENTITY);
         Wallet wallet = (Wallet) newInstanceArgs
                 .getSerializable(BUNDLE_WALLET);
+
+        // Title
+        if (mReceiverIdentity != null) {
+            getActivity().setTitle(getString(R.string.transfer_to, mReceiverIdentity.getUid()));
+        }
+        else {
+            getActivity().setTitle(getString(R.string.transfer));
+        }
 
         // Source wallet
         mWalletSpinner = ((Spinner) view.findViewById(R.id.wallet));
@@ -260,12 +271,6 @@ public class TransferFragment extends Fragment {
 
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
-        if (mReceiverIdentity != null) {
-            getActivity().setTitle(getString(R.string.transfer_to, mReceiverIdentity.getUid()));
-        }
-        else {
-            getActivity().setTitle(getString(R.string.transfer));
-        }
         ((MainActivity)getActivity()).setBackButtonEnabled(true);
     }
 
@@ -489,6 +494,7 @@ public class TransferFragment extends Fragment {
 
     public class TransferTask extends AsyncTaskHandleException<Wallet, Void, Boolean>{
 
+        private Activity mActivity = getActivity();
         private String popStackTraceName;
 
         public TransferTask(String popStackTraceName) {
@@ -507,23 +513,35 @@ public class TransferFragment extends Fragment {
 
         @Override
         protected Boolean doInBackgroundHandleException(Wallet... wallets) throws Exception {
+            Wallet wallet = wallets[0];
             TransactionRemoteService txService = ServiceLocator.instance().getTransactionRemoteService();
 
-            CharSequence amountStr;
+            String amountStr;
             if (mIsCoinUnit) {
-                amountStr = mAmountText.getText();
+                amountStr = mAmountText.getText().toString();
             }
             else {
-                amountStr = mConvertedText.getText();
+                amountStr = mConvertedText.getText().toString();
             }
-            long amount = Long.parseLong(amountStr.toString());
+            long amount = Long.parseLong(amountStr);
 
-            txService.transfert(
-                    wallets[0],
+            String comment = mCommentText.getText().toString().trim();
+
+            String fingerprint = txService.transfert(
+                    wallet,
                     mReceiverIdentity.getPubkey(),
                     amount,
-                    mCommentText.getText().toString()
+                    comment
                     );
+
+            // insert a new movement
+            Movement movement = new Movement();
+            movement.setFingerprint(fingerprint);
+            movement.setAmount(amount);
+            movement.setComment(comment);
+            movement.setWalletId(wallet.getId());
+            MovementService movementService = ServiceLocator.instance().getMovementService();
+            movementService.save(mActivity, movement);
 
             return true;
         }

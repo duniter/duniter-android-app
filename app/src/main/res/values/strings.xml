@@ -12,7 +12,7 @@
     <string name="creating_account_title">Hello.</string>
     <string name="creating_account_welcome"><![CDATA[Welcome to <b>uCoin</b>.<br/><small>A decentralized system for free currencies.</small>]]></string>
     <string name="loading_dots">Loading...</string>
-    <string name="computing_keys">Computed keys...</string>
+    <string name="computing_keys">Computing keys...</string>
     <string name="saving_account">Saving account locally...</string>
     <string name="connecting_peer">Connecting to node\n%s...</string>
     <string name="loading_currency">Loading currency from\n%s...</string>

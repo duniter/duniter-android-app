@@ -15,6 +15,7 @@ import io.ucoin.app.database.Contract;
 import io.ucoin.app.model.Movement;
 import io.ucoin.app.service.exception.DuplicatePubkeyException;
 import io.ucoin.app.technical.ObjectUtils;
+import io.ucoin.app.technical.StringUtils;
 import io.ucoin.app.technical.UCoinTechnicalException;
 
 /**
@@ -45,6 +46,7 @@ public class MovementService extends BaseService {
 
     public Movement save(final Context context, final Movement movement) throws DuplicatePubkeyException {
         ObjectUtils.checkNotNull(movement);
+        ObjectUtils.checkArgument(StringUtils.isNotBlank(movement.getFingerprint()));
 
         // create if not exists
         if (movement.getId() == null) {
@@ -135,6 +137,9 @@ public class MovementService extends BaseService {
         target.put(Contract.Movement.FINGERPRINT, source.getFingerprint());
         target.put(Contract.Movement.BLOCK, source.getBlockNumber());
         target.put(Contract.Movement.TIME, source.getTime());
+        if (StringUtils.isNotBlank(source.getComment())) {
+            target.put(Contract.Movement.COMMENT, source.getComment());
+        }
         return target;
     }
 
@@ -152,6 +157,7 @@ public class MovementService extends BaseService {
         result.setFingerprint(cursor.getString(mSelectHolder.fingerprint));
         result.setBlockNumber(cursor.getLong(mSelectHolder.blockIndex));
         result.setTime(cursor.getLong(mSelectHolder.timeIndex));
+        result.setComment(cursor.getString(mSelectHolder.commentIndex));
 
         return result;
     }
@@ -173,6 +179,7 @@ public class MovementService extends BaseService {
         int fingerprint;
         int blockIndex;
         int timeIndex;
+        int commentIndex;
 
         private SelectCursorHolder(final Cursor cursor ) {
             idIndex = cursor.getColumnIndex(Contract.Movement._ID);
@@ -182,6 +189,7 @@ public class MovementService extends BaseService {
             fingerprint = cursor.getColumnIndex(Contract.Movement.FINGERPRINT);
             blockIndex = cursor.getColumnIndex(Contract.Movement.BLOCK);
             timeIndex = cursor.getColumnIndex(Contract.Movement.TIME);
+            commentIndex = cursor.getColumnIndex(Contract.Movement.COMMENT);
         }
     }
 }

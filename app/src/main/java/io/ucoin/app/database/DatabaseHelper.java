@@ -82,6 +82,7 @@ public class DatabaseHelper extends SQLiteOpenHelper implements Contract {
                 Movement.FINGERPRINT + TEXT + NOTNULL + COMMA +
                 Movement.IS_UD + INTEGER + NOTNULL + COMMA +
                 Movement.AMOUNT + INTEGER + NOTNULL + COMMA +
+                Movement.COMMENT + TEXT + COMMA +
                 Movement.TIME + INTEGER + COMMA +
                 Movement.BLOCK + INTEGER + COMMA +
                 UNIQUE + "(" + Movement.FINGERPRINT + ")" + COMMA +

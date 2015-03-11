@@ -46,6 +46,7 @@ public interface Contract {
         public static final String WALLET_ID = "wallet_id";
         public static final String IS_UD = "is_ud";
         public static final String FINGERPRINT = "fingerprint";
+        public static final String COMMENT = "comment";
         public static final String AMOUNT = "amount";
         public static final String BLOCK = "block";
         public static final String TIME = "time";

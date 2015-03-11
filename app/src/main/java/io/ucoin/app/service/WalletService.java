@@ -173,14 +173,26 @@ public class WalletService extends BaseService {
     }
 
     public void delete(final Context context, final long walletId) {
+        Log.d(TAG, "Deleting wallet id=" + walletId);
 
         ContentResolver resolver = context.getContentResolver();
 
-        String whereClause = "_id=?";
-        String[] whereArgs = new String[]{String.valueOf(walletId)};
-        int rowsUpdated = resolver.delete(getContentUri(), whereClause, whereArgs);
-        if (rowsUpdated != 1) {
-            throw new UCoinTechnicalException(String.format("Error while deleting wallet [id=%s]. %s rows updated.", walletId, rowsUpdated));
+        // First, delete movements
+        {
+            String whereClause = Contract.Movement.WALLET_ID + "=?";
+            String[] whereArgs = new String[]{String.valueOf(walletId)};
+            int rowsDeleted = resolver.delete(Uri.parse(Provider.CONTENT_URI + "/movement/"), whereClause, whereArgs);
+            Log.d(TAG, " deleted movement count: " + rowsDeleted);
+        }
+
+        // Then delete the wallet
+        {
+            String whereClause = "_id=?";
+            String[] whereArgs = new String[]{String.valueOf(walletId)};
+            int rowsDeleted = resolver.delete(getContentUri(), whereClause, whereArgs);
+            if (rowsDeleted != 1) {
+                throw new UCoinTechnicalException(String.format("Error while deleting wallet [id=%s]. %s rows updated.", walletId, rowsDeleted));
+            }
         }
     }
 

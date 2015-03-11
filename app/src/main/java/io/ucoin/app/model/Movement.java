@@ -13,8 +13,9 @@ public class Movement implements LocalEntity, Serializable {
     private long amount;
     private Long time;
     private Long blockNumber;
-    private boolean isUD;
+    private boolean isUD = false;
     private String fingerprint;
+    private String comment;
 
     @Override
     public Long getId() {
@@ -72,5 +73,13 @@ public class Movement implements LocalEntity, Serializable {
 
     public void setFingerprint(String fingerprint) {
         this.fingerprint = fingerprint;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
     }
 }

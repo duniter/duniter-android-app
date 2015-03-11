@@ -17,7 +17,7 @@
         android:textAppearance="?android:textAppearanceMedium"
         android:textColor="@color/hideable_text_color"
         android:textSize="@dimen/abc_text_size_title_material"
-        android:text=""
+        android:text="01/01/2015"
         />
 
     <TextView
@@ -26,9 +26,18 @@
         android:layout_height="wrap_content"
         android:textColor="@color/hideable_text_color"
         android:textSize="@dimen/abc_text_size_body_2_material"
-        android:layout_below="@id/date"
-        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
         android:text="100"/>
 
 
+    <TextView
+        android:id="@+id/comment"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/hideable_text_color"
+        android:textSize="@dimen/abc_text_size_caption_material"
+        android:layout_below="@+id/date"
+        android:layout_alignParentLeft="true"
+        android:text=""/>
 </RelativeLayout>
