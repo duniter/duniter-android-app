@@ -39,6 +39,8 @@ public class BlockchainRemoteService extends BaseRemoteService {
 
     public static final String URL_BLOCK_CURRENT = URL_BASE + "/current";
 
+    public static final String URL_BLOCK_WITH_UD = URL_BASE + "/with/ud";
+
     public static final String URL_MEMBERSHIP = URL_BASE + "/membership";
 
     public static final String URL_MEMBERSHIP_SEARCH = URL_BASE + "/memberships/%s";
@@ -57,8 +59,8 @@ public class BlockchainRemoteService extends BaseRemoteService {
 
     /**
      * get the blockchain parameters (currency parameters)
+     * @param currencyId
      * @return
-     * @throws Exception
      */
     public BlockchainParameter getParameters(long currencyId) {
         // get blockchain parameter
@@ -70,7 +72,6 @@ public class BlockchainRemoteService extends BaseRemoteService {
      * get the blockchain parameters (currency parameters)
      * @param peer the peer to use for request
      * @return
-     * @throws Exception
      */
     public BlockchainParameter getParameters(Peer peer) {
         // get blockchain parameter
@@ -80,9 +81,9 @@ public class BlockchainRemoteService extends BaseRemoteService {
 
     /**
      * Retrieve a block, by id (from 0 to current)
+     * @param currencyId
      * @param number
      * @return
-     * @throws Exception
      */
     public BlockchainBlock getBlock(long currencyId, int number) {
         // get blockchain parameter
@@ -96,7 +97,6 @@ public class BlockchainRemoteService extends BaseRemoteService {
      * @param peer the peer to use for request
      * @param number the block number
      * @return
-     * @throws Exception
      */
     public BlockchainBlock getBlock(Peer peer, int number) {
         // get blockchain parameter
@@ -108,7 +108,6 @@ public class BlockchainRemoteService extends BaseRemoteService {
     /**
      * Retrieve the current block
      * @return
-     * @throws Exception
      */
     public BlockchainBlock getCurrentBlock(long currencyId) {
         // get blockchain parameter
@@ -120,7 +119,6 @@ public class BlockchainRemoteService extends BaseRemoteService {
      * Retrieve the current block
      * @param peer the peer to use for request
      * @return the last block
-     * @throws Exception
      */
     public BlockchainBlock getCurrentBlock(Peer peer) {
         // get blockchain parameter
@@ -130,8 +128,8 @@ public class BlockchainRemoteService extends BaseRemoteService {
 
     /**
      * Retrieve the currency data, from peer
+     * @param peer
      * @return
-     * @throws Exception
      */
     public Currency getCurrencyFromPeer(Peer peer) {
         BlockchainParameter parameter = getParameters(peer);
@@ -146,6 +144,33 @@ public class BlockchainRemoteService extends BaseRemoteService {
         return result;
     }
 
+    /**
+     * Retrieve the last block with UD
+     * @param currencyId id of currency
+     * @return
+     */
+    public Integer getLastUD(long currencyId) {
+        // get block number with UD
+        String blocksWithUdResponse = executeRequest(currencyId, URL_BLOCK_WITH_UD, String.class);
+        Integer blockNumber = getLastBlockNumberFromJson(blocksWithUdResponse);
+
+        // If no result (this could happen when no UD has been send
+        if (blockNumber == null) {
+            // get the first UD from currency parameter
+            BlockchainParameter parameter = getParameters(currencyId);
+            return parameter.getUd0();
+        }
+
+        // Get the UD from the last block with UD
+        BlockchainBlock block = getBlock(currencyId, blockNumber);
+        Integer lastUD = block.getDividend();
+
+        // Check not null (should never happend)
+        if (lastUD == null) {
+            throw new UCoinTechnicalException("Unable to get last UD from server");
+        }
+        return lastUD;
+    }
 
      /**
      * Check is a wallet is a member, and load its attribute isMember and certTimestamp
@@ -345,5 +370,22 @@ public class BlockchainRemoteService extends BaseRemoteService {
                 .append("CertTS: ").append(certificationTime).append('\n');
 
         return result.toString();
+    }
+
+    private Integer getLastBlockNumberFromJson(final String json) {
+
+        int startIndex = json.lastIndexOf(',');
+        int endIndex = json.lastIndexOf(']');
+        if (startIndex == -1 || endIndex == -1) {
+            return null;
+        }
+
+        String blockNumberStr = json.substring(startIndex+1,endIndex).trim();
+        try {
+            return Integer.parseInt(blockNumberStr);
+        } catch(NumberFormatException e) {
+            Log.e(TAG, "Could not parse JSON (block numbers)");
+            throw new UCoinTechnicalException("Could not parse server response");
+        }
     }
 }

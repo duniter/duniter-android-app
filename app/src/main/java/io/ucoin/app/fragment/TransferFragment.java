@@ -3,7 +3,6 @@ package io.ucoin.app.fragment;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
-import android.content.Context;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -17,7 +16,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
@@ -34,7 +32,6 @@ import io.ucoin.app.adapter.ContactArrayAdapter;
 import io.ucoin.app.adapter.ProgressViewAdapter;
 import io.ucoin.app.adapter.Views;
 import io.ucoin.app.adapter.WalletArrayAdapter;
-import io.ucoin.app.model.BlockchainParameter;
 import io.ucoin.app.model.Contact;
 import io.ucoin.app.model.Identity;
 import io.ucoin.app.model.Movement;
@@ -44,6 +41,7 @@ import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.service.exception.InsufficientCreditException;
 import io.ucoin.app.service.remote.TransactionRemoteService;
 import io.ucoin.app.technical.AsyncTaskHandleException;
+import io.ucoin.app.technical.MathUtils;
 import io.ucoin.app.technical.ObjectUtils;
 import io.ucoin.app.technical.StringUtils;
 
@@ -135,6 +133,7 @@ public class TransferFragment extends Fragment {
                 .getSerializable(BUNDLE_RECEIVER_ITENTITY);
         Wallet wallet = (Wallet) newInstanceArgs
                 .getSerializable(BUNDLE_WALLET);
+        View focusView = null;
 
         // Title
         if (mReceiverIdentity != null) {
@@ -163,33 +162,54 @@ public class TransferFragment extends Fragment {
             mWalletSpinner.setSelection(walletPosition);
         }
 
-        // target uid
-        if (mReceiverIdentity != null) {
-            ((TextView) view.findViewById(R.id.receiver_uid)).setText(mReceiverIdentity.getUid());
+        // Receiver
+        {
+            // If receiver identity is fixed, display only uid
+            if (mReceiverIdentity != null) {
+                ((TextView) view.findViewById(R.id.receiver_uid)).setText(mReceiverIdentity.getUid());
 
-            // Mask unused field
-            view.findViewById(R.id.receiver_contact).setVisibility(View.GONE);
-            view.findViewById(R.id.receiver_pubkey).setVisibility(View.GONE);
-        }
-        else {
-            mReceiverPubkeyText = (EditText)view.findViewById(R.id.receiver_pubkey);
+                // Mask unused field
+                view.findViewById(R.id.receiver_contact).setVisibility(View.GONE);
+                view.findViewById(R.id.receiver_pubkey).setVisibility(View.GONE);
+            }
 
-            mContactSpinner = ((Spinner) view.findViewById(R.id.receiver_contact));
-            mContactSpinner.setAdapter(mContactAdapter);
-            mContactSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                @Override
-                public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-                    // TODO : update mReceiverPubkeyText
+            // If user can choose the receiver: display contact list and a text field for pubkey
+            else {
+                // pubkey
+                mReceiverPubkeyText = (EditText) view.findViewById(R.id.receiver_pubkey);
+                focusView = mReceiverPubkeyText;
+
+                // Contact list (disable if no contact in list)
+                mContactSpinner = ((Spinner) view.findViewById(R.id.receiver_contact));
+                if (mContactAdapter.getCount() == 0) {
+                    mContactSpinner.setVisibility(View.GONE);
+                }
+                else {
+                    mContactSpinner.setAdapter(mContactAdapter);
+                    mContactSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                        @Override
+                        public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+                            // Copy the selected contact to pubkey field
+                            Contact selectContact = mContactAdapter.getItem(position);
+                            if (selectContact != null && selectContact.getIdentities().size() == 1) {
+                                Identity identity = selectContact.getIdentities().get(0);
+                                if (StringUtils.isNotBlank(identity.getPubkey())) {
+                                    mReceiverPubkeyText.setText(identity.getPubkey());
+                                }
+                            }
+                        }
+
+                        @Override
+                        public void onNothingSelected(AdapterView<?> parentView) {
+                            resetCurrencyData();
+                        }
+                    });
                 }
 
-                @Override
-                public void onNothingSelected(AdapterView<?> parentView) {
-                    resetCurrencyData();
-                }
-            });
 
-            // Mask unused field
-            view.findViewById(R.id.receiver_uid).setVisibility(View.GONE);
+                // Mask unused field
+                view.findViewById(R.id.receiver_uid).setVisibility(View.GONE);
+            }
         }
 
         // Amount
@@ -208,11 +228,9 @@ public class TransferFragment extends Fragment {
            public void afterTextChanged(Editable s) {
            }
         });
-        mAmountText.requestFocus();
-
-        // Force the keyboard to be open
-        ((InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE))
-                .toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
+        if (focusView == null) {
+            focusView = mAmountText;
+        }
 
         // Unit
         mAmountUnitText = (TextView)view.findViewById(R.id.amount_unit_text);
@@ -259,7 +277,13 @@ public class TransferFragment extends Fragment {
                 view.findViewById(R.id.transfer_progress),
                 mSendButton);
 
-        // Load data need for transfer
+        // Set the focus and open keyboard
+        if (focusView != null) {
+            focusView.requestFocus();
+            Views.showKeyboard(getActivity());
+        }
+
+        // Load data on currency (need for transfer and unit conversion)
         loadCurrencyData();
     }
 
@@ -432,19 +456,20 @@ public class TransferFragment extends Fragment {
             mConvertedText.setText("");
         }
         else {
-            double amount = Double.parseDouble(amountStr);
 
-            double convertedAmount;
             // if amount unit = coins
             if (isCoinUnit) {
-                convertedAmount = amount / mUniversalDividend;
-            }
-            // if amount unit = UD
-            else {
-                convertedAmount = amount * mUniversalDividend;
+                int amountInCoins = Integer.parseInt(amountStr);
+                double convertedAmount = MathUtils.convertToUD(amountInCoins, mUniversalDividend);
+                mConvertedText.setText(MathUtils.formatShort(convertedAmount));
             }
 
-            mConvertedText.setText(Double.toString(convertedAmount));
+            // if amount unit = UD
+            else {
+                double amountInUD = Double.parseDouble(amountStr);
+                long convertedAmount = MathUtils.convertToCoin(amountInUD, mUniversalDividend);
+                mConvertedText.setText(MathUtils.formatShort(convertedAmount));
+            }
 
         }
         mIsRunningConvertion = false;
@@ -462,17 +487,13 @@ public class TransferFragment extends Fragment {
                 return true;
             }
 
-
             mCurrencyId = selectedCurrencyId;
 
-            // Get the blockchain parameter
-            BlockchainParameter p = ServiceLocator.instance().getBlockchainRemoteService().getParameters(selectedCurrencyId);
-            if (p == null) {
+            // Get the last UD, from blockchain
+            mUniversalDividend = ServiceLocator.instance().getBlockchainRemoteService().getLastUD(selectedCurrencyId);
+            if (mUniversalDividend == null) {
                 return false;
             }
-
-            // set data
-            mUniversalDividend = p.getUd0();
 
             return true;
         }
@@ -496,6 +517,9 @@ public class TransferFragment extends Fragment {
 
         private Activity mActivity = getActivity();
         private String popStackTraceName;
+        private String mPubkey;
+        private long mAmount;
+        private String mComment;
 
         public TransferTask(String popStackTraceName) {
             this.popStackTraceName = popStackTraceName;
@@ -509,13 +533,16 @@ public class TransferFragment extends Fragment {
 
             // Show the progress bar
             mProgressViewAdapter.showProgress(true);
-        }
 
-        @Override
-        protected Boolean doInBackgroundHandleException(Wallet... wallets) throws Exception {
-            Wallet wallet = wallets[0];
-            TransactionRemoteService txService = ServiceLocator.instance().getTransactionRemoteService();
+            // pubkey
+            if (mReceiverIdentity != null) {
+                mPubkey =mReceiverIdentity.getPubkey();
+            }
+            else {
+                mPubkey = mReceiverPubkeyText.getText().toString().trim();
+            }
 
+            // Amount
             String amountStr;
             if (mIsCoinUnit) {
                 amountStr = mAmountText.getText().toString();
@@ -523,22 +550,30 @@ public class TransferFragment extends Fragment {
             else {
                 amountStr = mConvertedText.getText().toString();
             }
-            long amount = Long.parseLong(amountStr);
+            mAmount = Long.parseLong(amountStr);
 
-            String comment = mCommentText.getText().toString().trim();
+            // Comment
+            mComment = mCommentText.getText().toString().trim();
+        }
 
+        @Override
+        protected Boolean doInBackgroundHandleException(Wallet... wallets) throws Exception {
+            Wallet wallet = wallets[0];
+            TransactionRemoteService txService = ServiceLocator.instance().getTransactionRemoteService();
+
+            // Transfer
             String fingerprint = txService.transfert(
                     wallet,
-                    mReceiverIdentity.getPubkey(),
-                    amount,
-                    comment
+                    mPubkey,
+                    mAmount,
+                    mComment
                     );
 
-            // insert a new movement
+            // Add as new movement
             Movement movement = new Movement();
             movement.setFingerprint(fingerprint);
-            movement.setAmount(amount);
-            movement.setComment(comment);
+            movement.setAmount(mAmount);
+            movement.setComment(mComment);
             movement.setWalletId(wallet.getId());
             MovementService movementService = ServiceLocator.instance().getMovementService();
             movementService.save(mActivity, movement);

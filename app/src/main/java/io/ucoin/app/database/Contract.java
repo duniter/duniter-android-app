@@ -68,6 +68,7 @@ public interface Contract {
         public static final String CONTACT_ID = "contact_id";
         public static final String CURRENCY_ID = "currency_id";
         public static final String PUBLIC_KEY = "public_key";
+        public static final String UID = "uid";
     }
 
     /* -- not used yet --*/
