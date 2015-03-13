@@ -288,6 +288,7 @@ public class AddWalletFragment extends Fragment {
             // Create a new wallet
             Wallet wallet = new Wallet(currency.getCurrencyName(), uid, keyPair.publicKey, keyPair.secretKey);
             wallet.setCurrencyId(currency.getId());
+            wallet.setSalt(salt);
             wallet.setAccountId(Long.parseLong(accountId));
             wallet.setName(name);
 
