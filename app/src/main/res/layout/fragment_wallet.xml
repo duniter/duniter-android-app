@@ -24,6 +24,7 @@
             android:textSize="@dimen/abc_text_size_display_3_material" />
 
         <ImageButton android:id="@+id/icon"
+            android:layout_marginTop="20dp"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"

@@ -41,6 +41,7 @@ import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.service.exception.InsufficientCreditException;
 import io.ucoin.app.service.remote.TransactionRemoteService;
 import io.ucoin.app.technical.AsyncTaskHandleException;
+import io.ucoin.app.technical.DateUtils;
 import io.ucoin.app.technical.MathUtils;
 import io.ucoin.app.technical.ObjectUtils;
 import io.ucoin.app.technical.StringUtils;
@@ -574,6 +575,7 @@ public class TransferFragment extends Fragment {
             movement.setFingerprint(fingerprint);
             movement.setAmount(mAmount);
             movement.setComment(mComment);
+            movement.setTime(DateUtils.getCurrentTimestamp());
             movement.setWalletId(wallet.getId());
             MovementService movementService = ServiceLocator.instance().getMovementService();
             movementService.save(mActivity, movement);

@@ -63,9 +63,10 @@ public class MovementListFragment extends ListFragment {
 
         String selection = Contract.Movement.WALLET_ID + "=?";
         String[] selectionArgs = {String.valueOf(walletId)};
+        String orderBy = Contract.Movement.TIME + " DESC";
 
-        Cursor cursor = getActivity().getContentResolver().query(uri, new String[]{}, null,
-                null, null);
+        Cursor cursor = getActivity().getContentResolver().query(uri, new String[]{}, selection,
+                selectionArgs, orderBy);
         mCursorAdapter = new MovementCursorAdapter((Context) getActivity(), cursor, 0);
         setListAdapter(mCursorAdapter);
     }

@@ -72,12 +72,13 @@ public class MainActivity extends ActionBarActivity
         DateUtils.setDefaultMediumDateFormat(getMediumDateFormat());
         DateUtils.setDefaultLongDateFormat(getLongDateFormat());
         DateUtils.setDefaultShortDateFormat(getShortDateFormat());
+        DateUtils.setDefaultTimeFormat(getTimeFormat());
 
         // Init configuration
         Configuration config = new Configuration();
         Configuration.setInstance(config);
 
-        //LOAD account
+        // Load account
         AccountManager accountManager = AccountManager.get(this);
         Account[] accounts = accountManager.getAccountsByType(getString(R.string.ACCOUNT_TYPE));
 
@@ -350,6 +351,11 @@ public class MainActivity extends ActionBarActivity
     protected DateFormat getShortDateFormat() {
         return android.text.format.DateFormat.getDateFormat(getApplicationContext());
     }
+
+    protected DateFormat getTimeFormat() {
+        return android.text.format.DateFormat.getTimeFormat(getApplicationContext());
+    }
+
 
 
     public Account loadLastAccountUsed(AccountManager accountManager, Account[] accounts) {

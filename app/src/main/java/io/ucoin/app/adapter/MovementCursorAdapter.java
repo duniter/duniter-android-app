@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import io.ucoin.app.R;
@@ -35,9 +36,20 @@ public class MovementCursorAdapter extends CursorAdapter{
             view.setTag(viewHolder);
         }
 
-        // Date
-        String date = DateUtils.format(cursor.getInt(viewHolder.timeIndex));
-        viewHolder.dateView.setText(date);
+        // Icon
+        {
+            boolean isWriteInBlockchain = !cursor.isNull(viewHolder.blockIndex);
+            // Is write in blokchain ?
+            if (isWriteInBlockchain) {
+                viewHolder.iconView.setImageResource(R.drawable.ic_check_24dp);
+            } else {
+                viewHolder.iconView.setImageResource(R.drawable.ic_clock);
+            }
+        }
+
+        // Date/time
+        String dateTime = DateUtils.formatFriendlyDateTime(context, cursor.getLong(viewHolder.timeIndex));
+        viewHolder.dateView.setText(dateTime);
 
         // Amount
         int amount = cursor.getInt(viewHolder.amountIndex);
@@ -53,12 +65,15 @@ public class MovementCursorAdapter extends CursorAdapter{
         TextView dateView;
         TextView amountView;
         TextView commentView;
+        ImageView iconView;
 
         int timeIndex;
         int amountIndex;
         int commentIndex;
+        int blockIndex;
 
         ViewHolder(View view, Cursor cursor) {
+            iconView = (ImageView) view.findViewById(R.id.icon);
             dateView = (TextView) view.findViewById(R.id.date);
             amountView = (TextView) view.findViewById(R.id.amount);
             commentView = (TextView) view.findViewById(R.id.comment);
@@ -67,6 +82,7 @@ public class MovementCursorAdapter extends CursorAdapter{
             timeIndex = cursor.getColumnIndex(Contract.Movement.TIME);
             amountIndex = cursor.getColumnIndex(Contract.Movement.AMOUNT);
             commentIndex = cursor.getColumnIndex(Contract.Movement.COMMENT);
+            blockIndex = cursor.getColumnIndex(Contract.Movement.BLOCK);
         }
     }
 

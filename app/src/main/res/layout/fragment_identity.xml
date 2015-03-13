@@ -24,6 +24,7 @@
 
 
         <ImageButton android:id="@+id/favorite_button"
+            android:layout_marginTop="20dp"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
