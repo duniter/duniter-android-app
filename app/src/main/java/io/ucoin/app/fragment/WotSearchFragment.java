@@ -154,6 +154,7 @@ public class WotSearchFragment extends ListFragment
 
     @Override
     public void onQuerySuccess(List<? extends Identity> identities) {
+        mIdentityAdapter.setNotifyOnChange(false);
         mIdentityAdapter.clear();
         mIdentityAdapter.addAll(identities);
         mIdentityAdapter.notifyDataSetChanged();

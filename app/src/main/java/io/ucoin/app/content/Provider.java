@@ -28,6 +28,8 @@ public class Provider extends ContentProvider implements Contract {
     private static final int WALLET = 40;
     private static final int MOVEMENT = 50;
     private static final int CONTACT = 60;
+    private static final int CONTACT2CURRENCY = 70;
+    private static final int CONTACT_VIEW = 80;
 
 
     public static Uri CONTENT_URI;
@@ -48,6 +50,8 @@ public class Provider extends ContentProvider implements Contract {
         uriMatcher.addURI(AUTHORITY, "peer/", PEER);
         uriMatcher.addURI(AUTHORITY, "movement/", MOVEMENT);
         uriMatcher.addURI(AUTHORITY, "contact/", CONTACT);
+        uriMatcher.addURI(AUTHORITY, "contact2currency/", CONTACT2CURRENCY);
+        uriMatcher.addURI(AUTHORITY, "contactView/", CONTACT_VIEW);
 
         return true;
     }
@@ -112,6 +116,18 @@ public class Provider extends ContentProvider implements Contract {
                         selectionArgs, null, null, sortOrder);
                 cursor.setNotificationUri(getContext().getContentResolver(), uri);
                 break;
+            case CONTACT2CURRENCY :
+                queryBuilder.setTables(Contact2Currency.TABLE_NAME);
+                cursor = queryBuilder.query(db, projection, selection,
+                        selectionArgs, null, null, sortOrder);
+                cursor.setNotificationUri(getContext().getContentResolver(), uri);
+                break;
+            case CONTACT_VIEW :
+                queryBuilder.setTables(ContactView.VIEW_NAME);
+                cursor = queryBuilder.query(db, projection, selection,
+                        selectionArgs, null, null, sortOrder);
+                cursor.setNotificationUri(getContext().getContentResolver(), uri);
+                break;
             default:
                 throw new IllegalArgumentException("Unknown URI: " + uri);
         }
@@ -152,6 +168,10 @@ public class Provider extends ContentProvider implements Contract {
             case CONTACT:
                 id = db.insert(Contact.TABLE_NAME, null, values);
                 uri = Uri.parse("contact/" + id);
+                break;
+            case CONTACT2CURRENCY:
+                id = db.insert(Contact2Currency.TABLE_NAME, null, values);
+                uri = Uri.parse("contact2currency/" + id);
                 break;
             default:
                 throw new IllegalArgumentException("Unknown URI: " + uri);

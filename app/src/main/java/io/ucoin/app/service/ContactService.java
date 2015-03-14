@@ -15,7 +15,9 @@ import java.util.List;
 import io.ucoin.app.content.Provider;
 import io.ucoin.app.database.Contract;
 import io.ucoin.app.model.Contact;
+import io.ucoin.app.model.Identity;
 import io.ucoin.app.service.exception.DuplicatePubkeyException;
+import io.ucoin.app.technical.CollectionUtils;
 import io.ucoin.app.technical.ObjectUtils;
 import io.ucoin.app.technical.UCoinTechnicalException;
 
@@ -32,8 +34,11 @@ public class ContactService extends BaseService {
     // a cache instance of the contact Uri
     // Could NOT be static, because Uri is initialize in Provider.onCreate() method ;(
     private Uri mContentUri = null;
+    private Uri mViewContentUri = null;
 
     private SelectCursorHolder mSelectHolder = null;
+    private SelectViewCursorHolder mSelectViewHolder = null;
+    private Contact2CurrencyService mContact2CurrencyService = null;
 
     public ContactService() {
         super();
@@ -42,6 +47,7 @@ public class ContactService extends BaseService {
     @Override
     public void initialize() {
         super.initialize();
+        mContact2CurrencyService = ServiceLocator.instance().getContact2CurrencyService();
     }
 
     public Contact save(final Context context, final Contact contact) throws DuplicatePubkeyException {
@@ -56,6 +62,12 @@ public class ContactService extends BaseService {
         // or update
         else {
             update(context.getContentResolver(), contact);
+
+        }
+
+        // Save contact identities
+        if (CollectionUtils.isNotEmpty(contact.getIdentities())) {
+            mContact2CurrencyService.saveAll(context, contact.getId(), contact.getIdentities());
         }
 
         // return the updated contact (id could have change)
@@ -69,6 +81,10 @@ public class ContactService extends BaseService {
     public List<Contact> getContacts(Application application) {
         String accountId = ((io.ucoin.app.Application) application).getAccountId();
         return getContactsByAccountId(application.getContentResolver(), Long.parseLong(accountId));
+    }
+
+    public List<Contact> getContactsByCurrencyId(Context context, long currencyId) {
+        return getContactsByCurrencyId(context.getContentResolver(), currencyId);
     }
 
     public void delete(final Context context, final long contactId) {
@@ -91,8 +107,10 @@ public class ContactService extends BaseService {
         String[] selectionArgs = {
                 String.valueOf(accountId)
         };
+        String orderBy = Contract.Contact.NAME + " ASC";
+
         Cursor cursor = resolver.query(getContentUri(), new String[]{}, selection,
-                selectionArgs, null);
+                selectionArgs, orderBy);
 
         List<Contact> result = new ArrayList<Contact>();
         while (cursor.moveToNext()) {
@@ -103,6 +121,28 @@ public class ContactService extends BaseService {
 
         return result;
     }
+
+    private List<Contact> getContactsByCurrencyId(ContentResolver resolver, long currencyId) {
+
+        String selection = Contract.ContactView.CURRENCY_ID + "=?";
+        String[] selectionArgs = {
+                String.valueOf(currencyId),
+        };
+        String orderBy = Contract.ContactView.NAME + " ASC";
+
+        Cursor cursor = resolver.query(getViewContentUri(), new String[]{}, selection,
+                selectionArgs, orderBy);
+
+        List<Contact> result = new ArrayList<Contact>();
+        while (cursor.moveToNext()) {
+            Contact contact = toContactFromView(cursor);
+            result.add(contact);
+        }
+        cursor.close();
+
+        return result;
+    }
+
 
     public void insert(final ContentResolver resolver, final Contact source) {
 
@@ -135,6 +175,7 @@ public class ContactService extends BaseService {
         //Create account in database
         ContentValues target = new ContentValues();
         target.put(Contract.Contact.ACCOUNT_ID, source.getAccountId());
+        target.put(Contract.Contact.NAME, source.getName());
         return target;
     }
 
@@ -147,6 +188,27 @@ public class ContactService extends BaseService {
         Contact result = new Contact();
         result.setId(cursor.getLong(mSelectHolder.idIndex));
         result.setAccountId(cursor.getLong(mSelectHolder.accountIdIndex));
+        result.setName(cursor.getString(mSelectHolder.nameIdIndex));
+
+        return result;
+    }
+
+    private Contact toContactFromView(final Cursor cursor) {
+        // Init the holder is need
+        if (mSelectViewHolder == null) {
+            mSelectViewHolder = new SelectViewCursorHolder(cursor);
+        }
+
+        Contact result = new Contact();
+        result.setId(cursor.getLong(mSelectViewHolder.idIndex));
+        result.setAccountId(cursor.getLong(mSelectViewHolder.accountIdIndex));
+        result.setName(cursor.getString(mSelectViewHolder.nameIdIndex));
+
+        Identity identity = new Identity();
+        identity.setCurrencyId(cursor.getLong(mSelectViewHolder.currencyIdIndex));
+        identity.setUid(cursor.getString(mSelectViewHolder.uidIdIndex));
+        identity.setPubkey(cursor.getString(mSelectViewHolder.pubkeyIdIndex));
+        result.addIdentity(identity);
 
         return result;
     }
@@ -159,14 +221,39 @@ public class ContactService extends BaseService {
         return mContentUri;
     }
 
+    private Uri getViewContentUri() {
+        if (mViewContentUri != null){
+            return mViewContentUri;
+        }
+        mViewContentUri = Uri.parse(Provider.CONTENT_URI + "/contactView/");
+        return mViewContentUri;
+    }
+
     private class SelectCursorHolder {
 
         int idIndex;
         int accountIdIndex;
+        int nameIdIndex;
 
         private SelectCursorHolder(final Cursor cursor ) {
             idIndex = cursor.getColumnIndex(Contract.Contact._ID);
             accountIdIndex = cursor.getColumnIndex(Contract.Contact.ACCOUNT_ID);
+            nameIdIndex = cursor.getColumnIndex(Contract.Contact.NAME);
         }
     }
+
+    private class SelectViewCursorHolder extends SelectCursorHolder {
+
+        int currencyIdIndex;
+        int uidIdIndex;
+        int pubkeyIdIndex;
+
+        private SelectViewCursorHolder(final Cursor cursor ) {
+            super(cursor);
+            currencyIdIndex = cursor.getColumnIndex(Contract.Contact2Currency.CURRENCY_ID);
+            uidIdIndex = cursor.getColumnIndex(Contract.Contact2Currency.UID);
+            pubkeyIdIndex = cursor.getColumnIndex(Contract.Contact2Currency.PUBLIC_KEY);
+        }
+    }
+
 }

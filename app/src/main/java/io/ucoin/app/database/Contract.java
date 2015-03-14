@@ -56,16 +56,20 @@ public interface Contract {
         public static final String TABLE_NAME = "contact";
         public static final String ACCOUNT_ID = "account_id";
         public static final String NAME = "name";
-        /**
-         * The count of rows in a directory.
-         * <P>Type: INTEGER</P>
-         */
-        public static final String _COUNT = "_count";
     }
 
-    public static final class Contact2Currency {
+    public static final class Contact2Currency implements BaseColumns {
         public static final String TABLE_NAME = "contact2currency";
         public static final String CONTACT_ID = "contact_id";
+        public static final String CURRENCY_ID = "currency_id";
+        public static final String PUBLIC_KEY = "public_key";
+        public static final String UID = "uid";
+    }
+
+    public static final class ContactView implements BaseColumns {
+        public static final String VIEW_NAME = "contact_view";
+        public static final String ACCOUNT_ID = "account_id";
+        public static final String NAME = "name";
         public static final String CURRENCY_ID = "currency_id";
         public static final String PUBLIC_KEY = "public_key";
         public static final String UID = "uid";

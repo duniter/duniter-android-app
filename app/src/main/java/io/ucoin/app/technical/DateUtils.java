@@ -21,13 +21,15 @@ public class DateUtils {
     private static DateFormat DEFAULT_SHORT_DATE_FORMAT = new SimpleDateFormat();
     private static DateFormat DEFAULT_TIME_FORMAT = new SimpleDateFormat();
 
-    private static long COMPARE_CACHE_TIME = -1;
-    private static String COMPARE_YEAR;
-    private static long COMPARE_THIS_YEAR;
-    private static long COMPARE_TODAY;
-    private static long COMPARE_YESTERDAY;
+    private static long CACHE_REFRESH_TIME = -1;
+    private static String YEAR_AS_STRING_CACHE;
+    private static long FIRST_DAY_OF_YEAR_CACHE;
+    private static long TODAY_CACHE;
+    private static long YESTERDAY_CACHE;
+    private static long FIRST_DAY_OF_WEEK_CACHE;
+
     static {
-        refreshCompareVars();
+        refreshDateCache();
     }
 
 	protected DateUtils() {
@@ -82,25 +84,29 @@ public class DateUtils {
         }
 
         // Make sure cached variable are up to date
-        refreshCompareVars();
+        refreshDateCache();
 
         long timeInMillis = timestamp * 1000;
         Date date =  new Date(timeInMillis);
 
         // Last year
-        if (timeInMillis < COMPARE_THIS_YEAR) {
+        if (timeInMillis < FIRST_DAY_OF_YEAR_CACHE) {
             return DEFAULT_SHORT_DATE_FORMAT.format(date);
         }
 
         // This year
-        if (timeInMillis < COMPARE_YESTERDAY) {
-            return DEFAULT_MEDIUM_DATE_FORMAT.format(date).replace(COMPARE_YEAR, "");
+        if (timeInMillis < YESTERDAY_CACHE) {
+            return DEFAULT_MEDIUM_DATE_FORMAT.format(date).replace(YEAR_AS_STRING_CACHE, "");
         }
 
         // TODO : This week
+        // This week
+        //if (timeInMillis < FIRST_DAY_OF_WEEK_CACHE) {
+        //    return DEFAULT_LONG_DATE_FORMAT.format(date).replace(YEAR_AS_STRING_CACHE, "");
+        //}
 
         // yesterday
-        if (timeInMillis < COMPARE_TODAY) {
+        if (timeInMillis < TODAY_CACHE) {
             return context.getString(R.string.yesterday)+ " " + DEFAULT_TIME_FORMAT.format(date);
         }
 
@@ -121,11 +127,9 @@ public class DateUtils {
 
     /* -- internal  methods -- */
 
-    // TODO : this method should be called some times !!
-    // when opening wallet fragment ?
-    protected static void refreshCompareVars() {
-        if (COMPARE_CACHE_TIME != -1
-                && (System.currentTimeMillis() - COMPARE_CACHE_TIME) < 300000/*5min*/) {
+    protected static void refreshDateCache() {
+        if (CACHE_REFRESH_TIME != -1
+                && (System.currentTimeMillis() - CACHE_REFRESH_TIME) < 300000/*5min*/) {
             return;
         }
 
@@ -136,21 +140,26 @@ public class DateUtils {
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
-        COMPARE_TODAY = calendar.getTimeInMillis();
+        TODAY_CACHE = calendar.getTimeInMillis();
 
-        // Compute yesterday à 0 hour
+        // Compute yesterday at 0 hour
         calendar.add(Calendar.DATE, -1);
-        COMPARE_YESTERDAY = calendar.getTimeInMillis();
+        YESTERDAY_CACHE = calendar.getTimeInMillis();
+
+        // Compute first day of week, at 0 hour
+        calendar.setTimeInMillis(TODAY_CACHE); // revert to today
+        calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+        FIRST_DAY_OF_WEEK_CACHE = calendar.getTimeInMillis();
 
         // Compute yesterday à 0 hour
-        calendar.add(Calendar.DATE, 1); // revert to today
+        calendar.setTimeInMillis(TODAY_CACHE); // revert to today
         calendar.set(Calendar.DAY_OF_YEAR, 1);
-        COMPARE_THIS_YEAR = calendar.getTimeInMillis();
+        FIRST_DAY_OF_YEAR_CACHE = calendar.getTimeInMillis();
 
         // The actual year
-        COMPARE_YEAR = String.valueOf(calendar.get(Calendar.YEAR));
+        YEAR_AS_STRING_CACHE = String.valueOf(calendar.get(Calendar.YEAR));
 
         // update the cache time
-        COMPARE_CACHE_TIME = System.currentTimeMillis();
+        CACHE_REFRESH_TIME = System.currentTimeMillis();
     }
 }

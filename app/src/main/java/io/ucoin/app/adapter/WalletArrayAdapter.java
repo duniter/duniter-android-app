@@ -84,7 +84,7 @@ public class WalletArrayAdapter extends ArrayAdapter<Wallet> {
         Wallet wallet = getItem(position);
         ViewHolder viewHolder;
 
-        //inflate
+        // Inflate
         if (convertView == null) {
             convertView = LayoutInflater.from(this.getContext())
                     .inflate(resource, container, false);

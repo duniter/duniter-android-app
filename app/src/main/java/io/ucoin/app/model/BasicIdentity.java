@@ -11,9 +11,11 @@ import io.ucoin.app.technical.ObjectUtils;
  * @since 1.0
  *
  */
-public class BasicIdentity implements Serializable {
+public class BasicIdentity implements Serializable, LocalEntity {
 
     private static final long serialVersionUID = 8080689271400316984L;
+
+    private Long id;
 
     private String pubkey;
 
@@ -54,6 +56,15 @@ public class BasicIdentity implements Serializable {
         this.uid = uid;
     }
 
+    @Override
+    public Long getId() {
+        return id;
+    }
+
+    @Override
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     @Override
     public String toString() {

@@ -97,6 +97,9 @@ public class ServiceLocator implements Closeable {
     public ContactService getContactService() {
         return getService(ContactService.class);
     }
+    public Contact2CurrencyService getContact2CurrencyService() {
+        return getService(Contact2CurrencyService.class);
+    }
     public MovementService getMovementService() {
         return getService(MovementService.class);
     }

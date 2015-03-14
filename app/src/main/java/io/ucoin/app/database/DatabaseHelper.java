@@ -102,18 +102,31 @@ public class DatabaseHelper extends SQLiteOpenHelper implements Contract {
         db.execSQL(CREATE_TABLE_CONTACT);
 
         String CREATE_TABLE_CONTACT2CURRENCY = "CREATE TABLE " + Contact2Currency.TABLE_NAME + "(" +
+                Contact2Currency._ID + " INTEGER PRIMARY KEY AUTOINCREMENT" + COMMA +
                 Contact2Currency.CONTACT_ID + INTEGER + NOTNULL + COMMA +
                 Contact2Currency.CURRENCY_ID + TEXT + NOTNULL + COMMA +
                 Contact2Currency.UID + TEXT + COMMA +
                 Contact2Currency.PUBLIC_KEY + TEXT + NOTNULL + COMMA +
                 UNIQUE + "(" + Contact2Currency.CONTACT_ID + COMMA + Contact2Currency.PUBLIC_KEY + ")" + COMMA +
-                "PRIMARY KEY (" + Contact2Currency.CONTACT_ID + COMMA + Contact2Currency.CURRENCY_ID + ")" + COMMA +
                 "FOREIGN KEY (" + Contact2Currency.CURRENCY_ID + ") REFERENCES " +
                 Currency.TABLE_NAME + "(" + Currency._ID + ")" + COMMA +
                 "FOREIGN KEY (" + Contact2Currency.CONTACT_ID + ") REFERENCES " +
                 Contact.TABLE_NAME + "(" + Contact._ID + ")" +
                 ")";
         db.execSQL(CREATE_TABLE_CONTACT2CURRENCY);
+
+        String CREATE_CONTACT_VIEW = "CREATE VIEW " + ContactView.VIEW_NAME + " AS SELECT " +
+                Contact.TABLE_NAME + "." + Contact._ID + COMMA +
+                Contact.TABLE_NAME + "." + Contact.ACCOUNT_ID + COMMA +
+                Contact.TABLE_NAME + "." + Contact.NAME + COMMA +
+                Contact2Currency.TABLE_NAME + "." + Contact2Currency._ID + " AS " + Contact2Currency.TABLE_NAME + Contact2Currency._ID + COMMA +
+                Contact2Currency.TABLE_NAME + "." + Contact2Currency.CURRENCY_ID + COMMA +
+                Contact2Currency.TABLE_NAME + "." + Contact2Currency.UID + COMMA +
+                Contact2Currency.TABLE_NAME + "." + Contact2Currency.PUBLIC_KEY +
+                " FROM " +
+                Contact.TABLE_NAME + COMMA +
+                Contact2Currency.TABLE_NAME;
+        db.execSQL(CREATE_CONTACT_VIEW);
 
         /*
 

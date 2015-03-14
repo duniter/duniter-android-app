@@ -24,6 +24,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import io.ucoin.app.R;
@@ -41,10 +42,13 @@ import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.service.exception.InsufficientCreditException;
 import io.ucoin.app.service.remote.TransactionRemoteService;
 import io.ucoin.app.technical.AsyncTaskHandleException;
+import io.ucoin.app.technical.CollectionUtils;
 import io.ucoin.app.technical.DateUtils;
+import io.ucoin.app.technical.ExceptionUtils;
 import io.ucoin.app.technical.MathUtils;
 import io.ucoin.app.technical.ObjectUtils;
 import io.ucoin.app.technical.StringUtils;
+import io.ucoin.app.technical.UCoinTechnicalException;
 
 public class TransferFragment extends Fragment {
 
@@ -99,6 +103,14 @@ public class TransferFragment extends Fragment {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
+        // Read fragment arguments
+        Bundle newInstanceArgs = getArguments();
+        mReceiverIdentity = (Identity) newInstanceArgs
+                .getSerializable(BUNDLE_RECEIVER_ITENTITY);
+        Wallet wallet = (Wallet) newInstanceArgs
+                .getSerializable(BUNDLE_WALLET);
+
+        // Init wallet list
         final List<Wallet> wallets = ServiceLocator.instance().getWalletService().getWallets(getActivity().getApplication());
         mWalletAdapter = new WalletArrayAdapter(
                 getActivity(),
@@ -107,12 +119,22 @@ public class TransferFragment extends Fragment {
         );
         mWalletAdapter.setDropDownViewResource(WalletArrayAdapter.DEFAULT_LAYOUT_RES);
 
-        final List<Contact> contacts = ServiceLocator.instance().getContactService().getContacts(getActivity().getApplication());
-        mContactAdapter = new ContactArrayAdapter(
-                getActivity(),
-                android.R.layout.simple_spinner_item,
-                contacts
-        );
+        // Init contact list
+        if (wallet != null && wallet.getCurrencyId() != null) {
+            final List<Contact> contacts = ServiceLocator.instance().getContactService()
+                    .getContactsByCurrencyId(getActivity(), wallet.getCurrencyId());
+            mContactAdapter = new ContactArrayAdapter(
+                    getActivity(),
+                    android.R.layout.simple_spinner_item,
+                    contacts
+            );
+        }
+        else {
+            mContactAdapter = new ContactArrayAdapter(
+                    getActivity(),
+                    android.R.layout.simple_spinner_item
+            );
+        }
         mContactAdapter.setDropDownViewResource(ContactArrayAdapter.DEFAULT_LAYOUT_RES);
     }
 
@@ -158,9 +180,12 @@ public class TransferFragment extends Fragment {
                 resetCurrencyData();
             }
         });
+        // select the wallet given in argument
         if (wallet != null) {
             int walletPosition = mWalletAdapter.getPosition(wallet);
-            mWalletSpinner.setSelection(walletPosition);
+            if (walletPosition != -1) {
+                mWalletSpinner.setSelection(walletPosition);
+            }
         }
 
         // Receiver
@@ -477,40 +502,58 @@ public class TransferFragment extends Fragment {
     }
 
 
-    public class LoadCurrencyDataTask extends AsyncTaskHandleException<Void, Void, Boolean>{
+    public class LoadCurrencyDataTask extends AsyncTaskHandleException<Void, Void, List<Contact>>{
         @Override
-        protected Boolean doInBackgroundHandleException(Void... strings) {
+        protected List<Contact> doInBackgroundHandleException(Void... strings) {
             Wallet selectedWallet = (Wallet)mWalletSpinner.getSelectedItem();
             Long selectedCurrencyId = selectedWallet.getCurrencyId();
 
-            // Already loaded for this currency: exit
-            if (ObjectUtils.equals(selectedCurrencyId, mCurrencyId)) {
-                return true;
+            final List<Contact> contacts = ServiceLocator.instance().getContactService()
+                    .getContactsByCurrencyId(getActivity(), selectedCurrencyId);
+            List<Contact> result;
+
+            // Add a empty row (as first element)
+            if (CollectionUtils.isNotEmpty(contacts)) {
+                result = new ArrayList<Contact>(contacts.size() + 1);
+                result.add(new Contact());
+                result.addAll(contacts);
+            }
+            else {
+                result = contacts;
+            }
+
+            // If currency changed
+            if (!ObjectUtils.equals(selectedCurrencyId, mCurrencyId)) {
+
+                // Get the last UD, from blockchain
+                mUniversalDividend = ServiceLocator.instance().getBlockchainRemoteService().getLastUD(selectedCurrencyId);
+                if (mUniversalDividend == null) {
+                    throw new UCoinTechnicalException("Could not get last UD from blockchain.");
+                }
             }
 
             mCurrencyId = selectedCurrencyId;
 
-            // Get the last UD, from blockchain
-            mUniversalDividend = ServiceLocator.instance().getBlockchainRemoteService().getLastUD(selectedCurrencyId);
-            if (mUniversalDividend == null) {
-                return false;
-            }
-
-            return true;
+            return result;
         }
 
         @Override
-        protected void onSuccess(Boolean success) {
-            if (success == null || !success.booleanValue()) {
-                // TODO NLS
-                Toast.makeText(getActivity(),
-                        "Could not load currency parameter. conversion to UD disable.",
-                        Toast.LENGTH_SHORT).show();
+        protected void onSuccess(List<Contact> contacts) {
+            if (contacts != null) {
+                mSendButton.setEnabled(true);
+                mContactAdapter.setNotifyOnChange(false);
+                mContactAdapter.clear();
+                mContactAdapter.addAll(contacts);
+                mContactAdapter.notifyDataSetChanged();
             }
-            else {
+        }
 
-                mSendButton.setEnabled(success);
-            }
+        @Override
+        protected void onFailed(Throwable error) {
+            super.onFailed(error);
+            Toast.makeText(getActivity(),
+                    ExceptionUtils.getMessage(error),
+                    Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -537,7 +580,7 @@ public class TransferFragment extends Fragment {
 
             // pubkey
             if (mReceiverIdentity != null) {
-                mPubkey =mReceiverIdentity.getPubkey();
+                mPubkey = mReceiverIdentity.getPubkey();
             }
             else {
                 mPubkey = mReceiverPubkeyText.getText().toString().trim();

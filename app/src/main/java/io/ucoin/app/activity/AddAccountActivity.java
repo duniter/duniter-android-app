@@ -21,6 +21,7 @@ import io.ucoin.app.model.Peer;
 import io.ucoin.app.service.AccountService;
 import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.technical.AsyncTaskHandleException;
+import io.ucoin.app.technical.ExceptionUtils;
 
 public class AddAccountActivity extends ActionBarActivity  {
 
@@ -158,7 +159,7 @@ public class AddAccountActivity extends ActionBarActivity  {
             mProgressViewAdapter.showProgress(false);
             Log.e(TAG, Log.getStackTraceString(t));
             Toast.makeText(AddAccountActivity.this,
-                    "Error: " + t.getMessage(),
+                    ExceptionUtils.getMessage(t),
                     Toast.LENGTH_SHORT).show();
 
             // TODO : manage exception type, between :

@@ -43,7 +43,6 @@ public class Contact implements LocalEntity, Serializable {
         this.name = name;
     }
 
-
     public List<Identity> getIdentities() {
         return identities;
     }
@@ -58,11 +57,7 @@ public class Contact implements LocalEntity, Serializable {
 
     @Override
     public String toString() {
-        return new StringBuilder()
-                .append("id=").append(id)
-                .append(",accountId=").append(accountId)
-                .append(",name=").append(name)
-                .toString();
+        return name;
     }
 
     public void copy(Contact contact) {
@@ -81,6 +76,15 @@ public class Contact implements LocalEntity, Serializable {
             return  ObjectUtils.equals(this.id, bi.id)
                     && ObjectUtils.equals(this.accountId, bi.accountId)
                     && ObjectUtils.equals(this.name, bi.name);
+        }
+        return false;
+    }
+
+    public boolean hasIdentityForCurrency(long currencyId) {
+        for(Identity identity:identities) {
+            if (identity.getCurrencyId() != null && identity.getCurrencyId().longValue() == currencyId) {
+                return true;
+            }
         }
         return false;
     }

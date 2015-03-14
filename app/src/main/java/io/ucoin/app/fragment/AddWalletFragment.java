@@ -310,6 +310,7 @@ public class AddWalletFragment extends Fragment {
 
         @Override
         protected void onSuccess(Wallet wallet) {
+            mProgressViewAdapter.showProgress(false);
             // Go back
             getFragmentManager().popBackStack();
         }

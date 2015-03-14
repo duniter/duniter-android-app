@@ -200,12 +200,14 @@ public class WalletService extends BaseService {
 
     private List<Wallet> getWalletsByAccountId(ContentResolver resolver, long accountId) {
 
-        String selection = Contract.Currency.ACCOUNT_ID + "=?";
+        String selection = Contract.Wallet.ACCOUNT_ID + "=?";
         String[] selectionArgs = {
                 String.valueOf(accountId)
         };
+        String orderBy = Contract.Wallet.NAME + " ASC";
+
         Cursor cursor = resolver.query(getContentUri(), new String[]{}, selection,
-                selectionArgs, null);
+                selectionArgs, orderBy);
 
         List<Wallet> result = new ArrayList<Wallet>();
         while (cursor.moveToNext()) {

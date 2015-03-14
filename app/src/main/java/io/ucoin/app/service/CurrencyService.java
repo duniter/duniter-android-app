@@ -35,9 +35,9 @@ public class CurrencyService extends BaseService {
 
     private SelectCursorHolder mSelectHolder = null;
 
-    private Map<Long, String> currencyNameByIdCache;
+    private Map<Long, String> mCurrencyNameByIdCache;
 
-    private List<Long> currencyIdsCache;
+    private List<Long> mCurrencyIdsCache;
 
     public CurrencyService() {
         super();
@@ -60,11 +60,11 @@ public class CurrencyService extends BaseService {
             result = insert(context.getContentResolver(), currency);
 
             // update cache (if already loaded)
-            if (currencyNameByIdCache != null) {
-                currencyNameByIdCache.put(currency.getId(), currency.getCurrencyName());
+            if (mCurrencyNameByIdCache != null) {
+                mCurrencyNameByIdCache.put(currency.getId(), currency.getCurrencyName());
             }
-            if (currencyIdsCache != null) {
-                currencyIdsCache.add(currency.getId());
+            if (mCurrencyIdsCache != null) {
+                mCurrencyIdsCache.add(currency.getId());
             }
         }
 
@@ -129,11 +129,32 @@ public class CurrencyService extends BaseService {
      */
     public String getCurrencyNameById(long currencyId) {
         // Check if cache as been loaded
-        if (currencyNameByIdCache == null) {
+        if (mCurrencyNameByIdCache == null) {
             throw new UCoinTechnicalException("Cache not initialize. Please call loadCache() before getCurrencyNameById().");
         }
         // Get it from cache
-        return currencyNameByIdCache.get(currencyId);
+        return mCurrencyNameByIdCache.get(currencyId);
+    }
+
+    /**
+     * Return a (cached) currency id, by name
+     * @param currencyName
+     * @return
+     */
+    public Long getCurrencyIdByName(String currencyName) {
+        ObjectUtils.checkArgument(StringUtils.isNotBlank(currencyName));
+
+        // Check if cache as been loaded
+        if (mCurrencyNameByIdCache == null) {
+            throw new UCoinTechnicalException("Cache not initialize. Please call loadCache() before getCurrencyNameById().");
+        }
+        // Get it from cache
+        for (Map.Entry<Long, String> entry : mCurrencyNameByIdCache.entrySet()) {
+            if (currencyName.equals(entry.getValue())) {
+                return entry.getKey();
+            }
+        }
+        return null;
     }
 
     /**
@@ -141,7 +162,7 @@ public class CurrencyService extends BaseService {
      * @return
      */
     public List<Long> getCurrencyIds() {
-        return currencyIdsCache;
+        return mCurrencyIdsCache;
     }
 
     /**
@@ -149,18 +170,18 @@ public class CurrencyService extends BaseService {
      * @param application
      */
     public void loadCache(Application application) {
-        if (currencyNameByIdCache != null && currencyIdsCache != null) {
+        if (mCurrencyNameByIdCache != null && mCurrencyIdsCache != null) {
             return;
         }
 
         List<Currency> currencies = getCurrencies(application);
 
-        currencyNameByIdCache = new HashMap<Long, String>();
-        currencyIdsCache = new ArrayList<Long>();
+        mCurrencyNameByIdCache = new HashMap<Long, String>();
+        mCurrencyIdsCache = new ArrayList<Long>();
 
         for (Currency currency : currencies) {
-            currencyNameByIdCache.put(currency.getId(), currency.getCurrencyName());
-            currencyIdsCache.add(currency.getId());
+            mCurrencyNameByIdCache.put(currency.getId(), currency.getCurrencyName());
+            mCurrencyIdsCache.add(currency.getId());
         }
     }
 

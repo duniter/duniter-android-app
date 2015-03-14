@@ -193,6 +193,12 @@ public class IdentityFragment extends Fragment {
             case R.id.action_sign:
                 onSignClick();
                 return true;
+            case R.id.action_add_contact:
+                onAddAsNewContact();
+                return true;
+            case R.id.action_add_existing_contact:
+                onAddAsExistingContact();
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -228,6 +234,29 @@ public class IdentityFragment extends Fragment {
                 .addToBackStack(fragment.getClass().getSimpleName())
                 .commit();
     }
+
+    protected void onAddAsNewContact() {
+        Bundle newInstanceArgs = getArguments();
+        Identity identity = (Identity)
+                newInstanceArgs.getSerializable(Identity.class.getSimpleName());
+
+        Fragment fragment = AddContactFragment.newInstance(identity);
+        getFragmentManager().beginTransaction()
+                .setCustomAnimations(R.animator.slide_in_down,
+                        R.animator.slide_out_up,
+                        R.animator.slide_in_up,
+                        R.animator.slide_out_down)
+                .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
+                .addToBackStack(fragment.getClass().getSimpleName())
+                .commit();
+    }
+
+    protected void onAddAsExistingContact() {
+        Toast.makeText(getActivity(),
+                "Not implemented yet. But cooming soon !",
+                Toast.LENGTH_LONG).show();
+    }
+
 
     protected void onError(Throwable t) {
         Toast.makeText(getActivity(),

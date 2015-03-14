@@ -13,6 +13,9 @@ import java.util.List;
 
 import io.ucoin.app.R;
 import io.ucoin.app.model.Contact;
+import io.ucoin.app.model.Identity;
+import io.ucoin.app.technical.ObjectUtils;
+import io.ucoin.app.technical.StringUtils;
 
 public class ContactArrayAdapter extends ArrayAdapter<Contact> {
 
@@ -80,6 +83,9 @@ public class ContactArrayAdapter extends ArrayAdapter<Contact> {
 
         // Retrieve the item
         Contact contact = getItem(position);
+        Identity identity = contact.getIdentities().size() == 1
+                ? contact.getIdentities().get(0)
+                : null;
         ViewHolder viewHolder;
 
         //inflate
@@ -96,20 +102,24 @@ public class ContactArrayAdapter extends ArrayAdapter<Contact> {
         viewHolder.name.setText(contact.getName());
 
         // Uid
-        /*if (StringUtils.isNotBlank(contact.getUid())
-                && !ObjectUtils.equals(contact.getName(), contact.getUid())) {
+        if (identity != null
+            && StringUtils.isNotBlank(identity.getUid())
+                && !ObjectUtils.equals(contact.getName(), identity.getUid())) {
             viewHolder.uid.setText(convertView.getContext().getString(
                     R.string.contact_uid,
-                    contact.getUid()));
+                    identity.getUid()));
             viewHolder.uid.setVisibility(View.VISIBLE);
-        }
-        else {
+        } else {
             viewHolder.uid.setVisibility(View.GONE);
         }
 
         // pubKey
-        viewHolder.pubkey.setText(contact.getPubKeyHash());
-        */
+        if (identity != null) {
+            viewHolder.pubkey.setText(identity.getPubkey());
+        }
+        else {
+            viewHolder.pubkey.setVisibility(View.GONE);
+        }
 
         return convertView;
     }

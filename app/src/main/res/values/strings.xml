@@ -91,6 +91,8 @@
     <string name="join">Join as member</string>
     <string name="delete">Delete</string>
     <string name="remove">Remove</string>
+    <string name="add_as_new_contact">Add as new contact</string>
+    <string name="add_as_existing_contact">Add to existing contact</string>
 
     <!-- Strings related to currency -->
     <string name="favorites">Contacts</string>
@@ -114,6 +116,7 @@
     <string name="cert_date">signature date</string>
     <string name="join_sended">Registration sended.\nWaiting network processing.</string>
     <string name="join_error">Could not send registration (technical error)</string>
+    <string name="duplicate_currency_name">Currency [%s] already exists.</string>
 
 
     <!-- Strings related to peer/node -->
@@ -154,9 +157,15 @@
         can find it. This password can\'t be changed thereafter, so choose it carefully.</string>
     <string name="test">Test</string>
 
+    <!-- Strings related to contact -->
+    <string name="contact_name">name</string>
+    <string name="add_contact">New contact</string>
+    <string name="contact_uid">User ID: %s</string>
 
+    <!-- Validation messages -->
     <string name="login_too_short">This login is too short</string>
     <string name="name_or_uid_required">One of name or user ID is required</string>
+    <string name="name_too_short">This name is too short</string>
     <string name="salt_too_short">This salt is too short</string>
     <string name="password_too_short">This password is too short</string>
     <string name="login_incorrect">This login is incorrect</string>
@@ -180,6 +189,5 @@
         <item>@string/home</item>
         <item>@string/currencies</item>
         <item>@string/settings</item>
-        <item>@string/dev</item>
     </string-array>
 </resources>

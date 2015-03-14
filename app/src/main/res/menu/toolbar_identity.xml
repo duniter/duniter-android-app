@@ -3,16 +3,24 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".MainActivity">
 
-    <item
-        android:id="@+id/action_sign"
-        android:title="@string/sign"
-        ucoin:showAsAction="ifRoom|withText" />
 
     <item
         android:id="@+id/action_transfer"
         android:title="@string/transfer"
         ucoin:showAsAction="ifRoom|withText" />
 
+    <item
+        android:id="@+id/action_sign"
+        android:title="@string/sign"
+        ucoin:showAsAction="ifRoom|withText" />
+
+    <item
+        android:id="@+id/action_add_contact"
+        android:title="@string/add_as_new_contact" />
+
+    <item
+        android:id="@+id/action_add_existing_contact"
+        android:title="@string/add_as_existing_contact" />
 
 </menu>
 
