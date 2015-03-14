@@ -1,34 +1,57 @@
 TODO - in french, sorry ;/
 
- - WOT :
-  * bouton favori
+V0.3
+~~~~
 
- - WOT : sign
-   * après le sign, retour à identity fragment
+ - Sign
+    * après le sign, retour à identity fragment
+
+ - Service :
+    * revoir le loadMembership pour exploiter le lookup/isMember
 
  - Contact :
-   * Pouvoir ajouter un contact
+    * Pouvoir ajouter un contact depuis une fiche identity
+    * Pouvoir ajouter un contact depuis un bouton add (depuis home)
 
-   - Transfer :
-    - wallet spinner : le montant est caché
-    - ajouter une option de fragmen pour avoir choisir le destinataire (par spinner ou pubkey)
-    - après le transfer retour à identity fragment
+ -  Wallet :
+    * add a "renew" if member but expired
+
+ - Transfer :
+    * après transfer retour à identity fragment
+    * après transfer refermer keyboard
 
 - sur les Wallets (home) :
-   * gérer le rafraichissement du solde, en tache de fond à l'ouverture et après un transfert
-     - fait, mais il manque un délai avant de recommencer la mise à jour. et un bouton pour le déclencher
-     - il faudrai un progress bar pendant la rafraichissement
-   * il faudra un "credit" et un "expected_credit" calculé localement
-   * Mettre une icon différente pour les Wallet non member
+    * gérer le rafraichissement du solde, en tache de fond à l'ouverture et après un transfert
+     => fait, mais il manque un délai avant de recommencer la mise à jour. et un bouton pour le déclencher
+    * il faudra un "credit" et un "expected_credit" calculé localement
 
-- gérer les transactions :
+V0.4
+~~~~
+
+ - Cache :
+    * ajouter une cache dans : ServiceLocator.instance().getBlockchainRemoteService().getParameters()
+    * idem pour getLastUD()
+
+ -  Wallet :
+    * WOT : on scroll down: reduce header
+
+ - Identity :
+    * bouton favori
+    * WOT : on scroll down: reduce header
+
+ - WOT community
+    * trier par date de signature (DESC)
+    * barrer les signatures trop vielles
+    * masquer les plus anciennes, sous un bouton (afficher l'historique)
+
+ - gérer les transactions :
     * ajouter les transactions en attente après un transfert,
     * pour rafraichir la liste à partir des noeuds
-    * pourvoir renvoyer une transaction qui' n'est pas passée
+    * pouvoir renvoyer une transaction qui n'est pas passée
 
-- revoir les transitions entre fragment, notamment :
-  * dans l'assistance de création de compte
-  * au niveau des transfer, quand un login est nécessaire
+ - revoir les transitions entre fragment, notamment :
+    * dans l'assistance de création de compte
+    * au niveau des transfer, quand un login est nécessaire
 
 - Login :
-   * Ajouter une case à cocher "se rappeller de moi pendant XXX minutes" (XXX dans les settings)
+    * Ajouter une case à cocher "se rappeller de moi pendant XXX minutes" (XXX dans les settings)

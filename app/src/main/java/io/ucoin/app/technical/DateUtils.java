@@ -80,6 +80,10 @@ public class DateUtils {
         if (timestamp <= 0) {
             return null;
         }
+
+        // Make sure cached variable are up to date
+        refreshCompareVars();
+
         long timeInMillis = timestamp * 1000;
         Date date =  new Date(timeInMillis);
 
