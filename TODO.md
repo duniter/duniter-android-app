@@ -24,10 +24,11 @@ V0.3
     * gérer le rafraichissement du solde, en tache de fond à l'ouverture et après un transfert
      => fait, mais il manque un délai avant de recommencer la mise à jour. et un bouton pour le déclencher
     * il faudra un "credit" et un "expected_credit" calculé localement
-
-V0.4
 ~~~~
 
+V0.4
+
+~~~~
  - Cache :
     * ajouter une cache dans : ServiceLocator.instance().getBlockchainRemoteService().getParameters()
     * idem pour getLastUD()
@@ -55,3 +56,5 @@ V0.4
 
 - Login :
     * Ajouter une case à cocher "se rappeller de moi pendant XXX minutes" (XXX dans les settings)
+
+~~~~
