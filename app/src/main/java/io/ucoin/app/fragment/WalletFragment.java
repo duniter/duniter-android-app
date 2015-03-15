@@ -164,6 +164,9 @@ public class WalletFragment extends Fragment {
                 progressView,
                 wotListView);
 
+        // Make sure to hide the keyboard
+        Views.hideKeyboard(getActivity());
+
         // update views
         updateView(wallet);
 

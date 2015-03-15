@@ -12,7 +12,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
-import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -88,13 +87,13 @@ public class WalletListFragment extends ListFragment implements MainActivity.Que
         v.setVisibility(View.GONE);
 
         // add button
-        ImageButton addButton = (ImageButton) view.findViewById(R.id.add_button);
+        /*ImageButton addButton = (ImageButton) view.findViewById(R.id.add_button);
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                doOpenAddWalletFragment();
+                onAddWalletClick();
             }
-        });
+        });*/
 
         getListView().setOnScrollListener(new AbsListView.OnScrollListener() {
 
@@ -115,8 +114,11 @@ public class WalletListFragment extends ListFragment implements MainActivity.Que
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.action_add:
-                doOpenAddWalletFragment();
+            case R.id.action_add_wallet:
+                onAddWalletClick();
+                return true;
+            case R.id.action_refresh:
+                onRefreshClick();
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -140,6 +142,7 @@ public class WalletListFragment extends ListFragment implements MainActivity.Que
 
     @Override
     public void onQuerySuccess(List<? extends Wallet> wallets) {
+        mWalletArrayAdapter.setNotifyOnChange(true);
         mWalletArrayAdapter.clear();
         mWalletArrayAdapter.addAll(wallets);
         mWalletArrayAdapter.notifyDataSetChanged();
@@ -181,21 +184,38 @@ public class WalletListFragment extends ListFragment implements MainActivity.Que
 
     /* -- Internal methods -- */
 
+    private void onRefreshClick(){
+        int count = mWalletArrayAdapter.getCount();
+        if (count == 0) {
+            return;
+        }
+
+        // Copy wallet to array, from adapter
+        Wallet[] wallets = new Wallet[count];
+        for (int i = 0; i<count; i++) {
+            wallets[i] = mWalletArrayAdapter.getItem(i);
+        }
+
+        // run the refresh task
+        UpdaterAsyncTask updaterTask = new UpdaterAsyncTask(mUpdateCreditProgressBar);
+        updaterTask.execute(wallets);
+    }
+
     private void setOnClickListener(OnClickListener listener) {
          mListener = listener;
      }
 
-    protected void doOpenAddWalletFragment() {
+    protected void onAddWalletClick() {
         Fragment fragment = AddWalletFragment.newInstance();
         FragmentManager fragmentManager = getFragmentManager();
         // Insert the Home at the first place in back stack
         fragmentManager.popBackStack(HomeFragment.class.getSimpleName(), 0);
         fragmentManager.beginTransaction()
                 .setCustomAnimations(
-                        R.animator.delayed_slide_in_up,
+                        R.animator.slide_in_right,
                         R.animator.fade_out,
                         R.animator.delayed_fade_in,
-                        R.animator.slide_out_up)
+                        R.animator.slide_out_left)
                 .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
                 .addToBackStack(fragment.getClass().getSimpleName())
                 .commit();

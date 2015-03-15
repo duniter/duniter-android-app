@@ -2,6 +2,7 @@ package io.ucoin.app.model;
 
 import java.io.Serializable;
 
+import io.ucoin.app.technical.ObjectUtils;
 import io.ucoin.app.technical.crypto.CryptoUtils;
 import io.ucoin.app.technical.crypto.KeyPair;
 
@@ -167,5 +168,15 @@ public class Wallet extends KeyPair implements LocalEntity, Serializable {
 
     public void setDirty(boolean isDirty) {
         this.isDirty = isDirty;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof Wallet) {
+            return ObjectUtils.equals(id, ((Wallet)o).id)
+                    && ObjectUtils.equals(getPubKeyHash(), ((Wallet)o).getPubKeyHash())
+                    && ObjectUtils.equals(currencyId, ((Wallet)o).currencyId);
+        }
+        return super.equals(o);
     }
 }

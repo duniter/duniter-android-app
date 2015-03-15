@@ -84,19 +84,29 @@ public class HomeFragment extends Fragment {
         mStatusImage = (ImageView) view.findViewById(R.id.status_image);
 
         // Tab 1: wallet list
-        WalletListFragment fragment = WalletListFragment.newInstance(
-                // Manage click on wallet
-                new WalletListFragment.OnClickListener() {
-                    @Override
-                    public void onPositiveClick(Bundle args) {
-                        Wallet wallet = (Wallet)args.getSerializable(Wallet.class.getSimpleName());
-                        onWalletClick(wallet);
-                    }
-                });
-        mWalletResultListener = fragment;
-        getFragmentManager().beginTransaction()
-                .replace(R.id.tab1, fragment, "tab1")
+        {
+            WalletListFragment fragment1 = WalletListFragment.newInstance(
+                    // Manage click on wallet
+                    new WalletListFragment.OnClickListener() {
+                        @Override
+                        public void onPositiveClick(Bundle args) {
+                            Wallet wallet = (Wallet) args.getSerializable(Wallet.class.getSimpleName());
+                            onWalletClick(wallet);
+                        }
+                    });
+            mWalletResultListener = fragment1;
+            getFragmentManager().beginTransaction()
+                    .replace(R.id.tab1, fragment1, "tab1")
+                    .commit();
+        }
+
+        // Tab 2: contact list
+        {
+            ContactListFragment fragment2 = ContactListFragment.newInstance();
+            getFragmentManager().beginTransaction()
+                .replace(R.id.tab2, fragment2, "tab2")
                 .commit();
+        }
 
         // Load wallets
         LoadWalletsTask loadWalletsTask = new LoadWalletsTask();

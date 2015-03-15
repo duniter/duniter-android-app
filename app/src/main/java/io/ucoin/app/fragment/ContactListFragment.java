@@ -12,26 +12,23 @@ import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import io.ucoin.app.Application;
 import io.ucoin.app.R;
-import io.ucoin.app.adapter.MovementCursorAdapter;
+import io.ucoin.app.adapter.ContactCursorAdapter;
 import io.ucoin.app.adapter.ProgressViewAdapter;
 import io.ucoin.app.content.Provider;
 import io.ucoin.app.database.Contract;
-import io.ucoin.app.model.Wallet;
 
 
-public class MovementListFragment extends ListFragment {
+public class ContactListFragment extends ListFragment {
 
     protected static final String BUNDLE_WALLET_ID = "WalletId";
 
-    private MovementCursorAdapter mCursorAdapter;
+    private ContactCursorAdapter mCursorAdapter;
     private ProgressViewAdapter mProgressViewAdapter;
 
-    static public MovementListFragment newInstance(Wallet wallet) {
-        MovementListFragment fragment = new MovementListFragment();
-        Bundle args = new Bundle();
-        args.putLong(BUNDLE_WALLET_ID, wallet.getId());
-        fragment.setArguments(args);
+    static public ContactListFragment newInstance() {
+        ContactListFragment fragment = new ContactListFragment();
         return fragment;
     }
 
@@ -45,7 +42,7 @@ public class MovementListFragment extends ListFragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        return inflater.inflate(R.layout.fragment_movement_list,
+        return inflater.inflate(R.layout.fragment_contact_list,
                 container, false);
     }
 
@@ -56,17 +53,18 @@ public class MovementListFragment extends ListFragment {
         mProgressViewAdapter = new ProgressViewAdapter(
                 view.findViewById(R.id.progressbar),
                 getListView());
-        long walletId = getArguments().getLong(BUNDLE_WALLET_ID);
 
-        Uri uri = Uri.parse(Provider.CONTENT_URI + "/movement/");
+        Uri uri = Uri.parse(Provider.CONTENT_URI + "/contactView/");
 
-        String selection = Contract.Movement.WALLET_ID + "=?";
-        String[] selectionArgs = {String.valueOf(walletId)};
-        String orderBy = Contract.Movement.TIME + " DESC";
+        String selection = Contract.Contact.ACCOUNT_ID + "=?";
+        String[] selectionArgs = {
+                ((Application) getActivity().getApplication()).getAccountId()
+        };
+        String orderBy = Contract.Contact.NAME + " ASC";
 
         Cursor cursor = getActivity().getContentResolver().query(uri, new String[]{}, selection,
                 selectionArgs, orderBy);
-        mCursorAdapter = new MovementCursorAdapter((Context) getActivity(), cursor, 0);
+        mCursorAdapter = new ContactCursorAdapter((Context) getActivity(), cursor, 0);
         setListAdapter(mCursorAdapter);
     }
 

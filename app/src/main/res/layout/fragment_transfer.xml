@@ -45,8 +45,10 @@
             android:id="@+id/receiver_pubkey"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:singleLine="true"
             android:hint="@string/public_key"
-            android:textColor="#372c24" />
+            android:textColor="#372c24"
+            android:imeOptions="actionNext"/>
 
         <TextView
             android:id="@+id/receiver_uid"

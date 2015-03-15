@@ -75,6 +75,7 @@ public class TransferFragment extends Fragment {
     private Long mCurrencyId = null;
     private Integer mUniversalDividend = null;
     private boolean mIsRunningConvertion = false;
+    private boolean mInitializing = false;
 
     private Identity mReceiverIdentity;
 
@@ -118,23 +119,21 @@ public class TransferFragment extends Fragment {
                 wallets
         );
         mWalletAdapter.setDropDownViewResource(WalletArrayAdapter.DEFAULT_LAYOUT_RES);
+        // replace the given wallet with a wallet from list
+        if (wallet != null && CollectionUtils.isNotEmpty(wallets)) {
+            for (Wallet aWallet : wallets) {
+                if (ObjectUtils.equals(aWallet.getId(), wallet.getId())) {
+                    newInstanceArgs.putSerializable(BUNDLE_WALLET, wallet);
+                    break;
+                }
+            }
+        }
 
         // Init contact list
-        if (wallet != null && wallet.getCurrencyId() != null) {
-            final List<Contact> contacts = ServiceLocator.instance().getContactService()
-                    .getContactsByCurrencyId(getActivity(), wallet.getCurrencyId());
-            mContactAdapter = new ContactArrayAdapter(
-                    getActivity(),
-                    android.R.layout.simple_spinner_item,
-                    contacts
-            );
-        }
-        else {
-            mContactAdapter = new ContactArrayAdapter(
-                    getActivity(),
-                    android.R.layout.simple_spinner_item
-            );
-        }
+        mContactAdapter = new ContactArrayAdapter(
+                getActivity(),
+                android.R.layout.simple_spinner_item
+        );
         mContactAdapter.setDropDownViewResource(ContactArrayAdapter.DEFAULT_LAYOUT_RES);
     }
 
@@ -149,6 +148,7 @@ public class TransferFragment extends Fragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        mInitializing = true;
 
         // Read fragment arguments
         Bundle newInstanceArgs = getArguments();
@@ -172,7 +172,10 @@ public class TransferFragment extends Fragment {
         mWalletSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-                loadCurrencyData();
+                if (!mInitializing) {
+                    Wallet selectedWallet = (Wallet) parentView.getSelectedItem();
+                    loadCurrencyData(selectedWallet);
+                }
             }
 
             @Override
@@ -180,13 +183,6 @@ public class TransferFragment extends Fragment {
                 resetCurrencyData();
             }
         });
-        // select the wallet given in argument
-        if (wallet != null) {
-            int walletPosition = mWalletAdapter.getPosition(wallet);
-            if (walletPosition != -1) {
-                mWalletSpinner.setSelection(walletPosition);
-            }
-        }
 
         // Receiver
         {
@@ -207,30 +203,29 @@ public class TransferFragment extends Fragment {
 
                 // Contact list (disable if no contact in list)
                 mContactSpinner = ((Spinner) view.findViewById(R.id.receiver_contact));
-                if (mContactAdapter.getCount() == 0) {
-                    mContactSpinner.setVisibility(View.GONE);
-                }
-                else {
-                    mContactSpinner.setAdapter(mContactAdapter);
-                    mContactSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                        @Override
-                        public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-                            // Copy the selected contact to pubkey field
-                            Contact selectContact = mContactAdapter.getItem(position);
-                            if (selectContact != null && selectContact.getIdentities().size() == 1) {
-                                Identity identity = selectContact.getIdentities().get(0);
-                                if (StringUtils.isNotBlank(identity.getPubkey())) {
-                                    mReceiverPubkeyText.setText(identity.getPubkey());
-                                }
+                mContactSpinner.setAdapter(mContactAdapter);
+                mContactSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+                        if (mInitializing) {
+                            return;
+                        }
+                        // Copy the selected contact to pubkey field
+                        Contact selectContact = (Contact)parentView.getSelectedItem();
+                        if (selectContact != null && selectContact.getIdentities().size() == 1) {
+                            Identity identity = selectContact.getIdentities().get(0);
+                            if (StringUtils.isNotBlank(identity.getPubkey())) {
+                                mReceiverPubkeyText.setText(identity.getPubkey());
+                                mAmountText.requestFocus();
                             }
                         }
+                    }
 
-                        @Override
-                        public void onNothingSelected(AdapterView<?> parentView) {
-                            resetCurrencyData();
-                        }
-                    });
-                }
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parentView) {
+                        resetCurrencyData();
+                    }
+                });
 
 
                 // Mask unused field
@@ -310,7 +305,18 @@ public class TransferFragment extends Fragment {
         }
 
         // Load data on currency (need for transfer and unit conversion)
-        loadCurrencyData();
+        loadCurrencyData((Wallet)mWalletSpinner.getSelectedItem());
+
+
+        // select the wallet given in argument
+        if (wallet != null) {
+            int walletPosition = mWalletAdapter.getPosition(wallet);
+            if (walletPosition != -1) {
+                mWalletSpinner.setSelection(walletPosition);
+            }
+        }
+
+        mInitializing = false;
     }
 
 
@@ -331,9 +337,9 @@ public class TransferFragment extends Fragment {
 
     /* -- Internal methods -- */
 
-    protected void loadCurrencyData() {
+    protected void loadCurrencyData(final Wallet wallet) {
         LoadCurrencyDataTask loadCurrencyDataTask = new LoadCurrencyDataTask();
-        loadCurrencyDataTask.execute((Void) null);
+        loadCurrencyDataTask.execute(wallet);
     }
 
     protected void resetCurrencyData() {
@@ -502,10 +508,15 @@ public class TransferFragment extends Fragment {
     }
 
 
-    public class LoadCurrencyDataTask extends AsyncTaskHandleException<Void, Void, List<Contact>>{
+    public class LoadCurrencyDataTask extends AsyncTaskHandleException<Wallet, Void, List<Contact>>{
+
         @Override
-        protected List<Contact> doInBackgroundHandleException(Void... strings) {
-            Wallet selectedWallet = (Wallet)mWalletSpinner.getSelectedItem();
+        protected List<Contact> doInBackgroundHandleException(Wallet... wallets) {
+            if (wallets == null || wallets.length == 0) {
+                return null;
+            }
+            Wallet selectedWallet = wallets[0];
+
             Long selectedCurrencyId = selectedWallet.getCurrencyId();
 
             final List<Contact> contacts = ServiceLocator.instance().getContactService()
@@ -539,12 +550,17 @@ public class TransferFragment extends Fragment {
 
         @Override
         protected void onSuccess(List<Contact> contacts) {
-            if (contacts != null) {
+            if (CollectionUtils.isNotEmpty(contacts)) {
                 mSendButton.setEnabled(true);
                 mContactAdapter.setNotifyOnChange(false);
                 mContactAdapter.clear();
                 mContactAdapter.addAll(contacts);
                 mContactAdapter.notifyDataSetChanged();
+                mContactSpinner.setVisibility(View.VISIBLE);
+            }
+            else {
+                mContactSpinner.setVisibility(View.GONE);
+                mContactAdapter.clear();
             }
         }
 

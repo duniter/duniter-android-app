@@ -5,17 +5,8 @@
     android:orientation="vertical">
 
     <ProgressBar
-        android:id="@+id/search_progress"
+        android:id="@+id/progressbar"
         style="?android:attr/progressBarStyleInverse"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_gravity="center_horizontal|center_vertical"
-        android:visibility="gone" />
-
-    <ProgressBar
-        android:id="@+id/load_progress"
-        style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
@@ -34,27 +25,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentTop="true"
-        android:text="@string/no_wallet"
+        android:text="@string/no_transfer"
         android:textAppearance="?android:textAppearanceMedium"
         android:textColor="@color/hideable_text_color"
-        android:textSize="18sp"
-        android:layout_margin="8dp"/>
+        android:textSize="18sp"/>
 
-    <!-- Bottom toolbar
-    <LinearLayout
-        android:id="@+id/bottomBar"
-        android:layout_height="wrap_content"
-        android:layout_width="fill_parent"
-        android:orientation="horizontal"
-        android:layout_alignParentBottom="true">
-
-        <ImageButton
-            android:layout_height="match_parent"
-            android:layout_width="0dp"
-            android:layout_weight="0.5"
-            android:src="@android:drawable/ic_input_add"
-            android:text="@string/add"
-            android:id="@+id/add_button"/>
-
-    </LinearLayout> -->
 </RelativeLayout>

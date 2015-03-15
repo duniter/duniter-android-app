@@ -116,6 +116,7 @@ public class ContactArrayAdapter extends ArrayAdapter<Contact> {
         // pubKey
         if (identity != null) {
             viewHolder.pubkey.setText(identity.getPubkey());
+            viewHolder.pubkey.setVisibility(View.VISIBLE);
         }
         else {
             viewHolder.pubkey.setVisibility(View.GONE);

@@ -13,6 +13,8 @@ public class DatabaseHelper extends SQLiteOpenHelper implements Contract {
     private static final String BLOB = " BLOB ";
     private static final String UNIQUE = " UNIQUE ";
     private static final String NOTNULL = " NOT NULL";
+    private static final String FROM = " FROM ";
+    private static final String WHERE = " WHERE ";
     private static final String COMMA = ",";
 
 
@@ -123,9 +125,12 @@ public class DatabaseHelper extends SQLiteOpenHelper implements Contract {
                 Contact2Currency.TABLE_NAME + "." + Contact2Currency.CURRENCY_ID + COMMA +
                 Contact2Currency.TABLE_NAME + "." + Contact2Currency.UID + COMMA +
                 Contact2Currency.TABLE_NAME + "." + Contact2Currency.PUBLIC_KEY +
-                " FROM " +
+                FROM +
                 Contact.TABLE_NAME + COMMA +
-                Contact2Currency.TABLE_NAME;
+                Contact2Currency.TABLE_NAME +
+                WHERE +
+                Contact.TABLE_NAME + "." + Contact._ID + "=" + Contact2Currency.TABLE_NAME + "." + Contact2Currency.CONTACT_ID
+                ;
         db.execSQL(CREATE_CONTACT_VIEW);
 
         /*

@@ -105,6 +105,7 @@
     <string name="currency">Currency</string>
     <string name="no_currency">No currency</string>
     <string name="no_transfer">No transfer</string>
+    <string name="no_contact">No contact</string>
     <string name="currencies">Currencies</string>
     <string name="members">Members</string>
     <string name="members_count">%s members</string>

@@ -4,6 +4,11 @@
     tools:context=".MainActivity">
 
     <item
+        android:id="@+id/action_transfer"
+        android:title="@string/transfer"
+        ucoin:showAsAction="ifRoom|withText" />
+
+    <item
         android:id="@+id/action_self"
         android:title="@string/self"
         ucoin:showAsAction="ifRoom|withText" />
@@ -11,11 +16,6 @@
     <item
         android:id="@+id/action_join"
         android:title="@string/join"
-        ucoin:showAsAction="ifRoom|withText" />
-
-    <item
-        android:id="@+id/action_transfer"
-        android:title="@string/transfer"
         ucoin:showAsAction="ifRoom|withText" />
 
     <item
