@@ -455,10 +455,15 @@ public class TransferFragment extends Fragment {
         mAmountUnitText.setText(mConvertedUnitText.getText());
         mConvertedUnitText.setText(amountUnitText);
         if (mIsCoinUnit) {
+            // Convert into amount integer
+            String amountStr = mAmountText.getText().toString();
+            amountStr = String.valueOf(Math.round(Double.parseDouble(amountStr)));
+            mAmountText.setText(amountStr);
+            // Change the editor type to number (no decimal)
             mAmountText.setInputType(EditorInfo.TYPE_CLASS_NUMBER);
         }
         else {
-            // Allow decimal when in UD
+            // Change the editor type to number with decimal
             mAmountText.setInputType(EditorInfo.TYPE_CLASS_NUMBER|EditorInfo.TYPE_NUMBER_FLAG_DECIMAL);
         }
         updateComvertedAmountView(mIsCoinUnit);
