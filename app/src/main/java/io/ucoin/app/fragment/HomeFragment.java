@@ -21,11 +21,11 @@ import java.util.List;
 
 import io.ucoin.app.R;
 import io.ucoin.app.activity.MainActivity;
-import io.ucoin.app.adapter.Views;
 import io.ucoin.app.model.Wallet;
 import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.service.exception.PeerConnectionException;
 import io.ucoin.app.technical.AsyncTaskHandleException;
+import io.ucoin.app.technical.ViewUtils;
 
 
 public class HomeFragment extends Fragment {
@@ -216,7 +216,7 @@ public class HomeFragment extends Fragment {
                             .show();
                 }
             });
-            Views.toogleViews(mTabs, mStatusPanel);
+            ViewUtils.toogleViews(mTabs, mStatusPanel);
 
             // Display the error
             Toast.makeText(HomeFragment.this.getActivity(),

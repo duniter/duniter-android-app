@@ -1,6 +1,7 @@
 package io.ucoin.app.fragment;
 
 import android.app.Fragment;
+import android.app.FragmentManager;
 import android.content.Context;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -22,6 +23,7 @@ import io.ucoin.app.adapter.ProgressViewAdapter;
 import io.ucoin.app.model.Wallet;
 import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.technical.AsyncTaskHandleException;
+import io.ucoin.app.technical.ObjectUtils;
 import io.ucoin.app.technical.crypto.KeyPair;
 
 /**
@@ -38,16 +40,39 @@ public class LoginFragment extends Fragment {
         return fragment;
     }
 
-    public static LoginFragment newInstance(Wallet wallet, OnClickListener listener) {
-        LoginFragment fragment = new LoginFragment();
+    public static LoginFragment newInstance(Wallet wallet, OnLoginListener listener) {
+        ObjectUtils.checkNotNull(wallet);
         Bundle newInstanceArgs = new Bundle();
         newInstanceArgs.putSerializable(Wallet.class.getSimpleName(), wallet);
+
+        LoginFragment fragment = new LoginFragment();
         fragment.setArguments(newInstanceArgs);
-        fragment.setOnClickListener(listener);
+        fragment.setOnLoginListener(listener);
         return fragment;
     }
 
-    private OnClickListener mListener;
+    public static void login(final FragmentManager fragmentManager, final Wallet wallet, LoginFragment.OnLoginListener listener) {
+        ObjectUtils.checkNotNull(wallet);
+        ObjectUtils.checkNotNull(fragmentManager);
+
+        if (wallet.isAuthenticate()) {
+            listener.onSuccess(wallet);
+            return;
+        }
+
+        LoginFragment fragment = LoginFragment.newInstance(wallet, listener);
+
+        fragmentManager.beginTransaction()
+                .setCustomAnimations(R.animator.slide_in_down,
+                        R.animator.slide_out_up,
+                        R.animator.slide_in_up,
+                        R.animator.slide_out_down)
+                .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
+                .addToBackStack(fragment.getClass().getSimpleName())
+                .commit();
+    }
+
+    private OnLoginListener mListener;
 
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
@@ -312,15 +337,12 @@ public class LoginFragment extends Fragment {
         protected void onSuccess(Wallet wallet) {
             mAuthTask = null;
 
+            mProgressViewAdapter.showProgress(false);
             if (wallet != null) {
-                Bundle args = new Bundle();
-                args.putSerializable(Wallet.class.getSimpleName(), wallet);
-                mListener.onPositiveClick(args);
-
+                mListener.onSuccess(wallet);
             } else {
                 mPasswordView.setError(getString(R.string.password_incorrect));
                 mPasswordView.requestFocus();
-                mProgressViewAdapter.showProgress(false);
             }
         }
 
@@ -340,12 +362,12 @@ public class LoginFragment extends Fragment {
         }
     }
 
-    private void setOnClickListener(OnClickListener listener) {
+    private void setOnLoginListener(OnLoginListener listener) {
         mListener = listener;
     }
 
-    public interface OnClickListener {
-        public void onPositiveClick(Bundle args);
+    public interface OnLoginListener {
+        public void onSuccess(Wallet authWallet);
     }
 }
 

@@ -3,6 +3,8 @@ package io.ucoin.app.adapter;
 import android.app.Activity;
 import android.view.View;
 
+import io.ucoin.app.technical.ViewUtils;
+
 /**
  * Created by eis on 12/01/15.
  */
@@ -31,6 +33,6 @@ public class ProgressViewAdapter {
      * Shows the progress UI and hides the login form.
      */
     public void showProgress(final boolean show) {
-        Views.toogleViews(mView, mProgressView, show, mAnimTime);
+        ViewUtils.toogleViews(mView, mProgressView, show, mAnimTime);
     }
 }

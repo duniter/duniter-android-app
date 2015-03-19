@@ -27,6 +27,7 @@ import io.ucoin.app.service.remote.BlockchainRemoteService;
 import io.ucoin.app.service.remote.WotRemoteService;
 import io.ucoin.app.technical.AsyncTaskHandleException;
 import io.ucoin.app.technical.DateUtils;
+import io.ucoin.app.technical.ViewUtils;
 
 
 public class IdentityFragment extends Fragment {
@@ -167,6 +168,9 @@ public class IdentityFragment extends Fragment {
         mProgressViewAdapter = new ProgressViewAdapter(
                 progressView,
                 wotListView);
+
+        // Make sure to hide the keyboard
+        ViewUtils.hideKeyboard(getActivity());
 
         // Load WOT data
         LoadTask task = new LoadTask(identity);

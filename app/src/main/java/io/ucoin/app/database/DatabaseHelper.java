@@ -222,6 +222,9 @@ public class DatabaseHelper extends SQLiteOpenHelper implements Contract {
         db.execSQL("DROP TABLE IF EXISTS " + Currency.TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + Wallet.TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + Account.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + Contact.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + Contact2Currency.TABLE_NAME);
+        db.execSQL("DROP VIEW IF EXISTS " + ContactView.VIEW_NAME);
 
         // then recreate
         onCreate(db);

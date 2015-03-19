@@ -24,7 +24,6 @@ import io.ucoin.app.activity.MainActivity;
 import io.ucoin.app.adapter.CertificationListAdapter;
 import io.ucoin.app.adapter.ImageAdapterHelper;
 import io.ucoin.app.adapter.ProgressViewAdapter;
-import io.ucoin.app.adapter.Views;
 import io.ucoin.app.model.Wallet;
 import io.ucoin.app.model.WotCertification;
 import io.ucoin.app.service.ServiceLocator;
@@ -32,7 +31,9 @@ import io.ucoin.app.service.remote.WotRemoteService;
 import io.ucoin.app.technical.AsyncTaskHandleException;
 import io.ucoin.app.technical.DateUtils;
 import io.ucoin.app.technical.ExceptionUtils;
+import io.ucoin.app.technical.FragmentUtils;
 import io.ucoin.app.technical.StringUtils;
+import io.ucoin.app.technical.ViewUtils;
 
 
 public class WalletFragment extends Fragment {
@@ -165,7 +166,7 @@ public class WalletFragment extends Fragment {
                 wotListView);
 
         // Make sure to hide the keyboard
-        Views.hideKeyboard(getActivity());
+        ViewUtils.hideKeyboard(getActivity());
 
         // update views
         updateView(wallet);
@@ -276,37 +277,16 @@ public class WalletFragment extends Fragment {
         final Wallet wallet = (Wallet) newInstanceArgs
                 .getSerializable(Wallet.class.getSimpleName());
 
-        // Retrieve the fragment to pop after transfer
-        FragmentManager fragmentManager = getFragmentManager();
-        FragmentManager.BackStackEntry backStackEntry = fragmentManager.getBackStackEntryAt(
-                fragmentManager.getBackStackEntryCount() - 1);
-        final String popBackStackName = backStackEntry.getName();
+        // Retrieve the fragment to pop after self certification
+        final String popBackStackName = FragmentUtils.getPopBackName(getFragmentManager(), 0);
 
-        // If user is authenticate on wallet : perform the join
-        if (wallet.isAuthenticate()) {
-            SelfCertificationTask task = new SelfCertificationTask(popBackStackName);
-            task.execute(wallet);
-        }
-        else {
-            // Ask for authentication
-            LoginFragment fragment = LoginFragment.newInstance(wallet, new LoginFragment.OnClickListener() {
-                public void onPositiveClick(Bundle bundle) {
-                    Wallet authWallet = (Wallet)bundle.getSerializable(Wallet.class.getSimpleName());
-
-                    // Launch the join
-                    SelfCertificationTask task = new SelfCertificationTask(popBackStackName);
-                    task.execute(wallet);
-                }
-            });
-            getFragmentManager().beginTransaction()
-                    .setCustomAnimations(R.animator.slide_in_down,
-                            R.animator.slide_out_up,
-                            R.animator.slide_in_up,
-                            R.animator.slide_out_down)
-                    .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
-                    .addToBackStack(fragment.getClass().getSimpleName())
-                    .commit();
-        }
+        // Launch the self certification
+        LoginFragment.login(getFragmentManager(), wallet, new LoginFragment.OnLoginListener() {
+            public void onSuccess(Wallet authWallet) {
+                SelfCertificationTask task = new SelfCertificationTask(popBackStackName);
+                task.execute(authWallet);
+            }
+        });
     }
 
     protected void onRequestMembershipClick() {
@@ -316,36 +296,15 @@ public class WalletFragment extends Fragment {
                 .getSerializable(Wallet.class.getSimpleName());
 
         // Retrieve the fragment to pop after transfer
-        FragmentManager fragmentManager = getFragmentManager();
-        FragmentManager.BackStackEntry backStackEntry = fragmentManager.getBackStackEntryAt(
-                fragmentManager.getBackStackEntryCount() - 1);
-        final String popBackStackName = backStackEntry.getName();
+        final String popBackStackName = FragmentUtils.getPopBackName(getFragmentManager(), 0);
 
-        // If user is authenticate on wallet : perform the join
-        if (wallet.isAuthenticate()) {
-            RequestMembershipTask task = new RequestMembershipTask(popBackStackName);
-            task.execute(wallet);
-        }
-        else {
-            // Ask for authentication
-            LoginFragment fragment = LoginFragment.newInstance(wallet, new LoginFragment.OnClickListener() {
-                public void onPositiveClick(Bundle bundle) {
-                    Wallet authWallet = (Wallet)bundle.getSerializable(Wallet.class.getSimpleName());
-
-                    // Launch the join
-                    RequestMembershipTask task = new RequestMembershipTask(popBackStackName);
-                    task.execute(wallet);
-                }
-            });
-            getFragmentManager().beginTransaction()
-                    .setCustomAnimations(R.animator.slide_in_down,
-                            R.animator.slide_out_up,
-                            R.animator.slide_in_up,
-                            R.animator.slide_out_down)
-                    .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
-                    .addToBackStack(fragment.getClass().getSimpleName())
-                    .commit();
-        }
+        // Perform the join (after login)
+        LoginFragment.login(getFragmentManager(), wallet, new LoginFragment.OnLoginListener() {
+            public void onSuccess(Wallet authWallet){
+                RequestMembershipTask task = new RequestMembershipTask(popBackStackName);
+                task.execute(authWallet);
+            }
+        });
     }
 
     protected void onWotIdentityClick(int position) {
@@ -397,7 +356,8 @@ public class WalletFragment extends Fragment {
                         // Run the delete task
                         DeleteTask deleteTask = new DeleteTask(popBackStackName);
                         deleteTask.execute(wallet);
-                    }})
+                    }
+                })
                 .setNegativeButton(android.R.string.no, null).show();
     }
 
@@ -471,7 +431,7 @@ public class WalletFragment extends Fragment {
         protected void onPreExecute() {
             super.onPreExecute();
             // Hide the keyboard, in case we come from imeDone)
-            Views.hideKeyboard(getActivity());
+            ViewUtils.hideKeyboard(getActivity());
 
             // Show the progress bar
             mProgressViewAdapter.showProgress(true);
@@ -542,7 +502,7 @@ public class WalletFragment extends Fragment {
         protected void onPreExecute() {
             super.onPreExecute();
             // Hide the keyboard, in case we come from imeDone)
-            Views.hideKeyboard(getActivity());
+            ViewUtils.hideKeyboard(getActivity());
 
             // Show the progress bar
             mProgressViewAdapter.showProgress(true);

@@ -17,6 +17,8 @@ import java.util.Map;
 import io.ucoin.app.content.Provider;
 import io.ucoin.app.database.Contract;
 import io.ucoin.app.model.Currency;
+import io.ucoin.app.service.remote.BlockchainRemoteService;
+import io.ucoin.app.technical.DateUtils;
 import io.ucoin.app.technical.ObjectUtils;
 import io.ucoin.app.technical.StringUtils;
 import io.ucoin.app.technical.UCoinTechnicalException;
@@ -37,10 +39,20 @@ public class CurrencyService extends BaseService {
 
     private Map<Long, String> mCurrencyNameByIdCache;
 
+    private Map<Long, String> mCurrencyUDByIdCache;
+
     private List<Long> mCurrencyIdsCache;
+
+    private BlockchainRemoteService blockchainRemoteService;
 
     public CurrencyService() {
         super();
+    }
+
+    @Override
+    public void initialize() {
+        super.initialize();
+        blockchainRemoteService = ServiceLocator.instance().getBlockchainRemoteService();
     }
 
     public Currency save(final Context context, final Currency currency) {
@@ -183,6 +195,36 @@ public class CurrencyService extends BaseService {
             mCurrencyNameByIdCache.put(currency.getId(), currency.getCurrencyName());
             mCurrencyIdsCache.add(currency.getId());
         }
+    }
+
+    /**
+     * Return the value of the last universal dividend
+     * @param currencyId
+     * @return
+     */
+    public long getLastUD(long currencyId) {
+        // TODO : add technical cache class
+        if (mCurrencyUDByIdCache == null) {
+            mCurrencyUDByIdCache = new HashMap<Long, String>();
+        }
+        String cachedValue = mCurrencyUDByIdCache.get(currencyId);
+        long timeInSec = DateUtils.getCurrentTimestamp();
+        if (cachedValue != null) {
+            String cacheTime = cachedValue.substring(cachedValue.lastIndexOf("|") + 1);
+            if (Long.parseLong(cacheTime) - timeInSec < 5 * 60 /*5 min*/) {
+                String cachedLastUD = cachedValue.substring(0, cachedValue.lastIndexOf("|"));
+                return Long.parseLong(cachedLastUD);
+            }
+        }
+
+        // Retrieve the last UD from the blockchain
+        long lastUD = blockchainRemoteService.getLastUD(currencyId);
+
+        // Fill the cache
+        cachedValue = new StringBuilder().append(lastUD).append('|').append(timeInSec).toString();
+        mCurrencyUDByIdCache.put(currencyId, cachedValue);
+
+        return lastUD;
     }
 
     /* -- internal methods-- */

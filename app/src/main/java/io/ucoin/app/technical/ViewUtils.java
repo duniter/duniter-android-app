@@ -1,4 +1,4 @@
-package io.ucoin.app.adapter;
+package io.ucoin.app.technical;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -12,11 +12,11 @@ import android.view.inputmethod.InputMethodManager;
 /**
  * Created by eis on 12/02/15.
  */
-public class Views {
+public class ViewUtils {
 
     private static long mAnimTime = -1;
 
-    protected Views() {
+    protected ViewUtils() {
         // helper class, so protected constructor
     }
 

@@ -32,6 +32,16 @@
             android:text="@string/receiver"
             android:textColor="#372c24" />
 
+        <!-- Load contact progress-->
+        <ProgressBar
+            android:id="@+id/receiver_contact_progress"
+            style="?android:attr/progressBarStyleInverse"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dip"
+            android:layout_marginTop="5dip"
+            android:layout_gravity="center_horizontal|center_vertical"
+            android:visibility="gone" />
         <Spinner
             android:id="@+id/receiver_contact"
             android:layout_width="match_parent"
@@ -84,7 +94,8 @@
                 android:layout_weight="0.30"
                 android:hint="@string/amount_hint"
                 android:imeOptions="actionNext"
-                android:inputType="numberDecimal"
+                android:inputType="number"
+                android:maxLength="18"
                 android:singleLine="true"
                 android:textStyle="bold" />
 
@@ -162,7 +173,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/send" />
 
-            <!-- Login progress -->
+            <!-- progress -->
             <ProgressBar
                 android:id="@+id/transfer_progress"
                 style="?android:attr/progressBarStyleInverse"

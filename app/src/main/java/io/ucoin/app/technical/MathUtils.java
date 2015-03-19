@@ -1,20 +1,22 @@
 package io.ucoin.app.technical;
 
+import java.text.DecimalFormat;
+
 /**
  * Created by eis on 12/03/15.
  */
 public class MathUtils {
 
-    public static final int maxDecimalNumber = 2;
+    public static final int maxDecimalNumber = 4;
 
     private static final int roundConversionCoef = (int)Math.pow(10, maxDecimalNumber);
 
-    public static long convertToCoin(final double valueInUD, final int ud) {
+    public static long convertToCoin(final double valueInUD, final long ud) {
         return Math.round(valueInUD * ud);
     }
 
-    public static double convertToUD(final int coins, final int ud) {
-        return Math.round(coins / ud * roundConversionCoef) / roundConversionCoef;
+    public static double convertToUD(final long coins, final long ud) {
+        return Math.round((coins / ud) * roundConversionCoef) / roundConversionCoef;
     }
 
     /**
@@ -46,16 +48,19 @@ public class MathUtils {
     public static String formatShort(double amount) {
         // Less than a million
         if (amount < 1000000) {
-            return Double.toString(Math.round(amount * roundConversionCoef) / roundConversionCoef);
+            DecimalFormat f = new DecimalFormat();
+            f.setGroupingUsed(true);
+            //f.setDecimalSeparatorAlwaysShown(true);
+            return f.format(amount);
         }
 
         // Between 1 million and 1 billion
         String amountStr = Long.toString(Math.round(amount));
         if (amount < 1000000000) {
-            return amountStr.substring(0, amountStr.length() - 6) + "M";
+            return formatShort(amount / 1000000) + "M";
         }
 
         // More than 1 billion
-        return amountStr.substring(0, amountStr.length() - 9) + "G";
+        return formatShort(amount / 1000000000) + "G";
     }
 }

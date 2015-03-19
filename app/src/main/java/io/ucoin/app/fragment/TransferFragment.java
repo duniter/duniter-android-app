@@ -2,7 +2,6 @@ package io.ucoin.app.fragment;
 
 import android.app.Activity;
 import android.app.Fragment;
-import android.app.FragmentManager;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -31,7 +30,6 @@ import io.ucoin.app.R;
 import io.ucoin.app.activity.MainActivity;
 import io.ucoin.app.adapter.ContactArrayAdapter;
 import io.ucoin.app.adapter.ProgressViewAdapter;
-import io.ucoin.app.adapter.Views;
 import io.ucoin.app.adapter.WalletArrayAdapter;
 import io.ucoin.app.model.Contact;
 import io.ucoin.app.model.Identity;
@@ -45,10 +43,12 @@ import io.ucoin.app.technical.AsyncTaskHandleException;
 import io.ucoin.app.technical.CollectionUtils;
 import io.ucoin.app.technical.DateUtils;
 import io.ucoin.app.technical.ExceptionUtils;
+import io.ucoin.app.technical.FragmentUtils;
 import io.ucoin.app.technical.MathUtils;
 import io.ucoin.app.technical.ObjectUtils;
 import io.ucoin.app.technical.StringUtils;
 import io.ucoin.app.technical.UCoinTechnicalException;
+import io.ucoin.app.technical.ViewUtils;
 
 public class TransferFragment extends Fragment {
 
@@ -73,7 +73,7 @@ public class TransferFragment extends Fragment {
 
     private boolean mIsCoinUnit = true;
     private Long mCurrencyId = null;
-    private Integer mUniversalDividend = null;
+    private Long mUniversalDividend = null;
     private boolean mIsRunningConvertion = false;
     private boolean mInitializing = false;
 
@@ -190,7 +190,7 @@ public class TransferFragment extends Fragment {
             if (mReceiverIdentity != null) {
                 ((TextView) view.findViewById(R.id.receiver_uid)).setText(mReceiverIdentity.getUid());
 
-                // Mask unused field
+                // Mask unused views
                 view.findViewById(R.id.receiver_contact).setVisibility(View.GONE);
                 view.findViewById(R.id.receiver_pubkey).setVisibility(View.GONE);
             }
@@ -211,7 +211,7 @@ public class TransferFragment extends Fragment {
                             return;
                         }
                         // Copy the selected contact to pubkey field
-                        Contact selectContact = (Contact)parentView.getSelectedItem();
+                        Contact selectContact = (Contact) parentView.getSelectedItem();
                         if (selectContact != null && selectContact.getIdentities().size() == 1) {
                             Identity identity = selectContact.getIdentities().get(0);
                             if (StringUtils.isNotBlank(identity.getPubkey())) {
@@ -226,9 +226,9 @@ public class TransferFragment extends Fragment {
                         resetCurrencyData();
                     }
                 });
+                mContactSpinner.setVisibility(View.GONE);
 
-
-                // Mask unused field
+                // Mask unused views
                 view.findViewById(R.id.receiver_uid).setVisibility(View.GONE);
             }
         }
@@ -301,7 +301,7 @@ public class TransferFragment extends Fragment {
         // Set the focus and open keyboard
         if (focusView != null) {
             focusView.requestFocus();
-            Views.showKeyboard(getActivity());
+            ViewUtils.showKeyboard(getActivity());
         }
 
         // Load data on currency (need for transfer and unit conversion)
@@ -418,36 +418,17 @@ public class TransferFragment extends Fragment {
 
     protected void doTransfert(final Wallet wallet) {
         // Retrieve the fragment to pop after transfer
-        FragmentManager fragmentManager = getFragmentManager();
-        FragmentManager.BackStackEntry backStackEntry = fragmentManager.getBackStackEntryAt(
-                fragmentManager.getBackStackEntryCount() - 2);
-        final String popBackStackName = backStackEntry.getName();
+        final String popBackStackName = FragmentUtils.getPopBackName(getFragmentManager(), 1);
 
-        // If user is authenticate on wallet : perform the transfer
-        if (wallet.isAuthenticate()) {
-            mTransferTask = new TransferTask(popBackStackName);
-            mTransferTask.execute(wallet);
-        }
-        else {
-            // Ask for authentication
-            LoginFragment fragment = LoginFragment.newInstance(wallet, new LoginFragment.OnClickListener() {
-                public void onPositiveClick(Bundle bundle) {
-                    Wallet authWallet = (Wallet)bundle.getSerializable(Wallet.class.getSimpleName());
+        // Perform the transfer (after authenticate if need)
+        LoginFragment.login(getFragmentManager(), wallet, new LoginFragment.OnLoginListener() {
+            public void onSuccess(final Wallet authWallet) {
 
-                    // Launch the transfer
-                    mTransferTask = new TransferTask(popBackStackName);
-                    mTransferTask.execute(wallet);
-                }
-            });
-            getFragmentManager().beginTransaction()
-                    .setCustomAnimations(R.animator.slide_in_down,
-                            R.animator.slide_out_up,
-                            R.animator.slide_in_up,
-                            R.animator.slide_out_down)
-                    .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
-                    .addToBackStack(fragment.getClass().getSimpleName())
-                    .commit();
-        }
+                // Launch the transfer
+                mTransferTask = new TransferTask(popBackStackName);
+                mTransferTask.execute(authWallet);
+            }
+        });
     }
 
     protected boolean isAmountValidLong(String amountStr) {
@@ -473,6 +454,13 @@ public class TransferFragment extends Fragment {
         CharSequence amountUnitText = mAmountUnitText.getText();
         mAmountUnitText.setText(mConvertedUnitText.getText());
         mConvertedUnitText.setText(amountUnitText);
+        if (mIsCoinUnit) {
+            mAmountText.setInputType(EditorInfo.TYPE_CLASS_NUMBER);
+        }
+        else {
+            // Allow decimal when in UD
+            mAmountText.setInputType(EditorInfo.TYPE_CLASS_NUMBER|EditorInfo.TYPE_NUMBER_FLAG_DECIMAL);
+        }
         updateComvertedAmountView(mIsCoinUnit);
     }
 
@@ -491,8 +479,8 @@ public class TransferFragment extends Fragment {
 
             // if amount unit = coins
             if (isCoinUnit) {
-                int amountInCoins = Integer.parseInt(amountStr);
-                double convertedAmount = MathUtils.convertToUD(amountInCoins, mUniversalDividend);
+                long amountInCoins = Long.parseLong(amountStr);
+                double convertedAmount = ((double)amountInCoins) / mUniversalDividend.longValue();
                 mConvertedText.setText(MathUtils.formatShort(convertedAmount));
             }
 
@@ -510,6 +498,8 @@ public class TransferFragment extends Fragment {
 
     public class LoadCurrencyDataTask extends AsyncTaskHandleException<Wallet, Void, List<Contact>>{
 
+        private boolean mMustLoadContacts = (mContactSpinner != null);
+
         @Override
         protected List<Contact> doInBackgroundHandleException(Wallet... wallets) {
             if (wallets == null || wallets.length == 0) {
@@ -519,25 +509,27 @@ public class TransferFragment extends Fragment {
 
             Long selectedCurrencyId = selectedWallet.getCurrencyId();
 
-            final List<Contact> contacts = ServiceLocator.instance().getContactService()
-                    .getContactsByCurrencyId(getActivity(), selectedCurrencyId);
-            List<Contact> result;
+            List<Contact> result = null;
 
-            // Add a empty row (as first element)
-            if (CollectionUtils.isNotEmpty(contacts)) {
-                result = new ArrayList<Contact>(contacts.size() + 1);
-                result.add(new Contact());
-                result.addAll(contacts);
-            }
-            else {
-                result = contacts;
+            if (mMustLoadContacts) {
+                final List<Contact> contacts = ServiceLocator.instance().getContactService()
+                        .getContactsByCurrencyId(getActivity(), selectedCurrencyId);
+
+                // Add a empty row (as first element)
+                if (CollectionUtils.isNotEmpty(contacts)) {
+                    result = new ArrayList<Contact>(contacts.size() + 1);
+                    result.add(new Contact());
+                    result.addAll(contacts);
+                } else {
+                    result = contacts;
+                }
             }
 
             // If currency changed
             if (!ObjectUtils.equals(selectedCurrencyId, mCurrencyId)) {
 
                 // Get the last UD, from blockchain
-                mUniversalDividend = ServiceLocator.instance().getBlockchainRemoteService().getLastUD(selectedCurrencyId);
+                mUniversalDividend = ServiceLocator.instance().getCurrencyService().getLastUD(selectedCurrencyId);
                 if (mUniversalDividend == null) {
                     throw new UCoinTechnicalException("Could not get last UD from blockchain.");
                 }
@@ -550,6 +542,11 @@ public class TransferFragment extends Fragment {
 
         @Override
         protected void onSuccess(List<Contact> contacts) {
+            // Skip if fragment has been destroyed
+            if (mContactSpinner == null) {
+                return;
+            }
+
             if (CollectionUtils.isNotEmpty(contacts)) {
                 mSendButton.setEnabled(true);
                 mContactAdapter.setNotifyOnChange(false);
@@ -589,7 +586,7 @@ public class TransferFragment extends Fragment {
         protected void onPreExecute() {
             super.onPreExecute();
             // Hide the keyboard, in case we come from imeDone)
-            Views.hideKeyboard(getActivity());
+            ViewUtils.hideKeyboard(getActivity());
 
             // Show the progress bar
             mProgressViewAdapter.showProgress(true);
@@ -644,7 +641,9 @@ public class TransferFragment extends Fragment {
 
         @Override
         protected void onSuccess(Boolean success) {
-            mProgressViewAdapter.showProgress(false);
+            if (mProgressViewAdapter != null) {
+                mProgressViewAdapter.showProgress(false);
+            }
             if (success == null || !success.booleanValue()) {
                 Toast.makeText(getActivity(),
                         getString(R.string.transfer_error),

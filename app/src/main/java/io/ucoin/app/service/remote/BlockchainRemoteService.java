@@ -149,7 +149,7 @@ public class BlockchainRemoteService extends BaseRemoteService {
      * @param currencyId id of currency
      * @return
      */
-    public Integer getLastUD(long currencyId) {
+    public long getLastUD(long currencyId) {
         // get block number with UD
         String blocksWithUdResponse = executeRequest(currencyId, URL_BLOCK_WITH_UD, String.class);
         Integer blockNumber = getLastBlockNumberFromJson(blocksWithUdResponse);
@@ -163,13 +163,13 @@ public class BlockchainRemoteService extends BaseRemoteService {
 
         // Get the UD from the last block with UD
         BlockchainBlock block = getBlock(currencyId, blockNumber);
-        Integer lastUD = block.getDividend();
+        Long lastUD = block.getDividend();
 
         // Check not null (should never happend)
         if (lastUD == null) {
             throw new UCoinTechnicalException("Unable to get last UD from server");
         }
-        return lastUD;
+        return lastUD.longValue();
     }
 
      /**

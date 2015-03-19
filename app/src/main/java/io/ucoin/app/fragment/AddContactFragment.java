@@ -17,7 +17,6 @@ import android.widget.Toast;
 import io.ucoin.app.R;
 import io.ucoin.app.activity.MainActivity;
 import io.ucoin.app.adapter.ProgressViewAdapter;
-import io.ucoin.app.adapter.Views;
 import io.ucoin.app.model.Contact;
 import io.ucoin.app.model.Identity;
 import io.ucoin.app.service.ServiceLocator;
@@ -25,6 +24,7 @@ import io.ucoin.app.technical.AsyncTaskHandleException;
 import io.ucoin.app.technical.ExceptionUtils;
 import io.ucoin.app.technical.ObjectUtils;
 import io.ucoin.app.technical.StringUtils;
+import io.ucoin.app.technical.ViewUtils;
 
 /**
  * A screen used to add a wallet via currency, uid, salt and password.
@@ -169,7 +169,7 @@ public class AddContactFragment extends Fragment {
 
         @Override
         protected void onPreExecute() {
-            Views.hideKeyboard(getActivity());
+            ViewUtils.hideKeyboard(getActivity());
 
             // Show the progress bar
             mProgressViewAdapter.showProgress(true);

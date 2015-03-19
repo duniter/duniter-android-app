@@ -18,13 +18,14 @@ import java.util.List;
 import io.ucoin.app.R;
 import io.ucoin.app.activity.MainActivity;
 import io.ucoin.app.adapter.ProgressViewAdapter;
-import io.ucoin.app.adapter.Views;
 import io.ucoin.app.adapter.WalletArrayAdapter;
 import io.ucoin.app.model.Identity;
 import io.ucoin.app.model.Wallet;
 import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.service.remote.WotRemoteService;
 import io.ucoin.app.technical.AsyncTaskHandleException;
+import io.ucoin.app.technical.FragmentUtils;
+import io.ucoin.app.technical.ViewUtils;
 
 public class SignFragment extends Fragment {
 
@@ -148,33 +149,17 @@ public class SignFragment extends Fragment {
     }
 
     protected void doSign(final Wallet wallet) {
-        // If user is authenticate on wallet : perform the transfer
-        if (wallet.isAuthenticate()) {
-            mSignTask = new SignTask();
-            mSignTask.execute(wallet);
-        }
-        else {
-            // Ask for authentication
-            LoginFragment fragment = LoginFragment.newInstance(wallet, new LoginFragment.OnClickListener() {
-                public void onPositiveClick(Bundle bundle) {
-                    Wallet authWallet = (Wallet)bundle.getSerializable(Wallet.class.getSimpleName());
-                    // Make sure this is the same wallet returned
-                    //getFragmentManager().popBackStack(); // back to transfer fragment
+        // Retrieve the fragment to pop after transfer
+        final String popBackStackName = FragmentUtils.getPopBackName(getFragmentManager(), 1);
 
-                    // Launch the transfer
-                    mSignTask = new SignTask();
-                    mSignTask.execute(wallet);
-                }
-            });
-            getFragmentManager().beginTransaction()
-                    .setCustomAnimations(R.animator.slide_in_down,
-                            R.animator.slide_out_up,
-                            R.animator.slide_in_up,
-                            R.animator.slide_out_down)
-                    .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
-                    .addToBackStack(fragment.getClass().getSimpleName())
-                    .commit();
-        }
+        // Perform the transfer (when login)
+        LoginFragment.login(getFragmentManager(), wallet, new LoginFragment.OnLoginListener() {
+            public void onSuccess(final Wallet wallet) {
+                // Launch the transfer
+                mSignTask = new SignTask(popBackStackName);
+                mSignTask.execute(wallet);
+            }
+        });
     }
 
     /**
@@ -182,11 +167,17 @@ public class SignFragment extends Fragment {
      */
     public class SignTask extends AsyncTaskHandleException<Wallet, Void, Boolean> {
 
+        private String mPopBackStackName;
+
+        public SignTask(String popBackStackName) {
+            this.mPopBackStackName = popBackStackName;
+        }
+
         @Override
         protected void onPreExecute() {
 
             // hide keyboard
-            Views.hideKeyboard(getActivity());
+            ViewUtils.hideKeyboard(getActivity());
 
             // Show the progress bar
             mProgressViewAdapter.showProgress(true);
@@ -214,13 +205,13 @@ public class SignFragment extends Fragment {
                         Toast.LENGTH_SHORT).show();
             }
             else {
-                getFragmentManager().popBackStack(); // return back
+                getFragmentManager().popBackStack(mPopBackStackName, 0); // return back
 
                 Toast.makeText(getActivity(),
                         getString(R.string.cert_sended),
                         Toast.LENGTH_LONG).show();
-                // TODO smoul : could you go back to previous fragment ?
-                // Or maybe to a new transaction history fragment ?
+
+
             }
         }
 

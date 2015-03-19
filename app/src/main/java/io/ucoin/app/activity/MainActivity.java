@@ -38,7 +38,6 @@ import io.ucoin.app.R;
 import io.ucoin.app.config.Configuration;
 import io.ucoin.app.content.Provider;
 import io.ucoin.app.database.Contract;
-import io.ucoin.app.exception.UncaughtExceptionHandler;
 import io.ucoin.app.fragment.CurrencyListFragment;
 import io.ucoin.app.fragment.DevFragment;
 import io.ucoin.app.fragment.HomeFragment;
@@ -69,7 +68,7 @@ public class MainActivity extends ActionBarActivity
         super.onCreate(savedInstanceState);
 
         // Prepare some utilities
-        Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler(this));
+        //Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler(this));
         DateUtils.setDefaultMediumDateFormat(getMediumDateFormat());
         DateUtils.setDefaultLongDateFormat(getLongDateFormat());
         DateUtils.setDefaultShortDateFormat(getShortDateFormat());

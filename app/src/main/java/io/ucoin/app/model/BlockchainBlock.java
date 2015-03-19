@@ -26,7 +26,7 @@ public class BlockchainBlock implements Serializable {
     private String parameters;
     private String previousHash;
     private String previousIssuer;
-    private Integer dividend;
+    private Long dividend;
     //private int memberChanges;
     private List<Identity> identities;
     private List<Member> joiners;
@@ -116,10 +116,10 @@ public class BlockchainBlock implements Serializable {
     public void setPreviousIssuer(String previousIssuer) {
         this.previousIssuer = previousIssuer;
     }
-    public Integer getDividend() {
+    public Long getDividend() {
         return dividend;
     }
-    public void setDividend(Integer dividend) {
+    public void setDividend(Long dividend) {
         this.dividend = dividend;
     }
     public List<Identity> getIdentities() {
