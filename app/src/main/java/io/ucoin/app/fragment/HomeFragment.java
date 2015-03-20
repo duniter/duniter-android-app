@@ -159,7 +159,7 @@ public class HomeFragment extends Fragment {
         return false;
     }
 
-    protected void onWalletClick(Wallet wallet) {
+    protected void onWalletClick(final Wallet wallet) {
         Fragment fragment = WalletFragment.newInstance(wallet);
         FragmentManager fragmentManager = getFragmentManager();
         // Insert the Home at the first place in back stack

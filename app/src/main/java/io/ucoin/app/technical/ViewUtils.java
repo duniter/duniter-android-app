@@ -90,7 +90,7 @@ public class ViewUtils {
         inputManager.hideSoftInputFromWindow((null == activity.getCurrentFocus())
                         ? null
                         : activity.getCurrentFocus().getWindowToken(),
-                InputMethodManager.HIDE_NOT_ALWAYS);
+                InputMethodManager.HIDE_NOT_ALWAYS|InputMethodManager.HIDE_IMPLICIT_ONLY);
     }
 
     /* -- Internal methods -- */

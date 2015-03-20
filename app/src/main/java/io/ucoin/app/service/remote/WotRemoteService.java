@@ -308,11 +308,13 @@ public class WotRemoteService extends BaseRemoteService {
         WotIdentityCertifications certifiersOfList = getCertifiersOf(currencyId, pubkey);
         boolean certifiersOfIsEmpty = (certifiersOfList == null
                 || certifiersOfList.getCertifications() == null);
-        //Map<String, WotCertification> certifierByPubkeys = new HashMap<String, WotCertification>();
         if (!certifiersOfIsEmpty) {
             for (WotCertification certifier : certifiersOfList.getCertifications()) {
                 certifier.setCertifiedBy(false);
-                //certifierByPubkeys.put(certifier.getPubkey(), certifier);
+
+                // Set the currency Id
+                certifier.setCurrencyId(currencyId);
+
                 result.add(certifier);
             }
         }
@@ -327,8 +329,9 @@ public class WotRemoteService extends BaseRemoteService {
 
                 certifiedBy.setCertifiedBy(true);
 
-                // If exists, link to other side certification
-                String certifiedByPubkey = certifiedBy.getPubkey();
+                // Set the currency Id
+                certifiedBy.setCurrencyId(currencyId);
+
                 result.add(certifiedBy);
             }
         }

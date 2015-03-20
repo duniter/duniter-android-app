@@ -503,7 +503,7 @@ public class TransferFragment extends Fragment {
 
     public class LoadCurrencyDataTask extends AsyncTaskHandleException<Wallet, Void, List<Contact>>{
 
-        private boolean mMustLoadContacts = (mContactSpinner != null);
+        private boolean mLoadContacts = (mContactSpinner != null);
 
         @Override
         protected List<Contact> doInBackgroundHandleException(Wallet... wallets) {
@@ -516,7 +516,7 @@ public class TransferFragment extends Fragment {
 
             List<Contact> result = null;
 
-            if (mMustLoadContacts) {
+            if (mLoadContacts) {
                 final List<Contact> contacts = ServiceLocator.instance().getContactService()
                         .getContactsByCurrencyId(getActivity(), selectedCurrencyId);
 
@@ -547,8 +547,8 @@ public class TransferFragment extends Fragment {
 
         @Override
         protected void onSuccess(List<Contact> contacts) {
-            // Skip if fragment has been destroyed
-            if (mContactSpinner == null) {
+            // Skip if contacts not loaded
+            if (!mLoadContacts) {
                 return;
             }
 
@@ -591,7 +591,7 @@ public class TransferFragment extends Fragment {
         protected void onPreExecute() {
             super.onPreExecute();
             // Hide the keyboard, in case we come from imeDone)
-            ViewUtils.hideKeyboard(getActivity());
+            ViewUtils.hideKeyboard(mActivity);
 
             // Show the progress bar
             mProgressViewAdapter.showProgress(true);
@@ -650,17 +650,16 @@ public class TransferFragment extends Fragment {
                 mProgressViewAdapter.showProgress(false);
             }
             if (success == null || !success.booleanValue()) {
-                Toast.makeText(getActivity(),
+                Toast.makeText(mActivity,
                         getString(R.string.transfer_error),
                         Toast.LENGTH_SHORT).show();
             }
             else {
                 getFragmentManager().popBackStack(popStackTraceName, 0); // return back
 
-                Toast.makeText(getActivity(),
+                Toast.makeText(mActivity,
                         getString(R.string.transfer_sended),
                         Toast.LENGTH_LONG).show();
-
             }
         }
 
@@ -675,7 +674,7 @@ public class TransferFragment extends Fragment {
                 Toast.makeText(getActivity(),
                         getString(R.string.transfer_error)
                         + "\n"
-                        + error.getMessage(),
+                        + ExceptionUtils.getMessage(error),
                         Toast.LENGTH_SHORT).show();
             }
 
