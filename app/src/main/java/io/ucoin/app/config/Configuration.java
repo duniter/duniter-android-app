@@ -2,12 +2,9 @@ package io.ucoin.app.config;
 
 
 import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
 
 import io.ucoin.app.model.Identity;
 import io.ucoin.app.model.Wallet;
-import io.ucoin.app.technical.UCoinTechnicalException;
 import io.ucoin.app.technical.crypto.CryptoUtils;
 import io.ucoin.app.technical.crypto.TestFixtures;
 
@@ -40,35 +37,20 @@ public class Configuration  {
         return ConfigurationOption.VERSION.getDefaultValue();
     }
 
-//    public String getNodeCurrency() {
-//        //return applicationConfig.getOption(ConfigurationOption.NODE_CURRENCY.getKey());
-//    }
-//
-//    public String getNodeProtocol() {
-//        //return applicationConfig.getOption(ConfigurationOption.NODE_PROTOCOL.getKey());
-//    }
-
     public String getNodeHost() {
-        //return applicationConfig.getOption(ConfigurationOption.NODE_HOST.getKey());
         return ConfigurationOption.NODE_HOST.getDefaultValue();
     }
 
     public int getNodePort() {
-        //return applicationConfig.getOptionAsInt(ConfigurationOption.NODE_PORT.getKey());
         return Integer.parseInt(ConfigurationOption.NODE_PORT.getDefaultValue());
-    }
-
-    public URL getNodeUrl() {
-        //return applicationConfig.getOptionAsURL(ConfigurationOption.NODE_URL.getKey());
-        try {
-            return new URL("http://" + getNodeHost() + ":" + getNodePort());
-        } catch (MalformedURLException e) {
-            throw new UCoinTechnicalException("Could not compute the node URL", e);
-        }
     }
 
     public int getNodeTimeout() {
         return Integer.parseInt(ConfigurationOption.NODE_TIMEOUT.getDefaultValue());
+    }
+
+    public String getForumUrl() {
+        return ConfigurationOption.FORUM_URL.getDefaultValue();
     }
 
     private Wallet currentWallet;

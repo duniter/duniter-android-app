@@ -39,8 +39,8 @@ import io.ucoin.app.config.Configuration;
 import io.ucoin.app.content.Provider;
 import io.ucoin.app.database.Contract;
 import io.ucoin.app.fragment.CurrencyListFragment;
-import io.ucoin.app.fragment.DevFragment;
 import io.ucoin.app.fragment.HomeFragment;
+import io.ucoin.app.fragment.WebFragment;
 import io.ucoin.app.fragment.WotSearchFragment;
 import io.ucoin.app.model.Identity;
 import io.ucoin.app.service.ServiceLocator;
@@ -268,12 +268,12 @@ public class MainActivity extends ActionBarActivity
                 fragment = CurrencyListFragment.newInstance();
                 break;
             case 3:
+                fragment = WebFragment.newInstance();
+                break;
+            case 4:
                 Intent intent = new Intent(MainActivity.this,
                         SettingsActivity.class);
                 startActivity(intent);
-                break;
-            case 4:
-                fragment = DevFragment.newInstance();
                 break;
             default:
 

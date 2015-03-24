@@ -39,40 +39,28 @@ public enum ConfigurationOption {
     // ------------------------------------------------------------------------//
 
     VERSION(
-            "ucoinj.version",
-            "ucoinj.config.option.version.description",
+            "ucoin.version",
+            "ucoin.config.option.version.description",
             "1.0",
             String.class),
 
     SITE_URL(
-            "ucoinj.site.url",
-            "ucoinj.config.option.site.url.description",
+            "ucoin.site.url",
+            "ucoin.config.option.site.url.description",
             "http://ucoin.io/ucoinj",
             URL.class),
 
     ORGANIZATION_NAME(
-            "ucoinj.organizationName",
-            "ucoinj.config.option.organizationName.description",
+            "ucoin.organizationName",
+            "ucoin.config.option.organizationName.description",
             "e-is.pro",
             String.class),
 
     INCEPTION_YEAR(
-            "ucoinj.inceptionYear",
-            "ucoinj.config.option.inceptionYear.description",
+            "ucoin.inceptionYear",
+            "ucoin.config.option.inceptionYear.description",
             "2011",
             Integer.class),
-
-    USER_SALT(
-            "ucoinj.salt",
-            "ucoinj.config.option.salt.description",
-            "",
-            String.class),
-
-    USER_PASSWD(
-            "ucoinj.passwd",
-            "ucoinj.config.option.passwd.description",
-            "",
-            String.class),
 
     // ------------------------------------------------------------------------//
     // -- DATA CONSTANTS --------------------------------------------------//
@@ -83,48 +71,54 @@ public enum ConfigurationOption {
     // ------------------------------------------------------------------------//
 
     NODE_CURRENCY(
-            "ucoinj.node.currency",
-            "ucoinj.config.option.node.currency.description",
+            "ucoin.node.currency",
+            "ucoin.config.option.node.currency.description",
             "meta_brouzouf",
             String.class,
             false),
 
     NODE_PROTOCOL(
-            "ucoinj.node.protocol",
-            "ucoinj.config.option.node.protocol.description",
+            "ucoin.node.protocol",
+            "ucoin.config.option.node.protocol.description",
             "http",
             String.class,
             false),
 
     NODE_HOST(
-            "ucoinj.node.host",
-            "ucoinj.config.option.node.host.description",
+            "ucoin.node.host",
+            "ucoin.config.option.node.host.description",
             "metab.ucoin.io",
             //"server.e-is.pro",
             String.class,
             false),
 
     NODE_PORT(
-            "ucoinj.node.port",
-            "ucoinj.config.option.node.port.description",
+            "ucoin.node.port",
+            "ucoin.config.option.node.port.description",
             //"9101",
             "9201",
             Integer.class,
             false),
 
-    NODE_URL(
-            "ucoinj.node.url",
-            "ucoinj.config.option.node.port.description",
-            "${ucoinj.node.protocol}://${ucoinj.node.host}:${ucoinj.node.port}",
-            URL.class,
-            false),
-
     NODE_TIMEOUT(
-            "ucoinj.node.timeout",
-            "ucoinj.config.option.node.timeout.description",
+            "ucoin.node.timeout",
+            "ucoin.config.option.node.timeout.description",
             "3000",
             Integer.class,
-            false);
+            false),
+
+    FORUM_URL(
+            "ucoin.forum.url",
+                    "ucoin.config.option.forum.url.description",
+                    "http://forum.ucoin.io",
+            String.class,
+            false)
+
+    // ------------------------------------------------------------------------//
+    // -- EXT CONSTANTS --------------------------------------------------//
+    // ------------------------------------------------------------------------//
+
+    ;
 
     /** Configuration key. */
     private final String key;

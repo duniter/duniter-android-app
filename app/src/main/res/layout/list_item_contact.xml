@@ -8,6 +8,17 @@
     android:paddingLeft="8dp"
     android:paddingRight="8dp">
 
+    <ImageView
+        android:src="@drawable/ic_user_32dp"
+        android:id="@+id/icon"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp"
+        android:duplicateParentState="true" />
+
     <LinearLayout
         android:duplicateParentState="true"
         android:layout_height="wrap_content"

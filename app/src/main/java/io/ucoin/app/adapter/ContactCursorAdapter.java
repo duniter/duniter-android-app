@@ -2,6 +2,7 @@ package io.ucoin.app.adapter;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +12,8 @@ import android.widget.TextView;
 
 import io.ucoin.app.R;
 import io.ucoin.app.database.Contract;
+import io.ucoin.app.service.ContactService;
+import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.technical.ObjectUtils;
 import io.ucoin.app.technical.StringUtils;
 
@@ -38,6 +41,21 @@ public class ContactCursorAdapter extends CursorAdapter {
         if (viewHolder == null) {
             viewHolder = new ViewHolder(view, cursor);
             view.setTag(viewHolder);
+        }
+
+        // Icons
+        long phoneContactId = cursor.getLong(viewHolder.phoneContactId);
+        if (phoneContactId > 0) {// If link to a phone contact, load the contact's small photo
+            Bitmap contactBitmap = viewHolder.contactService.getPhotoAsBitmap(context, phoneContactId, false);
+            if (contactBitmap != null) {
+                viewHolder.icon.setImageBitmap(contactBitmap);
+            }
+            else {
+                viewHolder.icon.setImageResource(ImageAdapterHelper.IMAGE_CONTACT);
+            }
+        }
+        else {
+            viewHolder.icon.setImageResource(ImageAdapterHelper.IMAGE_CONTACT);
         }
 
         // Name
@@ -71,6 +89,7 @@ public class ContactCursorAdapter extends CursorAdapter {
         int nameIndex;
         int uidIndex;
         int pubkeyIndex;
+        int phoneContactId;
 
         ImageView icon;
         TextView uid;
@@ -78,6 +97,8 @@ public class ContactCursorAdapter extends CursorAdapter {
         TextView pubkey;
         TextView currency;
         TextView viewForError;
+
+        ContactService contactService;
 
         ViewHolder(View convertView, Cursor cursor) {
             icon = (ImageView) convertView.findViewById(R.id.icon);
@@ -94,6 +115,10 @@ public class ContactCursorAdapter extends CursorAdapter {
             nameIndex = cursor.getColumnIndex(Contract.ContactView.NAME);
             uidIndex = cursor.getColumnIndex(Contract.ContactView.UID);
             pubkeyIndex = cursor.getColumnIndex(Contract.ContactView.PUBLIC_KEY);
+            phoneContactId = cursor.getColumnIndex(Contract.ContactView.PHONE_CONTACT_ID);
+
+            // Service
+            contactService = ServiceLocator.instance().getContactService();
         }
     }
 

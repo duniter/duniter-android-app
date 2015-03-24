@@ -97,6 +97,7 @@ public class DatabaseHelper extends SQLiteOpenHelper implements Contract {
                 Contact._ID + " INTEGER PRIMARY KEY AUTOINCREMENT" + COMMA +
                 Contact.ACCOUNT_ID + INTEGER + NOTNULL + COMMA +
                 Contact.NAME + TEXT + NOTNULL + COMMA +
+                Contact.PHONE_CONTACT_ID + INTEGER + COMMA +
                 UNIQUE + "(" + Contact.NAME + ")" + COMMA +
                 "FOREIGN KEY (" + Contact.ACCOUNT_ID + ") REFERENCES " +
                 Account.TABLE_NAME + "(" + Account._ID + ")" +
@@ -121,6 +122,7 @@ public class DatabaseHelper extends SQLiteOpenHelper implements Contract {
                 Contact.TABLE_NAME + "." + Contact._ID + COMMA +
                 Contact.TABLE_NAME + "." + Contact.ACCOUNT_ID + COMMA +
                 Contact.TABLE_NAME + "." + Contact.NAME + COMMA +
+                Contact.TABLE_NAME + "." + Contact.PHONE_CONTACT_ID + COMMA +
                 Contact2Currency.TABLE_NAME + "." + Contact2Currency._ID + " AS " + Contact2Currency.TABLE_NAME + Contact2Currency._ID + COMMA +
                 Contact2Currency.TABLE_NAME + "." + Contact2Currency.CURRENCY_ID + COMMA +
                 Contact2Currency.TABLE_NAME + "." + Contact2Currency.UID + COMMA +

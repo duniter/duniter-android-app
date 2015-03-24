@@ -6,9 +6,16 @@ import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.provider.ContactsContract;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -99,9 +106,34 @@ public class ContactService extends BaseService {
         }
     }
 
+    public Bitmap getPhotoAsBitmap(Context context, long phoneContactId, boolean largeScale) {
+        InputStream is = null;
+        if (largeScale) {
+            is = getLargePhoto(context.getContentResolver(), phoneContactId);
+        }
+        else {
+            is = getSmallPhoto(context.getContentResolver(), phoneContactId);
+        }
+        if (is != null) {
+            try {
+                return BitmapFactory.decodeStream(is);
+            }
+            finally {
+                try {
+                    is.close();
+                }
+                catch(IOException e) {
+                    // silently mode
+                }
+            }
+        }
+        return null;
+    }
+
+
     /* -- internal methods-- */
 
-    private List<Contact> getContactsByAccountId(ContentResolver resolver, long accountId) {
+    protected List<Contact> getContactsByAccountId(ContentResolver resolver, long accountId) {
 
         String selection = Contract.Contact.ACCOUNT_ID + "=?";
         String[] selectionArgs = {
@@ -122,7 +154,7 @@ public class ContactService extends BaseService {
         return result;
     }
 
-    private List<Contact> getContactsByCurrencyId(ContentResolver resolver, long currencyId) {
+    protected List<Contact> getContactsByCurrencyId(ContentResolver resolver, long currencyId) {
 
         String selection = Contract.ContactView.CURRENCY_ID + "=?";
         String[] selectionArgs = {
@@ -144,7 +176,7 @@ public class ContactService extends BaseService {
     }
 
 
-    public void insert(final ContentResolver resolver, final Contact source) {
+    protected void insert(final ContentResolver resolver, final Contact source) {
 
         ContentValues target = toContentValues(source);
 
@@ -158,7 +190,7 @@ public class ContactService extends BaseService {
         source.setId(contactId);
     }
 
-    public void update(final ContentResolver resolver, final Contact source) {
+    protected void update(final ContentResolver resolver, final Contact source) {
         ObjectUtils.checkNotNull(source.getId());
 
         ContentValues target = toContentValues(source);
@@ -171,15 +203,16 @@ public class ContactService extends BaseService {
         }
     }
 
-    private ContentValues toContentValues(final Contact source) {
+    protected ContentValues toContentValues(final Contact source) {
         //Create account in database
         ContentValues target = new ContentValues();
         target.put(Contract.Contact.ACCOUNT_ID, source.getAccountId());
         target.put(Contract.Contact.NAME, source.getName());
+        target.put(Contract.Contact.PHONE_CONTACT_ID, source.getPhoneContactId());
         return target;
     }
 
-    private Contact toContact(final Cursor cursor) {
+    protected Contact toContact(final Cursor cursor) {
         // Init the holder is need
         if (mSelectHolder == null) {
             mSelectHolder = new SelectCursorHolder(cursor);
@@ -189,11 +222,12 @@ public class ContactService extends BaseService {
         result.setId(cursor.getLong(mSelectHolder.idIndex));
         result.setAccountId(cursor.getLong(mSelectHolder.accountIdIndex));
         result.setName(cursor.getString(mSelectHolder.nameIdIndex));
+        result.setPhoneContactId(cursor.getLong(mSelectViewHolder.phoneContactId));
 
         return result;
     }
 
-    private Contact toContactFromView(final Cursor cursor) {
+    protected Contact toContactFromView(final Cursor cursor) {
         // Init the holder is need
         if (mSelectViewHolder == null) {
             mSelectViewHolder = new SelectViewCursorHolder(cursor);
@@ -203,6 +237,7 @@ public class ContactService extends BaseService {
         result.setId(cursor.getLong(mSelectViewHolder.idIndex));
         result.setAccountId(cursor.getLong(mSelectViewHolder.accountIdIndex));
         result.setName(cursor.getString(mSelectViewHolder.nameIdIndex));
+        result.setPhoneContactId(cursor.getLong(mSelectViewHolder.phoneContactId));
 
         Identity identity = new Identity();
         identity.setCurrencyId(cursor.getLong(mSelectViewHolder.currencyIdIndex));
@@ -213,7 +248,7 @@ public class ContactService extends BaseService {
         return result;
     }
 
-    private Uri getContentUri() {
+    protected Uri getContentUri() {
         if (mContentUri != null){
             return mContentUri;
         }
@@ -221,7 +256,7 @@ public class ContactService extends BaseService {
         return mContentUri;
     }
 
-    private Uri getViewContentUri() {
+    protected Uri getViewContentUri() {
         if (mViewContentUri != null){
             return mViewContentUri;
         }
@@ -229,30 +264,69 @@ public class ContactService extends BaseService {
         return mViewContentUri;
     }
 
-    private class SelectCursorHolder {
+    protected InputStream getSmallPhoto(ContentResolver contentResolver, long phoneContactId) {
+        Uri contactUri = ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, phoneContactId);
+        Uri photoUri = Uri.withAppendedPath(contactUri, ContactsContract.Contacts.Photo.CONTENT_DIRECTORY);
+        Cursor cursor = contentResolver.query(photoUri,
+                new String[] {ContactsContract.Contacts.Photo.PHOTO}, null, null, null);
+        if (cursor == null) {
+            return null;
+        }
+        try {
+            if (cursor.moveToFirst()) {
+                byte[] data = cursor.getBlob(0);
+                if (data != null) {
+                    return new ByteArrayInputStream(data);
+                }
+            }
+        } finally {
+            cursor.close();
+        }
+        return null;
+    }
+
+    protected InputStream getLargePhoto(ContentResolver contentResolver, long phoneContactId) {
+
+        Uri contactUri = ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, phoneContactId);
+        Uri displayPhotoUri = Uri.withAppendedPath(contactUri, ContactsContract.Contacts.Photo.DISPLAY_PHOTO);
+        try {
+            AssetFileDescriptor fd =
+                    contentResolver.openAssetFileDescriptor(displayPhotoUri, "r");
+            return fd.createInputStream();
+        } catch (IOException e) {
+            return null;
+        }
+
+    }
+
+    protected class SelectCursorHolder {
 
         int idIndex;
         int accountIdIndex;
         int nameIdIndex;
+        int phoneContactId;
 
         private SelectCursorHolder(final Cursor cursor ) {
             idIndex = cursor.getColumnIndex(Contract.Contact._ID);
             accountIdIndex = cursor.getColumnIndex(Contract.Contact.ACCOUNT_ID);
             nameIdIndex = cursor.getColumnIndex(Contract.Contact.NAME);
+            phoneContactId = cursor.getColumnIndex(Contract.Contact.PHONE_CONTACT_ID);
         }
     }
 
-    private class SelectViewCursorHolder extends SelectCursorHolder {
+    protected class SelectViewCursorHolder extends SelectCursorHolder {
 
         int currencyIdIndex;
         int uidIdIndex;
         int pubkeyIdIndex;
+        int phoneContactId;
 
         private SelectViewCursorHolder(final Cursor cursor ) {
             super(cursor);
             currencyIdIndex = cursor.getColumnIndex(Contract.Contact2Currency.CURRENCY_ID);
             uidIdIndex = cursor.getColumnIndex(Contract.Contact2Currency.UID);
             pubkeyIdIndex = cursor.getColumnIndex(Contract.Contact2Currency.PUBLIC_KEY);
+            phoneContactId = cursor.getColumnIndex(Contract.Contact.PHONE_CONTACT_ID);
         }
     }
 

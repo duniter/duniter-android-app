@@ -41,10 +41,11 @@ public class MovementCursorAdapter extends CursorAdapter{
             boolean isWriteInBlockchain = !cursor.isNull(viewHolder.blockIndex);
             // Is write in blokchain ?
             if (isWriteInBlockchain) {
-                viewHolder.iconView.setImageResource(R.drawable.ic_checkmark_holo_light);
+                viewHolder.iconView.setImageResource(ImageAdapterHelper.IMAGE_MOVEMENT_VALID);
             } else {
-                viewHolder.iconView.setImageResource(android.R.drawable.ic_menu_recent_history);
+                viewHolder.iconView.setImageResource(ImageAdapterHelper.IMAGE_MOVEMENT_WAITING);
             }
+            // TODO : manage error icons, when not included in BC
         }
 
         // Date/time

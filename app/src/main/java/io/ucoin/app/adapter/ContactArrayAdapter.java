@@ -98,6 +98,9 @@ public class ContactArrayAdapter extends ArrayAdapter<Contact> {
             viewHolder = (ViewHolder) convertView.getTag();
         }
 
+        // Icons
+        viewHolder.icon.setImageResource(ImageAdapterHelper.IMAGE_CONTACT);
+
         // Name
         viewHolder.name.setText(contact.getName());
 

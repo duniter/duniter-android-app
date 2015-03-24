@@ -186,9 +186,15 @@
     <string name="sign_to">Sign %s</string>
     <string name="yesterday">yesterday</string>
 
+
+    <!-- Strings related to extension (ext) -->
+    <string name="forum">Forum</string>
+
+
     <string-array name="drawer_items">
         <item>@string/home</item>
         <item>@string/currencies</item>
+        <item>@string/forum</item>
         <item>@string/settings</item>
     </string-array>
 </resources>

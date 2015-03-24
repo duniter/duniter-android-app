@@ -15,6 +15,7 @@ public class Contact implements LocalEntity, Serializable {
     private Long id;
     private Long accountId;
     private String name;
+    private Long phoneContactId;
     private List<Identity> identities = new ArrayList<Identity>();
 
     @Override
@@ -53,6 +54,14 @@ public class Contact implements LocalEntity, Serializable {
 
     public void addIdentity(Identity identity) {
         this.identities.add(identity);
+    }
+
+    public Long getPhoneContactId() {
+        return phoneContactId;
+    }
+
+    public void setPhoneContactId(Long phoneContactId) {
+        this.phoneContactId = phoneContactId;
     }
 
     @Override
