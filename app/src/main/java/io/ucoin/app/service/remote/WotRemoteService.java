@@ -14,6 +14,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeSet;
 
 import io.ucoin.app.model.BlockchainBlock;
@@ -36,7 +37,7 @@ import io.ucoin.app.technical.crypto.CryptoUtils;
 
 public class WotRemoteService extends BaseRemoteService {
 
-    private static final String TAG = "WotService";
+    private static final String TAG = "WotRemoteService";
 
     public static final String URL_BASE = "/wot";
 
@@ -68,7 +69,7 @@ public class WotRemoteService extends BaseRemoteService {
         peerService = ServiceLocator.instance().getPeerService();
     }
 
-    public List<Identity> findIdentities(List<Long> currenciesIds, String uidOrPubKey) {
+    public List<Identity> findIdentities(Set<Long> currenciesIds, String uidOrPubKey) {
         List<Identity> result = new ArrayList<Identity>();
 
         String path = String.format(URL_LOOKUP, uidOrPubKey);
@@ -136,7 +137,7 @@ public class WotRemoteService extends BaseRemoteService {
         return toIdentity(lookupUid);
     }
 
-    public WotCertification[] getCertifications(long currencyId, String uid, String pubkey, boolean isMember) {
+    public Collection<WotCertification> getCertifications(long currencyId, String uid, String pubkey, boolean isMember) {
         ObjectUtils.checkNotNull(uid);
         ObjectUtils.checkNotNull(pubkey);
 
@@ -300,7 +301,7 @@ public class WotRemoteService extends BaseRemoteService {
     /* -- Internal methods -- */
 
 
-    protected WotCertification[] getCertificationsByPubkeyForMember(long currencyId, String pubkey) {
+    protected Collection<WotCertification> getCertificationsByPubkeyForMember(long currencyId, String pubkey) {
 
         Collection<WotCertification> result = new TreeSet<WotCertification>(WotCertificationComparators.newComparator());
 
@@ -339,12 +340,12 @@ public class WotRemoteService extends BaseRemoteService {
         // Group certifications  by [uid, pubKey] and keep last timestamp
         result = groupByUidAndPubKey(result);
 
-        return result.toArray(new WotCertification[result.size()]);
+        return result;
     }
 
-    protected WotCertification[] getCertificationsByPubkeyForNonMember(long currencyId, final String uid, final String pubkey) {
+    protected Collection<WotCertification> getCertificationsByPubkeyForNonMember(long currencyId, final String uid, final String pubkey) {
         // Ordered list, by uid/pubkey/cert time
-        TreeSet<WotCertification> result = new TreeSet<WotCertification>(WotCertificationComparators.newComparator());
+        Collection<WotCertification> result = new TreeSet<WotCertification>(WotCertificationComparators.newComparator());
 
         Log.d(TAG, String.format("Get non member WOT, by uid [%s] and pubKey [%s]", uid, pubkey));
 
@@ -359,7 +360,7 @@ public class WotRemoteService extends BaseRemoteService {
         Map<String, WotCertification> certifierByPubkeys = new HashMap<String, WotCertification>();
         if (lookupUId != null && lookupUId.getOthers() != null) {
             for(WotLookupSignature lookupSignature: lookupUId.getOthers()) {
-                Collection<WotCertification> certifiers = toCertifierCertifications(lookupSignature);
+                Collection<WotCertification> certifiers = toCertifierCertifications(lookupSignature, currencyId);
                 result.addAll(certifiers);
             }
         }
@@ -370,6 +371,9 @@ public class WotRemoteService extends BaseRemoteService {
                 if (lookupResult.getSigned() != null) {
                     for(WotLookupSignature lookupSignature : lookupResult.getSigned()) {
                         WotCertification certifiedBy = toCertifiedByCerticication(lookupSignature);
+
+                        // Set the currency Id
+                        certifiedBy.setCurrencyId(currencyId);
 
                         // If exists, link to other side certification
                         String certifiedByPubkey = certifiedBy.getPubkey();
@@ -387,7 +391,10 @@ public class WotRemoteService extends BaseRemoteService {
             }
         }
 
-        return result.toArray(new WotCertification[result.size()]);
+        // Group certifications  by [uid, pubKey] and keep last timestamp
+        result = groupByUidAndPubKey(result);
+
+        return result;
     }
 
     protected String getSelfCertification(byte[] secKey, String uid, long timestamp) {
@@ -538,7 +545,7 @@ public class WotRemoteService extends BaseRemoteService {
         return null;
     }
 
-    private Collection<WotCertification> toCertifierCertifications(final WotLookupSignature source) {
+    private Collection<WotCertification> toCertifierCertifications(final WotLookupSignature source, final long currencyId) {
         List<WotCertification> result = new ArrayList<WotCertification>();
         // If only one uid
         if (source.getUids().length == 1) {
@@ -555,6 +562,9 @@ public class WotRemoteService extends BaseRemoteService {
 
             // Is member
             target.setMember(source.isMember());
+
+            // Set currency Id
+            target.setCurrencyId(currencyId);
 
             result.add(target);
         }
@@ -573,6 +583,9 @@ public class WotRemoteService extends BaseRemoteService {
 
                 // Is member
                 target.setMember(source.isMember());
+
+                // Set currency Id
+                target.setCurrencyId(currencyId);
 
                 result.add(target);
             }

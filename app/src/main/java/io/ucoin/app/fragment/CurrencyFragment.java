@@ -112,7 +112,7 @@ public class CurrencyFragment extends Fragment {
         String selection = Contract.Currency.ACCOUNT_ID + "=? AND " +
                 Contract.Currency.FIRST_BLOCK_SIGNATURE + "=?";
         String[] selectionArgs = new String[]{
-                ((Application) getActivity().getApplication()).getAccountId(),
+                ((Application) getActivity().getApplication()).getAccountIdAsString(),
                 currency.getFirstBlockSignature()
         };
         Uri uri = Uri.parse(Provider.CONTENT_URI + "/currency/");
@@ -156,10 +156,11 @@ public class CurrencyFragment extends Fragment {
 
         Peer[] peers = currency.getPeers();
 
-        String account_id = ((Application) getActivity().getApplication()).getAccountId();
+        Long accountId = ((Application) getActivity().getApplication()).getAccountId();
+
         //add Currency to database
         ContentValues values = new ContentValues();
-        values.put(Contract.Currency.ACCOUNT_ID, account_id);
+        values.put(Contract.Currency.ACCOUNT_ID, accountId);
         values.put(Contract.Currency.NAME, currency.getCurrencyName());
         values.put(Contract.Currency.MEMBERS_COUNT, currency.getMembersCount());
         values.put(Contract.Currency.FIRST_BLOCK_SIGNATURE, currency.getFirstBlockSignature());

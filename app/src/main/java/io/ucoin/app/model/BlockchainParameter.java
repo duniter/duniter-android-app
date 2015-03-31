@@ -25,7 +25,7 @@ public class BlockchainParameter implements Serializable{
     /**
      * UD(0), i.e. initial Universal Dividend
      */
-    private Integer ud0;
+    private Long ud0;
     
     /**
      * Minimum delay between 2 identical certifications (same pubkeys)
@@ -120,11 +120,11 @@ public class BlockchainParameter implements Serializable{
         this.dt = dt;
     }
 
-    public Integer getUd0() {
+    public Long getUd0() {
         return ud0;
     }
 
-    public void setUd0(Integer ud0) {
+    public void setUd0(Long ud0) {
         this.ud0 = ud0;
     }
 

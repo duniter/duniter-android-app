@@ -11,7 +11,9 @@ import android.widget.TextView;
 
 import io.ucoin.app.R;
 import io.ucoin.app.database.Contract;
+import io.ucoin.app.technical.CurrencyUtils;
 import io.ucoin.app.technical.DateUtils;
+import io.ucoin.app.technical.ImageUtils;
 
 
 public class MovementCursorAdapter extends CursorAdapter{
@@ -41,9 +43,9 @@ public class MovementCursorAdapter extends CursorAdapter{
             boolean isWriteInBlockchain = !cursor.isNull(viewHolder.blockIndex);
             // Is write in blokchain ?
             if (isWriteInBlockchain) {
-                viewHolder.iconView.setImageResource(ImageAdapterHelper.IMAGE_MOVEMENT_VALID);
+                viewHolder.iconView.setImageResource(ImageUtils.IMAGE_MOVEMENT_VALID);
             } else {
-                viewHolder.iconView.setImageResource(ImageAdapterHelper.IMAGE_MOVEMENT_WAITING);
+                viewHolder.iconView.setImageResource(ImageUtils.IMAGE_MOVEMENT_WAITING);
             }
             // TODO : manage error icons, when not included in BC
         }
@@ -54,7 +56,7 @@ public class MovementCursorAdapter extends CursorAdapter{
 
         // Amount
         int amount = cursor.getInt(viewHolder.amountIndex);
-        viewHolder.amountView.setText(String.valueOf(amount));
+        viewHolder.amountView.setText(CurrencyUtils.formatCoin(amount));
 
         // Comment
         String comment= cursor.getString(viewHolder.commentIndex);

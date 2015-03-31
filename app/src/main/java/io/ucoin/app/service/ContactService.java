@@ -86,8 +86,8 @@ public class ContactService extends BaseService {
     }
 
     public List<Contact> getContacts(Application application) {
-        String accountId = ((io.ucoin.app.Application) application).getAccountId();
-        return getContactsByAccountId(application.getContentResolver(), Long.parseLong(accountId));
+        long accountId = ((io.ucoin.app.Application) application).getAccountId();
+        return getContactsByAccountId(application.getContentResolver(), accountId);
     }
 
     public List<Contact> getContactsByCurrencyId(Context context, long currencyId) {

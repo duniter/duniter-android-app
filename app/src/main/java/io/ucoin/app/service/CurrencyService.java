@@ -10,18 +10,18 @@ import android.database.Cursor;
 import android.net.Uri;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import io.ucoin.app.content.Provider;
 import io.ucoin.app.database.Contract;
 import io.ucoin.app.model.Currency;
 import io.ucoin.app.service.remote.BlockchainRemoteService;
-import io.ucoin.app.technical.DateUtils;
 import io.ucoin.app.technical.ObjectUtils;
 import io.ucoin.app.technical.StringUtils;
 import io.ucoin.app.technical.UCoinTechnicalException;
+import io.ucoin.app.technical.cache.SimpleCache;
 
 /**
  * Created by eis on 07/02/15.
@@ -31,17 +31,16 @@ public class CurrencyService extends BaseService {
     /** Logger. */
     private static final String TAG = "CurrencyService";
 
+    private static final long UD_CACHE_TIME_MILLIS = 5 * 60 * 1000; // = 5 min
+
     // a cache instance of the wallet Uri
     // Could NOT be static, because Uri is initialize in Provider.onCreate() method ;(
     private Uri mContentUri = null;
 
     private SelectCursorHolder mSelectHolder = null;
 
-    private Map<Long, String> mCurrencyNameByIdCache;
-
-    private Map<Long, String> mCurrencyUDByIdCache;
-
-    private List<Long> mCurrencyIdsCache;
+    private SimpleCache<Long, Currency> mCurrencyCache;
+    private SimpleCache<Long, Long> mUDCache;
 
     private BlockchainRemoteService blockchainRemoteService;
 
@@ -61,6 +60,8 @@ public class CurrencyService extends BaseService {
         ObjectUtils.checkArgument(StringUtils.isNotBlank(currency.getFirstBlockSignature()));
         ObjectUtils.checkNotNull(currency.getMembersCount());
         ObjectUtils.checkArgument(currency.getMembersCount().intValue() >= 0);
+        ObjectUtils.checkNotNull(currency.getLastUD());
+        ObjectUtils.checkArgument(currency.getLastUD().intValue() > 0);
 
         ObjectUtils.checkArgument((currency.getAccount() != null && currency.getAccount().getId() != null)
             || currency.getAccountId() != null, "One of 'currency.account.id' or 'currency.accountId' is mandatory.");
@@ -71,13 +72,8 @@ public class CurrencyService extends BaseService {
         if (currency.getId() == null) {
             result = insert(context.getContentResolver(), currency);
 
-            // update cache (if already loaded)
-            if (mCurrencyNameByIdCache != null) {
-                mCurrencyNameByIdCache.put(currency.getId(), currency.getCurrencyName());
-            }
-            if (mCurrencyIdsCache != null) {
-                mCurrencyIdsCache.add(currency.getId());
-            }
+            // Update the cache (if already loaded)
+            mCurrencyCache.put(currency.getId(), currency);
         }
 
         // or update
@@ -109,16 +105,117 @@ public class CurrencyService extends BaseService {
     }
 
     public List<Currency> getCurrencies(Application application) {
-        String accountId = ((io.ucoin.app.Application) application).getAccountId();
-        return getCurrenciesByAccountId(application.getContentResolver(), Long.parseLong(accountId));
+        Long accountId = ((io.ucoin.app.Application) application).getAccountId();
+        return getCurrenciesByAccountId(application.getContentResolver(), accountId);
     }
 
-    public Currency getCurrencyById(Context context, int currencyId) {
+    public Currency getCurrencyById(Context context, long currencyId) {
+        return mCurrencyCache.get(context, currencyId);
+    }
+
+    /**
+     * Return a (cached) currency name, by id
+     * @param currencyId
+     * @return
+     */
+    public String getCurrencyNameById(long currencyId) {
+        Currency currency = mCurrencyCache.getIfPresent(currencyId);
+        if (currency == null) {
+            return null;
+        }
+        return currency.getCurrencyName();
+    }
+
+    /**
+     * Return a currency id, by name
+     * @param currencyName
+     * @return
+     */
+    public Long getCurrencyIdByName(String currencyName) {
+        ObjectUtils.checkArgument(StringUtils.isNotBlank(currencyName));
+
+        // Search from currencies
+        for (Map.Entry<Long, Currency> entry : mCurrencyCache.entrySet()) {
+            Currency currency = entry.getValue();
+            if (ObjectUtils.equals(currencyName, currency.getCurrencyName())) {
+                return entry.getKey();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Return a (cached) list of currency ids
+     * @return
+     */
+    public Set<Long> getCurrencyIds() {
+        return mCurrencyCache.keySet();
+    }
+
+    /**
+     * Fill all cache need for currencies
+     * @param application
+     */
+    public void loadCache(Application application) {
+        // Create and fill the currency cache
+        if (mCurrencyCache == null) {
+            List<Currency> currencies = getCurrencies(application);
+
+            mCurrencyCache = new SimpleCache<Long, Currency>() {
+                @Override
+                public Currency load(Context context, Long currencyId) {
+                    return getCurrencyById(context.getContentResolver(), currencyId);
+                }
+            };
+
+            // Fill the cache
+            for (Currency currency : currencies) {
+                mCurrencyCache.put(currency.getId(), currency);
+            }
+        }
+
+        // Create the UD cache
+        if (mUDCache == null) {
+            List<Currency> currencies = getCurrencies(application);
+
+            mUDCache = new SimpleCache<Long, Long>(UD_CACHE_TIME_MILLIS) {
+                @Override
+                public Long load(final Context context, final Long currencyId) {
+                    // Retrieve the last UD from the blockchain
+                    final long lastUD = blockchainRemoteService.getLastUD(currencyId);
+
+                    new Runnable() {
+                        public void run() {
+                            Currency currency = getCurrencyById(context, currencyId);
+                            if (!ObjectUtils.equals(currency.getLastUD(), lastUD)) {
+                                currency.setLastUD(lastUD);
+                                save(context, currency);
+                            }
+                        }
+                    };
+                    return lastUD;
+                }
+            };
+        }
+    }
+
+    /**
+     * Return the value of the last universal dividend
+     * @param currencyId
+     * @return
+     */
+    public long getLastUD(Context context, long currencyId) {
+        return mUDCache.get(context, currencyId);
+    }
+
+    /* -- internal methods-- */
+
+    private Currency getCurrencyById(ContentResolver resolver, long currencyId) {
         String selection = Contract.Currency._ID + "=?";
         String[] selectionArgs = {
                 String.valueOf(currencyId)
         };
-        Cursor cursor = context.getContentResolver()
+        Cursor cursor = resolver
                 .query(getContentUri(),
                         new String[]{},
                         selection,
@@ -132,102 +229,6 @@ public class CurrencyService extends BaseService {
         cursor.close();
         return currency;
     }
-
-
-    /**
-     * Return a (cached) currency name, by id
-     * @param currencyId
-     * @return
-     */
-    public String getCurrencyNameById(long currencyId) {
-        // Check if cache as been loaded
-        if (mCurrencyNameByIdCache == null) {
-            throw new UCoinTechnicalException("Cache not initialize. Please call loadCache() before getCurrencyNameById().");
-        }
-        // Get it from cache
-        return mCurrencyNameByIdCache.get(currencyId);
-    }
-
-    /**
-     * Return a (cached) currency id, by name
-     * @param currencyName
-     * @return
-     */
-    public Long getCurrencyIdByName(String currencyName) {
-        ObjectUtils.checkArgument(StringUtils.isNotBlank(currencyName));
-
-        // Check if cache as been loaded
-        if (mCurrencyNameByIdCache == null) {
-            throw new UCoinTechnicalException("Cache not initialize. Please call loadCache() before getCurrencyNameById().");
-        }
-        // Get it from cache
-        for (Map.Entry<Long, String> entry : mCurrencyNameByIdCache.entrySet()) {
-            if (currencyName.equals(entry.getValue())) {
-                return entry.getKey();
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Return a (cached) list of currency ids
-     * @return
-     */
-    public List<Long> getCurrencyIds() {
-        return mCurrencyIdsCache;
-    }
-
-    /**
-     * Fill all cache need for currencies
-     * @param application
-     */
-    public void loadCache(Application application) {
-        if (mCurrencyNameByIdCache != null && mCurrencyIdsCache != null) {
-            return;
-        }
-
-        List<Currency> currencies = getCurrencies(application);
-
-        mCurrencyNameByIdCache = new HashMap<Long, String>();
-        mCurrencyIdsCache = new ArrayList<Long>();
-
-        for (Currency currency : currencies) {
-            mCurrencyNameByIdCache.put(currency.getId(), currency.getCurrencyName());
-            mCurrencyIdsCache.add(currency.getId());
-        }
-    }
-
-    /**
-     * Return the value of the last universal dividend
-     * @param currencyId
-     * @return
-     */
-    public long getLastUD(long currencyId) {
-        // TODO : add technical cache class
-        if (mCurrencyUDByIdCache == null) {
-            mCurrencyUDByIdCache = new HashMap<Long, String>();
-        }
-        String cachedValue = mCurrencyUDByIdCache.get(currencyId);
-        long timeInSec = DateUtils.getCurrentTimestamp();
-        if (cachedValue != null) {
-            String cacheTime = cachedValue.substring(cachedValue.lastIndexOf("|") + 1);
-            if (Long.parseLong(cacheTime) - timeInSec < 5 * 60 /*5 min*/) {
-                String cachedLastUD = cachedValue.substring(0, cachedValue.lastIndexOf("|"));
-                return Long.parseLong(cachedLastUD);
-            }
-        }
-
-        // Retrieve the last UD from the blockchain
-        long lastUD = blockchainRemoteService.getLastUD(currencyId);
-
-        // Fill the cache
-        cachedValue = new StringBuilder().append(lastUD).append('|').append(timeInSec).toString();
-        mCurrencyUDByIdCache.put(currencyId, cachedValue);
-
-        return lastUD;
-    }
-
-    /* -- internal methods-- */
 
     private List<Currency> getCurrenciesByAccountId(ContentResolver resolver, long accountId) {
 
@@ -294,6 +295,7 @@ public class CurrencyService extends BaseService {
         target.put(Contract.Currency.NAME, source.getCurrencyName());
         target.put(Contract.Currency.MEMBERS_COUNT, source.getMembersCount());
         target.put(Contract.Currency.FIRST_BLOCK_SIGNATURE, source.getFirstBlockSignature());
+        target.put(Contract.Currency.LAST_UD, source.getLastUD());
 
         return target;
     }

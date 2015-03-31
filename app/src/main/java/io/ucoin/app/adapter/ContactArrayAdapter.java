@@ -14,6 +14,7 @@ import java.util.List;
 import io.ucoin.app.R;
 import io.ucoin.app.model.Contact;
 import io.ucoin.app.model.Identity;
+import io.ucoin.app.technical.ImageUtils;
 import io.ucoin.app.technical.ObjectUtils;
 import io.ucoin.app.technical.StringUtils;
 
@@ -99,7 +100,7 @@ public class ContactArrayAdapter extends ArrayAdapter<Contact> {
         }
 
         // Icons
-        viewHolder.icon.setImageResource(ImageAdapterHelper.IMAGE_CONTACT);
+        viewHolder.icon.setImageResource(ImageUtils.IMAGE_CONTACT);
 
         // Name
         viewHolder.name.setText(contact.getName());

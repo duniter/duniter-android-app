@@ -1,12 +1,10 @@
 package io.ucoin.app.fragment;
 
-import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.ListFragment;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -15,19 +13,16 @@ import android.widget.AbsListView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import io.ucoin.app.R;
 import io.ucoin.app.activity.MainActivity;
-import io.ucoin.app.adapter.ProgressViewAdapter;
 import io.ucoin.app.adapter.WalletArrayAdapter;
 import io.ucoin.app.model.Wallet;
 import io.ucoin.app.service.ServiceLocator;
-import io.ucoin.app.technical.AsyncTaskHandleException;
-import io.ucoin.app.technical.CollectionUtils;
-import io.ucoin.app.technical.ExceptionUtils;
+import io.ucoin.app.technical.task.ProgressDialogAsyncTaskListener;
 
 
 public class WalletListFragment extends ListFragment implements MainActivity.QueryResultListener<Wallet>{
@@ -36,12 +31,10 @@ public class WalletListFragment extends ListFragment implements MainActivity.Que
     private static final String WALLET_LIST_ARGS_KEYS = "Wallets";
 
     private WalletArrayAdapter mWalletArrayAdapter;
-    private ProgressViewAdapter mProgressViewAdapter;
     private ProgressBar mUpdateCreditProgressBar;
     private OnClickListener mListener;
     private int mScrollState;
     private ListView mListView;
-    private UpdaterAsyncTask mUpdaterTask;
 
     protected static WalletListFragment newInstance(OnClickListener listener) {
         WalletListFragment fragment = new WalletListFragment();
@@ -73,16 +66,10 @@ public class WalletListFragment extends ListFragment implements MainActivity.Que
 
         mListView = getListView();
 
-        // search progress
-        mProgressViewAdapter = new ProgressViewAdapter(
-                view.findViewById(R.id.search_progress),
-                getListView());
-
         // refresh progress
         mUpdateCreditProgressBar = (ProgressBar)view.findViewById(R.id.load_progress);
 
         // Display the progress by default (onQuerySuccess will disable it)
-        mProgressViewAdapter.showProgress(true);
         TextView v = (TextView) view.findViewById(android.R.id.empty);
         v.setVisibility(View.GONE);
 
@@ -146,40 +133,19 @@ public class WalletListFragment extends ListFragment implements MainActivity.Que
         mWalletArrayAdapter.clear();
         mWalletArrayAdapter.addAll(wallets);
         mWalletArrayAdapter.notifyDataSetChanged();
-        mProgressViewAdapter.showProgress(false);
-
-        // Run the updater task
-        if (CollectionUtils.isNotEmpty(wallets)) {
-            boolean refreshNeed = true;
-            // TODO : manage a time delay before refresh ?
-
-            if (refreshNeed) {
-                UpdaterAsyncTask updaterTask = new UpdaterAsyncTask(mUpdateCreditProgressBar);
-                updaterTask.execute(wallets.toArray(new Wallet[wallets.size()]));
-            }
-        }
     }
 
     @Override
     public void onQueryFailed(String message) {
-        mProgressViewAdapter.showProgress(false);
-        // TODO display the message
     }
 
     @Override
-    public void onQueryCancelled() {
-        mProgressViewAdapter.showProgress(false);
+    public void onQueryCancelled(){
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-
-        // Stop the updater task
-        if (mUpdaterTask != null) {
-            mUpdaterTask.stop();
-            mUpdaterTask = null;
-        }
     }
 
     /* -- Internal methods -- */
@@ -191,14 +157,32 @@ public class WalletListFragment extends ListFragment implements MainActivity.Que
         }
 
         // Copy wallet to array, from adapter
-        Wallet[] wallets = new Wallet[count];
+        List<Wallet> wallets = new ArrayList<Wallet>(count);
         for (int i = 0; i<count; i++) {
-            wallets[i] = mWalletArrayAdapter.getItem(i);
+            wallets.add(mWalletArrayAdapter.getItem(i));
         }
 
-        // run the refresh task
-        UpdaterAsyncTask updaterTask = new UpdaterAsyncTask(mUpdateCreditProgressBar);
-        updaterTask.execute(wallets);
+        // Run wallets  update, using a progress dialog
+        ServiceLocator.instance().getWalletService().updateWalletsRemotely(
+                wallets,
+                new ProgressDialogAsyncTaskListener<List<? extends Wallet>>(getActivity()) {
+
+                    @Override
+                    public void onProgressUpdate() {
+                        // Update only when we're not scrolling, and only for visible views
+                        if (mScrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE) {
+                            int start = mListView.getFirstVisiblePosition();
+                            for (int i = start, j = mListView.getLastVisiblePosition(); i <= j; i++) {
+                                View view = mListView.getChildAt(i - start);
+                                Wallet wallet = (Wallet) mListView.getItemAtPosition(i);
+                                if (wallet.isDirty()) {
+                                    mListView.getAdapter().getView(i, view, mListView); // Tell the adapter to update this view
+                                    wallet.setDirty(false);
+                                }
+                            }
+                        }
+                    }
+                });
     }
 
     private void setOnClickListener(OnClickListener listener) {
@@ -221,80 +205,5 @@ public class WalletListFragment extends ListFragment implements MainActivity.Que
                 .commit();
     }
 
-    private class UpdaterAsyncTask extends AsyncTaskHandleException<Wallet, Void, Void> {
 
-        boolean isRunning = true;
-        private Activity mActivity = getActivity();
-
-        public UpdaterAsyncTask(ProgressBar progressBar) {
-            super(progressBar, null);
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            mUpdateCreditProgressBar.setVisibility(View.VISIBLE);
-        }
-
-        public void stop() {
-            isRunning = false;
-        }
-
-        @Override
-        protected Void doInBackgroundHandleException(final Wallet... wallets) {
-            int i=0;
-            int count = wallets.length;
-
-            setMax(count);
-            setProgress(0);
-
-            while (isRunning && i < count) {
-                Wallet wallet = wallets[i++];
-
-                ServiceLocator.instance().getWalletService().updateWallet(mActivity, wallet);
-
-                // Gather data about your adapter objects
-                // If an object has changed, mark it as dirty
-
-                increment();
-            }
-
-            return null;
-        }
-
-        /*@Override
-        protected void onProgressUpdate(final Void... values) {
-            super.onProgressUpdate(values);
-
-            // Update only when we're not scrolling, and only for visible views
-            if (mScrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE) {
-                int start = mListView.getFirstVisiblePosition();
-                for(int i = start, j = mListView.getLastVisiblePosition(); i<=j; i++) {
-                    View view = mListView.getChildAt(i-start);
-                    Wallet wallet = (Wallet)mListView.getItemAtPosition(i);
-                    if (wallet.isDirty()) {
-                        mListView.getAdapter().getView(i, view, mListView); // Tell the adapter to update this view
-                        wallet.setDirty(false);
-                    }
-
-                }
-            }
-
-        }*/
-
-        @Override
-        protected void onSuccess(Void aVoid) {
-            mUpdateCreditProgressBar.setVisibility(View.GONE);
-        }
-
-        @Override
-        protected void onFailed(Throwable t) {
-            mUpdateCreditProgressBar.setVisibility(View.GONE);
-            Log.d(TAG, "Error in updated task", t);
-            Toast.makeText(mActivity,
-                    ExceptionUtils.getMessage(t),
-                    Toast.LENGTH_LONG)
-                    .show();
-        }
-    }
 }

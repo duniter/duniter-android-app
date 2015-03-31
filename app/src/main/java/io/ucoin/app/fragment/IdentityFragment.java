@@ -16,6 +16,8 @@ import android.widget.TabHost;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.Collection;
+
 import io.ucoin.app.R;
 import io.ucoin.app.activity.MainActivity;
 import io.ucoin.app.adapter.CertificationListAdapter;
@@ -25,9 +27,11 @@ import io.ucoin.app.model.WotCertification;
 import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.service.remote.BlockchainRemoteService;
 import io.ucoin.app.service.remote.WotRemoteService;
-import io.ucoin.app.technical.AsyncTaskHandleException;
+import io.ucoin.app.technical.CollectionUtils;
 import io.ucoin.app.technical.DateUtils;
+import io.ucoin.app.technical.ObjectUtils;
 import io.ucoin.app.technical.ViewUtils;
+import io.ucoin.app.technical.task.AsyncTaskHandleException;
 
 
 public class IdentityFragment extends Fragment {
@@ -140,25 +144,7 @@ public class IdentityFragment extends Fragment {
                 WotCertification cert = (WotCertification) mCertificationListAdapter
                         .getItem(position);
 
-                Fragment fragment = IdentityFragment.newInstance(cert, mTabs.getCurrentTab());
-                FragmentManager fragmentManager = getFragmentManager();
-
-                fragmentManager.beginTransaction()
-                        .setCustomAnimations(R.animator.slide_in_right,
-                                R.animator.slide_out_left)
-                        .remove(IdentityFragment.this)
-                        .commit();
-
-                fragmentManager.popBackStack();
-
-                fragmentManager.beginTransaction()
-                        .setCustomAnimations(R.animator.slide_in_right,
-                                R.animator.slide_out_left,
-                                R.animator.delayed_fade_in,
-                                R.animator.slide_out_up)
-                        .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
-                        .addToBackStack(fragment.getClass().getSimpleName())
-                        .commit();
+                onCertificationClick(cert);
             }
         });
 
@@ -200,11 +186,36 @@ public class IdentityFragment extends Fragment {
             case R.id.action_add_contact:
                 onAddAsNewContact();
                 return true;
-            case R.id.action_add_existing_contact:
+            /*case R.id.action_add_existing_contact:
                 onAddAsExistingContact();
-                return true;
+                return true;*/
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    protected void onCertificationClick(WotCertification cert) {
+        // Reset the cert time, before to resue the identity
+        cert.setTimestamp(-1);
+
+        Fragment fragment = IdentityFragment.newInstance(cert, mTabs.getCurrentTab());
+
+        FragmentManager fragmentManager = getFragmentManager();
+        fragmentManager.beginTransaction()
+                .setCustomAnimations(R.animator.slide_in_right,
+                        R.animator.slide_out_left)
+                .remove(IdentityFragment.this)
+                .commit();
+
+        fragmentManager.popBackStack();
+
+        fragmentManager.beginTransaction()
+                .setCustomAnimations(R.animator.slide_in_right,
+                        R.animator.slide_out_left,
+                        R.animator.delayed_fade_in,
+                        R.animator.slide_out_up)
+                .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
+                .addToBackStack(fragment.getClass().getSimpleName())
+                .commit();
     }
 
     protected void onTransferClick() {
@@ -269,10 +280,12 @@ public class IdentityFragment extends Fragment {
 
     }
 
-    public class LoadTask extends AsyncTaskHandleException<Void, Void, WotCertification[]> {
+    public class LoadTask extends AsyncTaskHandleException<Void, Void, Collection<WotCertification>> {
         private final Identity mIdentity;
 
         LoadTask(Identity identity) {
+            ObjectUtils.checkNotNull(identity);
+            ObjectUtils.checkNotNull(identity.getCurrencyId());
             mIdentity = identity;
         }
 
@@ -283,8 +296,7 @@ public class IdentityFragment extends Fragment {
         }
 
         @Override
-        protected WotCertification[] doInBackgroundHandleException(Void... params) {
-
+        protected Collection<WotCertification> doInBackgroundHandleException(Void... params) {
             // Refresh the membership data
             BlockchainRemoteService bcService = ServiceLocator.instance().getBlockchainRemoteService();
             bcService.loadMembership(mIdentity.getCurrencyId(), mIdentity, false);
@@ -299,7 +311,7 @@ public class IdentityFragment extends Fragment {
         }
 
         @Override
-        protected void onSuccess(WotCertification[] certifications) {
+        protected void onSuccess(Collection<WotCertification> certifications) {
 
             // Refresh timestamp
             mTimestampView.setText(DateUtils.format(mIdentity.getTimestamp()));
@@ -309,7 +321,7 @@ public class IdentityFragment extends Fragment {
 
             // Update certification list
             mCertificationListAdapter.clear();
-            if (certifications != null && certifications.length  > 0) {
+            if (CollectionUtils.isNotEmpty(certifications)) {
                 mCertificationListAdapter.addAll(certifications);
                 mCertificationListAdapter.notifyDataSetChanged();
             }

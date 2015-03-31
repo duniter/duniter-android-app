@@ -113,7 +113,7 @@ public class DateUtils {
         return DEFAULT_TIME_FORMAT.format(date);
     }
 
-    public static long getCurrentTimestamp() {
+    public static long getCurrentTimestampSeconds() {
         return (long)Math.floor(System.currentTimeMillis() / 1000);
     }
 

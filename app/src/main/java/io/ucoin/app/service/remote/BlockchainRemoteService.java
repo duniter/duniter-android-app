@@ -140,6 +140,7 @@ public class BlockchainRemoteService extends BaseRemoteService {
         result.setCurrencyName(parameter.getCurrency());
         result.setFirstBlockSignature(firstBlock.getSignature());
         result.setMembersCount(lastBlock.getMembersCount());
+        result.setLastUD(parameter.getUd0());
 
         return result;
     }

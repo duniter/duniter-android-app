@@ -15,6 +15,7 @@ public class Currency implements Serializable {
     private String firstBlockSignature;
     private Account account;
     private Long accountId;
+    private Long lastUD;
 
     public Currency() {
     }
@@ -84,6 +85,14 @@ public class Currency implements Serializable {
 
     public void setAccountId(Long accountId) {
         this.accountId = accountId;
+    }
+
+    public Long getLastUD() {
+        return lastUD;
+    }
+
+    public void setLastUD(Long lastUD) {
+        this.lastUD = lastUD;
     }
 
     public String toString() {

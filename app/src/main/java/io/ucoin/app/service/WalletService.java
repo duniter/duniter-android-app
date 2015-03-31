@@ -1,13 +1,14 @@
 package io.ucoin.app.service;
 
 import android.app.Activity;
-import android.app.Application;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
+import android.preference.PreferenceManager;
 import android.provider.BaseColumns;
 import android.util.Log;
 
@@ -15,16 +16,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.ucoin.app.R;
+import io.ucoin.app.activity.SettingsActivity;
 import io.ucoin.app.content.Provider;
 import io.ucoin.app.database.Contract;
+import io.ucoin.app.model.UnitType;
 import io.ucoin.app.model.Wallet;
 import io.ucoin.app.service.exception.DuplicatePubkeyException;
 import io.ucoin.app.service.remote.TransactionRemoteService;
+import io.ucoin.app.technical.CollectionUtils;
+import io.ucoin.app.technical.CurrencyUtils;
 import io.ucoin.app.technical.DateUtils;
 import io.ucoin.app.technical.ObjectUtils;
 import io.ucoin.app.technical.StringUtils;
 import io.ucoin.app.technical.UCoinTechnicalException;
 import io.ucoin.app.technical.crypto.CryptoUtils;
+import io.ucoin.app.technical.task.AsyncTaskHandleException;
+import io.ucoin.app.technical.task.AsyncTaskListener;
+import io.ucoin.app.technical.task.NullProgressModel;
+import io.ucoin.app.technical.task.ProgressModel;
 
 /**
  * Created by eis on 07/02/15.
@@ -85,23 +94,104 @@ public class WalletService extends BaseService {
         return wallet;
     }
 
-    public List<Wallet> getWallets(Activity activity) {
-        return getWallets(activity.getApplication());
+    /**
+     * Get wallets form database, and update it from remote node if ask
+     *
+     * @param accountId account Id
+     * @param updateRemotely Should wallet must be update from remote nodes ?
+     */
+    public List<Wallet> getWalletsByAccountId(final Context context,
+                                      final long accountId,
+                                      final boolean updateRemotely,
+                                      ProgressModel progressModel) {
+
+        // Make sure the progress model is not null
+        if (progressModel == null) {
+            progressModel = new NullProgressModel();
+        }
+
+        boolean needComputeUD = displayCreditAsUD(context);
+
+        progressModel.setMax(100);
+        progressModel.setProgress(0);
+
+        // Loading wallets from database
+        progressModel.setMessage(context.getString(R.string.loading_wallets));
+        List<Wallet> result = getWalletsByAccountId(context, accountId, needComputeUD);
+        progressModel.increment();
+
+        // Check if cancelled
+        if (progressModel.isCancelled()) {
+            return null;
+        }
+
+        if (CollectionUtils.isNotEmpty(result) && updateRemotely) {
+            // Update progress message and max
+            progressModel.setMessage(context.getString(R.string.updating_balances));
+            progressModel.setMax(result.size() + 1);
+
+            for (Wallet wallet : result) {
+
+                updateWalletFromRemoteNode(context, wallet);
+
+                progressModel.increment();
+
+                // Check if cancelled
+                if (progressModel.isCancelled()) {
+                    return null;
+                }
+            }
+        }
+
+        return result;
     }
 
-    public List<Wallet> getWallets(Application application) {
-        String accountId = ((io.ucoin.app.Application) application).getAccountId();
-        return getWalletsByAccountId(application.getContentResolver(), Long.parseLong(accountId));
+    /**
+     * Get wallets form database, and update it from remote node if ask
+     *
+     * @param accountId account Id
+     * @param updateRemotely Should wallet must be update from remote nodes ?
+     */
+    public void getWalletsByAccountId(final long accountId,
+                                      final boolean updateRemotely,
+                                      final AsyncTaskListener<List<Wallet>> listener) {
+
+        LoadWalletsTask task = new LoadWalletsTask(listener, updateRemotely);
+        task.execute(accountId);
+    }
+
+    /**
+     * Update wallets from remote nodes (balance)
+     *
+     * @param wallets
+     * @param listener
+     */
+    public void updateWalletsRemotely(final List<? extends Wallet> wallets, final AsyncTaskListener<List<? extends Wallet>> listener) {
+        ObjectUtils.checkNotNull(wallets);
+        ObjectUtils.checkNotNull(listener);
+
+        // If empty, do nothing
+        if (CollectionUtils.isEmpty(wallets)) {
+            listener.onSuccess(null);
+            return;
+        }
+
+        // Run the async task
+        UpdateWalletsRemotelyTask task = new UpdateWalletsRemotelyTask(listener);
+        task.execute(wallets.toArray(new Wallet[wallets.size()]));
     }
 
     /**
      * Return wallets that have a uid (e.g. that could be used to sign another identity)
-     * @param application
+     * @param context
+     * @param accountId
      * @return
      */
-    public List<Wallet> getWalletsWithUid(Application application) {
-        String accountId = ((io.ucoin.app.Application) application).getAccountId();
-        List<Wallet> allWallets = getWalletsByAccountId(application.getContentResolver(), Long.parseLong(accountId));
+    public List<Wallet> getUidWalletsByAccountId(Context context, long accountId) {
+        List<Wallet> allWallets = getWalletsByAccountId(
+                context,
+                accountId,
+                displayCreditAsUD(context));
 
         List<Wallet> result = new ArrayList<Wallet>();
         for (Wallet wallet: allWallets) {
@@ -111,35 +201,6 @@ public class WalletService extends BaseService {
         }
 
         return result;
-    }
-
-    public void updateWallet(Context context, Wallet wallet) {
-        ObjectUtils.checkNotNull(wallet);
-        ObjectUtils.checkNotNull(wallet.getCurrencyId());
-
-        Log.d(TAG, String.format("updating wallet [%s]", wallet.toString()));
-
-        Long currencyId = wallet.getCurrencyId();
-        boolean dirty = false;
-
-        Long creditObj = transactionRemoteService.getCredit(wallet.getCurrencyId(), wallet.getPubKeyHash());
-        int updatedCredit = creditObj == null ? 0 : creditObj.intValue();
-        if (wallet.getCredit() == null || updatedCredit != wallet.getCredit().intValue()) {
-            wallet.setCredit(updatedCredit);
-            dirty = true;
-        }
-
-        if (dirty) {
-            // Save updated wallet to DB
-            try {
-                save(context, wallet);
-            } catch (DuplicatePubkeyException e) {
-                // Should never happen
-            }
-
-            // Mark as dirty (let's the UI known that something changed)
-            wallet.setDirty(true);
-        }
     }
 
     /**
@@ -155,7 +216,7 @@ public class WalletService extends BaseService {
         ObjectUtils.checkNotNull(wallet.getSecKey());
         ObjectUtils.checkNotNull(wallet.getUid());
 
-        long certTimestamp = DateUtils.getCurrentTimestamp();
+        long certTimestamp = DateUtils.getCurrentTimestampSeconds();
 
         // Send self to node
         ServiceLocator.instance().getWotRemoteService().sendSelf(
@@ -198,7 +259,14 @@ public class WalletService extends BaseService {
 
     /* -- internal methods-- */
 
-    private List<Wallet> getWalletsByAccountId(ContentResolver resolver, long accountId) {
+    protected List<Wallet> getWallets(Context context, long accountId) {
+        return getWalletsByAccountId(
+                context,
+                accountId,
+                displayCreditAsUD(context));
+    }
+
+    private List<Wallet> getWalletsByAccountId(Context context, long accountId, boolean computeUD) {
 
         String selection = Contract.Wallet.ACCOUNT_ID + "=?";
         String[] selectionArgs = {
@@ -206,17 +274,53 @@ public class WalletService extends BaseService {
         };
         String orderBy = Contract.Wallet.NAME + " ASC";
 
-        Cursor cursor = resolver.query(getContentUri(), new String[]{}, selection,
-                selectionArgs, orderBy);
+        Cursor cursor = context.getContentResolver()
+                .query(getContentUri(),
+                        new String[]{}, selection, selectionArgs, orderBy);
 
         List<Wallet> result = new ArrayList<Wallet>();
         while (cursor.moveToNext()) {
             Wallet wallet = toWallet(cursor);
             result.add(wallet);
+
+            // Update the wallet UD
+            if (computeUD) {
+                computeWalletUD(context, wallet);
+            }
         }
         cursor.close();
 
         return result;
+    }
+
+
+    protected void updateWalletFromRemoteNode(Context context, Wallet wallet) {
+        ObjectUtils.checkNotNull(wallet);
+        ObjectUtils.checkNotNull(wallet.getCurrencyId());
+
+        Log.d(TAG, String.format("updating wallet [%s]", wallet.toString()));
+
+        Long currencyId = wallet.getCurrencyId();
+        boolean dirty = false;
+
+        Long creditObj = transactionRemoteService.getCredit(wallet.getCurrencyId(), wallet.getPubKeyHash());
+        int updatedCredit = creditObj == null ? 0 : creditObj.intValue();
+        if (wallet.getCredit() == null || updatedCredit != wallet.getCredit().intValue()) {
+            wallet.setCredit(updatedCredit);
+            dirty = true;
+        }
+
+        if (dirty) {
+            // Save updated wallet to DB
+            try {
+                save(context, wallet);
+            } catch (DuplicatePubkeyException e) {
+                // Should never happen
+            }
+
+            // Mark as dirty (let's the UI known that something changed)
+            wallet.setDirty(true);
+        }
     }
 
     private void checkPubKeyUnique(
@@ -351,12 +455,28 @@ public class WalletService extends BaseService {
         return result;
     }
 
+    private void computeWalletUD(Context context, Wallet wallet) {
+
+        long lastUD = currencyService.getLastUD(context, wallet.getCurrencyId());
+        double ud = CurrencyUtils.convertToUD(wallet.getCredit(), lastUD);
+        wallet.setCreditAsUD(ud);
+    }
+
     private Uri getContentUri() {
         if (mContentUri != null){
             return mContentUri;
         }
         mContentUri = Uri.parse(Provider.CONTENT_URI + "/wallet/");
         return mContentUri;
+    }
+
+    private boolean displayCreditAsUD(Context context) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        return SettingsActivity.PREF_UNIT_UD.equals(preferences.getString(SettingsActivity.PREF_UNIT, UnitType.COIN));
+    }
+
+    private long getAccountId(Activity activity) {
+        return ((io.ucoin.app.Application) activity.getApplication()).getAccountId();
     }
 
     private class SelectCursorHolder {
@@ -386,5 +506,93 @@ public class WalletService extends BaseService {
             creditIndex = cursor.getColumnIndex(Contract.Wallet.CREDIT);
             saltIndex = cursor.getColumnIndex(Contract.Wallet.SALT);
         }
+    }
+
+    private class LoadWalletsTask extends AsyncTaskHandleException<Long, Void, List<Wallet>> {
+
+        private boolean mUpdateRemotely;
+
+        public LoadWalletsTask(AsyncTaskListener<List<Wallet>> listener, boolean updateRemotely) {
+            super(listener);
+            this.mUpdateRemotely = updateRemotely;
+        }
+
+        @Override
+        protected List<Wallet> doInBackgroundHandleException(Long... accountIds) {
+            Long accountId = accountIds[0];
+            Context context = getContext();
+            boolean computeUD = displayCreditAsUD(context);
+
+            setMax(100);
+            setProgress(0);
+
+            // Loading wallets from database
+            setMessage(getContext().getString(R.string.loading_wallets));
+            List<Wallet> result = getWalletsByAccountId(context, accountId, computeUD);
+            increment();
+
+            // Check if cancelled
+            if (isCancelled()) {
+                return null;
+            }
+
+            if (CollectionUtils.isNotEmpty(result) && mUpdateRemotely) {
+                // Update progress message and max
+                setMessage(getContext().getString(R.string.updating_balances));
+                setMax(result.size() + 1);
+
+                for (Wallet wallet : result) {
+
+                    updateWalletFromRemoteNode(getContext(), wallet);
+
+                    increment();
+
+                    // Check if cancelled
+                    if (isCancelled()) {
+                        return null;
+                    }
+                }
+            }
+
+            return result;
+        }
+
+    }
+
+    private class UpdateWalletsRemotelyTask extends AsyncTaskHandleException<Wallet, Void, List<Wallet>> {
+
+        public UpdateWalletsRemotelyTask(AsyncTaskListener<List<? extends Wallet>> listener) {
+            super(listener);
+        }
+
+        @Override
+        protected List<Wallet> doInBackgroundHandleException(final Wallet... wallets) {
+            int i=0;
+            int count = wallets.length;
+
+            setMax(count);
+            setProgress(0);
+            setMessage(getString(R.string.updating_balances));
+
+            List<Wallet> result = new ArrayList<Wallet>(count);
+            while (i < count) {
+
+                Wallet wallet = wallets[i++];
+
+                updateWalletFromRemoteNode(getContext(), wallet);
+
+                result.add(wallet);
+
+                increment();
+
+                // Check if cancel
+                if (isCancelled()) {
+                    return null;
+                }
+            }
+
+            return result;
+        }
+
     }
 }

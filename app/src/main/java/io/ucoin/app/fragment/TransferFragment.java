@@ -39,16 +39,17 @@ import io.ucoin.app.service.MovementService;
 import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.service.exception.InsufficientCreditException;
 import io.ucoin.app.service.remote.TransactionRemoteService;
-import io.ucoin.app.technical.AsyncTaskHandleException;
 import io.ucoin.app.technical.CollectionUtils;
+import io.ucoin.app.technical.CurrencyUtils;
 import io.ucoin.app.technical.DateUtils;
 import io.ucoin.app.technical.ExceptionUtils;
 import io.ucoin.app.technical.FragmentUtils;
-import io.ucoin.app.technical.MathUtils;
 import io.ucoin.app.technical.ObjectUtils;
 import io.ucoin.app.technical.StringUtils;
 import io.ucoin.app.technical.UCoinTechnicalException;
 import io.ucoin.app.technical.ViewUtils;
+import io.ucoin.app.technical.task.AsyncTaskHandleException;
+import io.ucoin.app.technical.task.NullAsyncTaskListener;
 
 public class TransferFragment extends Fragment {
 
@@ -105,29 +106,19 @@ public class TransferFragment extends Fragment {
         setHasOptionsMenu(true);
 
         // Read fragment arguments
-        Bundle newInstanceArgs = getArguments();
+        final Bundle newInstanceArgs = getArguments();
         mReceiverIdentity = (Identity) newInstanceArgs
                 .getSerializable(BUNDLE_RECEIVER_ITENTITY);
-        Wallet wallet = (Wallet) newInstanceArgs
+        final Wallet wallet = (Wallet) newInstanceArgs
                 .getSerializable(BUNDLE_WALLET);
+        final long accountId = ((io.ucoin.app.Application)getActivity().getApplication()).getAccountId();
 
         // Init wallet list
-        final List<Wallet> wallets = ServiceLocator.instance().getWalletService().getWallets(getActivity().getApplication());
         mWalletAdapter = new WalletArrayAdapter(
                 getActivity(),
-                android.R.layout.simple_spinner_item,
-                wallets
+                android.R.layout.simple_spinner_item
         );
         mWalletAdapter.setDropDownViewResource(WalletArrayAdapter.DEFAULT_LAYOUT_RES);
-        // replace the given wallet with a wallet from list
-        if (wallet != null && CollectionUtils.isNotEmpty(wallets)) {
-            for (Wallet aWallet : wallets) {
-                if (ObjectUtils.equals(aWallet.getId(), wallet.getId())) {
-                    newInstanceArgs.putSerializable(BUNDLE_WALLET, wallet);
-                    break;
-                }
-            }
-        }
 
         // Init contact list
         mContactAdapter = new ContactArrayAdapter(
@@ -135,6 +126,33 @@ public class TransferFragment extends Fragment {
                 android.R.layout.simple_spinner_item
         );
         mContactAdapter.setDropDownViewResource(ContactArrayAdapter.DEFAULT_LAYOUT_RES);
+
+        // Load wallets
+        ServiceLocator.instance().getWalletService().getWalletsByAccountId(
+                accountId,
+                false,
+                new NullAsyncTaskListener<List<Wallet>>(getActivity()) {
+                    @Override
+                    public void onSuccess(List<Wallet> wallets) {
+                        mWalletAdapter.clear();
+
+                        if (CollectionUtils.isNotEmpty(wallets)) {
+
+                            mWalletAdapter.addAll(wallets);
+                            loadCurrencyData(wallets.get(0));
+
+                            // replace the given wallet with a wallet from list
+                            if (wallet != null) {
+                                for (Wallet aWallet : wallets) {
+                                    if (ObjectUtils.equals(aWallet.getId(), wallet.getId())) {
+                                        newInstanceArgs.putSerializable(BUNDLE_WALLET, wallet);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
     }
 
     @Override
@@ -338,8 +356,10 @@ public class TransferFragment extends Fragment {
     /* -- Internal methods -- */
 
     protected void loadCurrencyData(final Wallet wallet) {
-        LoadCurrencyDataTask loadCurrencyDataTask = new LoadCurrencyDataTask();
-        loadCurrencyDataTask.execute(wallet);
+        if (wallet != null) {
+            LoadCurrencyDataTask loadCurrencyDataTask = new LoadCurrencyDataTask();
+            loadCurrencyDataTask.execute(wallet);
+        }
     }
 
     protected void resetCurrencyData() {
@@ -484,16 +504,14 @@ public class TransferFragment extends Fragment {
 
             // if amount unit = coins
             if (isCoinUnit) {
-                long amountInCoins = Long.parseLong(amountStr);
-                double convertedAmount = ((double)amountInCoins) / mUniversalDividend.longValue();
-                mConvertedText.setText(MathUtils.formatShort(convertedAmount));
+                double convertedAmount = CurrencyUtils.convertToUD(Long.parseLong(amountStr), mUniversalDividend.longValue());
+                mConvertedText.setText(CurrencyUtils.formatShort(convertedAmount));
             }
 
             // if amount unit = UD
             else {
-                double amountInUD = Double.parseDouble(amountStr);
-                long convertedAmount = MathUtils.convertToCoin(amountInUD, mUniversalDividend);
-                mConvertedText.setText(MathUtils.formatShort(convertedAmount));
+                long convertedAmount = CurrencyUtils.convertToCoin(Double.parseDouble(amountStr), mUniversalDividend);
+                mConvertedText.setText(CurrencyUtils.formatShort(convertedAmount));
             }
 
         }
@@ -504,6 +522,7 @@ public class TransferFragment extends Fragment {
     public class LoadCurrencyDataTask extends AsyncTaskHandleException<Wallet, Void, List<Contact>>{
 
         private boolean mLoadContacts = (mContactSpinner != null);
+        private Activity mActivity = getActivity();
 
         @Override
         protected List<Contact> doInBackgroundHandleException(Wallet... wallets) {
@@ -534,7 +553,7 @@ public class TransferFragment extends Fragment {
             if (!ObjectUtils.equals(selectedCurrencyId, mCurrencyId)) {
 
                 // Get the last UD, from blockchain
-                mUniversalDividend = ServiceLocator.instance().getCurrencyService().getLastUD(selectedCurrencyId);
+                mUniversalDividend = ServiceLocator.instance().getCurrencyService().getLastUD(mActivity, selectedCurrencyId);
                 if (mUniversalDividend == null) {
                     throw new UCoinTechnicalException("Could not get last UD from blockchain.");
                 }
@@ -636,7 +655,7 @@ public class TransferFragment extends Fragment {
             movement.setFingerprint(fingerprint);
             movement.setAmount(mAmount);
             movement.setComment(mComment);
-            movement.setTime(DateUtils.getCurrentTimestamp());
+            movement.setTime(DateUtils.getCurrentTimestampSeconds());
             movement.setWalletId(wallet.getId());
             MovementService movementService = ServiceLocator.instance().getMovementService();
             movementService.save(mActivity, movement);

@@ -14,6 +14,7 @@ import java.util.List;
 import io.ucoin.app.R;
 import io.ucoin.app.model.Identity;
 import io.ucoin.app.technical.DateUtils;
+import io.ucoin.app.technical.ImageUtils;
 
 public class IdentityArrayAdapter extends ArrayAdapter<Identity> {
 
@@ -48,7 +49,7 @@ public class IdentityArrayAdapter extends ArrayAdapter<Identity> {
         }
 
         // Icon
-        viewHolder.icon.setImageResource(ImageAdapterHelper.getImage(identity));
+        viewHolder.icon.setImageResource(ImageUtils.getImage(identity));
 
         // Uid
         viewHolder.uid.setText(identity.getUid());

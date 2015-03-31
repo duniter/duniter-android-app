@@ -29,10 +29,10 @@ import io.ucoin.app.model.Currency;
 import io.ucoin.app.model.Peer;
 import io.ucoin.app.service.CurrencyService;
 import io.ucoin.app.service.ServiceLocator;
-import io.ucoin.app.technical.AsyncTaskHandleException;
 import io.ucoin.app.technical.ExceptionUtils;
 import io.ucoin.app.technical.StringUtils;
 import io.ucoin.app.technical.UCoinTechnicalException;
+import io.ucoin.app.technical.task.AsyncTaskHandleException;
 
 
 public class CurrencyListFragment extends ListFragment {
@@ -70,7 +70,7 @@ public class CurrencyListFragment extends ListFragment {
         Uri uri = Uri.parse(Provider.CONTENT_URI + "/currency/");
         String selection = Contract.Currency.ACCOUNT_ID + "=?";
         String[] selectionArgs = {
-                ((Application) getActivity().getApplication()).getAccountId()
+                ((Application) getActivity().getApplication()).getAccountIdAsString()
         };
 
         Cursor cursor = getActivity().getContentResolver().query(uri, new String[]{}, selection,
@@ -161,6 +161,7 @@ public class CurrencyListFragment extends ListFragment {
 
         @Override
         protected void onPreExecute() {
+            super.onPreExecute();
             mProgressViewAdapter.showProgress(true);
         }
 

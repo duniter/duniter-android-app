@@ -17,9 +17,9 @@ import android.preference.PreferenceManager;
 import android.preference.RingtonePreference;
 import android.text.TextUtils;
 
-import io.ucoin.app.R;
-
 import java.util.List;
+
+import io.ucoin.app.R;
 
 /**
  * A {@link PreferenceActivity} that presents a set of application settings. On
@@ -40,6 +40,10 @@ public class SettingsActivity extends PreferenceActivity {
      * shown on tablets.
      */
     private static final boolean ALWAYS_SIMPLE_PREFS = false;
+
+    public static final String PREF_UNIT = "unit";
+    public static final String PREF_UNIT_COIN = "coin";
+    public static final String PREF_UNIT_UD = "ud";
 
 
     @Override
@@ -80,9 +84,9 @@ public class SettingsActivity extends PreferenceActivity {
         // Bind the summaries of EditText/List/Dialog/Ringtone preferences to
         // their values. When their values change, their summaries are updated
         // to reflect the new value, per the Android Design guidelines.
-        bindPreferenceSummaryToValue(findPreference("example_text"));
-        bindPreferenceSummaryToValue(findPreference("example_list"));
-        bindPreferenceSummaryToValue(findPreference("notifications_new_message_ringtone"));
+        bindPreferenceSummaryToValue(findPreference(PREF_UNIT));
+        bindPreferenceSummaryToValue(findPreference("add_receiver_as_contact"));
+        bindPreferenceSummaryToBooleanValue(findPreference("notifications_new_payment"), false);
         bindPreferenceSummaryToValue(findPreference("sync_frequency"));
     }
 
@@ -199,6 +203,18 @@ public class SettingsActivity extends PreferenceActivity {
                         .getDefaultSharedPreferences(preference.getContext())
                         .getString(preference.getKey(), ""));
     }
+    private static void bindPreferenceSummaryToBooleanValue(Preference preference,
+                                                            boolean defaultValue) {
+        // Set the listener to watch for value changes.
+        preference.setOnPreferenceChangeListener(sBindPreferenceSummaryToValueListener);
+
+        // Trigger the listener immediately with the preference's
+        // current value.
+        sBindPreferenceSummaryToValueListener.onPreferenceChange(preference,
+                PreferenceManager
+                        .getDefaultSharedPreferences(preference.getContext())
+                        .getBoolean(preference.getKey(), defaultValue));
+    }
 
     /**
      * This fragment shows general preferences only. It is used when the
@@ -215,8 +231,8 @@ public class SettingsActivity extends PreferenceActivity {
             // to their values. When their values change, their summaries are
             // updated to reflect the new value, per the Android Design
             // guidelines.
-            bindPreferenceSummaryToValue(findPreference("example_text"));
-            bindPreferenceSummaryToValue(findPreference("example_list"));
+            bindPreferenceSummaryToValue(findPreference(PREF_UNIT));
+            bindPreferenceSummaryToValue(findPreference("add_receiver_as_contact"));
         }
     }
 

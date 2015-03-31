@@ -15,6 +15,7 @@ import android.widget.Toast;
 
 import java.util.List;
 
+import io.ucoin.app.Application;
 import io.ucoin.app.R;
 import io.ucoin.app.activity.MainActivity;
 import io.ucoin.app.adapter.ProgressViewAdapter;
@@ -23,9 +24,9 @@ import io.ucoin.app.model.Identity;
 import io.ucoin.app.model.Wallet;
 import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.service.remote.WotRemoteService;
-import io.ucoin.app.technical.AsyncTaskHandleException;
 import io.ucoin.app.technical.FragmentUtils;
 import io.ucoin.app.technical.ViewUtils;
+import io.ucoin.app.technical.task.AsyncTaskHandleException;
 
 public class SignFragment extends Fragment {
 
@@ -52,7 +53,8 @@ public class SignFragment extends Fragment {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
-        final List<Wallet> wallets = ServiceLocator.instance().getWalletService().getWalletsWithUid(getActivity().getApplication());
+        long accountId = ((Application)getActivity().getApplication()).getAccountId();
+        final List<Wallet> wallets = ServiceLocator.instance().getWalletService().getUidWalletsByAccountId(getActivity(), accountId);
         mWalletAdapter = new WalletArrayAdapter(
                 getActivity(),
                 android.R.layout.simple_spinner_item,
@@ -175,6 +177,7 @@ public class SignFragment extends Fragment {
 
         @Override
         protected void onPreExecute() {
+            super.onPreExecute();
 
             // hide keyboard
             ViewUtils.hideKeyboard(getActivity());

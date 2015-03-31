@@ -1,6 +1,7 @@
 package io.ucoin.app.model;
 
 import java.io.Serializable;
+import java.util.Collection;
 
 import io.ucoin.app.technical.ObjectUtils;
 import io.ucoin.app.technical.crypto.CryptoUtils;
@@ -19,6 +20,8 @@ public class Wallet extends KeyPair implements LocalEntity, Serializable {
     private String name;
     private Integer credit;
     private Identity identity;
+    private Double creditAsUD;
+    private Collection<WotCertification> certifications;
 
     /**
      * Use for UI, when some properties has not been displayed yet
@@ -168,6 +171,22 @@ public class Wallet extends KeyPair implements LocalEntity, Serializable {
 
     public void setDirty(boolean isDirty) {
         this.isDirty = isDirty;
+    }
+
+    public Double getCreditAsUD() {
+        return creditAsUD;
+    }
+
+    public void setCreditAsUD(Double creditAsUD) {
+        this.creditAsUD = creditAsUD;
+    }
+
+    public Collection<WotCertification> getCertifications() {
+        return certifications;
+    }
+
+    public void setCertifications(Collection<WotCertification> certifications) {
+        this.certifications = certifications;
     }
 
     @Override

@@ -14,6 +14,7 @@ import io.ucoin.app.R;
 import io.ucoin.app.model.WotCertification;
 import io.ucoin.app.model.WotIdentityCertifications;
 import io.ucoin.app.technical.DateUtils;
+import io.ucoin.app.technical.ImageUtils;
 
 public abstract class WotExpandableListAdapter extends BaseExpandableListAdapter {
 
@@ -110,7 +111,7 @@ public abstract class WotExpandableListAdapter extends BaseExpandableListAdapter
 
         // Icon
         ImageView icon = (ImageView) convertView.findViewById(R.id.icon);
-        icon.setImageResource(ImageAdapterHelper.getImage(item));
+        icon.setImageResource(ImageUtils.getImage(item));
 
         // Uid
         ((TextView) convertView.findViewById(R.id.uid))

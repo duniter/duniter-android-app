@@ -58,7 +58,7 @@ public class ContactListFragment extends ListFragment {
 
         String selection = Contract.Contact.ACCOUNT_ID + "=?";
         String[] selectionArgs = {
-                ((Application) getActivity().getApplication()).getAccountId()
+                ((Application) getActivity().getApplication()).getAccountIdAsString()
         };
         String orderBy = Contract.Contact.NAME + " ASC";
 

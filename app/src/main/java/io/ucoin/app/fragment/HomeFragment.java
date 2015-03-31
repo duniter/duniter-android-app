@@ -1,7 +1,9 @@
 package io.ucoin.app.fragment;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.os.Bundle;
 import android.support.v7.widget.SearchView;
@@ -19,13 +21,15 @@ import android.widget.Toast;
 
 import java.util.List;
 
+import io.ucoin.app.Application;
 import io.ucoin.app.R;
 import io.ucoin.app.activity.MainActivity;
 import io.ucoin.app.model.Wallet;
 import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.service.exception.PeerConnectionException;
-import io.ucoin.app.technical.AsyncTaskHandleException;
 import io.ucoin.app.technical.ViewUtils;
+import io.ucoin.app.technical.task.AsyncTaskHandleException;
+import io.ucoin.app.technical.task.ProgressDialogAsyncTaskListener;
 
 
 public class HomeFragment extends Fragment {
@@ -177,17 +181,42 @@ public class HomeFragment extends Fragment {
 
     public class LoadWalletsTask extends AsyncTaskHandleException<Void, Void, List<Wallet>> {
 
+        private Activity mActivity = getActivity();
+
+        public LoadWalletsTask() {
+            super();
+            ProgressDialog progressDialog = new ProgressDialog(getActivity());
+            ProgressDialogAsyncTaskListener listener = new ProgressDialogAsyncTaskListener(progressDialog);
+            setListener(listener);
+        }
+
         @Override
         protected List<Wallet> doInBackgroundHandleException(Void... param) throws PeerConnectionException{
-            // Load currencies cache
-            ServiceLocator.instance().getCurrencyService().loadCache(getActivity().getApplication());
+            ServiceLocator serviceLocator = ServiceLocator.instance();
+            Long accountId = ((Application)mActivity.getApplication()).getAccountId();
 
-            // Load peers cache
-            ServiceLocator.instance().getPeerService().loadCache(getActivity().getApplication());
+            setMax(100);
+            setProgress(0);
+
+            // Load caches
+            {
+                setMessage(getString(R.string.starting_home));
+
+                // Load currencies cache
+                serviceLocator.getCurrencyService().loadCache(getActivity().getApplication());
+                increment();
+
+                // Load peers cache
+                serviceLocator.getPeerService().loadCache(getActivity().getApplication());
+                increment();
+            }
 
             // Load wallets
-            return ServiceLocator.instance().getWalletService()
-                    .getWallets(getActivity().getApplication());
+            return serviceLocator.getWalletService().getWalletsByAccountId(
+                    getActivity(),
+                    accountId,
+                    true,
+                    LoadWalletsTask.this);
         }
 
         @Override
@@ -200,10 +229,9 @@ public class HomeFragment extends Fragment {
             final String errorMessage = getString(R.string.connected_error, t.getMessage());
             Log.e(getClass().getSimpleName(), errorMessage, t);
 
-            // TODO send a message ?
             mWalletResultListener.onQueryFailed(null);
 
-            // TODO: should never append here (no network connection)
+            // Error when no network connection
             mStatusText.setText(getString(R.string.not_connected));
             mStatusImage.setImageResource(R.drawable.warning45);
             mStatusImage.setOnClickListener(new View.OnClickListener() {

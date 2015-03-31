@@ -1,6 +1,8 @@
 package io.ucoin.app.adapter;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,7 +14,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.ucoin.app.R;
+import io.ucoin.app.activity.SettingsActivity;
+import io.ucoin.app.model.UnitType;
 import io.ucoin.app.model.Wallet;
+import io.ucoin.app.technical.CurrencyUtils;
+import io.ucoin.app.technical.ImageUtils;
 import io.ucoin.app.technical.ObjectUtils;
 import io.ucoin.app.technical.StringUtils;
 
@@ -21,6 +27,7 @@ public class WalletArrayAdapter extends ArrayAdapter<Wallet> {
     public static int DEFAULT_LAYOUT_RES = R.layout.list_item_wallet;
     private int mResource;
     private int mDropDownResource;
+    private String mUnitType;
 
     public WalletArrayAdapter(Context context) {
         this(context, new ArrayList<Wallet>());
@@ -35,6 +42,10 @@ public class WalletArrayAdapter extends ArrayAdapter<Wallet> {
         mResource = resource;
         mDropDownResource = resource;
         setDropDownViewResource(resource);
+
+        // Read the default unit to use
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        mUnitType = preferences.getString(SettingsActivity.PREF_UNIT, UnitType.COIN);
     }
 
     public WalletArrayAdapter(Context context, int resource, List<Wallet> wallets) {
@@ -42,6 +53,10 @@ public class WalletArrayAdapter extends ArrayAdapter<Wallet> {
         mResource = resource;
         mDropDownResource = resource;
         setDropDownViewResource(resource);
+
+        // Read the default unit to use
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        mUnitType = preferences.getString(SettingsActivity.PREF_UNIT, UnitType.COIN);
     }
 
     @Override
@@ -95,7 +110,7 @@ public class WalletArrayAdapter extends ArrayAdapter<Wallet> {
         }
 
         // Icon
-        viewHolder.icon.setImageResource(ImageAdapterHelper.getImage(wallet));
+        viewHolder.icon.setImageResource(ImageUtils.getImage(wallet));
 
         // Name
         viewHolder.name.setText(wallet.getName());
@@ -115,11 +130,31 @@ public class WalletArrayAdapter extends ArrayAdapter<Wallet> {
         // pubKey
         viewHolder.pubkey.setText(wallet.getPubKeyHash());
 
-        // Credit
-        viewHolder.credit.setText(String.valueOf(wallet.getCredit()));
+        // If unit is coins
+        if (SettingsActivity.PREF_UNIT_COIN.equals(mUnitType)) {
+            // Credit as coins
+            viewHolder.credit.setText(CurrencyUtils.formatCoin(wallet.getCredit()));
+            // Currency name
+            viewHolder.currency.setText(wallet.getCurrency());
+        }
 
-        // Currency name
-        viewHolder.currency.setText(wallet.getCurrency());
+        // If unit is UD
+        else if (SettingsActivity.PREF_UNIT_UD.equals(mUnitType)) {
+            // Credit as UD
+            viewHolder.credit.setText(convertView.getResources().getString(
+                    R.string.universal_dividend_value,
+                    CurrencyUtils.formatUD(wallet.getCreditAsUD())));
+
+            // Currency name
+            viewHolder.currency.setText(wallet.getCurrency());
+        }
+
+        // Other unit
+        else {
+            viewHolder.credit.setVisibility(View.GONE);
+            viewHolder.currency.setVisibility(View.GONE);
+        }
+
 
         return convertView;
     }
@@ -133,6 +168,8 @@ public class WalletArrayAdapter extends ArrayAdapter<Wallet> {
         TextView pubkey;
         TextView currency;
         TextView viewForError;
+
+        String creditUnit;
 
         ViewHolder(View convertView) {
             icon = (ImageView) convertView.findViewById(R.id.icon);

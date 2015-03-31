@@ -20,8 +20,8 @@ import io.ucoin.app.model.Account;
 import io.ucoin.app.model.Peer;
 import io.ucoin.app.service.AccountService;
 import io.ucoin.app.service.ServiceLocator;
-import io.ucoin.app.technical.AsyncTaskHandleException;
 import io.ucoin.app.technical.ExceptionUtils;
+import io.ucoin.app.technical.task.AsyncTaskHandleException;
 
 public class AddAccountActivity extends ActionBarActivity  {
 
@@ -116,6 +116,7 @@ public class AddAccountActivity extends ActionBarActivity  {
 
         @Override
         protected void onPreExecute() {
+            super.onPreExecute();
             // Hide the keyboard, in case we come from imeDone)
             InputMethodManager inputManager = (InputMethodManager)
                     getSystemService(Context.INPUT_METHOD_SERVICE);

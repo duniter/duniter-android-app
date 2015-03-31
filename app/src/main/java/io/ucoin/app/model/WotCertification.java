@@ -85,6 +85,7 @@ public class WotCertification extends Identity  {
 
     public void setTimestamp(long certTime) {
         if (certTime < 0) {
+            cert_time = null;
             return;
         }
         if (cert_time == null){

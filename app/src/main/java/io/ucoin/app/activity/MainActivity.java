@@ -32,6 +32,7 @@ import android.widget.Toast;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.Set;
 
 import io.ucoin.app.Application;
 import io.ucoin.app.R;
@@ -46,8 +47,9 @@ import io.ucoin.app.model.Identity;
 import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.service.exception.PeerConnectionException;
 import io.ucoin.app.service.remote.WotRemoteService;
-import io.ucoin.app.technical.AsyncTaskHandleException;
+import io.ucoin.app.technical.CurrencyUtils;
 import io.ucoin.app.technical.DateUtils;
+import io.ucoin.app.technical.task.AsyncTaskHandleException;
 
 
 public class MainActivity extends ActionBarActivity
@@ -73,6 +75,7 @@ public class MainActivity extends ActionBarActivity
         DateUtils.setDefaultLongDateFormat(getLongDateFormat());
         DateUtils.setDefaultShortDateFormat(getShortDateFormat());
         DateUtils.setDefaultTimeFormat(getTimeFormat());
+        CurrencyUtils.setDefaultLocale(getResources().getConfiguration().locale);
 
         // Init configuration
         Configuration config = new Configuration();
@@ -304,8 +307,8 @@ public class MainActivity extends ActionBarActivity
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         // Create the data loader, using cursor
-        String account_id = ((Application) getApplication()).getAccountId();
-        Uri uri = Uri.parse(Provider.CONTENT_URI + "/account/" + account_id);
+        long accountId = ((Application) getApplication()).getAccountId();
+        Uri uri = Uri.parse(Provider.CONTENT_URI + "/account/" + accountId);
 
         return new CursorLoader(this, uri, null,
                 null, null, null);
@@ -417,7 +420,7 @@ public class MainActivity extends ActionBarActivity
         protected List<Identity> doInBackgroundHandleException(String... queries) throws PeerConnectionException {
 
             // Get list of currencies
-            List<Long> currenciesIds = ServiceLocator.instance().getCurrencyService().getCurrencyIds();
+            Set<Long> currenciesIds = ServiceLocator.instance().getCurrencyService().getCurrencyIds();
 
             WotRemoteService service = ServiceLocator.instance().getWotRemoteService();
             List<Identity> results = service.findIdentities(currenciesIds, queries[0]);

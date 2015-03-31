@@ -14,6 +14,7 @@ import io.ucoin.app.R;
 import io.ucoin.app.database.Contract;
 import io.ucoin.app.service.ContactService;
 import io.ucoin.app.service.ServiceLocator;
+import io.ucoin.app.technical.ImageUtils;
 import io.ucoin.app.technical.ObjectUtils;
 import io.ucoin.app.technical.StringUtils;
 
@@ -51,11 +52,11 @@ public class ContactCursorAdapter extends CursorAdapter {
                 viewHolder.icon.setImageBitmap(contactBitmap);
             }
             else {
-                viewHolder.icon.setImageResource(ImageAdapterHelper.IMAGE_CONTACT);
+                viewHolder.icon.setImageResource(ImageUtils.IMAGE_CONTACT);
             }
         }
         else {
-            viewHolder.icon.setImageResource(ImageAdapterHelper.IMAGE_CONTACT);
+            viewHolder.icon.setImageResource(ImageUtils.IMAGE_CONTACT);
         }
 
         // Name

@@ -27,11 +27,11 @@ import io.ucoin.app.model.Wallet;
 import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.service.exception.DuplicatePubkeyException;
 import io.ucoin.app.service.remote.TransactionRemoteService;
-import io.ucoin.app.technical.AsyncTaskHandleException;
 import io.ucoin.app.technical.ObjectUtils;
 import io.ucoin.app.technical.StringUtils;
 import io.ucoin.app.technical.ViewUtils;
 import io.ucoin.app.technical.crypto.KeyPair;
+import io.ucoin.app.technical.task.AsyncTaskHandleException;
 
 /**
  * A screen used to add a wallet via currency, uid, salt and password.
@@ -258,6 +258,7 @@ public class AddWalletFragment extends Fragment {
 
         @Override
         protected void onPreExecute() {
+            super.onPreExecute();
             ViewUtils.hideKeyboard(getActivity());
 
             // Show the progress bar
@@ -280,7 +281,7 @@ public class AddWalletFragment extends Fragment {
                 name = uid;
             }
 
-            String accountId = ((io.ucoin.app.Application) getActivity().getApplication()).getAccountId();
+            long accountId = ((io.ucoin.app.Application) getActivity().getApplication()).getAccountId();
 
             // Create a seed from salt and password
             KeyPair keyPair = ServiceLocator.instance().getCryptoService().getKeyPair(salt, password);
@@ -289,7 +290,7 @@ public class AddWalletFragment extends Fragment {
             Wallet wallet = new Wallet(currency.getCurrencyName(), uid, keyPair.publicKey, keyPair.secretKey);
             wallet.setCurrencyId(currency.getId());
             wallet.setSalt(salt);
-            wallet.setAccountId(Long.parseLong(accountId));
+            wallet.setAccountId(accountId);
             wallet.setName(name);
 
             // Load membership

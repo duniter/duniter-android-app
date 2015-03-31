@@ -20,13 +20,13 @@ import io.ucoin.app.service.exception.PeerConnectionException;
 import io.ucoin.app.service.exception.UidMatchAnotherPubkeyException;
 import io.ucoin.app.service.remote.BlockchainRemoteService;
 import io.ucoin.app.service.remote.TransactionRemoteService;
-import io.ucoin.app.technical.DummyProgressModel;
 import io.ucoin.app.technical.ObjectUtils;
-import io.ucoin.app.technical.ProgressModel;
 import io.ucoin.app.technical.StringUtils;
 import io.ucoin.app.technical.UCoinTechnicalException;
 import io.ucoin.app.technical.crypto.Base58;
 import io.ucoin.app.technical.crypto.KeyPair;
+import io.ucoin.app.technical.task.NullProgressModel;
+import io.ucoin.app.technical.task.ProgressModel;
 
 /**
  * Created by eis on 07/02/15.
@@ -52,7 +52,7 @@ public class AccountService extends BaseService {
                 salt,
                 password,
                 peer,
-                new DummyProgressModel());
+                new NullProgressModel());
     }
 
     public Account create(

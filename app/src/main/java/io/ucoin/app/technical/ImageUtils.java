@@ -1,4 +1,4 @@
-package io.ucoin.app.adapter;
+package io.ucoin.app.technical;
 
 import io.ucoin.app.R;
 import io.ucoin.app.model.Identity;
@@ -9,7 +9,7 @@ import io.ucoin.app.model.WotCertification;
 /**
  * Created by eis on 12/01/15.
  */
-public class ImageAdapterHelper {
+public class ImageUtils {
 
     // Wallet
     private static final Integer WALLET_MEMBER = R.drawable.ic_member_32dp;

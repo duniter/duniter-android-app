@@ -53,7 +53,9 @@
     <string name="delete_wallet_error">Could not delete wallet (technical error)\n%s</string>
     <string name="delete_wallet_confirm">Are you sure ?</string>
     <string name="wallet_deleted">Wallet successfully deleted</string>
-
+    <string name="universal_dividend_value">%s UD</string>
+    <string name="loading_wallets">Loading wallets...</string>
+    <string name="updating_balances">Updating balances...</string>
 
     <!-- Strings related to transfer/transaction -->
     <string name="wallet_transmitter">Wallet</string>

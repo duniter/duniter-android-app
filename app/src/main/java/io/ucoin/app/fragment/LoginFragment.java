@@ -22,9 +22,9 @@ import io.ucoin.app.R;
 import io.ucoin.app.adapter.ProgressViewAdapter;
 import io.ucoin.app.model.Wallet;
 import io.ucoin.app.service.ServiceLocator;
-import io.ucoin.app.technical.AsyncTaskHandleException;
 import io.ucoin.app.technical.ObjectUtils;
 import io.ucoin.app.technical.crypto.KeyPair;
+import io.ucoin.app.technical.task.AsyncTaskHandleException;
 
 /**
  * A login screen that offers login via salt and password.
@@ -301,6 +301,7 @@ public class LoginFragment extends Fragment {
 
         @Override
         protected void onPreExecute() {
+            super.onPreExecute();
             // Hide the keyboard, in case we come from imeDone)
             InputMethodManager inputManager = (InputMethodManager)
                     getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);

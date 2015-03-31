@@ -14,6 +14,7 @@ import java.util.List;
 import io.ucoin.app.R;
 import io.ucoin.app.model.WotCertification;
 import io.ucoin.app.technical.DateUtils;
+import io.ucoin.app.technical.ImageUtils;
 
 public class CertificationListAdapter extends ArrayAdapter<WotCertification> {
 
@@ -49,7 +50,7 @@ public class CertificationListAdapter extends ArrayAdapter<WotCertification> {
         }
 
         // Icon
-        viewHolder.icon.setImageResource(ImageAdapterHelper.getCertificationImage(certification));
+        viewHolder.icon.setImageResource(ImageUtils.getCertificationImage(certification));
 
         // Uid
         viewHolder.uid.setText(certification.getUid());

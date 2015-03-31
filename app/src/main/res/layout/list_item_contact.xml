@@ -9,14 +9,12 @@
     android:paddingRight="8dp">
 
     <ImageView
-        android:src="@drawable/ic_user_32dp"
+        android:src="@drawable/ic_contact_picture"
         android:id="@+id/icon"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_marginLeft="5dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginTop="4dp"
-        android:layout_marginBottom="4dp"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_margin="8dp"
+        android:background="@drawable/shape_circle"
         android:duplicateParentState="true" />
 
     <LinearLayout
@@ -38,34 +36,42 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:textAppearanceMedium"
-                android:textColor="@color/hideable_text_color"
+                android:textColor="@color/primary_text_default_material_light"
                 android:singleLine="true"
                 android:text="name"
                 android:layout_gravity="left|top"
                 android:textSize="18sp"/>
 
-            <TextView
-                android:id="@+id/uid"
+            <LinearLayout
                 android:duplicateParentState="true"
-                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textAppearance="?android:textAppearanceMedium"
-                android:textColor="@color/hideable_text_color"
-                android:singleLine="true"
-                android:text="name"
-                android:layout_gravity="left|top"
-                android:textSize="12sp"/>
+                android:orientation="horizontal"
+                android:layout_width="match_parent">
 
-            <TextView
-                android:id="@+id/pubkey"
-                android:duplicateParentState="true"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:textAppearanceMedium"
-                android:textColor="@color/hideable_text_color"
-                android:text="G2CBgZBPLe6FSFUgpx2Jf1Aqsgta6iib3vmDRA1yLiqU"
-                android:textSize="12sp"
-                android:singleLine="true"/>
+                <TextView
+                    android:id="@+id/uid"
+                    android:duplicateParentState="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:textAppearanceMedium"
+                    android:textColor="@color/secondary_text_default_material_light"
+                    android:singleLine="true"
+                    android:text="name"
+                    android:textSize="12sp"
+                    android:layout_marginRight="8dp"
+                    android:layout_marginEnd="8dp"/>
+
+                <TextView
+                    android:id="@+id/pubkey"
+                    android:duplicateParentState="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:textAppearanceMedium"
+                    android:textColor="@color/abc_primary_text_material_light"
+                    android:text="G2CBgZBPLe6FSFUgpx2Jf1Aqsgta6iib3vmDRA1yLiqU"
+                    android:textSize="12sp"
+                    android:singleLine="true"/>
+            </LinearLayout>
         </LinearLayout>
     </LinearLayout>
 

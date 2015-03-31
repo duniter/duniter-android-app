@@ -20,11 +20,11 @@ import io.ucoin.app.adapter.ProgressViewAdapter;
 import io.ucoin.app.model.Contact;
 import io.ucoin.app.model.Identity;
 import io.ucoin.app.service.ServiceLocator;
-import io.ucoin.app.technical.AsyncTaskHandleException;
 import io.ucoin.app.technical.ExceptionUtils;
 import io.ucoin.app.technical.ObjectUtils;
 import io.ucoin.app.technical.StringUtils;
 import io.ucoin.app.technical.ViewUtils;
+import io.ucoin.app.technical.task.AsyncTaskHandleException;
 
 /**
  * A screen used to add a wallet via currency, uid, salt and password.
@@ -169,6 +169,7 @@ public class AddContactFragment extends Fragment {
 
         @Override
         protected void onPreExecute() {
+            super.onPreExecute();
             ViewUtils.hideKeyboard(getActivity());
 
             // Show the progress bar
@@ -189,11 +190,11 @@ public class AddContactFragment extends Fragment {
             }
 
             // Retrieve account id
-            String accountId = ((io.ucoin.app.Application) getActivity().getApplication()).getAccountId();
+            Long accountId = ((io.ucoin.app.Application) getActivity().getApplication()).getAccountId();
 
             Contact contact = new Contact();
             contact.setName(name);
-            contact.setAccountId(Long.valueOf(accountId));
+            contact.setAccountId(accountId);
             contact.addIdentity(identity);
 
             // Save the contact in DB

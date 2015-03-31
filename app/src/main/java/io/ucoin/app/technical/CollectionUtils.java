@@ -19,6 +19,9 @@ public class CollectionUtils {
     public static boolean isNotEmpty(Object[] coll) {
         return coll != null && coll.length > 0;
     }
+    public static boolean isEmpty(Object[] coll) {
+        return coll == null || coll.length == 0;
+    }
 
     public static String join(final Object[] array) {
         return join(array, ", ");

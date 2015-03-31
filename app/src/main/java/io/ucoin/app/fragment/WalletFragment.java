@@ -5,7 +5,9 @@ import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -20,21 +22,27 @@ import android.widget.TabHost;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.Collection;
+
 import io.ucoin.app.R;
 import io.ucoin.app.activity.MainActivity;
+import io.ucoin.app.activity.SettingsActivity;
 import io.ucoin.app.adapter.CertificationListAdapter;
-import io.ucoin.app.adapter.ImageAdapterHelper;
 import io.ucoin.app.adapter.ProgressViewAdapter;
+import io.ucoin.app.model.UnitType;
 import io.ucoin.app.model.Wallet;
 import io.ucoin.app.model.WotCertification;
 import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.service.remote.WotRemoteService;
-import io.ucoin.app.technical.AsyncTaskHandleException;
+import io.ucoin.app.technical.CollectionUtils;
+import io.ucoin.app.technical.CurrencyUtils;
 import io.ucoin.app.technical.DateUtils;
 import io.ucoin.app.technical.ExceptionUtils;
 import io.ucoin.app.technical.FragmentUtils;
+import io.ucoin.app.technical.ImageUtils;
 import io.ucoin.app.technical.StringUtils;
 import io.ucoin.app.technical.ViewUtils;
+import io.ucoin.app.technical.task.AsyncTaskHandleException;
 
 
 public class WalletFragment extends Fragment {
@@ -53,6 +61,8 @@ public class WalletFragment extends Fragment {
     private TextView mCreditView;
     private TextView mCurrencyView;
     private TabHost mTabs;
+
+    private String mUnitType;
 
     private boolean mSignatureSingleLine = true;
     private boolean mPubKeySingleLine = true;
@@ -169,6 +179,10 @@ public class WalletFragment extends Fragment {
         // Make sure to hide the keyboard
         ViewUtils.hideKeyboard(getActivity());
 
+        // Read unit type from preferences
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        mUnitType = preferences.getString(SettingsActivity.PREF_UNIT, UnitType.COIN);
+
         // update views
         updateView(wallet);
 
@@ -225,7 +239,7 @@ public class WalletFragment extends Fragment {
         mUidView.setText(wallet.getUid());
 
         // Icon
-        mIcon.setImageResource(ImageAdapterHelper.getImageWhite(wallet));
+        mIcon.setImageResource(ImageUtils.getImageWhite(wallet));
 
         // Registration date
         if (wallet.getCertTimestamp() > 0) {
@@ -248,12 +262,37 @@ public class WalletFragment extends Fragment {
         // Currency
         mCurrencyView.setText(wallet.getCurrency());
 
-        // Credit
-        mCreditView.setText(wallet.getCredit().toString());
+        // If unit is coins
+        if (SettingsActivity.PREF_UNIT_COIN.equals(mUnitType)) {
+            // Credit as coins
+            mCreditView.setText(CurrencyUtils.formatCoin(wallet.getCredit()));
+        }
+
+        // If unit is UD
+        else if (SettingsActivity.PREF_UNIT_UD.equals(mUnitType)) {
+            // Credit as UD
+            mCreditView.setText(getString(
+                    R.string.universal_dividend_value,
+                    CurrencyUtils.formatUD(wallet.getCreditAsUD())));
+        }
+
+        // Other unit
+        else {
+            mCreditView.setVisibility(View.GONE);
+        }
+
+        // Use the pre-loaded WOT data if exists
+        if (CollectionUtils.isNotEmpty(wallet.getCertifications())) {
+            mCertificationListAdapter.clear();
+            mCertificationListAdapter.addAll(wallet.getCertifications());
+            mCertificationListAdapter.notifyDataSetChanged();
+        }
 
         // Load WOT data
-        LoadTask task = new LoadTask();
-        task.execute(wallet);
+        else {
+            LoadTask task = new LoadTask();
+            task.execute(wallet);
+        }
     }
 
     protected void onTransferClick() {
@@ -369,7 +408,7 @@ public class WalletFragment extends Fragment {
 
     }
 
-    public class LoadTask extends AsyncTaskHandleException<Wallet, Void, WotCertification[]> {
+    public class LoadTask extends AsyncTaskHandleException<Wallet, Void, Collection<WotCertification>> {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
@@ -377,29 +416,32 @@ public class WalletFragment extends Fragment {
         }
 
         @Override
-        protected WotCertification[] doInBackgroundHandleException(Wallet... wallets) {
+        protected Collection<WotCertification> doInBackgroundHandleException(Wallet... wallets) {
             Wallet wallet = wallets[0];
 
             // Get certifications (if has a uid)
+            Collection<WotCertification> certifications = null;
             if (StringUtils.isNotBlank(wallet.getUid())) {
                 WotRemoteService wotService = ServiceLocator.instance().getWotRemoteService();
-                return wotService.getCertifications(
+                certifications =  wotService.getCertifications(
                         wallet.getCurrencyId(),
                         wallet.getUid(),
                         wallet.getPubKeyHash(),
                         wallet.getIdentity().isMember());
             }
-            else {
-                return null;
-            }
+
+            // Update the wallet( to avoid a new load when navigate on community members)
+            wallet.setCertifications(certifications);
+
+            return certifications;
          }
 
         @Override
-        protected void onSuccess(WotCertification[] certifications) {
+        protected void onSuccess(Collection<WotCertification> certifications) {
 
             // Update certification list
             mCertificationListAdapter.clear();
-            if (certifications != null && certifications.length  > 0) {
+            if (CollectionUtils.isNotEmpty(certifications)) {
                 mCertificationListAdapter.addAll(certifications);
                 mCertificationListAdapter.notifyDataSetChanged();
             }
