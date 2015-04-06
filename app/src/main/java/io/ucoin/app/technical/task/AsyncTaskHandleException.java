@@ -48,9 +48,9 @@ public abstract class AsyncTaskHandleException<Param, Progress, Result>
         this.mListener = new NullAsyncTaskListener(context);
     }
 
-    public AsyncTaskHandleException() {
-        this.mListener = new NullAsyncTaskListener();
-    }
+    //public AsyncTaskHandleException() {
+    //    this.mListener = new NullAsyncTaskListener();
+    //}
 
     public AsyncTaskListener getListener() {
         return mListener;

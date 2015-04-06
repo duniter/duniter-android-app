@@ -30,7 +30,7 @@ public interface Contract {
 
     public static final class Wallet implements BaseColumns {
         public static final String TABLE_NAME = "wallet";
-        public static final String NAME = "name";
+        public static final String ALIAS = "alias";
         public static final String UID = "uid";
         public static final String SALT = "salt";
         public static final String CERT_TS = "cert_ts";
@@ -40,6 +40,10 @@ public interface Contract {
         public static final String PUBLIC_KEY = "public_key";
         public static final String SECRET_KEY = "secret_key";
         public static final String CREDIT = "credit";
+        /*
+        * Last block number synchronized
+        * */
+        public static final String BLOCK_NUMBER = "block_number";
     }
 
     public static final class Movement implements BaseColumns {

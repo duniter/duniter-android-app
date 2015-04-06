@@ -1,4 +1,4 @@
-package io.ucoin.app.model;
+package io.ucoin.app.model.remote;
 
 import java.util.List;
 
@@ -10,14 +10,14 @@ public class TxSourceResults {
 	    
     private List<TxSource> sources;
     
-    private double balance;
+    private Long credit;
 
-	public double getBalance() {
-		return balance;
+	public Long getCredit() {
+		return credit;
 	}
 
-	public void setBalance(double balance) {
-		this.balance = balance;
+	public void setCredit(Long credit) {
+		this.credit = credit;
 	}
 
 	public String getCurrency() {

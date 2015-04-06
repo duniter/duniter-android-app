@@ -1,5 +1,6 @@
 package io.ucoin.app.fragment;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.os.Bundle;
@@ -19,7 +20,7 @@ import android.widget.Toast;
 import java.util.Collection;
 
 import io.ucoin.app.R;
-import io.ucoin.app.activity.MainActivity;
+import io.ucoin.app.activity.IToolbarActivity;
 import io.ucoin.app.adapter.CertificationListAdapter;
 import io.ucoin.app.adapter.ProgressViewAdapter;
 import io.ucoin.app.model.Identity;
@@ -170,8 +171,12 @@ public class IdentityFragment extends Fragment {
 
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
-        getActivity().setTitle(R.string.identity);
-        ((MainActivity)getActivity()).setBackButtonEnabled(true);
+        Activity activity = getActivity();
+        activity.setTitle(R.string.identity);
+        if (activity instanceof IToolbarActivity) {
+            ((IToolbarActivity) activity).setToolbarBackButtonEnabled(true);
+            ((IToolbarActivity) activity).setToolbarDrawable(getResources().getDrawable(R.drawable.shape_identity_toolbar));
+        }
     }
 
     @Override
@@ -284,6 +289,7 @@ public class IdentityFragment extends Fragment {
         private final Identity mIdentity;
 
         LoadTask(Identity identity) {
+            super(getActivity());
             ObjectUtils.checkNotNull(identity);
             ObjectUtils.checkNotNull(identity.getCurrencyId());
             mIdentity = identity;

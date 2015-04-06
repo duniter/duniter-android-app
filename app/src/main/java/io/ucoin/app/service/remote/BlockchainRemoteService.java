@@ -1,5 +1,6 @@
 package io.ucoin.app.service.remote;
 
+import android.content.Context;
 import android.util.Log;
 
 import org.apache.http.NameValuePair;
@@ -25,6 +26,7 @@ import io.ucoin.app.service.exception.UidMatchAnotherPubkeyException;
 import io.ucoin.app.technical.ObjectUtils;
 import io.ucoin.app.technical.StringUtils;
 import io.ucoin.app.technical.UCoinTechnicalException;
+import io.ucoin.app.technical.cache.SimpleCache;
 
 public class BlockchainRemoteService extends BaseRemoteService {
 
@@ -47,8 +49,18 @@ public class BlockchainRemoteService extends BaseRemoteService {
 
     private NetworkRemoteService networkRemoteService;
 
+    // Cache need for wallet refresh : iteration on wallet should not
+    // execute a download of the current block
+    private SimpleCache<Long, BlockchainBlock> mCurrentBlockCache;
+
     public BlockchainRemoteService() {
         super();
+        mCurrentBlockCache = new SimpleCache<Long, BlockchainBlock>(10000 /*= 10s*/) {
+            @Override
+            public BlockchainBlock load(Context context, Long currencyId) {
+                return getCurrentBlock(currencyId);
+            }
+        };
     }
 
     @Override
@@ -56,6 +68,7 @@ public class BlockchainRemoteService extends BaseRemoteService {
         super.initialize();
         networkRemoteService = ServiceLocator.instance().getNetworkRemoteService();
     }
+
 
     /**
      * get the blockchain parameters (currency parameters)
@@ -103,6 +116,19 @@ public class BlockchainRemoteService extends BaseRemoteService {
         String path = String.format(URL_BLOCK, number);
         BlockchainBlock result = executeRequest(peer, path, BlockchainBlock.class);
         return result;
+    }
+
+    /**
+     * Retrieve the current block (with short cache)
+     * @return
+     */
+    public BlockchainBlock getCurrentBlock(long currencyId, boolean useCache) {
+        if (!useCache) {
+            return getCurrentBlock(currencyId);
+        }
+        else {
+            return mCurrentBlockCache.get(null, currencyId);
+        }
     }
 
     /**
@@ -389,4 +415,5 @@ public class BlockchainRemoteService extends BaseRemoteService {
             throw new UCoinTechnicalException("Could not parse server response");
         }
     }
+
 }

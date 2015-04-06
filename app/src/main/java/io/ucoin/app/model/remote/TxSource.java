@@ -1,13 +1,16 @@
-package io.ucoin.app.model;
+package io.ucoin.app.model.remote;
 
 import java.io.Serializable;
 
 public class TxSource implements Serializable, Cloneable {
 
+    public static final String SOURCE_TYPE_UD = "D";
+    public static final String SOURCE_TYPE_TRASNACTION = "T";
+
 	private static final long serialVersionUID = 8084087351543574142L;
 
 	private String type;	
-	private int number;	
+	private long number;
 	private String fingerprint;	
     private long amount;
 
@@ -42,11 +45,11 @@ public class TxSource implements Serializable, Cloneable {
 	 * The block number where the source has been written
 	 * @return
 	 */
-	public int getNumber() {
+	public long getNumber() {
 		return number;
 	}
 
-	public void setNumber(int number) {
+	public void setNumber(long number) {
 		this.number = number;
 	}
 
@@ -64,5 +67,14 @@ public class TxSource implements Serializable, Cloneable {
 
 	public void setAmount(long amount) {
 		this.amount = amount;
-	}    
+	}
+
+    public String toString() {
+        return new StringBuilder()
+                .append("type=").append(type)
+                .append(",number=").append(number)
+                .append(",fingerprint=").append(fingerprint)
+                .append(",amount=").append(amount)
+                .toString();
+    }
 }

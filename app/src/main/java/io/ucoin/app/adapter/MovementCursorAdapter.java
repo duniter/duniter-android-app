@@ -40,9 +40,9 @@ public class MovementCursorAdapter extends CursorAdapter{
 
         // Icon
         {
-            boolean isWriteInBlockchain = !cursor.isNull(viewHolder.blockIndex);
+            boolean isWritten = !cursor.isNull(viewHolder.blockNumberIndex);
             // Is write in blokchain ?
-            if (isWriteInBlockchain) {
+            if (isWritten) {
                 viewHolder.iconView.setImageResource(ImageUtils.IMAGE_MOVEMENT_VALID);
             } else {
                 viewHolder.iconView.setImageResource(ImageUtils.IMAGE_MOVEMENT_WAITING);
@@ -73,7 +73,7 @@ public class MovementCursorAdapter extends CursorAdapter{
         int timeIndex;
         int amountIndex;
         int commentIndex;
-        int blockIndex;
+        int blockNumberIndex;
 
         ViewHolder(View view, Cursor cursor) {
             iconView = (ImageView) view.findViewById(R.id.icon);
@@ -85,7 +85,7 @@ public class MovementCursorAdapter extends CursorAdapter{
             timeIndex = cursor.getColumnIndex(Contract.Movement.TIME);
             amountIndex = cursor.getColumnIndex(Contract.Movement.AMOUNT);
             commentIndex = cursor.getColumnIndex(Contract.Movement.COMMENT);
-            blockIndex = cursor.getColumnIndex(Contract.Movement.BLOCK);
+            blockNumberIndex = cursor.getColumnIndex(Contract.Movement.BLOCK);
         }
     }
 

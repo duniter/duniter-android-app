@@ -29,7 +29,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/wallet_name" />
+            android:text="@string/alias" />
 
         <EditText
             android:id="@+id/name"
@@ -37,7 +37,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="20dip"
             android:layout_marginTop="5dip"
-            android:hint="@string/wallet_name"
+            android:hint="@string/alias"
             android:imeOptions="actionNext"
             android:inputType="textNoSuggestions"
             android:singleLine="true"
@@ -47,7 +47,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/user_id" />
+            android:text="@string/uid" />
 
         <EditText
             android:id="@+id/uid"
@@ -55,7 +55,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="20dip"
             android:layout_marginTop="5dip"
-            android:hint="@string/user_id"
+            android:hint="@string/uid"
             android:imeOptions="actionNext"
             android:inputType="textNoSuggestions"
             android:singleLine="true"

@@ -20,6 +20,7 @@ import android.widget.TextView;
 import java.util.List;
 
 import io.ucoin.app.R;
+import io.ucoin.app.activity.IToolbarActivity;
 import io.ucoin.app.activity.MainActivity;
 import io.ucoin.app.adapter.IdentityArrayAdapter;
 import io.ucoin.app.adapter.ProgressViewAdapter;
@@ -94,8 +95,12 @@ public class WotSearchFragment extends ListFragment
         String query = newInstanceArgs
                 .getString("query");
 
-        getActivity().setTitle("/" + query);
-        ((MainActivity)getActivity()).setBackButtonEnabled(true);
+        Activity activity = getActivity();
+        activity.setTitle("/" + query);
+        if (activity instanceof IToolbarActivity) {
+            ((IToolbarActivity) activity).setToolbarBackButtonEnabled(true);
+            ((IToolbarActivity) activity).setToolbarColor(R.color.primary);
+        }
 
         SearchManager searchManager = (SearchManager) getActivity()
                 .getSystemService(Activity.SEARCH_SERVICE);

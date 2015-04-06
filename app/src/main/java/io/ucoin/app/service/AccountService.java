@@ -125,7 +125,7 @@ public class AccountService extends BaseService {
             wallet.setName(account.getUid());
             wallet.setCurrencyId(currency.getId());
             wallet.setAccountId(account.getId());
-            wallet.setCredit(credit == null ? 0 : credit.intValue());
+            wallet.setCredit(credit == null ? 0 : credit);
             WalletService walletService = ServiceLocator.instance().getWalletService();
             wallet = walletService.save(context, wallet);
         }

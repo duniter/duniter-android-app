@@ -14,7 +14,7 @@ import android.webkit.WebViewClient;
 import android.widget.Toast;
 
 import io.ucoin.app.R;
-import io.ucoin.app.activity.MainActivity;
+import io.ucoin.app.activity.IToolbarActivity;
 import io.ucoin.app.adapter.ProgressViewAdapter;
 import io.ucoin.app.config.Configuration;
 import io.ucoin.app.technical.StringUtils;
@@ -105,12 +105,16 @@ public class WebFragment extends Fragment {
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        //inflater.inflate(R.menu.toolbar_identity, menu);
+        inflater.inflate(R.menu.toolbar_web, menu);
     }
 
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
-        getActivity().setTitle(R.string.forum);
-        ((MainActivity)getActivity()).setBackButtonEnabled(true);
+        Activity activity = getActivity();
+        activity.setTitle(getString(R.string.forum));
+        if (activity instanceof IToolbarActivity) {
+            ((IToolbarActivity) activity).setToolbarBackButtonEnabled(false);
+            ((IToolbarActivity) activity).setToolbarColor(getResources().getColor(R.color.primary));
+        }
     }
 }

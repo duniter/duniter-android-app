@@ -1,19 +1,29 @@
 package io.ucoin.app.service;
 
+import android.content.ContentProviderOperation;
+import android.content.ContentProviderResult;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.OperationApplicationException;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.RemoteException;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+import io.ucoin.app.R;
 import io.ucoin.app.content.Provider;
 import io.ucoin.app.database.Contract;
+import io.ucoin.app.model.ModelUtils;
 import io.ucoin.app.model.Movement;
+import io.ucoin.app.model.remote.TxSource;
 import io.ucoin.app.service.exception.DuplicatePubkeyException;
+import io.ucoin.app.technical.CollectionUtils;
 import io.ucoin.app.technical.ObjectUtils;
 import io.ucoin.app.technical.StringUtils;
 import io.ucoin.app.technical.UCoinTechnicalException;
@@ -80,14 +90,93 @@ public class MovementService extends BaseService {
         }
     }
 
+    /**
+     * Update wallet's movements state (written in blockchain or not)
+     * @param context
+     * @param walletId
+     * @param sources
+     */
+    public void updateMovementsFromSources(final Context context,
+                                           long walletId,
+                                           long bockNumber,
+                                           List<TxSource> sources) {
+
+        // Load movement that waiting block
+        List<Movement> waitingMovements = getWaitingMovementsByWalletId(context.getContentResolver(), walletId);
+
+        Map<String, TxSource> sourcesByFingerprint = ModelUtils.toFingertprintMap(sources);
+
+        List<Movement> updatedMovement = new ArrayList<>();
+        for(Movement waitingMovement : waitingMovements) {
+            TxSource source = sourcesByFingerprint.remove(waitingMovement.getFingerprint());
+            if (source != null) {
+                waitingMovement.setBlockNumber(source.getNumber());
+                // TODO get the time of the block.
+                // -> using a rolling cache ?
+
+                updatedMovement.add(waitingMovement);
+            }
+        }
+
+        // Process not processed source
+        List<Movement> newMovements = new ArrayList<>();
+        for (TxSource source: sourcesByFingerprint.values()) {
+            // If UD
+            if (TxSource.SOURCE_TYPE_UD.equals(source.getType())) {
+                // If not processed block
+                if (source.getNumber() > bockNumber) {
+                    Log.d(TAG, "Detected a received UD : " + source.toString() + "Should be processed ???");
+                    // TODO : check the block number to known if already processed or not
+                    Movement udMovement = new Movement();
+                    udMovement.setWalletId(walletId);
+                    udMovement.setFingerprint(source.getFingerprint());
+                    udMovement.setComment(context.getString(R.string.movement_ud));
+                    udMovement.setAmount(source.getAmount());
+                    udMovement.setUD(true);
+                    udMovement.setBlockNumber(source.getNumber());
+                    // TODO : udMovement.setTime();
+                    newMovements.add(udMovement);
+                }
+            }
+        }
+
+        // Update existing movements to update
+        if (CollectionUtils.isNotEmpty(updatedMovement)) {
+            // bulk updates
+            update(context.getContentResolver(), updatedMovement);
+        }
+
+        // Insert new movements
+        if (CollectionUtils.isNotEmpty(newMovements)) {
+            // bulk insert
+            insert(context.getContentResolver(), newMovements, false);
+        }
+    }
+
     /* -- internal methods-- */
 
-    private List<Movement> getMovementsByWalletId(ContentResolver resolver, long walletId) {
+    private List<Movement> getMovementsByWalletId(final ContentResolver resolver, final long walletId) {
 
         String selection = Contract.Movement.WALLET_ID + "=?";
         String[] selectionArgs = {
                 String.valueOf(walletId)
         };
+        return getMovements(resolver, selection, selectionArgs);
+    }
+
+    private List<Movement> getWaitingMovementsByWalletId(final ContentResolver resolver, final long walletId) {
+
+        String selection = String.format("%s=? AND %s is null",
+                Contract.Movement.WALLET_ID,
+                Contract.Movement.BLOCK
+                );
+        String[] selectionArgs = {
+                String.valueOf(walletId)
+        };
+        return getMovements(resolver, selection, selectionArgs);
+    }
+
+    private List<Movement> getMovements(final ContentResolver resolver, final String selection, final String[] selectionArgs) {
         Cursor cursor = resolver.query(getContentUri(), new String[]{}, selection,
                 selectionArgs, null);
 
@@ -125,6 +214,75 @@ public class MovementService extends BaseService {
         int rowsUpdated = resolver.update(getContentUri(), target, whereClause, whereArgs);
         if (rowsUpdated != 1) {
             throw new UCoinTechnicalException(String.format("Error while updating movement. %s rows updated.", rowsUpdated));
+        }
+    }
+
+    public void update(final ContentResolver resolver, final List<Movement> movements) {
+
+        Uri contentUri = getContentUri();
+        String whereClause = "_id=?";
+        ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
+
+        for (Movement movement: movements) {
+            String[] whereArgs = new String[]{String.valueOf(movement.getId())};
+
+            ops.add(ContentProviderOperation.newUpdate(contentUri)
+                    .withSelection(whereClause, whereArgs)
+                    .withValues(toContentValues(movement))
+                    .withYieldAllowed(true)
+                    .build());
+        }
+
+        try {
+            resolver.applyBatch(contentUri.getAuthority(), ops);
+        }
+        catch(RemoteException e1) {
+            throw new UCoinTechnicalException("Error while inserting movements in batch mode: "
+                    + e1.getMessage(),
+                    e1);
+        }
+        catch(OperationApplicationException e2) {
+            throw new UCoinTechnicalException("Error while inserting movements in batch mode: "
+                    + e2.getMessage(),
+                    e2);
+        }
+    }
+
+    public void insert(final ContentResolver resolver, final List<Movement> movements, boolean mustSetId) {
+
+        Uri contentUri = getContentUri();
+        ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
+
+        for (Movement movement: movements) {
+            ops.add(ContentProviderOperation.newInsert(contentUri)
+                    .withValues(toContentValues(movement))
+                    .withYieldAllowed(true)
+                    .build());
+        }
+
+        try {
+            // Execute the batch
+            ContentProviderResult[] opResults = resolver.applyBatch(contentUri.getAuthority(), ops);
+
+            // Set movement's ids
+            if (mustSetId) {
+                int i = 0;
+                for (Movement movement : movements) {
+                    ContentProviderResult opResult = opResults[i++];
+                    Long movementId = ContentUris.parseId(opResult.uri);
+                    movement.setId(movementId);
+                }
+            }
+        }
+        catch(RemoteException e1) {
+            throw new UCoinTechnicalException("Error while inserting movements in batch mode: "
+                    + e1.getMessage(),
+                    e1);
+        }
+        catch(OperationApplicationException e2) {
+            throw new UCoinTechnicalException("Error while inserting movements in batch mode: "
+                    + e2.getMessage(),
+                    e2);
         }
     }
 

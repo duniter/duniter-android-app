@@ -5,17 +5,19 @@
     android:minHeight="?android:listPreferredItemHeight"
     android:gravity="center_vertical"
     android:duplicateParentState="true"
-    android:paddingLeft="8dp"
-    android:paddingRight="8dp">
+    android:paddingLeft="0dp"
+    android:paddingRight="8dp"
+    android:layout_margin="0dp">
 
-    <ImageView
-        android:src="@drawable/ic_contact_picture"
+    <io.ucoin.app.view.RoundedImageView
         android:id="@+id/icon"
+        android:src="@drawable/ic_contact_picture"
         android:layout_width="56dp"
         android:layout_height="56dp"
         android:layout_margin="8dp"
-        android:background="@drawable/shape_circle"
-        android:duplicateParentState="true" />
+        android:duplicateParentState="true"
+        android:layout_gravity="center"
+        android:scaleType="fitXY"/>
 
     <LinearLayout
         android:duplicateParentState="true"
@@ -32,46 +34,18 @@
 
             <TextView
                 android:id="@+id/name"
-                android:duplicateParentState="true"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:textAppearanceMedium"
-                android:textColor="@color/primary_text_default_material_light"
-                android:singleLine="true"
                 android:text="name"
-                android:layout_gravity="left|top"
-                android:textSize="18sp"/>
+                style="@style/ListItemHead"/>
 
-            <LinearLayout
-                android:duplicateParentState="true"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_width="match_parent">
+            <TextView
+                android:id="@+id/uid"
+                android:text="name"
+                style="@style/ListItemSubhead"/>
 
-                <TextView
-                    android:id="@+id/uid"
-                    android:duplicateParentState="true"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="?android:textAppearanceMedium"
-                    android:textColor="@color/secondary_text_default_material_light"
-                    android:singleLine="true"
-                    android:text="name"
-                    android:textSize="12sp"
-                    android:layout_marginRight="8dp"
-                    android:layout_marginEnd="8dp"/>
-
-                <TextView
-                    android:id="@+id/pubkey"
-                    android:duplicateParentState="true"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="?android:textAppearanceMedium"
-                    android:textColor="@color/abc_primary_text_material_light"
-                    android:text="G2CBgZBPLe6FSFUgpx2Jf1Aqsgta6iib3vmDRA1yLiqU"
-                    android:textSize="12sp"
-                    android:singleLine="true"/>
-            </LinearLayout>
+            <TextView
+                android:id="@+id/pubkey"
+                android:text="G2CBgZBPLe6FSFUgpx2Jf1Aqsgta6iib3vmDRA1yLiqU"
+                style="@style/ListItemSubhead"/>
         </LinearLayout>
     </LinearLayout>
 

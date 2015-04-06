@@ -16,7 +16,7 @@
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
         android:layout_margin="8dp"
-        android:background="@drawable/shape_circle"
+        android:background="@drawable/shape_item_wallet"
         android:src="@drawable/ic_account_white_36dp" />
 
     <TextView

@@ -1,17 +1,16 @@
 package io.ucoin.app.fragment;
 
-import android.app.Fragment;
-import android.app.FragmentManager;
 import android.app.ListFragment;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.ListView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -20,6 +19,7 @@ import java.util.List;
 import io.ucoin.app.R;
 import io.ucoin.app.activity.MainActivity;
 import io.ucoin.app.adapter.WalletArrayAdapter;
+import io.ucoin.app.model.Currency;
 import io.ucoin.app.model.Wallet;
 import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.technical.task.ProgressDialogAsyncTaskListener;
@@ -31,7 +31,6 @@ public class WalletListFragment extends ListFragment implements MainActivity.Que
     private static final String WALLET_LIST_ARGS_KEYS = "Wallets";
 
     private WalletArrayAdapter mWalletArrayAdapter;
-    private ProgressBar mUpdateCreditProgressBar;
     private OnClickListener mListener;
     private int mScrollState;
     private ListView mListView;
@@ -39,6 +38,8 @@ public class WalletListFragment extends ListFragment implements MainActivity.Que
     protected static WalletListFragment newInstance(OnClickListener listener) {
         WalletListFragment fragment = new WalletListFragment();
         fragment.setOnClickListener(listener);
+        Bundle args = new Bundle();
+        fragment.setArguments(args);
         return fragment;
     }
 
@@ -65,9 +66,6 @@ public class WalletListFragment extends ListFragment implements MainActivity.Que
         super.onViewCreated(view, savedInstanceState);
 
         mListView = getListView();
-
-        // refresh progress
-        mUpdateCreditProgressBar = (ProgressBar)view.findViewById(R.id.load_progress);
 
         // Display the progress by default (onQuerySuccess will disable it)
         TextView v = (TextView) view.findViewById(android.R.id.empty);
@@ -99,6 +97,11 @@ public class WalletListFragment extends ListFragment implements MainActivity.Que
     }
 
     @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.toolbar_wallet_list, menu);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_add_wallet:
@@ -108,7 +111,8 @@ public class WalletListFragment extends ListFragment implements MainActivity.Que
                 onRefreshClick();
                 return true;
         }
-        return super.onOptionsItemSelected(item);
+
+        return false;
     }
 
     @Override
@@ -190,6 +194,19 @@ public class WalletListFragment extends ListFragment implements MainActivity.Que
      }
 
     protected void onAddWalletClick() {
+        Bundle args = getArguments();
+        Currency currency = (Currency)args.getSerializable(Currency.class.getSimpleName());
+
+        AddWalletDialogFragment fragment;
+        if (currency == null) {
+            fragment = AddWalletDialogFragment.newInstance(getActivity());
+        }
+        else {
+            fragment = AddWalletDialogFragment.newInstance(currency);
+        }
+        fragment.show(getFragmentManager(),
+                fragment.getClass().getSimpleName());
+        /*
         Fragment fragment = AddWalletFragment.newInstance();
         FragmentManager fragmentManager = getFragmentManager();
         // Insert the Home at the first place in back stack
@@ -203,7 +220,6 @@ public class WalletListFragment extends ListFragment implements MainActivity.Que
                 .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
                 .addToBackStack(fragment.getClass().getSimpleName())
                 .commit();
+                */
     }
-
-
 }

@@ -1,5 +1,6 @@
 package io.ucoin.app.fragment;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.LoaderManager;
@@ -19,7 +20,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import io.ucoin.app.R;
-import io.ucoin.app.activity.MainActivity;
+import io.ucoin.app.activity.IToolbarActivity;
 import io.ucoin.app.content.Provider;
 import io.ucoin.app.database.Contract;
 
@@ -74,8 +75,12 @@ public class DevFragment extends Fragment implements
 
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
-        getActivity().setTitle(R.string.dev);
-        ((MainActivity)getActivity()).setBackButtonEnabled(false);
+        Activity activity = getActivity();
+        activity.setTitle(getString(R.string.dev));
+        if (activity instanceof IToolbarActivity) {
+            ((IToolbarActivity) activity).setToolbarBackButtonEnabled(false);
+            ((IToolbarActivity) activity).setToolbarColor(getResources().getColor(R.color.primary));
+        }
     }
 
     @Override

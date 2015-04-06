@@ -48,7 +48,7 @@
     <string name="credit">credit</string>
     <string name="not_registred">not registred</string>
     <string name="wallet_uid">(%s)</string>
-    <string name="wallet_name">Wallet name</string>
+    <string name="alias">Local alias (optional)</string>
     <string name="delete_wallet">Delete wallet</string>
     <string name="delete_wallet_error">Could not delete wallet (technical error)\n%s</string>
     <string name="delete_wallet_confirm">Are you sure ?</string>
@@ -72,6 +72,7 @@
     <string name="amount_not_long">Amount must a valid integer</string>
     <string name="amount_not_decimal">Amount must a valid decimal</string>
     <string name="transactions">Transactions</string>
+    <string name="movement_ud">Universal Dividend</string>
 
     <!-- Strings related to actions -->
     <string name="send">Send</string>
@@ -131,7 +132,7 @@
     <!-- Strings related to identities -->
     <string name="identity">Identity</string>
     <string name="uid_or_public_key">user or public key</string>
-    <string name="user_id">User ID</string>
+    <string name="uid">User identifier (UID)</string>
     <string name="identity_icon">Identity icon</string>
     <string name="certified_by">Certified by</string>
     <string name="certifiers_of">Certifiers of</string>
@@ -144,13 +145,13 @@
     <!-- Strings related to account/authentication --> -->
     <string name="login">Login</string>
     <string name="next">Next</string>
-    <string name="email_password_salt">Email (or password salt)</string>
     <string name="password">Password</string>
     <string name="confirm">Confirm</string>
     <string name="confirm_password">Confirm password</string>
     <string name="pin_code">PIN code</string>
     <string name="add_account">Add account</string>
     <string name="add_wallet">Add wallet</string>
+    <string name="add_wallet_title">New wallet</string>
     <string name="salt">Salt</string>
     <string name="salt_instructions">Salt: We advice you to choose your personal e-mail as value for this
         field. But you can put any other value: it only has to carry enough entropy to avoid key
@@ -163,7 +164,7 @@
     <!-- Strings related to contact -->
     <string name="contact_name">name</string>
     <string name="add_contact">New contact</string>
-    <string name="contact_uid">User ID: %s</string>
+    <string name="contact_uid">(%s)</string>
 
     <!-- Validation messages -->
     <string name="login_too_short">This login is too short</string>

@@ -13,9 +13,9 @@ import java.util.List;
 
 import io.ucoin.app.model.Peer;
 import io.ucoin.app.model.TxOutput;
-import io.ucoin.app.model.TxSource;
-import io.ucoin.app.model.TxSourceResults;
 import io.ucoin.app.model.Wallet;
+import io.ucoin.app.model.remote.TxSource;
+import io.ucoin.app.model.remote.TxSourceResults;
 import io.ucoin.app.service.CryptoService;
 import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.service.exception.InsufficientCreditException;
@@ -82,15 +82,15 @@ public class TransactionRemoteService extends BaseRemoteService {
         return fingerprint;
 	}
 
-	public TxSourceResults getSources(long currencyId, String pubKey) {
+	public TxSourceResults getSourcesAndCredit(long currencyId, String pubKey) {
 		Log.d(TAG, String.format("Get sources by pubKey [%s]", pubKey));
 
 		// get parameter
 		String path = String.format(URL_TX_SOURCES, pubKey);
 		TxSourceResults result = executeRequest(currencyId, path, TxSourceResults.class);
 
-		// Compute the balance
-		result.setBalance(computeBalance(result.getSources()));
+		// Compute the credit
+		result.setCredit(computeCredit(result.getSources()));
 
 		return result;
 	}
@@ -106,8 +106,8 @@ public class TransactionRemoteService extends BaseRemoteService {
             return null;
         }
 
-        // Compute the balance
-        return computeBalance(result.getSources());
+        // Compute the credit
+        return computeCredit(result.getSources());
     }
 
     public Long getCredit(Peer peer, String pubKey) {
@@ -121,8 +121,21 @@ public class TransactionRemoteService extends BaseRemoteService {
             return null;
         }
 
-        // Compute the balance
-        return computeBalance(result.getSources());
+        // Compute the credit
+        return computeCredit(result.getSources());
+    }
+
+
+    public long computeCredit(List<TxSource> sources) {
+        if (sources == null) {
+            return 0;
+        }
+
+        long credit = 0;
+        for (TxSource source : sources) {
+            credit += source.getAmount();
+        }
+        return credit;
     }
 
 	/* -- internal methods -- */
@@ -134,7 +147,7 @@ public class TransactionRemoteService extends BaseRemoteService {
         ObjectUtils.checkArgument(StringUtils.isNotBlank(wallet.getPubKeyHash()));
 
 		// Retrieve the wallet sources
-		TxSourceResults sourceResults = getSources(wallet.getCurrencyId(), wallet.getPubKeyHash());
+		TxSourceResults sourceResults = getSourcesAndCredit(wallet.getCurrencyId(), wallet.getPubKeyHash());
 		if (sourceResults == null) {
 			throw new UCoinTechnicalException("Unable to load user sources.");
 		}
@@ -276,15 +289,4 @@ public class TransactionRemoteService extends BaseRemoteService {
 		}
 	}
 
-	protected long computeBalance(List<TxSource> sources) {
-		if (sources == null) {
-			return 0;
-		}
-
-		long balance = 0;
-		for (TxSource source : sources) {
-			balance += source.getAmount();
-		}
-		return balance;
-	}
 }

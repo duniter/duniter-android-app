@@ -1,5 +1,6 @@
 package io.ucoin.app.fragment;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -15,7 +16,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import io.ucoin.app.R;
-import io.ucoin.app.activity.MainActivity;
+import io.ucoin.app.activity.IToolbarActivity;
 import io.ucoin.app.adapter.ProgressViewAdapter;
 import io.ucoin.app.model.Contact;
 import io.ucoin.app.model.Identity;
@@ -107,7 +108,12 @@ public class AddContactFragment extends Fragment {
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
         getActivity().setTitle(R.string.add_as_new_contact);
-        ((MainActivity) getActivity()).setBackButtonEnabled(true);
+        Activity activity = getActivity();
+        activity.setTitle(getString(R.string.add_as_new_contact));
+        if (activity instanceof IToolbarActivity) {
+            ((IToolbarActivity) activity).setToolbarBackButtonEnabled(true);
+            ((IToolbarActivity) activity).setToolbarColor(getResources().getColor(R.color.primary));
+        }
     }
 
     private void updateView(Identity identity) {
@@ -167,6 +173,12 @@ public class AddContactFragment extends Fragment {
      */
     public class AddContactTask extends AsyncTaskHandleException<Object, Void, Contact> {
 
+        private Long mAccountId;
+
+        public AddContactTask() {
+            super(getActivity());
+        }
+
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
@@ -174,6 +186,9 @@ public class AddContactFragment extends Fragment {
 
             // Show the progress bar
             mProgressViewAdapter.showProgress(true);
+
+            // Retrieve account id
+            mAccountId = ((io.ucoin.app.Application) getActivity().getApplication()).getAccountId();
         }
 
         @Override
@@ -189,16 +204,13 @@ public class AddContactFragment extends Fragment {
                 name = identity.getUid();
             }
 
-            // Retrieve account id
-            Long accountId = ((io.ucoin.app.Application) getActivity().getApplication()).getAccountId();
-
             Contact contact = new Contact();
             contact.setName(name);
-            contact.setAccountId(accountId);
+            contact.setAccountId(mAccountId);
             contact.addIdentity(identity);
 
             // Save the contact in DB
-            ServiceLocator.instance().getContactService().save(getActivity(), contact);
+            ServiceLocator.instance().getContactService().save(getContext(), contact);
 
             return contact;
         }
@@ -215,7 +227,7 @@ public class AddContactFragment extends Fragment {
             mProgressViewAdapter.showProgress(false);
 
             Log.d(TAG, "Error in AddContactTask", t);
-            Toast.makeText(getActivity(),
+            Toast.makeText(getContext(),
                     ExceptionUtils.getMessage(t),
                     Toast.LENGTH_LONG).show();
 

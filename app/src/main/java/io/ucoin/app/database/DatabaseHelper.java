@@ -61,21 +61,21 @@ public class DatabaseHelper extends SQLiteOpenHelper implements Contract {
 
         String CREATE_TABLE_WALLET = "CREATE TABLE " + Wallet.TABLE_NAME + "(" +
                 Wallet._ID + " INTEGER PRIMARY KEY AUTOINCREMENT" + COMMA +
-                Wallet.NAME + TEXT + NOTNULL + COMMA +
+                Wallet.ALIAS + TEXT + NOTNULL + COMMA +
                 Wallet.UID + TEXT + COMMA +
                 Wallet.SALT + TEXT + COMMA +
                 Wallet.PUBLIC_KEY + TEXT + NOTNULL + COMMA +
                 Wallet.CERT_TS + TEXT + COMMA +
-                // TODO : change SECRET_KEY type to BLOB
                 Wallet.SECRET_KEY + TEXT + COMMA +
                 Wallet.ACCOUNT_ID + INTEGER + NOTNULL + COMMA +
                 Wallet.CURRENCY_ID + INTEGER + NOTNULL + COMMA +
                 Wallet.IS_MEMBER + INTEGER + NOTNULL + COMMA +
                 Wallet.CREDIT + INTEGER + NOTNULL + COMMA +
+                Wallet.BLOCK_NUMBER + INTEGER + NOTNULL + COMMA +
                 "FOREIGN KEY (" + Wallet.ACCOUNT_ID + ") REFERENCES " + Account.TABLE_NAME + "(" + Account._ID + ")" +
                 "FOREIGN KEY (" + Wallet.CURRENCY_ID + ") REFERENCES " + Currency.TABLE_NAME + "(" + Currency._ID + ")" +
                 UNIQUE + "(" + Wallet.CURRENCY_ID + COMMA + Wallet.PUBLIC_KEY + ")" +
-                UNIQUE + "(" + Wallet.CURRENCY_ID + COMMA + Wallet.NAME + ")" +
+                UNIQUE + "(" + Wallet.CURRENCY_ID + COMMA + Wallet.ALIAS + ")" +
                 ")";
         db.execSQL(CREATE_TABLE_WALLET);
 

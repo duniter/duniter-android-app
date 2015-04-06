@@ -295,6 +295,7 @@ public class LoginFragment extends Fragment {
         private final String mPassword;
 
         UserLoginTask(String salt, String password) {
+            super(getActivity());
             mSalt = salt;
             mPassword = password;
         }

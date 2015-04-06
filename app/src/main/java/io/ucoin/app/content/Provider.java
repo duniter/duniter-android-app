@@ -1,14 +1,19 @@
 package io.ucoin.app.content;
 
 import android.content.ContentProvider;
+import android.content.ContentProviderOperation;
+import android.content.ContentProviderResult;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.OperationApplicationException;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.util.Log;
+
+import java.util.ArrayList;
 
 import io.ucoin.app.R;
 import io.ucoin.app.database.Contract;
@@ -30,9 +35,11 @@ public class Provider extends ContentProvider implements Contract {
     private static final int CONTACT = 60;
     private static final int CONTACT2CURRENCY = 70;
     private static final int CONTACT_VIEW = 80;
-
-
     public static Uri CONTENT_URI;
+
+    private volatile boolean applyingBatch=false;
+
+
     static final UriMatcher uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 
     @Override
@@ -251,4 +258,11 @@ public class Provider extends ContentProvider implements Contract {
         return nbRowsUpdated;
     }
 
+    @Override
+    public ContentProviderResult[] applyBatch(
+            ArrayList<ContentProviderOperation> operations)
+            throws OperationApplicationException {
+
+        return super.applyBatch(operations);
+    }
 }

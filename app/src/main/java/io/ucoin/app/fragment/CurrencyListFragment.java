@@ -20,7 +20,7 @@ import android.widget.Toast;
 
 import io.ucoin.app.Application;
 import io.ucoin.app.R;
-import io.ucoin.app.activity.MainActivity;
+import io.ucoin.app.activity.IToolbarActivity;
 import io.ucoin.app.adapter.CurrencyCursorAdapter;
 import io.ucoin.app.adapter.ProgressViewAdapter;
 import io.ucoin.app.content.Provider;
@@ -84,11 +84,13 @@ public class CurrencyListFragment extends ListFragment {
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-            inflater.inflate(R.menu.toolbar_currency_list, menu);
-            getActivity().setTitle(R.string.currencies);
-            ((MainActivity) getActivity()).setBackButtonEnabled(false);
-            ((MainActivity) getActivity()).
-                    setToolbarColor(getResources().getColor(R.color.primary));
+        inflater.inflate(R.menu.toolbar_currency_list, menu);
+        Activity activity = getActivity();
+        activity.setTitle(R.string.currencies);
+        if (activity instanceof IToolbarActivity) {
+            ((IToolbarActivity) activity).setToolbarBackButtonEnabled(false);
+            ((IToolbarActivity) activity).setToolbarColor(getResources().getColor(R.color.primary));
+        }
     }
 
     @Override
@@ -152,10 +154,10 @@ public class CurrencyListFragment extends ListFragment {
 
     public class AddCurrencyTask extends AsyncTaskHandleException<Peer, Void, Currency> {
 
-        private Activity mActivity = getActivity();
-        private String popStackTraceName;
+         private String popStackTraceName;
 
         public AddCurrencyTask(String popStackTraceName) {
+            super(getActivity());
             this.popStackTraceName = popStackTraceName;
         }
 
@@ -181,7 +183,7 @@ public class CurrencyListFragment extends ListFragment {
                 }
 
                 // Save currency into DB
-                currency = currencyService.save(mActivity, currency);
+                currency = currencyService.save(getContext(), currency);
             }
 
             return currency;
@@ -200,7 +202,7 @@ public class CurrencyListFragment extends ListFragment {
         protected void onFailed(Throwable t) {
             mProgressViewAdapter.showProgress(false);
             getFragmentManager().popBackStack(popStackTraceName, 0); // return back
-            Toast.makeText(mActivity,
+            Toast.makeText(getContext(),
                     ExceptionUtils.getMessage(t),
                     Toast.LENGTH_LONG)
                     .show();

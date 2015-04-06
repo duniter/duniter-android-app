@@ -1,17 +1,17 @@
 package io.ucoin.app.fragment;
 
 import android.app.Activity;
-import android.app.Fragment;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.DialogFragment;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -20,11 +20,10 @@ import android.widget.Toast;
 import java.util.List;
 
 import io.ucoin.app.R;
-import io.ucoin.app.activity.IToolbarActivity;
 import io.ucoin.app.adapter.CurrencyArrayAdapter;
-import io.ucoin.app.adapter.ProgressViewAdapter;
 import io.ucoin.app.model.Currency;
 import io.ucoin.app.model.Wallet;
+import io.ucoin.app.service.CurrencyService;
 import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.service.exception.DuplicatePubkeyException;
 import io.ucoin.app.service.remote.TransactionRemoteService;
@@ -38,81 +37,128 @@ import io.ucoin.app.technical.task.AsyncTaskHandleException;
 /**
  * A screen used to add a wallet via currency, uid, salt and password.
  */
-public class AddWalletFragment extends Fragment {
+public class AddWalletDialogFragment extends DialogFragment {
 
-    public static final String TAG = "AddWalletFragment";
+    public static final String TAG = "AddWalletDialog";
 
-    public static AddWalletFragment newInstance() {
-        AddWalletFragment fragment = new AddWalletFragment();
+    public static AddWalletDialogFragment newInstance(Activity activity) {
+        ObjectUtils.checkNotNull(activity);
+
+        // If only ONE currency in database, force to select this one
+        CurrencyService currencyService = ServiceLocator.instance().getCurrencyService();
+        int currencyCount = currencyService.getCurrencyCount();
+        if (currencyCount == 1) {
+            return newInstance(currencyService.getCurrencies(activity).iterator().next());
+        }
+
+        AddWalletDialogFragment fragment = new AddWalletDialogFragment();
         Bundle args = new Bundle();
         fragment.setArguments(args);
 
         return fragment;
     }
 
+    public static AddWalletDialogFragment newInstance(Currency currency) {
+        ObjectUtils.checkNotNull(currency);
+
+        AddWalletDialogFragment fragment = new AddWalletDialogFragment();
+        Bundle args = new Bundle();
+        args.putSerializable(Currency.class.getSimpleName(), currency);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
     // UI references.
     private CurrencyArrayAdapter mCurrencyAdapter;
     private Spinner mCurrencySpinner;
-    private TextView mNameView;
+    private TextView mAliasView;
     private TextView mUidView;
     private EditText mSaltView;
     private EditText mPasswordView;
     private EditText mConfirmPasswordView;
-    private ProgressViewAdapter mProgressViewAdapter;
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
-        // Create the currencies adapter
-        final List<Currency> currencies = ServiceLocator.instance().getCurrencyService().getCurrencies(getActivity());
-        mCurrencyAdapter = new CurrencyArrayAdapter(
-                getActivity(),
-                android.R.layout.simple_spinner_item,
-                currencies
-        );
-        mCurrencyAdapter.setDropDownViewResource(CurrencyArrayAdapter.DEFAULT_LAYOUT_RES);
-    }
+        LayoutInflater inflater = getActivity().getLayoutInflater();
+        final View view = inflater.inflate(R.layout.fragment_add_wallet_dialog, null);
+        builder.setView(view);
+        builder.setTitle(R.string.add_wallet_title);
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        super.onCreateView(inflater, container, savedInstanceState);
-
-        return inflater.inflate(R.layout.fragment_add_wallet,
-                container, false);
-    }
-
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
-        // Getting a given wallet
         Bundle newInstanceArgs = getArguments();
         Currency currency = (Currency) newInstanceArgs
                 .getSerializable(Currency.class.getSimpleName());
 
-        // currency
+        // Currency
         mCurrencySpinner = (Spinner) view.findViewById(R.id.currency);
+        if (currency != null) {
+            view.findViewById(R.id.currency_label).setVisibility(View.GONE);
+            mCurrencySpinner.setVisibility(View.GONE);
+            mCurrencyAdapter = new CurrencyArrayAdapter(
+                    getActivity(),
+                    android.R.layout.simple_spinner_item);
+        }
+        else {
+            // Create the currencies adapter
+            final List<Currency> currencies = ServiceLocator.instance().getCurrencyService().getCurrencies(getActivity());
+            mCurrencyAdapter = new CurrencyArrayAdapter(
+                    getActivity(),
+                    android.R.layout.simple_spinner_item,
+                    currencies);
+            mCurrencyAdapter.setDropDownViewResource(CurrencyArrayAdapter.DEFAULT_LAYOUT_RES);
+        }
         mCurrencySpinner.setAdapter(mCurrencyAdapter);
 
-        // Name
-        mNameView = (TextView) view.findViewById(R.id.name);
-        mNameView.requestFocus();
+        // Alias
+        mAliasView = (TextView) view.findViewById(R.id.alias);
+        mAliasView.requestFocus();
 
-        // user ID
+        // UID
+        final TextView mUidTip = (TextView) view.findViewById(R.id.uid_tip);
         mUidView = (TextView) view.findViewById(R.id.uid);
-        mUidView.requestFocus();
+        mUidView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if(hasFocus) {
+                    mUidTip.setVisibility(View.VISIBLE);
+                } else {
+                    mUidTip.setVisibility(View.GONE);
+                }
+            }
+        });
 
         // Salt
+        final TextView saltTip = (TextView) view.findViewById(R.id.salt_tip);
         mSaltView = (EditText) view.findViewById(R.id.salt);
+        mSaltView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+            if(hasFocus) {
+                saltTip.setVisibility(View.VISIBLE);
+            } else {
+                saltTip.setVisibility(View.GONE);
+            }
+            }
+        });
 
         // Password
+        final TextView passwordTip = (TextView) view.findViewById(R.id.password_tip);
         mPasswordView = (EditText) view.findViewById(R.id.password);
+        mPasswordView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+            if(hasFocus) {
+                passwordTip.setVisibility(View.VISIBLE);
+            } else {
+                passwordTip.setVisibility(View.GONE);
+            }
+            }
+        });
 
         // Confirm password
         mConfirmPasswordView = (EditText) view.findViewById(R.id.confirm_password);
+        mConfirmPasswordView.setOnFocusChangeListener(mPasswordView.getOnFocusChangeListener());
         mConfirmPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
@@ -124,37 +170,22 @@ public class AddWalletFragment extends Fragment {
             }
         });
 
-        Button mAddButton = (Button) view.findViewById(R.id.add_button);
-        mAddButton.setOnClickListener(new View.OnClickListener() {
+
+        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             @Override
-            public void onClick(View view) {
+            public void onClick(DialogInterface dialog, int id) {
                 attemptAddWallet();
             }
         });
 
-        mProgressViewAdapter = new ProgressViewAdapter(
-                view.findViewById(R.id.progressbar),
-                mAddButton);
+        builder.setNegativeButton(R.string.CANCEL, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+                dismiss();
+            }
+        });
 
-        // fill the UI with the given wallet
-        updateView(currency);
-    }
-
-    @Override
-    public void onPrepareOptionsMenu(Menu menu) {
-        Activity activity = getActivity();
-        activity.setTitle(getString(R.string.add_wallet));
-        if (activity instanceof IToolbarActivity) {
-            ((IToolbarActivity) activity).setToolbarBackButtonEnabled(true);
-            ((IToolbarActivity) activity).setToolbarColor(getResources().getColor(R.color.primary));
-        }
-    }
-
-    private void updateView(Currency currency) {
-        if (currency != null) {
-            int position = mCurrencyAdapter.getPosition(currency);
-            mCurrencySpinner.setSelection(position);
-        }
+        return builder.create();
     }
 
     /**
@@ -171,17 +202,18 @@ public class AddWalletFragment extends Fragment {
         mPasswordView.setError(null);
         mConfirmPasswordView.setError(null);
 
-        // Store values at the time of the login attempt.
-        Currency currency = (Currency)mCurrencySpinner.getSelectedItem();
-        String name = mNameView.getText().toString();
+        // Read field values
+        Currency currency = (Currency)getArguments().getSerializable(Currency.class.getSimpleName());
+        if (currency == null) {
+            currency = (Currency) mCurrencySpinner.getSelectedItem();
+        }
+        String name = mAliasView.getText().toString();
         String uid = mUidView.getText().toString();
         String salt = mSaltView.getText().toString();
         String password = mPasswordView.getText().toString();
 
-
         boolean cancel = false;
         View focusView = null;
-
 
         // Check for a valid currency
         if (currency == null) {
@@ -192,8 +224,8 @@ public class AddWalletFragment extends Fragment {
 
         // Check for a valid name (mandatory if uid is not set)
         if (TextUtils.isEmpty(name) && TextUtils.isEmpty(uid)) {
-            mNameView.setError(getString(R.string.name_or_uid_required));
-            if (focusView == null) focusView = mNameView;
+            mAliasView.setError(getString(R.string.name_or_uid_required));
+            if (focusView == null) focusView = mAliasView;
             cancel = true;
         }
 
@@ -263,16 +295,14 @@ public class AddWalletFragment extends Fragment {
     public class AddWalletTask extends AsyncTaskHandleException<Object, Void, Wallet> {
 
         public AddWalletTask() {
-            super(getActivity());
+
+            super(getActivity(), true/*use progress dialog*/);
         }
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
             ViewUtils.hideKeyboard(getActivity());
-
-            // Show the progress bar
-            mProgressViewAdapter.showProgress(true);
         }
 
         @Override
@@ -321,14 +351,11 @@ public class AddWalletFragment extends Fragment {
 
         @Override
         protected void onSuccess(Wallet wallet) {
-            mProgressViewAdapter.showProgress(false);
-            // Go back
-            getFragmentManager().popBackStack();
+            dismiss();
         }
 
         @Override
         protected void onFailed(Throwable t) {
-            mProgressViewAdapter.showProgress(false);
 
             if (t instanceof DuplicatePubkeyException) {
                 mUidView.setError(getString(R.string.duplicate_wallet_pubkey));
@@ -345,7 +372,7 @@ public class AddWalletFragment extends Fragment {
 
         @Override
         protected void onCancelled() {
-            mProgressViewAdapter.showProgress(false);
+            dismiss();
         }
     }
 }

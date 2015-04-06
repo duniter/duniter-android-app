@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.ucoin.app.R;
-import io.ucoin.app.activity.MainActivity;
+import io.ucoin.app.activity.IToolbarActivity;
 import io.ucoin.app.adapter.ContactArrayAdapter;
 import io.ucoin.app.adapter.ProgressViewAdapter;
 import io.ucoin.app.adapter.WalletArrayAdapter;
@@ -176,13 +176,6 @@ public class TransferFragment extends Fragment {
                 .getSerializable(BUNDLE_WALLET);
         View focusView = null;
 
-        // Title
-        if (mReceiverIdentity != null) {
-            getActivity().setTitle(getString(R.string.transfer_to, mReceiverIdentity.getUid()));
-        }
-        else {
-            getActivity().setTitle(getString(R.string.transfer));
-        }
 
         // Source wallet
         mWalletSpinner = ((Spinner) view.findViewById(R.id.wallet));
@@ -345,7 +338,20 @@ public class TransferFragment extends Fragment {
 
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
-        ((MainActivity)getActivity()).setBackButtonEnabled(true);
+        Activity activity = getActivity();
+
+        // Title
+        if (mReceiverIdentity != null) {
+            activity.setTitle(getString(R.string.transfer_to, mReceiverIdentity.getUid()));
+        }
+        else {
+            activity.setTitle(getString(R.string.transfer));
+        }
+
+        if (activity instanceof IToolbarActivity) {
+            ((IToolbarActivity) activity).setToolbarBackButtonEnabled(true);
+            ((IToolbarActivity) activity).setToolbarColor(getResources().getColor(R.color.primary));
+        }
     }
 
     @Override
@@ -522,7 +528,10 @@ public class TransferFragment extends Fragment {
     public class LoadCurrencyDataTask extends AsyncTaskHandleException<Wallet, Void, List<Contact>>{
 
         private boolean mLoadContacts = (mContactSpinner != null);
-        private Activity mActivity = getActivity();
+
+        public LoadCurrencyDataTask() {
+            super(getActivity());
+        }
 
         @Override
         protected List<Contact> doInBackgroundHandleException(Wallet... wallets) {
@@ -553,7 +562,7 @@ public class TransferFragment extends Fragment {
             if (!ObjectUtils.equals(selectedCurrencyId, mCurrencyId)) {
 
                 // Get the last UD, from blockchain
-                mUniversalDividend = ServiceLocator.instance().getCurrencyService().getLastUD(mActivity, selectedCurrencyId);
+                mUniversalDividend = ServiceLocator.instance().getCurrencyService().getLastUD(getContext(), selectedCurrencyId);
                 if (mUniversalDividend == null) {
                     throw new UCoinTechnicalException("Could not get last UD from blockchain.");
                 }
@@ -588,7 +597,7 @@ public class TransferFragment extends Fragment {
         @Override
         protected void onFailed(Throwable error) {
             super.onFailed(error);
-            Toast.makeText(getActivity(),
+            Toast.makeText(getContext(),
                     ExceptionUtils.getMessage(error),
                     Toast.LENGTH_SHORT).show();
         }
@@ -596,21 +605,22 @@ public class TransferFragment extends Fragment {
 
     public class TransferTask extends AsyncTaskHandleException<Wallet, Void, Boolean>{
 
-        private Activity mActivity = getActivity();
         private String popStackTraceName;
         private String mPubkey;
         private long mAmount;
         private String mComment;
 
         public TransferTask(String popStackTraceName) {
+            super(getActivity());
             this.popStackTraceName = popStackTraceName;
         }
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
+
             // Hide the keyboard, in case we come from imeDone)
-            ViewUtils.hideKeyboard(mActivity);
+            ViewUtils.hideKeyboard((Activity)getContext());
 
             // Show the progress bar
             mProgressViewAdapter.showProgress(true);
@@ -658,7 +668,7 @@ public class TransferFragment extends Fragment {
             movement.setTime(DateUtils.getCurrentTimestampSeconds());
             movement.setWalletId(wallet.getId());
             MovementService movementService = ServiceLocator.instance().getMovementService();
-            movementService.save(mActivity, movement);
+            movementService.save(getContext(), movement);
 
             return true;
         }
@@ -669,14 +679,14 @@ public class TransferFragment extends Fragment {
                 mProgressViewAdapter.showProgress(false);
             }
             if (success == null || !success.booleanValue()) {
-                Toast.makeText(mActivity,
+                Toast.makeText(getContext(),
                         getString(R.string.transfer_error),
                         Toast.LENGTH_SHORT).show();
             }
             else {
                 getFragmentManager().popBackStack(popStackTraceName, 0); // return back
 
-                Toast.makeText(mActivity,
+                Toast.makeText(getContext(),
                         getString(R.string.transfer_sended),
                         Toast.LENGTH_LONG).show();
             }
@@ -690,7 +700,7 @@ public class TransferFragment extends Fragment {
             }
             else {
                 Log.d(TAG, "Could not send transaction: " + error.getMessage(), error);
-                Toast.makeText(getActivity(),
+                Toast.makeText(getContext(),
                         getString(R.string.transfer_error)
                         + "\n"
                         + ExceptionUtils.getMessage(error),

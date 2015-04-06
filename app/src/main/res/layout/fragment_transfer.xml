@@ -23,7 +23,8 @@
             android:layout_marginTop="5dip"
             android:hint="@string/wallet_transmitter_hint"
             android:imeOptions="actionNext"
-            android:textSize="@dimen/abc_text_size_body_2_material" />
+            android:textSize="@dimen/abc_text_size_body_2_material"
+            style="FormSpinner"/>
 
         <!-- receiver -->
         <TextView

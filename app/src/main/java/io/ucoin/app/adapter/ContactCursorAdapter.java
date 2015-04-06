@@ -21,8 +21,6 @@ import io.ucoin.app.technical.StringUtils;
 public class ContactCursorAdapter extends CursorAdapter {
 
     public static int DEFAULT_LAYOUT_RES = R.layout.list_item_contact;
-    private int mResource;
-    private int mDropDownResource;
 
     public ContactCursorAdapter(Context context, Cursor c, int flags) {
         super(context, c, flags);
@@ -46,7 +44,7 @@ public class ContactCursorAdapter extends CursorAdapter {
 
         // Icons
         long phoneContactId = cursor.getLong(viewHolder.phoneContactId);
-        if (phoneContactId > 0) {// If link to a phone contact, load the contact's small photo
+        if (phoneContactId > 0) { // If link to a phone contact, load the contact's small photo
             Bitmap contactBitmap = viewHolder.contactService.getPhotoAsBitmap(context, phoneContactId, false);
             if (contactBitmap != null) {
                 viewHolder.icon.setImageBitmap(contactBitmap);

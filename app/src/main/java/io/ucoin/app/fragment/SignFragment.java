@@ -1,5 +1,6 @@
 package io.ucoin.app.fragment;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -17,7 +18,7 @@ import java.util.List;
 
 import io.ucoin.app.Application;
 import io.ucoin.app.R;
-import io.ucoin.app.activity.MainActivity;
+import io.ucoin.app.activity.IToolbarActivity;
 import io.ucoin.app.adapter.ProgressViewAdapter;
 import io.ucoin.app.adapter.WalletArrayAdapter;
 import io.ucoin.app.model.Identity;
@@ -112,8 +113,12 @@ public class SignFragment extends Fragment {
         Bundle newInstanceArgs = getArguments();
         final Identity identity = (Identity) newInstanceArgs
                 .getSerializable(Identity.class.getSimpleName());
-        getActivity().setTitle(getString(R.string.sign_to, identity.getUid()));
-        ((MainActivity)getActivity()).setBackButtonEnabled(true);
+        Activity activity = getActivity();
+        activity.setTitle(getString(R.string.sign_to, identity.getUid()));
+        if (activity instanceof IToolbarActivity) {
+            ((IToolbarActivity) activity).setToolbarBackButtonEnabled(true);
+            ((IToolbarActivity) activity).setToolbarColor(getResources().getColor(R.color.primary));
+        }
     }
 
     @Override
@@ -172,6 +177,7 @@ public class SignFragment extends Fragment {
         private String mPopBackStackName;
 
         public SignTask(String popBackStackName) {
+            super(getActivity());
             this.mPopBackStackName = popBackStackName;
         }
 

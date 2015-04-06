@@ -1,5 +1,6 @@
 package io.ucoin.app.fragment;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -16,7 +17,7 @@ import android.widget.TextView;
 
 import io.ucoin.app.Application;
 import io.ucoin.app.R;
-import io.ucoin.app.activity.MainActivity;
+import io.ucoin.app.activity.IToolbarActivity;
 import io.ucoin.app.content.Provider;
 import io.ucoin.app.database.Contract;
 import io.ucoin.app.model.Currency;
@@ -52,8 +53,6 @@ public class CurrencyFragment extends Fragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        getActivity().setTitle(getString(R.string.currency));
-        ((MainActivity) getActivity()).setBackButtonEnabled(false);
 
         Bundle newInstanceArgs = getArguments();
         Currency currency = (Currency) newInstanceArgs
@@ -129,8 +128,12 @@ public class CurrencyFragment extends Fragment {
 
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
-        getActivity().setTitle(R.string.currency);
-        ((MainActivity) getActivity()).setBackButtonEnabled(true);
+        Activity activity = getActivity();
+        activity.setTitle(R.string.currency);
+        if (activity instanceof IToolbarActivity) {
+            ((IToolbarActivity) activity).setToolbarBackButtonEnabled(true);
+            ((IToolbarActivity) activity).setToolbarColor(getResources().getColor(R.color.primary));
+        }
     }
 
     @Override

@@ -9,9 +9,12 @@ import android.content.ContentResolver;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
+import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
@@ -49,12 +52,15 @@ import io.ucoin.app.service.exception.PeerConnectionException;
 import io.ucoin.app.service.remote.WotRemoteService;
 import io.ucoin.app.technical.CurrencyUtils;
 import io.ucoin.app.technical.DateUtils;
+import io.ucoin.app.technical.ExceptionUtils;
 import io.ucoin.app.technical.task.AsyncTaskHandleException;
 
 
 public class MainActivity extends ActionBarActivity
         implements ListView.OnItemClickListener,
-        LoaderManager.LoaderCallbacks<Cursor> {
+        IToolbarActivity,
+        LoaderManager.LoaderCallbacks<Cursor>,
+        SharedPreferences.OnSharedPreferenceChangeListener {
 
     private static final int MIN_SEARCH_CHARACTERS = 2;
     private ActionBarDrawerToggle mToggle;
@@ -64,6 +70,7 @@ public class MainActivity extends ActionBarActivity
     private TextView mUidView;
     private TextView mPubkeyView;
     private Toolbar mToolbar;
+    private boolean mUnitPreferenceChanged = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,6 +83,9 @@ public class MainActivity extends ActionBarActivity
         DateUtils.setDefaultShortDateFormat(getShortDateFormat());
         DateUtils.setDefaultTimeFormat(getTimeFormat());
         CurrencyUtils.setDefaultLocale(getResources().getConfiguration().locale);
+
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        preferences.registerOnSharedPreferenceChangeListener(this);
 
         // Init configuration
         Configuration config = new Configuration();
@@ -142,15 +152,8 @@ public class MainActivity extends ActionBarActivity
 
         ContentResolver.setSyncAutomatically(account, getString(R.string.AUTHORITY), true);
 
-        Fragment fragment = HomeFragment.newInstance();
-
-        getFragmentManager().beginTransaction()
-                .setCustomAnimations(
-                        R.animator.fade_in,
-                        R.animator.fade_out)
-                .add(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
-                .addToBackStack(fragment.getClass().getSimpleName())
-                .commit();
+        // Open the home fragment
+        openHomeFragment();
     }
 
     @Override
@@ -158,6 +161,33 @@ public class MainActivity extends ActionBarActivity
         super.onPostCreate(savedInstanceState);
         mToggle.syncState();
     }
+
+    /**
+     * This method will detect when a change on pref should restart the main activity
+     */
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (key.equals(SettingsActivity.PREF_UNIT)) {
+            mUnitPreferenceChanged = true;
+        }
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        if (mUnitPreferenceChanged) {
+            openHomeFragment();
+            mUnitPreferenceChanged = false;
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        preferences.unregisterOnSharedPreferenceChangeListener(this);
+        super.onDestroy();
+    }
+
 
     @Override
     public void onConfigurationChanged(android.content.res.Configuration newConfig) {
@@ -201,6 +231,11 @@ public class MainActivity extends ActionBarActivity
         }
 
         int bsEntryCount = getFragmentManager().getBackStackEntryCount();
+        if (bsEntryCount <= 1) {
+            super.onBackPressed();
+            return;
+        }
+
         String currentFragment = getFragmentManager()
                 .getBackStackEntryAt(bsEntryCount - 1)
                 .getName();
@@ -215,13 +250,7 @@ public class MainActivity extends ActionBarActivity
             }
         }
 
-
-        if (getFragmentManager().getBackStackEntryCount() == 1) {
-            //leave the activity
-            super.onBackPressed();
-        } else {
-            getFragmentManager().popBackStack();
-        }
+        getFragmentManager().popBackStack();
     }
 
     public boolean onQueryTextSubmit(MenuItem searchItem, String query) {
@@ -337,7 +366,28 @@ public class MainActivity extends ActionBarActivity
         mToolbar.setBackgroundColor(colorRes);
     }
 
+    public void setToolbarDrawable(Drawable drawable) {
+        mToolbar.setBackground(drawable);
+    }
+
+    /**
+     * Display an an arrow in the toolbar to get to the previous fragment
+     * or an hamburger icon to open the navigation drawer
+     */
+    @Override
+    public void setToolbarBackButtonEnabled(boolean enabled) {
+        if (enabled) {
+            mToggle.setDrawerIndicatorEnabled(false);
+            getSupportActionBar().setHomeButtonEnabled(true);
+        } else {
+            mToggle.setDrawerIndicatorEnabled(true);
+            getSupportActionBar().setHomeButtonEnabled(false);
+        }
+
+    }
+
     /* -- Internal methods -- */
+
     protected DateFormat getMediumDateFormat() {
         final String format = Settings.System.getString(getContentResolver(), Settings.System.DATE_FORMAT);
         if (TextUtils.isEmpty(format)) {
@@ -359,7 +409,24 @@ public class MainActivity extends ActionBarActivity
         return android.text.format.DateFormat.getTimeFormat(getApplicationContext());
     }
 
+    protected void openHomeFragment() {
 
+        Fragment fragment = getFragmentManager().findFragmentById(R.id.frame_content);
+        if (fragment != null && fragment instanceof HomeFragment) {
+            getFragmentManager().beginTransaction().remove(fragment).commit();
+            getFragmentManager().popBackStack();
+        }
+
+        fragment = HomeFragment.newInstance();
+
+        getFragmentManager().beginTransaction()
+                .setCustomAnimations(
+                        R.animator.fade_in,
+                        R.animator.fade_out)
+                .add(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
+                .addToBackStack(fragment.getClass().getSimpleName())
+                .commit();
+    }
 
     public Account loadLastAccountUsed(AccountManager accountManager, Account[] accounts) {
 
@@ -380,20 +447,6 @@ public class MainActivity extends ActionBarActivity
         return null;
     }
 
-    /**
-     * Display an an arrow in the toolbar to get to the previous fragment
-     * or an hamburger icon to open the navigation drawer
-     */
-    public void setBackButtonEnabled(boolean enabled) {
-        if (enabled) {
-            mToggle.setDrawerIndicatorEnabled(false);
-            getSupportActionBar().setHomeButtonEnabled(true);
-        } else {
-            mToggle.setDrawerIndicatorEnabled(true);
-            getSupportActionBar().setHomeButtonEnabled(false);
-        }
-
-    }
 
     /**
      * Interface for handling OnBackPressed event in fragments     *
@@ -406,6 +459,7 @@ public class MainActivity extends ActionBarActivity
         public boolean onBackPressed();
     }
 
+
     public interface QueryResultListener<T> {
         public void onQuerySuccess(List<? extends T> identities);
 
@@ -415,6 +469,10 @@ public class MainActivity extends ActionBarActivity
     }
 
     public class SearchTask extends AsyncTaskHandleException<String, Void, List<Identity>> {
+
+        public SearchTask() {
+            super(MainActivity.this);
+        }
 
         @Override
         protected List<Identity> doInBackgroundHandleException(String... queries) throws PeerConnectionException {
@@ -439,7 +497,7 @@ public class MainActivity extends ActionBarActivity
 
         @Override
         protected void onFailed(Throwable t) {
-            mQueryResultListener.onQueryFailed(null);
+            mQueryResultListener.onQueryFailed(ExceptionUtils.getMessage(t));
         }
 
         @Override

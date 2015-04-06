@@ -72,8 +72,10 @@ public class CurrencyService extends BaseService {
         if (currency.getId() == null) {
             result = insert(context.getContentResolver(), currency);
 
-            // Update the cache (if already loaded)
-            mCurrencyCache.put(currency.getId(), currency);
+            // Update the cache (if already initialized)
+            if (mCurrencyCache != null) {
+                mCurrencyCache.put(currency.getId(), currency);
+            }
         }
 
         // or update
@@ -151,6 +153,15 @@ public class CurrencyService extends BaseService {
     public Set<Long> getCurrencyIds() {
         return mCurrencyCache.keySet();
     }
+
+    /**
+     * Return a (cached) number of registered currencies
+     * @return
+     */
+    public int getCurrencyCount() {
+        return mCurrencyCache.entrySet().size();
+    }
+
 
     /**
      * Fill all cache need for currencies

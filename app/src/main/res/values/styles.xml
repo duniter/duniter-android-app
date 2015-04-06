@@ -91,4 +91,31 @@
         <item name="android:gravity">center_horizontal</item>
     </style>
 
+    <style name="ListItemHead">
+        <item name="android:duplicateParentState">true</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textAppearance">?android:textAppearanceMedium</item>
+        <item name="android:textColor">@color/primary_text_default_material_light</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:layout_gravity">left|top</item>
+        <item name="android:textSize">18sp</item>
+    </style>
+
+    <style name="ListItemSubhead">
+        <item name="android:duplicateParentState">true</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textAppearance">?android:textAppearanceMedium</item>
+        <item name="android:textColor">@color/hideable_text_color</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:layout_gravity">left|top</item>
+        <item name="android:textSize">12sp</item>
+    </style>
+
+    <style name="FormSpinner">
+        <item name="android:background">@drawable/shape_item_wallet</item>
+    </style>
+
+
 </resources>

@@ -19,9 +19,12 @@ import io.ucoin.app.R;
 import io.ucoin.app.activity.SettingsActivity;
 import io.ucoin.app.content.Provider;
 import io.ucoin.app.database.Contract;
+import io.ucoin.app.model.BlockchainBlock;
 import io.ucoin.app.model.UnitType;
 import io.ucoin.app.model.Wallet;
+import io.ucoin.app.model.remote.TxSourceResults;
 import io.ucoin.app.service.exception.DuplicatePubkeyException;
+import io.ucoin.app.service.remote.BlockchainRemoteService;
 import io.ucoin.app.service.remote.TransactionRemoteService;
 import io.ucoin.app.technical.CollectionUtils;
 import io.ucoin.app.technical.CurrencyUtils;
@@ -54,6 +57,8 @@ public class WalletService extends BaseService {
     private CurrencyService currencyService;
     private PeerService peerService;
     private TransactionRemoteService transactionRemoteService;
+    private BlockchainRemoteService blockchainRemoteService;
+    private MovementService movementService;
 
     public WalletService() {
         super();
@@ -65,6 +70,8 @@ public class WalletService extends BaseService {
         currencyService = ServiceLocator.instance().getCurrencyService();
         transactionRemoteService = ServiceLocator.instance().getTransactionRemoteService();
         peerService = ServiceLocator.instance().getPeerService();
+        movementService = ServiceLocator.instance().getMovementService();
+        blockchainRemoteService = ServiceLocator.instance().getBlockchainRemoteService();
     }
 
     public Wallet save(final Context context, final Wallet wallet) throws DuplicatePubkeyException {
@@ -112,9 +119,6 @@ public class WalletService extends BaseService {
 
         boolean needComputeUD = displayCreditAsUD(context);
 
-        progressModel.setMax(100);
-        progressModel.setProgress(0);
-
         // Loading wallets from database
         progressModel.setMessage(context.getString(R.string.loading_wallets));
         List<Wallet> result = getWalletsByAccountId(context, accountId, needComputeUD);
@@ -132,7 +136,7 @@ public class WalletService extends BaseService {
 
             for (Wallet wallet : result) {
 
-                updateWalletFromRemoteNode(context, wallet);
+                updateWalletRemotly(context, wallet);
 
                 progressModel.increment();
 
@@ -272,7 +276,7 @@ public class WalletService extends BaseService {
         String[] selectionArgs = {
                 String.valueOf(accountId)
         };
-        String orderBy = Contract.Wallet.NAME + " ASC";
+        String orderBy = Contract.Wallet.ALIAS + " ASC";
 
         Cursor cursor = context.getContentResolver()
                 .query(getContentUri(),
@@ -285,7 +289,7 @@ public class WalletService extends BaseService {
 
             // Update the wallet UD
             if (computeUD) {
-                computeWalletUD(context, wallet);
+                updateCreditUD(context, wallet);
             }
         }
         cursor.close();
@@ -294,33 +298,74 @@ public class WalletService extends BaseService {
     }
 
 
-    protected void updateWalletFromRemoteNode(Context context, Wallet wallet) {
+    /**
+     * Update wallet from remote nodes (from the blockchain)
+     * @param context
+     * @param wallet
+     */
+    protected void updateWalletRemotly(final Context context, final Wallet wallet) {
         ObjectUtils.checkNotNull(wallet);
         ObjectUtils.checkNotNull(wallet.getCurrencyId());
 
-        Log.d(TAG, String.format("updating wallet [%s]", wallet.toString()));
+        Log.d(TAG, String.format("Updating wallet [%s]", wallet.toString()));
 
-        Long currencyId = wallet.getCurrencyId();
-        boolean dirty = false;
+        long currencyId = wallet.getCurrencyId();
+        boolean computeUD = displayCreditAsUD(context);
 
-        Long creditObj = transactionRemoteService.getCredit(wallet.getCurrencyId(), wallet.getPubKeyHash());
-        int updatedCredit = creditObj == null ? 0 : creditObj.intValue();
-        if (wallet.getCredit() == null || updatedCredit != wallet.getCredit().intValue()) {
-            wallet.setCredit(updatedCredit);
-            dirty = true;
+        // Get the current block number (using cache)
+        // This should be done BEFORE the call of getSources (in case a new block occur)
+        BlockchainBlock currentBlock = blockchainRemoteService.getCurrentBlock(currencyId, true /*use cache*/);
+        long currentBlockNumber = currentBlock == null ? 0 :currentBlock.getNumber();
+        boolean blockNumberHasChanged = wallet.getBlockNumber() != currentBlockNumber;
+
+        // Stop if no new block
+        if (!blockNumberHasChanged) {
+            return;
         }
 
-        if (dirty) {
-            // Save updated wallet to DB
+        // Get sources and credit, from remote nodes
+        TxSourceResults txSourcesAndCredit = transactionRemoteService.getSourcesAndCredit(currencyId, wallet.getPubKeyHash());
+        long credit = txSourcesAndCredit.getCredit() == null ? 0 : txSourcesAndCredit.getCredit().longValue();
+        double creditAsUD = 0;
+        if (computeUD) {
+            creditAsUD = getCreditAsUD(context, currencyId, credit);
+        }
+
+        // Check if credit has been updated or not
+        boolean creditHasChanged = wallet.getCredit() == null
+                || wallet.getCredit().longValue() != credit;
+        boolean creditAsUDHasChanged = computeUD
+                && (wallet.getCreditAsUD() == null
+                || wallet.getCreditAsUD().doubleValue() != creditAsUD);
+
+
+        // If new block since the last update
+        if (blockNumberHasChanged) {
+            // Process wallet's sources
+            movementService.updateMovementsFromSources(context, wallet.getId(),
+                    wallet.getBlockNumber(),
+                    txSourcesAndCredit.getSources());
+        }
+
+        // If credits has changed
+        if (creditHasChanged || creditAsUDHasChanged || blockNumberHasChanged) {
+
+            // Set new credits
+            wallet.setCredit(credit);
+            wallet.setCreditAsUD(creditAsUD);
+            wallet.setBlockNumber(currentBlockNumber);
+
+            // Save the wallet
             try {
                 save(context, wallet);
             } catch (DuplicatePubkeyException e) {
-                // Should never happen
+                // Should never happend
             }
 
             // Mark as dirty (let's the UI known that something changed)
             wallet.setDirty(true);
         }
+
     }
 
     private void checkPubKeyUnique(
@@ -410,7 +455,7 @@ public class WalletService extends BaseService {
         ContentValues target = new ContentValues();
         target.put(Contract.Wallet.ACCOUNT_ID, source.getAccountId());
         target.put(Contract.Wallet.CURRENCY_ID, source.getCurrencyId());
-        target.put(Contract.Wallet.NAME, source.getName());
+        target.put(Contract.Wallet.ALIAS, source.getName());
         target.put(Contract.Wallet.UID, source.getUid());
         if (source.getSalt() != null) {
             target.put(Contract.Wallet.SALT, source.getSalt());
@@ -424,7 +469,7 @@ public class WalletService extends BaseService {
         }
         target.put(Contract.Wallet.IS_MEMBER, source.getIsMember().booleanValue() ? 1 : 0);
         target.put(Contract.Wallet.CREDIT, source.getCredit());
-
+        target.put(Contract.Wallet.BLOCK_NUMBER, source.getBlockNumber());
         return target;
     }
 
@@ -447,19 +492,29 @@ public class WalletService extends BaseService {
         result.setAccountId(cursor.getLong(mSelectHolder.accountIdIndex));
         result.setCurrencyId(currencyId);
         result.setName(cursor.getString(mSelectHolder.nameIndex));
-        result.setCredit(cursor.getInt(mSelectHolder.creditIndex));
+        result.setCredit(cursor.getLong(mSelectHolder.creditIndex));
         result.setMember(cursor.getInt(mSelectHolder.isMemberIndex) == 1 ? true : false);
         result.setCertTimestamp(cursor.getLong(mSelectHolder.certTimestampIndex));
         result.setSalt(cursor.getString(mSelectHolder.saltIndex));
+        result.setBlockNumber(cursor.getLong(mSelectHolder.blockNumberIndex));
 
         return result;
     }
 
-    private void computeWalletUD(Context context, Wallet wallet) {
+    private void updateCreditUD(Context context, Wallet wallet) {
 
         long lastUD = currencyService.getLastUD(context, wallet.getCurrencyId());
         double ud = CurrencyUtils.convertToUD(wallet.getCredit(), lastUD);
         wallet.setCreditAsUD(ud);
+    }
+
+    private double getCreditAsUD(Context context, long currencyId, long credit) {
+        if (credit == 0) {
+            return 0;
+        }
+
+        long lastUD = currencyService.getLastUD(context, currencyId);
+        return CurrencyUtils.convertToUD(credit, lastUD);
     }
 
     private Uri getContentUri() {
@@ -492,12 +547,13 @@ public class WalletService extends BaseService {
         int uidIndex;
         int certTimestampIndex;
         int saltIndex;
+        int blockNumberIndex;
 
         private SelectCursorHolder(final Cursor cursor ) {
             idIndex = cursor.getColumnIndex(Contract.Wallet._ID);
             accountIdIndex = cursor.getColumnIndex(Contract.Wallet.ACCOUNT_ID);
             currencyIdIndex = cursor.getColumnIndex(Contract.Wallet.CURRENCY_ID);
-            nameIndex = cursor.getColumnIndex(Contract.Wallet.NAME);
+            nameIndex = cursor.getColumnIndex(Contract.Wallet.ALIAS);
             pubKeyIndex = cursor.getColumnIndex(Contract.Wallet.PUBLIC_KEY);
             uidIndex= cursor.getColumnIndex(Contract.Wallet.UID);
             certTimestampIndex= cursor.getColumnIndex(Contract.Wallet.CERT_TS);
@@ -505,6 +561,7 @@ public class WalletService extends BaseService {
             isMemberIndex = cursor.getColumnIndex(Contract.Wallet.IS_MEMBER);
             creditIndex = cursor.getColumnIndex(Contract.Wallet.CREDIT);
             saltIndex = cursor.getColumnIndex(Contract.Wallet.SALT);
+            blockNumberIndex = cursor.getColumnIndex(Contract.Wallet.BLOCK_NUMBER);
         }
     }
 
@@ -543,7 +600,7 @@ public class WalletService extends BaseService {
 
                 for (Wallet wallet : result) {
 
-                    updateWalletFromRemoteNode(getContext(), wallet);
+                    updateWalletRemotly(getContext(), wallet);
 
                     increment();
 
@@ -579,7 +636,7 @@ public class WalletService extends BaseService {
 
                 Wallet wallet = wallets[i++];
 
-                updateWalletFromRemoteNode(getContext(), wallet);
+                updateWalletRemotly(getContext(), wallet);
 
                 result.add(wallet);
 

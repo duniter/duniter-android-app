@@ -18,9 +18,10 @@ public class Wallet extends KeyPair implements LocalEntity, Serializable {
     private Long currencyId;
     private Long accountId;
     private String name;
-    private Integer credit;
+    private Long credit;
     private Identity identity;
     private Double creditAsUD;
+    private long blockNumber = -1;
     private Collection<WotCertification> certifications;
 
     /**
@@ -119,11 +120,11 @@ public class Wallet extends KeyPair implements LocalEntity, Serializable {
         this.name = name;
     }
 
-    public Integer getCredit() {
+    public Long getCredit() {
         return credit;
     }
 
-    public void setCredit(Integer credit) {
+    public void setCredit(Long credit) {
         this.credit = credit;
     }
 
@@ -187,6 +188,14 @@ public class Wallet extends KeyPair implements LocalEntity, Serializable {
 
     public void setCertifications(Collection<WotCertification> certifications) {
         this.certifications = certifications;
+    }
+
+    public long getBlockNumber() {
+        return blockNumber;
+    }
+
+    public void setBlockNumber(long blockNumber) {
+        this.blockNumber = blockNumber;
     }
 
     @Override

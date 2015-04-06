@@ -4,18 +4,16 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.ProgressDialog;
-import android.app.SearchManager;
 import android.os.Bundle;
-import android.support.v7.widget.SearchView;
+import android.support.v13.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.TabHost;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,6 +21,7 @@ import java.util.List;
 
 import io.ucoin.app.Application;
 import io.ucoin.app.R;
+import io.ucoin.app.activity.IToolbarActivity;
 import io.ucoin.app.activity.MainActivity;
 import io.ucoin.app.model.Wallet;
 import io.ucoin.app.service.ServiceLocator;
@@ -30,6 +29,7 @@ import io.ucoin.app.service.exception.PeerConnectionException;
 import io.ucoin.app.technical.ViewUtils;
 import io.ucoin.app.technical.task.AsyncTaskHandleException;
 import io.ucoin.app.technical.task.ProgressDialogAsyncTaskListener;
+import io.ucoin.app.view.SlidingTabLayout;
 
 
 public class HomeFragment extends Fragment {
@@ -37,7 +37,8 @@ public class HomeFragment extends Fragment {
     private View mStatusPanel;
     private TextView mStatusText;
     private ImageView mStatusImage;
-    private TabHost mTabs;
+    //private TabHost mTabs;
+    private SlidingTabLayout mSlidingTabLayout;
     private MainActivity.QueryResultListener<Wallet> mWalletResultListener;
 
     public static HomeFragment newInstance() {
@@ -63,7 +64,7 @@ public class HomeFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         // Tab host
-        mTabs = (TabHost)view.findViewById(R.id.tabHost);
+        /*mTabs = (TabHost)view.findViewById(R.id.tabHost);
         mTabs.setup();
         {
             TabHost.TabSpec spec = mTabs.newTabSpec("tab1");
@@ -76,7 +77,7 @@ public class HomeFragment extends Fragment {
             spec.setContent(R.id.tab2);
             spec.setIndicator(getString(R.string.favorites));
             mTabs.addTab(spec);
-        }
+        }*/
 
         mStatusPanel = view.findViewById(R.id.status_panel);
         mStatusPanel.setVisibility(View.GONE);
@@ -87,6 +88,7 @@ public class HomeFragment extends Fragment {
         // Image
         mStatusImage = (ImageView) view.findViewById(R.id.status_image);
 
+        /*
         // Tab 1: wallet list
         {
             WalletListFragment fragment1 = WalletListFragment.newInstance(
@@ -110,7 +112,18 @@ public class HomeFragment extends Fragment {
             getFragmentManager().beginTransaction()
                 .replace(R.id.tab2, fragment2, "tab2")
                 .commit();
-        }
+        }*/
+
+        // Get the ViewPager and set it's PagerAdapter so that it can display items
+        ViewPager viewPager;
+        viewPager = (ViewPager) view.findViewById(R.id.viewpager);
+        viewPager.setAdapter(new HomePagerAdapter(getChildFragmentManager()));
+
+        // Give the SlidingTabLayout the ViewPager, this must be done AFTER the ViewPager has had
+        // it's PagerAdapter set.
+        mSlidingTabLayout = (SlidingTabLayout) view.findViewById(R.id.sliding_tabs);
+        mSlidingTabLayout.setDistributeEvenly(true);
+        mSlidingTabLayout.setViewPager(viewPager);
 
         // Load wallets
         LoadWalletsTask loadWalletsTask = new LoadWalletsTask();
@@ -118,43 +131,13 @@ public class HomeFragment extends Fragment {
     }
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.toolbar_home, menu);
-    }
-
-    @Override
     public void onPrepareOptionsMenu(Menu menu) {
-        getActivity().setTitle(getString(R.string.app_name));
-        ((MainActivity)getActivity()).setBackButtonEnabled(false);
-
-        SearchManager searchManager = (SearchManager) getActivity()
-                .getSystemService(getActivity().SEARCH_SERVICE);
-        final MenuItem searchItem = menu.findItem(R.id.action_search);
-
-        final SearchView searchView = (SearchView) searchItem.getActionView();
-        searchView.setSearchableInfo(searchManager
-                .getSearchableInfo(getActivity().getComponentName()));
-
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String s) {
-                return ((MainActivity) getActivity()).onQueryTextSubmit(searchItem, s);
-            }
-
-            @Override
-            public boolean onQueryTextChange(String s) {
-                return true;
-            }
-        });
-
-        searchView.setOnQueryTextFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (!hasFocus) {
-                    searchView.setIconified(true);
-                }
-            }
-        });
+        Activity activity = getActivity();
+        activity.setTitle(getString(R.string.app_name));
+        if (activity instanceof IToolbarActivity) {
+            ((IToolbarActivity) activity).setToolbarBackButtonEnabled(false);
+            ((IToolbarActivity) activity).setToolbarColor(getResources().getColor(R.color.primary));
+        }
     }
 
     //Return false to allow normal menu processing to proceed, true to consume it here
@@ -179,13 +162,74 @@ public class HomeFragment extends Fragment {
                 .commit();
     }
 
+    private class HomePagerAdapter extends FragmentPagerAdapter {
+
+        public HomePagerAdapter(FragmentManager fm) {
+            super(fm);
+        }
+
+        /**
+         * @return the number of pages to display
+         */
+        @Override
+        public int getCount() {
+            return 2;
+        }
+
+        /**
+         * Return the title of the item at {@code position}. This is important as what this method
+         * returns is what is displayed in the {@link io.ucoin.app.view.SlidingTabLayout}.
+         * <p>
+         * Here we construct one using the position value, but for real application the title should
+         * refer to the item's contents.
+         */
+        @Override
+        public CharSequence getPageTitle(int position) {
+            if(position == 0)
+                return getString(R.string.wallets);
+            else
+                return getString(R.string.favorites);
+        }
+
+        @Override
+        public android.app.Fragment getItem(int i) {
+
+            android.app.Fragment fragment;
+            if(i == 0) {
+                fragment =  WalletListFragment.newInstance(
+                        // Manage click on wallet
+                        new WalletListFragment.OnClickListener() {
+                            @Override
+                            public void onPositiveClick(Bundle args) {
+                                Wallet wallet = (Wallet) args.getSerializable(Wallet.class.getSimpleName());
+                                onWalletClick(wallet);
+                            }
+                        });
+                mWalletResultListener = (WalletListFragment)fragment;
+                fragment.setHasOptionsMenu(true);
+            }
+            else {
+                fragment = ContactListFragment.newInstance();
+                fragment.setHasOptionsMenu(true);
+            }
+
+            return fragment;
+        }
+    }
+
     public class LoadWalletsTask extends AsyncTaskHandleException<Void, Void, List<Wallet>> {
 
-        private Activity mActivity = getActivity();
+        private long mAccountId;
+        private Application mApplication;
 
         public LoadWalletsTask() {
-            super();
+            super(getActivity());
+
+            mApplication = (Application)getActivity().getApplication();
+            mAccountId = mApplication.getAccountId();
+
             ProgressDialog progressDialog = new ProgressDialog(getActivity());
+            progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
             ProgressDialogAsyncTaskListener listener = new ProgressDialogAsyncTaskListener(progressDialog);
             setListener(listener);
         }
@@ -193,7 +237,6 @@ public class HomeFragment extends Fragment {
         @Override
         protected List<Wallet> doInBackgroundHandleException(Void... param) throws PeerConnectionException{
             ServiceLocator serviceLocator = ServiceLocator.instance();
-            Long accountId = ((Application)mActivity.getApplication()).getAccountId();
 
             setMax(100);
             setProgress(0);
@@ -203,18 +246,18 @@ public class HomeFragment extends Fragment {
                 setMessage(getString(R.string.starting_home));
 
                 // Load currencies cache
-                serviceLocator.getCurrencyService().loadCache(getActivity().getApplication());
+                serviceLocator.getCurrencyService().loadCache(mApplication);
                 increment();
 
                 // Load peers cache
-                serviceLocator.getPeerService().loadCache(getActivity().getApplication());
+                serviceLocator.getPeerService().loadCache(mApplication);
                 increment();
             }
 
             // Load wallets
             return serviceLocator.getWalletService().getWalletsByAccountId(
-                    getActivity(),
-                    accountId,
+                    getContext(),
+                    mAccountId,
                     true,
                     LoadWalletsTask.this);
         }
@@ -238,16 +281,18 @@ public class HomeFragment extends Fragment {
                 @Override
                 public void onClick(View v) {
                     // Display the error on click
-                    Toast.makeText(HomeFragment.this.getActivity(),
+                    Toast.makeText(getContext(),
                             getString(R.string.connected_error, errorMessage),
                             Toast.LENGTH_LONG)
                             .show();
                 }
             });
-            ViewUtils.toogleViews(mTabs, mStatusPanel);
+
+            //ViewUtils.toogleViews(mTabs, mStatusPanel);
+            ViewUtils.toogleViews(mSlidingTabLayout, mStatusPanel);
 
             // Display the error
-            Toast.makeText(HomeFragment.this.getActivity(),
+            Toast.makeText(getContext(),
                     errorMessage,
                     Toast.LENGTH_SHORT)
                     .show();

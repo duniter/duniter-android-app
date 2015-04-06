@@ -25,7 +25,7 @@ import android.widget.Toast;
 import java.util.Collection;
 
 import io.ucoin.app.R;
-import io.ucoin.app.activity.MainActivity;
+import io.ucoin.app.activity.IToolbarActivity;
 import io.ucoin.app.activity.SettingsActivity;
 import io.ucoin.app.adapter.CertificationListAdapter;
 import io.ucoin.app.adapter.ProgressViewAdapter;
@@ -130,6 +130,25 @@ public class WalletFragment extends Fragment {
         //Uid
         mUidView = (TextView) view.findViewById(R.id.uid);
 
+        // details view
+        final View detailView = view.findViewById(R.id.details);
+        detailView.setVisibility(View.GONE);
+
+        // Toogle detail button
+        final ImageButton toogleDetailButton = (ImageButton) view.findViewById(R.id.toogle_detail);
+        toogleDetailButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (detailView.getVisibility() == View.VISIBLE) {
+                    detailView.setVisibility(View.GONE);
+                    toogleDetailButton.setImageResource(R.drawable.expander_open_holo_dark);
+                } else {
+                    detailView.setVisibility(View.VISIBLE);
+                    toogleDetailButton.setImageResource(R.drawable.expander_close_holo_dark);
+                }
+            }
+        });
+
         // Icon
         mIcon = (ImageButton)view.findViewById(R.id.icon);
 
@@ -188,6 +207,7 @@ public class WalletFragment extends Fragment {
 
     }
 
+
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.toolbar_wallet, menu);
@@ -209,8 +229,12 @@ public class WalletFragment extends Fragment {
 
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
-        getActivity().setTitle(R.string.wallet_title);
-        ((MainActivity)getActivity()).setBackButtonEnabled(true);
+        Activity activity = getActivity();
+        activity.setTitle(R.string.wallet_title);
+        if (activity instanceof IToolbarActivity) {
+            ((IToolbarActivity) activity).setToolbarBackButtonEnabled(true);
+            ((IToolbarActivity) activity).setToolbarDrawable(getResources().getDrawable(R.drawable.shape_wallet_toolbar));
+        }
     }
 
     @Override
@@ -340,7 +364,7 @@ public class WalletFragment extends Fragment {
 
         // Perform the join (after login)
         LoginFragment.login(getFragmentManager(), wallet, new LoginFragment.OnLoginListener() {
-            public void onSuccess(Wallet authWallet){
+            public void onSuccess(Wallet authWallet) {
                 RequestMembershipTask task = new RequestMembershipTask(popBackStackName);
                 task.execute(authWallet);
             }
@@ -409,6 +433,11 @@ public class WalletFragment extends Fragment {
     }
 
     public class LoadTask extends AsyncTaskHandleException<Wallet, Void, Collection<WotCertification>> {
+
+        public LoadTask() {
+            super(getActivity());
+        }
+
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
@@ -464,10 +493,10 @@ public class WalletFragment extends Fragment {
 
     public class SelfCertificationTask extends AsyncTaskHandleException<Wallet, Void, Wallet> {
 
-        private Activity mActivity = getActivity();
         private String popStackTraceName;
 
         public SelfCertificationTask(String popStackTraceName) {
+            super(getActivity());
             this.popStackTraceName = popStackTraceName;
         }
 
@@ -475,7 +504,7 @@ public class WalletFragment extends Fragment {
         protected void onPreExecute() {
             super.onPreExecute();
             // Hide the keyboard, in case we come from imeDone)
-            ViewUtils.hideKeyboard(mActivity);
+            ViewUtils.hideKeyboard(getActivity());
 
             // Show the progress bar
             mProgressViewAdapter.showProgress(true);
@@ -487,7 +516,7 @@ public class WalletFragment extends Fragment {
 
             // Get certifications (if has a uid)
             if (StringUtils.isNotBlank(wallet.getUid())) {
-                ServiceLocator.instance().getWalletService().sendSelfAndSave(mActivity, wallet);
+                ServiceLocator.instance().getWalletService().sendSelfAndSave(getContext(), wallet);
 
                 return wallet;
             }
@@ -500,14 +529,14 @@ public class WalletFragment extends Fragment {
         protected void onSuccess(Wallet wallet) {
             mProgressViewAdapter.showProgress(false);
             if (wallet == null || wallet.getCertTimestamp() <= 0) {
-                Toast.makeText(mActivity,
+                Toast.makeText(getContext(),
                         getString(R.string.join_error),
                         Toast.LENGTH_SHORT).show();
             }
             else {
                 getFragmentManager().popBackStack(popStackTraceName, 0); // return back
 
-                Toast.makeText(mActivity,
+                Toast.makeText(getContext(),
                         getString(R.string.join_sended),
                         Toast.LENGTH_LONG).show();
 
@@ -519,7 +548,7 @@ public class WalletFragment extends Fragment {
         protected void onFailed(Throwable error) {
             super.onFailed(error);
             Log.d(TAG, "Could not send join: " + ExceptionUtils.getMessage(error), error);
-            Toast.makeText(mActivity,
+            Toast.makeText(getContext(),
                     getString(R.string.join_error)
                             + "\n"
                             + ExceptionUtils.getMessage(error),
@@ -540,6 +569,7 @@ public class WalletFragment extends Fragment {
         private String popStackTraceName;
 
         public RequestMembershipTask(String popStackTraceName) {
+            super(getActivity());
             this.popStackTraceName = popStackTraceName;
         }
 
@@ -610,9 +640,9 @@ public class WalletFragment extends Fragment {
     public class DeleteTask extends AsyncTaskHandleException<Wallet, Void, Void> {
 
         private String popStackTraceName;
-        private Activity mActivity = getActivity();
 
         public DeleteTask(String popStackTraceName) {
+            super(getActivity());
             this.popStackTraceName = popStackTraceName;
         }
 
@@ -628,7 +658,7 @@ public class WalletFragment extends Fragment {
             Wallet wallet = wallets[0];
 
             // Do deletion
-            ServiceLocator.instance().getWalletService().delete(mActivity, wallet.getId());
+            ServiceLocator.instance().getWalletService().delete(getContext(), wallet.getId());
 
             return (Void)null;
         }
@@ -638,7 +668,7 @@ public class WalletFragment extends Fragment {
             mProgressViewAdapter.showProgress(false);
             getFragmentManager().popBackStack(popStackTraceName, 0); // return back
 
-            Toast.makeText(mActivity,
+            Toast.makeText(getContext(),
                     getString(R.string.wallet_deleted),
                     Toast.LENGTH_LONG).show();
         }
@@ -647,7 +677,7 @@ public class WalletFragment extends Fragment {
         protected void onFailed(Throwable error) {
             super.onFailed(error);
             Log.d(TAG, "Could not delete wallet: " + ExceptionUtils.getMessage(error), error);
-            Toast.makeText(getActivity(),
+            Toast.makeText(getContext(),
                     getString(R.string.delete_wallet_error, ExceptionUtils.getMessage(error)),
                             Toast.LENGTH_SHORT).show();
 

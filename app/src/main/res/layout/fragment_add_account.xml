@@ -21,14 +21,14 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="0.25"
-            android:text="@string/user_id" />
+            android:text="@string/uid" />
 
         <EditText
             android:id="@+id/uid"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="0.75"
-            android:hint="@string/user_id"
+            android:hint="@string/uid"
             android:imeOptions="actionNext"
             android:inputType="textNoSuggestions"
             android:singleLine="true"
