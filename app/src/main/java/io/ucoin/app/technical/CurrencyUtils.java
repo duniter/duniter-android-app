@@ -124,6 +124,21 @@ public class CurrencyUtils {
         return formatShort(Long.parseLong(amountStr) / 1000) + "G";
     }
 
+    public static Double parse(String amount) {
+        if (StringUtils.isBlank(amount)) {
+            return null;
+        }
+        return Double.parseDouble(amount.trim().replace(',', '.'));
+    }
+
+    public static Long parseLong(String amount) {
+        if (StringUtils.isBlank(amount)) {
+            return null;
+        }
+        amount = amount.replaceAll("[\\s,]+", "");
+        return Long.parseLong(amount);
+    }
+
     /* -- Internal methods -- */
 
 

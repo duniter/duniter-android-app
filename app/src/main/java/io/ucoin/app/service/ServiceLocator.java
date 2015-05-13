@@ -1,5 +1,7 @@
 package io.ucoin.app.service;
 
+import android.app.Application;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.HashMap;
@@ -28,9 +30,9 @@ public class ServiceLocator implements Closeable {
         // shouldn't be instantiated
         serviceCache = new HashMap<Class<?>, Object>();
     }
-    
+
     public void init() {
-        
+
     }
 
     @Override
@@ -59,7 +61,7 @@ public class ServiceLocator implements Closeable {
     public static ServiceLocator instance() {
         return instance;
     }
-    
+
     public BlockchainRemoteService getBlockchainRemoteService() {
         return getService(BlockchainRemoteService.class);
     }
@@ -104,6 +106,16 @@ public class ServiceLocator implements Closeable {
         return getService(MovementService.class);
     }
 
+
+    public void loadCaches(Application application) {
+
+        // Load currencies cache
+        getCurrencyService().loadCache(application);
+
+        // Load peers cache
+        getPeerService().loadCache(application);
+
+    }
 
     /* -- Internal methods -- */
     protected <S extends BaseService> S getService(Class<S> clazz) {

@@ -1,22 +1,20 @@
 package io.ucoin.app.fragment;
 
-import android.app.Activity;
-import android.app.Fragment;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.DialogFragment;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
-import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import io.ucoin.app.R;
-import io.ucoin.app.activity.IToolbarActivity;
 import io.ucoin.app.adapter.ProgressViewAdapter;
 import io.ucoin.app.model.Contact;
 import io.ucoin.app.model.Identity;
@@ -30,12 +28,12 @@ import io.ucoin.app.technical.task.AsyncTaskHandleException;
 /**
  * A screen used to add a wallet via currency, uid, salt and password.
  */
-public class AddContactFragment extends Fragment {
+public class AddContactDialogFragment extends DialogFragment {
 
     public static final String TAG = "AddContactFragment";
 
-    public static AddContactFragment newInstance(Identity identity) {
-        AddContactFragment fragment = new AddContactFragment();
+    public static AddContactDialogFragment newInstance(Identity identity) {
+        AddContactDialogFragment fragment = new AddContactDialogFragment();
         Bundle args = new Bundle();
         args.putSerializable(Identity.class.getSimpleName(), identity);
         fragment.setArguments(args);
@@ -49,23 +47,13 @@ public class AddContactFragment extends Fragment {
     private ProgressViewAdapter mProgressViewAdapter;
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
-    }
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        super.onCreateView(inflater, container, savedInstanceState);
-
-        return inflater.inflate(R.layout.fragment_add_new_contact,
-                container, false);
-    }
-
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+        LayoutInflater inflater = getActivity().getLayoutInflater();
+        final View view = inflater.inflate(R.layout.fragment_add_new_contact, null);
+        builder.setView(view);
+        builder.setTitle(R.string.add_as_new_contact_title);
 
         // Getting a given identity
         Bundle newInstanceArgs = getArguments();
@@ -74,8 +62,11 @@ public class AddContactFragment extends Fragment {
 
         // Uid
         mUidView = (TextView) view.findViewById(R.id.uid);
+        if (identity != null) {
+            mUidView.setText(identity.getUid());
+        }
 
-        // Name
+        // Alias
         mNameView = (TextView) view.findViewById(R.id.name);
         mNameView.requestFocus();
         mNameView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -89,37 +80,22 @@ public class AddContactFragment extends Fragment {
             }
         });
 
-        Button mAddButton = (Button) view.findViewById(R.id.add_button);
-        mAddButton.setOnClickListener(new View.OnClickListener() {
+
+        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             @Override
-            public void onClick(View view) {
+            public void onClick(DialogInterface dialog, int id) {
                 attemptAddContact(identity);
             }
         });
 
-        mProgressViewAdapter = new ProgressViewAdapter(
-                view.findViewById(R.id.progressbar),
-                mAddButton);
+        builder.setNegativeButton(R.string.CANCEL, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+                dismiss();
+            }
+        });
 
-        // fill the UI with the given identity
-        updateView(identity);
-    }
-
-    @Override
-    public void onPrepareOptionsMenu(Menu menu) {
-        getActivity().setTitle(R.string.add_as_new_contact);
-        Activity activity = getActivity();
-        activity.setTitle(getString(R.string.add_as_new_contact));
-        if (activity instanceof IToolbarActivity) {
-            ((IToolbarActivity) activity).setToolbarBackButtonEnabled(true);
-            ((IToolbarActivity) activity).setToolbarColor(getResources().getColor(R.color.primary));
-        }
-    }
-
-    private void updateView(Identity identity) {
-        if (identity != null) {
-            mUidView.setText(identity.getUid());
-        }
+        return builder.create();
     }
 
     /**
@@ -140,10 +116,16 @@ public class AddContactFragment extends Fragment {
         View focusView = null;
 
         // Check for a valid name (mandatory if uid is not set)
-        if (TextUtils.isEmpty(name)) {
-            mNameView.setError(getString(R.string.field_required));
-            if (focusView == null) focusView = mNameView;
-            cancel = true;
+        if (!TextUtils.isEmpty(name)) {
+            // Use UID as default name
+            if (!TextUtils.isEmpty(identity.getUid())) {
+                name = identity.getUid();
+            }
+            else {
+                mNameView.setError(getString(R.string.field_required));
+                if (focusView == null) focusView = mNameView;
+                cancel = true;
+            }
         }
         else if (!isNameValid(name)) {
             mNameView.setError(getString(R.string.name_too_short));
@@ -184,9 +166,6 @@ public class AddContactFragment extends Fragment {
             super.onPreExecute();
             ViewUtils.hideKeyboard(getActivity());
 
-            // Show the progress bar
-            mProgressViewAdapter.showProgress(true);
-
             // Retrieve account id
             mAccountId = ((io.ucoin.app.Application) getActivity().getApplication()).getAccountId();
         }
@@ -217,15 +196,11 @@ public class AddContactFragment extends Fragment {
 
         @Override
         protected void onSuccess(Contact contact) {
-            // Go back
-            getFragmentManager().popBackStack();
-            mProgressViewAdapter.showProgress(false);
+            dismiss();
         }
 
         @Override
         protected void onFailed(Throwable t) {
-            mProgressViewAdapter.showProgress(false);
-
             Log.d(TAG, "Error in AddContactTask", t);
             Toast.makeText(getContext(),
                     ExceptionUtils.getMessage(t),
@@ -235,7 +210,7 @@ public class AddContactFragment extends Fragment {
 
         @Override
         protected void onCancelled() {
-            mProgressViewAdapter.showProgress(false);
+            dismiss();
         }
     }
 }

@@ -52,14 +52,32 @@
             android:hint="@string/receiver_hint"
             android:imeOptions="actionNext"
             android:textSize="@dimen/abc_text_size_body_2_material" />
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dip"
+        android:layout_marginTop="5dip"
+        android:orientation="horizontal">
         <EditText
             android:id="@+id/receiver_pubkey"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="0.70"
             android:singleLine="true"
             android:hint="@string/public_key"
             android:textColor="#372c24"
             android:imeOptions="actionNext"/>
+
+        <Button
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Browse"
+            android:id="@+id/browse_button"
+            android:layout_gravity="right" />
+      </LinearLayout>
 
         <TextView
             android:id="@+id/receiver_uid"
@@ -72,12 +90,12 @@
             android:textSize="@dimen/abc_text_size_body_2_material" />
 
 
-        <!-- amount label -->
+        <!-- amount label
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/amount"
-            android:textColor="#372c24" />
+            android:textColor="#372c24" />-->
 
 
         <LinearLayout
@@ -141,12 +159,12 @@
 
         </LinearLayout>
 
-        <!-- comment -->
+        <!-- comment
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/comment_optional"
-            android:textColor="#372c24" />
+            android:textColor="#372c24" /-->
 
 
         <EditText

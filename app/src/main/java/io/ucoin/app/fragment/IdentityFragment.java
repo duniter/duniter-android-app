@@ -1,6 +1,7 @@
 package io.ucoin.app.fragment;
 
 import android.app.Activity;
+import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.os.Bundle;
@@ -260,7 +261,23 @@ public class IdentityFragment extends Fragment {
         Identity identity = (Identity)
                 newInstanceArgs.getSerializable(Identity.class.getSimpleName());
 
-        Fragment fragment = AddContactFragment.newInstance(identity);
+        /*Intent intent = new Intent(Intent.ACTION_INSERT_OR_EDIT);
+        intent.setType(ContactsContract.Contacts.CONTENT_ITEM_TYPE);
+        //intent.putExtra(ContactsContract.CommonDataKinds.Im.DISPLAY_NAME, "test");
+        intent.putExtra(ContactsContract.CommonDataKinds.Im.DATA, "ucoin");
+        intent.putExtra(ContactsContract.CommonDataKinds.Im.TYPE, ContactsContract.CommonDataKinds.Im.TYPE_WORK);
+        intent.putExtra(ContactsContract.CommonDataKinds.Im.PROTOCOL, ContactsContract.CommonDataKinds.Im.CUSTOM_PROTOCOL);
+        intent.putExtra(ContactsContract.CommonDataKinds.Im.CUSTOM_PROTOCOL, "ucoin");
+
+        startActivity(intent);
+        */
+
+        DialogFragment fragment = AddContactDialogFragment.newInstance(identity);
+        fragment.show(getFragmentManager(),
+                fragment.getClass().getSimpleName());
+
+        /*
+        Fragment fragment = AddContactDialogFragment.newInstance(identity);
         getFragmentManager().beginTransaction()
                 .setCustomAnimations(R.animator.slide_in_down,
                         R.animator.slide_out_up,
@@ -269,6 +286,7 @@ public class IdentityFragment extends Fragment {
                 .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
                 .addToBackStack(fragment.getClass().getSimpleName())
                 .commit();
+                */
     }
 
     protected void onAddAsExistingContact() {

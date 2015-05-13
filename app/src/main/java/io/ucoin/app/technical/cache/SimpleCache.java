@@ -52,7 +52,7 @@ public abstract class SimpleCache<K, V> {
         long timeInMillis = System.currentTimeMillis();
         if (cachedValue != null) {
             Long cachedTime = mCachedTimes.get(key);
-            if (cachedTime.longValue() - timeInMillis < mCacheTimeInMillis) {
+            if (timeInMillis - cachedTime.longValue() < mCacheTimeInMillis) {
                 return cachedValue;
             }
         }

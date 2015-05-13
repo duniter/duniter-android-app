@@ -7,9 +7,9 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
 
-    <!-- To auto-complete the email text field in the login form with the user's emails
+    <!-- To auto-complete the email text field in the login form with the user's emails  -->
     <uses-permission android:name="android.permission.READ_PROFILE" />
-    <uses-permission android:name="android.permission.READ_CONTACTS" />  -->
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
 
     <application
         android:name="io.ucoin.app.Application"
@@ -29,6 +29,23 @@
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
+            </intent-filter>
+
+            <!--intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="ucoin"/>
+            </intent-filter-->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="data.ucoin.fr"
+                    android:scheme="http"/>
             </intent-filter>
 
             <meta-data

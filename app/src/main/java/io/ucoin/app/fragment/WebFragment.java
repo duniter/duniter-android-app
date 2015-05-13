@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebChromeClient;
@@ -73,6 +74,7 @@ public class WebFragment extends Fragment {
         mWebView = (WebView)view.findViewById(R.id.webview);
         mWebView.getSettings().setJavaScriptEnabled(true);
         mWebView.getSettings().setBuiltInZoomControls(true);
+        mWebView.setClickable(true);
 
         mWebView.setWebChromeClient(new WebChromeClient() {
             public void onProgressChanged(WebView view, int progress) {
@@ -86,6 +88,7 @@ public class WebFragment extends Fragment {
                 Toast.makeText(activity, "Oh no! " + description, Toast.LENGTH_SHORT).show();
             }
         });
+
 
         // progress
         mProgressAdapter = new ProgressViewAdapter(
@@ -116,5 +119,21 @@ public class WebFragment extends Fragment {
             ((IToolbarActivity) activity).setToolbarBackButtonEnabled(false);
             ((IToolbarActivity) activity).setToolbarColor(getResources().getColor(R.color.primary));
         }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_back:
+                mProgressAdapter.showProgress(true);
+                mWebView.goBack();
+                return true;
+            case R.id.action_forward:
+                mProgressAdapter.showProgress(true);
+                mWebView.goForward();
+                return true;
+        }
+
+        return false;
     }
 }

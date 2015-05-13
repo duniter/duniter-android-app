@@ -19,6 +19,11 @@ public class ProgressViewAdapter {
                 activity.findViewById(viewId));
     }
 
+    public ProgressViewAdapter(View parentView, int progressViewId, int viewId) {
+        this(parentView.findViewById(progressViewId),
+                parentView.findViewById(viewId));
+    }
+
     public ProgressViewAdapter(View progressView, View view) {
         this(progressView, view, progressView.getResources().getInteger(android.R.integer.config_shortAnimTime));
     }

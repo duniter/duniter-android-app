@@ -17,11 +17,26 @@ public class ModelUtils {
      * @param sources
      * @return
      */
-    public static Map<String, TxSource> toFingertprintMap(List<TxSource> sources) {
+    public static Map<String, TxSource> sourcesToFingerprintMap(List<TxSource> sources) {
 
         Map<String, TxSource> result = new HashMap<>();
         for(TxSource source: sources) {
             result.put(source.getFingerprint(), source);
+        }
+
+        return result;
+    }
+
+    /**
+     * Transform a list of sources, into a Map, using the fingerprint as key
+     * @param movements
+     * @return
+     */
+    public static Map<String, Movement> movementsToFingerprintMap(List<Movement> movements) {
+
+        Map<String, Movement> result = new HashMap<>();
+        for(Movement movement: movements) {
+            result.put(movement.getFingerprint(), movement);
         }
 
         return result;

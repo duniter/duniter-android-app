@@ -1,8 +1,11 @@
 package io.ucoin.app.fragment;
 
+import android.app.DialogFragment;
 import android.app.ListFragment;
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -12,16 +15,20 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import io.ucoin.app.Application;
 import io.ucoin.app.R;
 import io.ucoin.app.activity.MainActivity;
 import io.ucoin.app.adapter.WalletArrayAdapter;
 import io.ucoin.app.model.Currency;
 import io.ucoin.app.model.Wallet;
 import io.ucoin.app.service.ServiceLocator;
+import io.ucoin.app.service.exception.PeerConnectionException;
+import io.ucoin.app.technical.task.AsyncTaskHandleException;
 import io.ucoin.app.technical.task.ProgressDialogAsyncTaskListener;
 
 
@@ -31,11 +38,11 @@ public class WalletListFragment extends ListFragment implements MainActivity.Que
     private static final String WALLET_LIST_ARGS_KEYS = "Wallets";
 
     private WalletArrayAdapter mWalletArrayAdapter;
-    private OnClickListener mListener;
+    private WalletListListener mListener;
     private int mScrollState;
     private ListView mListView;
 
-    protected static WalletListFragment newInstance(OnClickListener listener) {
+    protected static WalletListFragment newInstance(WalletListListener listener) {
         WalletListFragment fragment = new WalletListFragment();
         fragment.setOnClickListener(listener);
         Bundle args = new Bundle();
@@ -71,15 +78,6 @@ public class WalletListFragment extends ListFragment implements MainActivity.Que
         TextView v = (TextView) view.findViewById(android.R.id.empty);
         v.setVisibility(View.GONE);
 
-        // add button
-        /*ImageButton addButton = (ImageButton) view.findViewById(R.id.add_button);
-        addButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                onAddWalletClick();
-            }
-        });*/
-
         getListView().setOnScrollListener(new AbsListView.OnScrollListener() {
 
             @Override
@@ -94,6 +92,10 @@ public class WalletListFragment extends ListFragment implements MainActivity.Que
             }
 
         });
+
+        // Load wallets
+        LoadWalletsTask loadWalletsTask = new LoadWalletsTask();
+        loadWalletsTask.execute();
     }
 
     @Override
@@ -127,16 +129,14 @@ public class WalletListFragment extends ListFragment implements MainActivity.Que
     }
 
 
-    public interface OnClickListener {
+    public interface WalletListListener {
         public void onPositiveClick(Bundle args);
+        public void onLoadFailed(Throwable t);
     }
 
     @Override
     public void onQuerySuccess(List<? extends Wallet> wallets) {
-        mWalletArrayAdapter.setNotifyOnChange(true);
-        mWalletArrayAdapter.clear();
-        mWalletArrayAdapter.addAll(wallets);
-        mWalletArrayAdapter.notifyDataSetChanged();
+
     }
 
     @Override
@@ -189,7 +189,7 @@ public class WalletListFragment extends ListFragment implements MainActivity.Que
                 });
     }
 
-    private void setOnClickListener(OnClickListener listener) {
+    private void setOnClickListener(WalletListListener listener) {
          mListener = listener;
      }
 
@@ -197,7 +197,7 @@ public class WalletListFragment extends ListFragment implements MainActivity.Que
         Bundle args = getArguments();
         Currency currency = (Currency)args.getSerializable(Currency.class.getSimpleName());
 
-        AddWalletDialogFragment fragment;
+        DialogFragment fragment;
         if (currency == null) {
             fragment = AddWalletDialogFragment.newInstance(getActivity());
         }
@@ -206,20 +206,67 @@ public class WalletListFragment extends ListFragment implements MainActivity.Que
         }
         fragment.show(getFragmentManager(),
                 fragment.getClass().getSimpleName());
-        /*
-        Fragment fragment = AddWalletFragment.newInstance();
-        FragmentManager fragmentManager = getFragmentManager();
-        // Insert the Home at the first place in back stack
-        fragmentManager.popBackStack(HomeFragment.class.getSimpleName(), 0);
-        fragmentManager.beginTransaction()
-                .setCustomAnimations(
-                        R.animator.slide_in_right,
-                        R.animator.fade_out,
-                        R.animator.delayed_fade_in,
-                        R.animator.slide_out_left)
-                .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
-                .addToBackStack(fragment.getClass().getSimpleName())
-                .commit();
-                */
+
+        // Reload wallet list
+        LoadWalletsTask task = new LoadWalletsTask();
+        task.execute();
+    }
+
+    public class LoadWalletsTask extends AsyncTaskHandleException<Void, Void, List<Wallet>> {
+
+        private long mAccountId;
+        private Application mApplication;
+
+        public LoadWalletsTask() {
+            super(getActivity());
+
+            mApplication = (Application)getActivity().getApplication();
+            mAccountId = mApplication.getAccountId();
+
+            ProgressDialog progressDialog = new ProgressDialog(getActivity());
+            //progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+            ProgressDialogAsyncTaskListener listener = new ProgressDialogAsyncTaskListener(progressDialog);
+            setListener(listener);
+        }
+
+        @Override
+        protected List<Wallet> doInBackgroundHandleException(Void... param) throws PeerConnectionException {
+            ServiceLocator serviceLocator = ServiceLocator.instance();
+
+            setMax(100);
+            setProgress(0);
+
+            // Load wallets
+            return serviceLocator.getWalletService().getWalletsByAccountId(
+                    getContext(),
+                    mAccountId,
+                    true,
+                    LoadWalletsTask.this);
+        }
+
+        @Override
+        protected void onSuccess(final List<Wallet> wallets) {
+            mWalletArrayAdapter.setNotifyOnChange(true);
+            mWalletArrayAdapter.clear();
+            mWalletArrayAdapter.addAll(wallets);
+            mWalletArrayAdapter.notifyDataSetChanged();
+        }
+
+        @Override
+        protected void onFailed(Throwable t) {
+
+            final String errorMessage = getString(R.string.connected_error, t.getMessage());
+            Log.e(getClass().getSimpleName(), errorMessage, t);
+
+            // Display the error
+            Toast.makeText(getContext(),
+                    errorMessage,
+                    Toast.LENGTH_SHORT)
+                    .show();
+
+            if (mListener != null) {
+                mListener.onLoadFailed(t);
+            }
+        }
     }
 }

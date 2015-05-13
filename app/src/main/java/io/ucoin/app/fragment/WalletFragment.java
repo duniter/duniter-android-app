@@ -189,10 +189,8 @@ public class WalletFragment extends Fragment {
         });
 
         //PROGRESS VIEW
-        View progressView = view.findViewById(R.id.load_progress);
-        progressView.setVisibility(View.VISIBLE);
         mProgressViewAdapter = new ProgressViewAdapter(
-                progressView,
+                view.findViewById(R.id.load_progress),
                 wotListView);
 
         // Make sure to hide the keyboard
@@ -310,6 +308,7 @@ public class WalletFragment extends Fragment {
             mCertificationListAdapter.clear();
             mCertificationListAdapter.addAll(wallet.getCertifications());
             mCertificationListAdapter.notifyDataSetChanged();
+            mProgressViewAdapter.showProgress(false);
         }
 
         // Load WOT data

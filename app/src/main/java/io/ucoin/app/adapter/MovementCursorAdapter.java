@@ -43,9 +43,11 @@ public class MovementCursorAdapter extends CursorAdapter{
             boolean isWritten = !cursor.isNull(viewHolder.blockNumberIndex);
             // Is write in blokchain ?
             if (isWritten) {
-                viewHolder.iconView.setImageResource(ImageUtils.IMAGE_MOVEMENT_VALID);
+                //viewHolder.iconView.setImageResource(ImageUtils.IMAGE_MOVEMENT_VALID);
+                viewHolder.iconView.setVisibility(View.GONE);
             } else {
                 viewHolder.iconView.setImageResource(ImageUtils.IMAGE_MOVEMENT_WAITING);
+                viewHolder.iconView.setVisibility(View.VISIBLE);
             }
             // TODO : manage error icons, when not included in BC
         }

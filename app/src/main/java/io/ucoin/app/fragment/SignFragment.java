@@ -62,6 +62,11 @@ public class SignFragment extends Fragment {
                 wallets
         );
         mWalletAdapter.setDropDownViewResource(R.layout.list_item_wallet);
+
+        // If only one wallet : chain to doSign immedialtely
+        if (wallets.size() == 1) {
+            doSign(wallets.get(0));
+        }
     }
 
     @Override

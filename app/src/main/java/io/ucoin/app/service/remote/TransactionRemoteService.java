@@ -14,6 +14,7 @@ import java.util.List;
 import io.ucoin.app.model.Peer;
 import io.ucoin.app.model.TxOutput;
 import io.ucoin.app.model.Wallet;
+import io.ucoin.app.model.remote.TxHistoryResults;
 import io.ucoin.app.model.remote.TxSource;
 import io.ucoin.app.model.remote.TxSourceResults;
 import io.ucoin.app.service.CryptoService;
@@ -33,6 +34,8 @@ public class TransactionRemoteService extends BaseRemoteService {
     public static final String URL_TX_PROCESS = URL_TX_BASE + "/process";
 
     public static final String URL_TX_SOURCES = URL_TX_BASE + "/sources/%s";
+
+    public static final String URL_TX_HISTORY = URL_TX_BASE + "/history/%s/blocks/%s/%s";
 
 
 	private CryptoService cryptoService;
@@ -136,6 +139,20 @@ public class TransactionRemoteService extends BaseRemoteService {
             credit += source.getAmount();
         }
         return credit;
+    }
+
+    public TxHistoryResults getHistory(long currencyId, String pubKey, long fromBlockNumber, long toBlockNumber) {
+        ObjectUtils.checkNotNull(pubKey);
+        ObjectUtils.checkArgument(fromBlockNumber >= 0);
+        ObjectUtils.checkArgument(fromBlockNumber <= toBlockNumber);
+
+        Log.d(TAG, String.format("Get TX history by pubKey [%s], from block [%s]", pubKey, fromBlockNumber));
+
+        // get parameter
+        String path = String.format(URL_TX_HISTORY, pubKey, fromBlockNumber, toBlockNumber);
+            TxHistoryResults result = executeRequest(currencyId, path, TxHistoryResults.class);
+
+        return result;
     }
 
 	/* -- internal methods -- */

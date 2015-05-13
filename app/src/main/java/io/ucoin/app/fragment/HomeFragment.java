@@ -3,7 +3,6 @@ package io.ucoin.app.fragment;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
-import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -17,18 +16,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.List;
-
-import io.ucoin.app.Application;
 import io.ucoin.app.R;
 import io.ucoin.app.activity.IToolbarActivity;
 import io.ucoin.app.activity.MainActivity;
 import io.ucoin.app.model.Wallet;
-import io.ucoin.app.service.ServiceLocator;
-import io.ucoin.app.service.exception.PeerConnectionException;
 import io.ucoin.app.technical.ViewUtils;
-import io.ucoin.app.technical.task.AsyncTaskHandleException;
-import io.ucoin.app.technical.task.ProgressDialogAsyncTaskListener;
 import io.ucoin.app.view.SlidingTabLayout;
 
 
@@ -125,9 +117,6 @@ public class HomeFragment extends Fragment {
         mSlidingTabLayout.setDistributeEvenly(true);
         mSlidingTabLayout.setViewPager(viewPager);
 
-        // Load wallets
-        LoadWalletsTask loadWalletsTask = new LoadWalletsTask();
-        loadWalletsTask.execute();
     }
 
     @Override
@@ -195,19 +184,26 @@ public class HomeFragment extends Fragment {
         public android.app.Fragment getItem(int i) {
 
             android.app.Fragment fragment;
+
+            // Wallet list page
             if(i == 0) {
                 fragment =  WalletListFragment.newInstance(
                         // Manage click on wallet
-                        new WalletListFragment.OnClickListener() {
+                        new WalletListFragment.WalletListListener() {
                             @Override
                             public void onPositiveClick(Bundle args) {
                                 Wallet wallet = (Wallet) args.getSerializable(Wallet.class.getSimpleName());
                                 onWalletClick(wallet);
                             }
+                            public void onLoadFailed(Throwable t) {
+                                onWalletListLoadFailed(t);
+                            }
                         });
                 mWalletResultListener = (WalletListFragment)fragment;
                 fragment.setHasOptionsMenu(true);
             }
+
+            // Contact page
             else {
                 fragment = ContactListFragment.newInstance();
                 fragment.setHasOptionsMenu(true);
@@ -217,85 +213,34 @@ public class HomeFragment extends Fragment {
         }
     }
 
-    public class LoadWalletsTask extends AsyncTaskHandleException<Void, Void, List<Wallet>> {
+    protected void onWalletListLoadFailed(Throwable t) {
 
-        private long mAccountId;
-        private Application mApplication;
+        final String errorMessage = getString(R.string.connected_error, t.getMessage());
+        Log.e(getClass().getSimpleName(), errorMessage, t);
 
-        public LoadWalletsTask() {
-            super(getActivity());
+        mWalletResultListener.onQueryFailed(null);
 
-            mApplication = (Application)getActivity().getApplication();
-            mAccountId = mApplication.getAccountId();
-
-            ProgressDialog progressDialog = new ProgressDialog(getActivity());
-            progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-            ProgressDialogAsyncTaskListener listener = new ProgressDialogAsyncTaskListener(progressDialog);
-            setListener(listener);
-        }
-
-        @Override
-        protected List<Wallet> doInBackgroundHandleException(Void... param) throws PeerConnectionException{
-            ServiceLocator serviceLocator = ServiceLocator.instance();
-
-            setMax(100);
-            setProgress(0);
-
-            // Load caches
-            {
-                setMessage(getString(R.string.starting_home));
-
-                // Load currencies cache
-                serviceLocator.getCurrencyService().loadCache(mApplication);
-                increment();
-
-                // Load peers cache
-                serviceLocator.getPeerService().loadCache(mApplication);
-                increment();
+        // Error when no network connection
+        mStatusText.setText(getString(R.string.not_connected));
+        mStatusImage.setImageResource(R.drawable.warning45);
+        mStatusImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Display the error on click
+                Toast.makeText(getActivity(),
+                        getString(R.string.connected_error, errorMessage),
+                        Toast.LENGTH_LONG)
+                        .show();
             }
+        });
 
-            // Load wallets
-            return serviceLocator.getWalletService().getWalletsByAccountId(
-                    getContext(),
-                    mAccountId,
-                    true,
-                    LoadWalletsTask.this);
-        }
+        //ViewUtils.toogleViews(mTabs, mStatusPanel);
+        ViewUtils.toogleViews(mSlidingTabLayout, mStatusPanel);
 
-        @Override
-        protected void onSuccess(final List<Wallet> wallets) {
-            mWalletResultListener.onQuerySuccess(wallets);
-        }
-
-        @Override
-        protected void onFailed(Throwable t) {
-            final String errorMessage = getString(R.string.connected_error, t.getMessage());
-            Log.e(getClass().getSimpleName(), errorMessage, t);
-
-            mWalletResultListener.onQueryFailed(null);
-
-            // Error when no network connection
-            mStatusText.setText(getString(R.string.not_connected));
-            mStatusImage.setImageResource(R.drawable.warning45);
-            mStatusImage.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    // Display the error on click
-                    Toast.makeText(getContext(),
-                            getString(R.string.connected_error, errorMessage),
-                            Toast.LENGTH_LONG)
-                            .show();
-                }
-            });
-
-            //ViewUtils.toogleViews(mTabs, mStatusPanel);
-            ViewUtils.toogleViews(mSlidingTabLayout, mStatusPanel);
-
-            // Display the error
-            Toast.makeText(getContext(),
-                    errorMessage,
-                    Toast.LENGTH_SHORT)
-                    .show();
-        }
+        // Display the error
+        Toast.makeText(getActivity(),
+                errorMessage,
+                Toast.LENGTH_SHORT)
+                .show();
     }
 }

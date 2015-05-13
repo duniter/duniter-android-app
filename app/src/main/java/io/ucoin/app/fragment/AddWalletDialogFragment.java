@@ -26,6 +26,7 @@ import io.ucoin.app.model.Wallet;
 import io.ucoin.app.service.CurrencyService;
 import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.service.exception.DuplicatePubkeyException;
+import io.ucoin.app.service.exception.UidMatchAnotherPubkeyException;
 import io.ucoin.app.service.remote.TransactionRemoteService;
 import io.ucoin.app.technical.ExceptionUtils;
 import io.ucoin.app.technical.ObjectUtils;
@@ -335,6 +336,10 @@ public class AddWalletDialogFragment extends DialogFragment {
 
             // Load membership
             ServiceLocator.instance().getBlockchainRemoteService().loadMembership(currency.getId(), wallet.getIdentity(), true);
+            // If isMember is null, the UID is already used by another pubkey !
+            if (wallet.getIsMember() == null) {
+                throw new UidMatchAnotherPubkeyException();
+            }
 
             // Get credit
             TransactionRemoteService txService = ServiceLocator.instance().getTransactionRemoteService();
@@ -359,6 +364,10 @@ public class AddWalletDialogFragment extends DialogFragment {
 
             if (t instanceof DuplicatePubkeyException) {
                 mUidView.setError(getString(R.string.duplicate_wallet_pubkey));
+                mUidView.requestFocus();
+            }
+            else if (t instanceof UidMatchAnotherPubkeyException) {
+                mUidView.setError(getString(R.string.uid_match_another_pubkey));
                 mUidView.requestFocus();
             }
             else {

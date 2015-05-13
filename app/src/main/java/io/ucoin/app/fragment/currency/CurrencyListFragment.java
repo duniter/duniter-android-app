@@ -1,4 +1,4 @@
-package io.ucoin.app.fragment;
+package io.ucoin.app.fragment.currency;
 
 import android.app.Activity;
 import android.app.Fragment;
@@ -25,6 +25,7 @@ import io.ucoin.app.adapter.CurrencyCursorAdapter;
 import io.ucoin.app.adapter.ProgressViewAdapter;
 import io.ucoin.app.content.Provider;
 import io.ucoin.app.database.Contract;
+import io.ucoin.app.fragment.AddCurrencyFragment;
 import io.ucoin.app.model.Currency;
 import io.ucoin.app.model.Peer;
 import io.ucoin.app.service.CurrencyService;

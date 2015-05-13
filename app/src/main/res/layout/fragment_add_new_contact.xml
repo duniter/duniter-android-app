@@ -31,29 +31,12 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="20dip"
             android:layout_marginTop="5dip"
-            android:hint="@string/contact_name"
+            android:hint="@string/contact_name_hint"
             android:imeOptions="actionDone"
             android:inputType="textNoSuggestions"
             android:singleLine="true"
             android:textSize="@dimen/abc_text_size_body_2_material"/>
 
-        <Button
-            android:id="@+id/add_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="@string/ok"
-            android:textStyle="bold" />
-
-        <!-- progress -->
-        <ProgressBar
-            android:id="@+id/progressbar"
-            style="?android:attr/progressBarStyleInverse"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="16dp"
-            android:visibility="gone" />
     </LinearLayout>
 
 </ScrollView>

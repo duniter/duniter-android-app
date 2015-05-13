@@ -21,6 +21,8 @@ import io.ucoin.app.content.Provider;
 import io.ucoin.app.database.Contract;
 import io.ucoin.app.model.ModelUtils;
 import io.ucoin.app.model.Movement;
+import io.ucoin.app.model.remote.TxHistoryMovement;
+import io.ucoin.app.model.remote.TxHistoryResults;
 import io.ucoin.app.model.remote.TxSource;
 import io.ucoin.app.service.exception.DuplicatePubkeyException;
 import io.ucoin.app.technical.CollectionUtils;
@@ -91,41 +93,74 @@ public class MovementService extends BaseService {
     }
 
     /**
-     * Update wallet's movements state (written in blockchain or not)
+     * Update wallet's movements from tx history
      * @param context
      * @param walletId
      * @param sources
      */
-    public void updateMovementsFromSources(final Context context,
+    public void updateMovementsFromHistory(final Context context,
                                            long walletId,
                                            long bockNumber,
-                                           List<TxSource> sources) {
+                                           List<TxSource> sources,
+                                           TxHistoryResults historyResults) {
 
         // Load movement that waiting block
         List<Movement> waitingMovements = getWaitingMovementsByWalletId(context.getContentResolver(), walletId);
 
-        Map<String, TxSource> sourcesByFingerprint = ModelUtils.toFingertprintMap(sources);
+        Map<String, Movement> waitingMovementByFingerprint = ModelUtils.movementsToFingerprintMap(waitingMovements);
 
-        List<Movement> updatedMovement = new ArrayList<>();
-        for(Movement waitingMovement : waitingMovements) {
-            TxSource source = sourcesByFingerprint.remove(waitingMovement.getFingerprint());
-            if (source != null) {
-                waitingMovement.setBlockNumber(source.getNumber());
-                // TODO get the time of the block.
-                // -> using a rolling cache ?
+        List<Movement> movementsToUpdate = new ArrayList<>();
+        List<Movement> movementsToInsert = new ArrayList<>();
 
-                updatedMovement.add(waitingMovement);
+        // Transfer Received
+        if (historyResults.getHistory() != null && CollectionUtils.isNotEmpty(historyResults.getHistory().getReceived())) {
+            for (TxHistoryMovement txHistoryMovement : historyResults.getHistory().getReceived()) {
+                Movement waitingMovement = waitingMovementByFingerprint.get(txHistoryMovement.getFingerprint());
+
+                // Movement was existing, so update it
+                if (waitingMovement != null) {
+                    waitingMovement.setBlockNumber(txHistoryMovement.getBlockNumber());
+                    waitingMovement.setTime(txHistoryMovement.getTime());
+                    movementsToUpdate.add(waitingMovement);
+                }
+
+                // Movement was not exists, so insert it
+                else {
+                    Movement newMovement = toMovement(txHistoryMovement, walletId, historyResults.getPubkey());
+
+                    movementsToInsert.add(newMovement);
+                }
             }
         }
 
-        // Process not processed source
-        List<Movement> newMovements = new ArrayList<>();
-        for (TxSource source: sourcesByFingerprint.values()) {
+        // Transfer sent
+        if (historyResults.getHistory() != null && CollectionUtils.isNotEmpty(historyResults.getHistory().getReceived())) {
+            for (TxHistoryMovement txHistoryMovement : historyResults.getHistory().getSent()) {
+                Movement waitingMovement = waitingMovementByFingerprint.get(txHistoryMovement.getFingerprint());
+
+                // Movement was existing, so update it
+                if (waitingMovement != null) {
+                    waitingMovement.setBlockNumber(txHistoryMovement.getBlockNumber());
+                    waitingMovement.setTime(txHistoryMovement.getTime());
+                    movementsToUpdate.add(waitingMovement);
+                }
+
+                // Movement was not exists, so insert it
+                else {
+                    Movement newMovement = toMovement(txHistoryMovement, walletId, historyResults.getPubkey());
+
+                    movementsToInsert.add(newMovement);
+                }
+            }
+        }
+
+        // UD received
+        for (TxSource source: sources) {
             // If UD
             if (TxSource.SOURCE_TYPE_UD.equals(source.getType())) {
                 // If not processed block
                 if (source.getNumber() > bockNumber) {
-                    Log.d(TAG, "Detected a received UD : " + source.toString() + "Should be processed ???");
+                    Log.d(TAG, "Detected a received UD : " + source.toString() + ". Should be processed ???");
                     // TODO : check the block number to known if already processed or not
                     Movement udMovement = new Movement();
                     udMovement.setWalletId(walletId);
@@ -135,25 +170,79 @@ public class MovementService extends BaseService {
                     udMovement.setUD(true);
                     udMovement.setBlockNumber(source.getNumber());
                     // TODO : udMovement.setTime();
-                    newMovements.add(udMovement);
+                    movementsToInsert.add(udMovement);
                 }
             }
         }
 
         // Update existing movements to update
-        if (CollectionUtils.isNotEmpty(updatedMovement)) {
+        if (CollectionUtils.isNotEmpty(movementsToUpdate)) {
             // bulk updates
-            update(context.getContentResolver(), updatedMovement);
+            update(context.getContentResolver(), movementsToUpdate);
         }
 
         // Insert new movements
-        if (CollectionUtils.isNotEmpty(newMovements)) {
+        if (CollectionUtils.isNotEmpty(movementsToInsert)) {
             // bulk insert
-            insert(context.getContentResolver(), newMovements, false);
+            insert(context.getContentResolver(), movementsToInsert, false);
         }
     }
 
     /* -- internal methods-- */
+    private Movement toMovement(TxHistoryMovement source, long walletId, String pubkey) {
+        long amount = computeAmount(source, pubkey);
+
+        Movement target = new Movement();
+        target.setWalletId(walletId);
+        target.setFingerprint(source.getFingerprint());
+        target.setComment(source.getComment());
+        target.setAmount(amount);
+        target.setUD(false);
+        target.setBlockNumber(source.getBlockNumber());
+        target.setTime(source.getTime());
+
+        return target;
+    }
+
+    private long getAmountFromTxInput(String version, String inlineTxSource) {
+        int lastIndex = inlineTxSource.lastIndexOf(':');
+        return Long.parseLong(inlineTxSource.substring(lastIndex+1));
+    }
+
+    private long getAmountFromTxOutput(String version, String inlineTxSource) {
+        int lastIndex = inlineTxSource.lastIndexOf(':');
+        return Long.parseLong(inlineTxSource.substring(lastIndex+1));
+    }
+
+    private long computeAmount(TxHistoryMovement movement, String pubkey) {
+        long result = 0;
+
+        int issuerIndex = -1;
+        int i=0;
+        for (String issuer: movement.getIssuers()) {
+            if (pubkey.equals(issuer)) {
+                issuerIndex = i;
+                break;
+            }
+            i++;
+        }
+
+        if (issuerIndex != -1) {
+            for (String input : movement.getInputs()) {
+                if (input.startsWith(issuerIndex + ":")) {
+                    result -= getAmountFromTxInput(movement.getVersion(), input);
+                }
+            }
+        }
+
+        for (String output : movement.getOutputs()) {
+            if (output.startsWith(pubkey + ":")) {
+                result += getAmountFromTxOutput(movement.getVersion(), output);
+            }
+        }
+
+        return result;
+    }
 
     private List<Movement> getMovementsByWalletId(final ContentResolver resolver, final long walletId) {
 

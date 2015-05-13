@@ -168,45 +168,46 @@ public class CurrencyService extends BaseService {
      * @param application
      */
     public void loadCache(Application application) {
-        // Create and fill the currency cache
-        if (mCurrencyCache == null) {
-            List<Currency> currencies = getCurrencies(application);
+        if (mCurrencyCache == null || mUDCache == null) {
+            // Create and fill the currency cache
+            List<Currency> currencies = currencies = getCurrencies(application);
+            if (mCurrencyCache == null) {
 
-            mCurrencyCache = new SimpleCache<Long, Currency>() {
-                @Override
-                public Currency load(Context context, Long currencyId) {
-                    return getCurrencyById(context.getContentResolver(), currencyId);
+                mCurrencyCache = new SimpleCache<Long, Currency>() {
+                    @Override
+                    public Currency load(Context context, Long currencyId) {
+                        return getCurrencyById(context.getContentResolver(), currencyId);
+                    }
+                };
+
+                // Fill the cache
+                for (Currency currency : currencies) {
+                    mCurrencyCache.put(currency.getId(), currency);
                 }
-            };
-
-            // Fill the cache
-            for (Currency currency : currencies) {
-                mCurrencyCache.put(currency.getId(), currency);
             }
-        }
 
-        // Create the UD cache
-        if (mUDCache == null) {
-            List<Currency> currencies = getCurrencies(application);
+            // Create the UD cache
+            if (mUDCache == null) {
 
-            mUDCache = new SimpleCache<Long, Long>(UD_CACHE_TIME_MILLIS) {
-                @Override
-                public Long load(final Context context, final Long currencyId) {
-                    // Retrieve the last UD from the blockchain
-                    final long lastUD = blockchainRemoteService.getLastUD(currencyId);
+                mUDCache = new SimpleCache<Long, Long>(UD_CACHE_TIME_MILLIS) {
+                    @Override
+                    public Long load(final Context context, final Long currencyId) {
+                        // Retrieve the last UD from the blockchain
+                        final long lastUD = blockchainRemoteService.getLastUD(currencyId);
 
-                    new Runnable() {
-                        public void run() {
-                            Currency currency = getCurrencyById(context, currencyId);
-                            if (!ObjectUtils.equals(currency.getLastUD(), lastUD)) {
-                                currency.setLastUD(lastUD);
-                                save(context, currency);
+                        new Runnable() {
+                            public void run() {
+                                Currency currency = getCurrencyById(context, currencyId);
+                                if (!ObjectUtils.equals(currency.getLastUD(), lastUD)) {
+                                    currency.setLastUD(lastUD);
+                                    save(context, currency);
+                                }
                             }
-                        }
-                    };
-                    return lastUD;
-                }
-            };
+                        };
+                        return lastUD;
+                    }
+                };
+            }
         }
     }
 

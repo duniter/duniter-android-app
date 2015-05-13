@@ -9,8 +9,8 @@
         android:title="@string/back"
         ucoin:showAsAction="ifRoom|withText" />
     <item
-        android:id="@+id/action_next"
-        android:title="@string/next"
+        android:id="@+id/action_forward"
+        android:title="@string/forward"
         ucoin:showAsAction="ifRoom|withText" />
 </menu>
 

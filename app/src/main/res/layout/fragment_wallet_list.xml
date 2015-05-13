@@ -40,21 +40,4 @@
         android:textSize="18sp"
         android:layout_margin="8dp"/>
 
-    <!-- Bottom toolbar
-    <LinearLayout
-        android:id="@+id/bottomBar"
-        android:layout_height="wrap_content"
-        android:layout_width="fill_parent"
-        android:orientation="horizontal"
-        android:layout_alignParentBottom="true">
-
-        <ImageButton
-            android:layout_height="match_parent"
-            android:layout_width="0dp"
-            android:layout_weight="0.5"
-            android:src="@android:drawable/ic_input_add"
-            android:text="@string/add"
-            android:id="@+id/add_button"/>
-
-    </LinearLayout> -->
 </RelativeLayout>

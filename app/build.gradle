@@ -9,7 +9,7 @@ android {
     buildToolsVersion "21.1.2"
     defaultConfig {
         applicationId "io.ucoin.ucoin"
-        minSdkVersion 17
+        minSdkVersion 14
         targetSdkVersion 21
         versionCode 4
         versionName '0.4'
@@ -72,6 +72,7 @@ dependencies {
     compile 'com.android.support:appcompat-v7:21.0.3'
     compile 'com.android.support:support-v4:21.0.3'
     compile 'com.android.support:support-v13:21.0.+'
+    //compile 'com.android.support:recyclerview-v7:21.0.+'
     compile 'com.google.android.gms:play-services:6.5.87'
     compile project(':scrypt')
     compile project(':kalium-jni')

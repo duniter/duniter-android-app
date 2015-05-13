@@ -42,10 +42,12 @@ import io.ucoin.app.R;
 import io.ucoin.app.config.Configuration;
 import io.ucoin.app.content.Provider;
 import io.ucoin.app.database.Contract;
-import io.ucoin.app.fragment.CurrencyListFragment;
+import io.ucoin.app.exception.UncaughtExceptionHandler;
 import io.ucoin.app.fragment.HomeFragment;
+import io.ucoin.app.fragment.TransferFragment;
 import io.ucoin.app.fragment.WebFragment;
 import io.ucoin.app.fragment.WotSearchFragment;
+import io.ucoin.app.fragment.currency.CurrencyListFragment;
 import io.ucoin.app.model.Identity;
 import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.service.exception.PeerConnectionException;
@@ -77,7 +79,7 @@ public class MainActivity extends ActionBarActivity
         super.onCreate(savedInstanceState);
 
         // Prepare some utilities
-        //Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler(this));
+        Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler(this));
         DateUtils.setDefaultMediumDateFormat(getMediumDateFormat());
         DateUtils.setDefaultLongDateFormat(getLongDateFormat());
         DateUtils.setDefaultShortDateFormat(getShortDateFormat());
@@ -109,6 +111,11 @@ public class MainActivity extends ActionBarActivity
             Toast.makeText(this, "Could Not load account", Toast.LENGTH_LONG).show();
             finish();
             return;
+        }
+
+        // Loading caches
+        else {
+            ServiceLocator.instance().loadCaches(getApplication());
         }
 
         setContentView(R.layout.activity_main);
@@ -152,8 +159,8 @@ public class MainActivity extends ActionBarActivity
 
         ContentResolver.setSyncAutomatically(account, getString(R.string.AUTHORITY), true);
 
-        // Open the home fragment
-        openHomeFragment();
+        // Open the default fragment
+        openDefaultFragment();
     }
 
     @Override
@@ -409,6 +416,30 @@ public class MainActivity extends ActionBarActivity
         return android.text.format.DateFormat.getTimeFormat(getApplicationContext());
     }
 
+    protected void openDefaultFragment() {
+        Intent intent = getIntent();
+
+        // Open transfer if a given URI exists
+        if (intent != null && intent.getAction() == Intent.ACTION_VIEW) {
+            Uri uri = intent.getData();
+            Log.d("MAINACTIVITY", "Asking to open uri: " + uri.toString());
+
+            Identity identity = new Identity();
+            List<String> pathSegments = uri.getPathSegments();
+
+            if (pathSegments.size()== 2) {
+                identity.setCurrency(pathSegments.get(0));
+                identity.setPubkey(pathSegments.get(1));
+
+                openTransfertFragment(identity);
+                return;
+            }
+        }
+
+        // By default, open home fragment
+        openHomeFragment();
+    }
+
     protected void openHomeFragment() {
 
         Fragment fragment = getFragmentManager().findFragmentById(R.id.frame_content);
@@ -418,6 +449,27 @@ public class MainActivity extends ActionBarActivity
         }
 
         fragment = HomeFragment.newInstance();
+
+        getFragmentManager().beginTransaction()
+                .setCustomAnimations(
+                        R.animator.fade_in,
+                        R.animator.fade_out)
+                .add(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
+                .addToBackStack(fragment.getClass().getSimpleName())
+                .commit();
+    }
+
+
+    protected void openTransfertFragment(Identity identity) {
+
+        Fragment fragment = getFragmentManager().findFragmentById(R.id.frame_content);
+        if (fragment != null && fragment instanceof TransferFragment) {
+            getFragmentManager().beginTransaction().remove(fragment).commit();
+            getFragmentManager().popBackStack();
+        }
+
+
+        fragment = TransferFragment.newInstance(identity);
 
         getFragmentManager().beginTransaction()
                 .setCustomAnimations(

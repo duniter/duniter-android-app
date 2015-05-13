@@ -2,10 +2,15 @@ package io.ucoin.app.fragment;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.text.method.DigitsKeyListener;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -57,6 +62,8 @@ public class TransferFragment extends Fragment {
 
     public static final String BUNDLE_WALLET = "Wallet";
     public static final String BUNDLE_RECEIVER_ITENTITY = "ReceiverIdentity";
+
+    protected static final int PICK_CONTACT_REQUEST = 1;
 
     private TextView mReceiverUidView;
     private Spinner  mWalletSpinner;
@@ -197,13 +204,26 @@ public class TransferFragment extends Fragment {
 
         // Receiver
         {
-            // If receiver identity is fixed, display only uid
-            if (mReceiverIdentity != null) {
+            // If receiver identity is fixed, with a uid (and pubkey) : display only the UID
+            if (mReceiverIdentity != null
+                    && mReceiverIdentity.getUid() != null
+                    && mReceiverIdentity.getPubkey() != null) {
                 ((TextView) view.findViewById(R.id.receiver_uid)).setText(mReceiverIdentity.getUid());
 
                 // Mask unused views
                 view.findViewById(R.id.receiver_contact).setVisibility(View.GONE);
                 view.findViewById(R.id.receiver_pubkey).setVisibility(View.GONE);
+                view.findViewById(R.id.browse_button).setVisibility(View.GONE);
+            }
+
+            // If receiver identity is fixed, display only pubkey
+            if (mReceiverIdentity != null && mReceiverIdentity.getPubkey() != null) {
+                ((TextView) view.findViewById(R.id.receiver_pubkey)).setText(mReceiverIdentity.getPubkey());
+                focusView = mAmountText;
+
+                // Mask unused views
+                view.findViewById(R.id.receiver_contact).setVisibility(View.GONE);
+                view.findViewById(R.id.receiver_uid).setVisibility(View.GONE);
             }
 
             // If user can choose the receiver: display contact list and a text field for pubkey
@@ -238,6 +258,15 @@ public class TransferFragment extends Fragment {
                     }
                 });
                 mContactSpinner.setVisibility(View.GONE);
+
+
+                Button browseButton = (Button)view.findViewById(R.id.browse_button);
+                browseButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        pickContact();
+                    }
+                });
 
                 // Mask unused views
                 view.findViewById(R.id.receiver_uid).setVisibility(View.GONE);
@@ -373,6 +402,39 @@ public class TransferFragment extends Fragment {
         mCurrencyId = null;
     }
 
+    protected void pickContact() {
+        Intent intent = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
+        //intent.setType(ContactsContract.Contacts.CONTENT_ITEM_TYPE);
+        //intent.setType(ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE);
+        startActivityForResult(intent, PICK_CONTACT_REQUEST);
+
+        /*
+        Intent pickContactIntent = new Intent(Intent.ACTION_PICK, ContactsContract.CommonDataKinds.Phone.CONTENT_URI);
+        pickContactIntent.setType(ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE);
+        startActivityForResult(pickContactIntent, PICK_CONTACT_REQUEST);*/
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == PICK_CONTACT_REQUEST) {
+            if (resultCode == Activity.RESULT_OK) {
+                Uri contactUri = data.getData();
+                String id = contactUri.getLastPathSegment();
+
+                String[] projections = new String[]{ContactsContract.CommonDataKinds.Phone.NUMBER};
+
+                Cursor cursor = getActivity().getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                        projections, ContactsContract.CommonDataKinds.Phone.CONTACT_ID + "=?", new String[]{id}, null);
+                cursor.moveToFirst();
+
+                int column = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
+                String number = cursor.getString(column);
+                Log.d(TAG, "Pick contact with number: " + number);
+            }
+        }
+    }
+
     protected boolean attemptTransfer() {
 
         // Reset errors.
@@ -396,7 +458,7 @@ public class TransferFragment extends Fragment {
         }
 
         // Check public key (if no given receiver identity)
-        if (mReceiverIdentity == null
+        if ((mReceiverIdentity == null || mReceiverIdentity.getUid() == null)
                 && StringUtils.isBlank(mReceiverPubkeyText.getText().toString())) {
             mReceiverPubkeyText.setError(getString(R.string.field_required));
             focusView = mReceiverPubkeyText;
@@ -419,10 +481,10 @@ public class TransferFragment extends Fragment {
         } else {
             Double value;
             if (mIsCoinUnit) {
-                value = Double.valueOf(mAmountText.getText().toString());
+                value = CurrencyUtils.parse(mAmountText.getText().toString());
             }
             else {
-                value = Double.valueOf(mConvertedText.getText().toString());
+                value = CurrencyUtils.parse(mAmountText.getText().toString());
             }
             if (wallet.getCredit() < value) {
                 mWalletAdapter.setError(mWalletSpinner.getSelectedView(), getString(R.string.insufficient_credit));
@@ -487,10 +549,12 @@ public class TransferFragment extends Fragment {
             mAmountText.setText(amountStr);
             // Change the editor type to number (no decimal)
             mAmountText.setInputType(EditorInfo.TYPE_CLASS_NUMBER);
+            mAmountText.setKeyListener(DigitsKeyListener.getInstance("0123456789"));
         }
         else {
             // Change the editor type to number with decimal
             mAmountText.setInputType(EditorInfo.TYPE_CLASS_NUMBER|EditorInfo.TYPE_NUMBER_FLAG_DECIMAL);
+            mAmountText.setKeyListener(DigitsKeyListener.getInstance("0123456789."));
         }
         updateComvertedAmountView(mIsCoinUnit);
     }
@@ -641,7 +705,7 @@ public class TransferFragment extends Fragment {
             else {
                 amountStr = mConvertedText.getText().toString();
             }
-            mAmount = Long.parseLong(amountStr);
+            mAmount = CurrencyUtils.parseLong(amountStr);
 
             // Comment
             mComment = mCommentText.getText().toString().trim();

@@ -1,12 +1,15 @@
-package io.ucoin.app.fragment;
+package io.ucoin.app.fragment.currency;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.app.FragmentManager;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v13.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -22,9 +25,11 @@ import io.ucoin.app.content.Provider;
 import io.ucoin.app.database.Contract;
 import io.ucoin.app.model.Currency;
 import io.ucoin.app.model.Peer;
+import io.ucoin.app.view.SlidingTabLayout;
 
 public class CurrencyFragment extends Fragment {
 
+    private SlidingTabLayout mSlidingTabLayout;
 
     public static CurrencyFragment newInstance(Currency currency) {
         Bundle newInstanceArgs = new Bundle();
@@ -63,38 +68,18 @@ public class CurrencyFragment extends Fragment {
 
         TextView memberCount = (TextView) view.findViewById(R.id.members_count);
         memberCount.setText(getString(R.string.members_count, currency.getMembersCount()));
-/*
-        TextView mUd0 = (TextView) view.findViewById(R.id.ud0);
-        TextView mSigDelay = (TextView) view.findViewById(R.id.sig_delay);
-        TextView mSigValidity = (TextView) view.findViewById(R.id.sig_validity);
-        TextView mSigQty = (TextView) view.findViewById(R.id.sig_qty);
-        TextView mSigWoT = (TextView) view.findViewById(R.id.sig_woT);
-        TextView mMsValidity = (TextView) view.findViewById(R.id.ms_validity);
-        TextView mStepMax = (TextView) view.findViewById(R.id.step_max);
-        TextView mMedianTimeBlocks = (TextView) view.findViewById(R.id.median_time_blocks);
-        TextView mAvgGenTime = (TextView) view.findViewById(R.id.avg_gen_time);
-        TextView mDtDiffEval = (TextView) view.findViewById(R.id.dt_diff_eval);
-        TextView mBlocksRot = (TextView) view.findViewById(R.id.blocks_rot);
-        TextView mPercentRot = (TextView) view.findViewById(R.id.percent_rot);
 
-        TextView growth = (TextView) view.findViewById(R.id.growth);
-        growth.setText(getString(R.string.growth) + ": " +
-        Double.toString(parameter.getC()) + " / " + Integer.toString(parameter.getDt()));
+        // Get the ViewPager and set it's PagerAdapter so that it can display items
+        ViewPager viewPager;
+        viewPager = (ViewPager) view.findViewById(R.id.viewpager);
+        viewPager.setAdapter(new HomePagerAdapter(getChildFragmentManager(), currency));
 
+        // Give the SlidingTabLayout the ViewPager, this must be done AFTER the ViewPager has had
+        // it's PagerAdapter set.
+        mSlidingTabLayout = (SlidingTabLayout) view.findViewById(R.id.sliding_tabs);
+        mSlidingTabLayout.setDistributeEvenly(true);
+        mSlidingTabLayout.setViewPager(viewPager);
 
-        mUd0.setText(Integer.toString(parameter.getUd0()));
-        mSigDelay.setText(Integer.toString(parameter.getSigDelay()));
-        mSigValidity.setText(Integer.toString(parameter.getSigValidity()));
-        mSigQty.setText(Integer.toString(parameter.getSigQty()));
-        mSigWoT.setText(Integer.toString(parameter.getSigWoT()));
-        mMsValidity.setText(Integer.toString(parameter.getMsValidity()));
-        mStepMax.setText(Integer.toString(parameter.getStepMax()));
-        mMedianTimeBlocks.setText(Integer.toString(parameter.getMedianTimeBlocks()));
-        mAvgGenTime.setText(Integer.toString(parameter.getAvgGenTime()));
-        mDtDiffEval.setText(Integer.toString(parameter.getDtDiffEval()));
-        mBlocksRot.setText(Integer.toString(parameter.getBlocksRot()));
-        mPercentRot.setText(Double.toString(parameter.getPercentRot()));
-*/
     }
 
 
@@ -190,4 +175,59 @@ public class CurrencyFragment extends Fragment {
     public void delete() {
         //todo delete if no or empty wallet, else make inactive
     }
+
+
+    private class HomePagerAdapter extends FragmentPagerAdapter {
+
+        public HomePagerAdapter(FragmentManager fm, Currency currency) {
+            super(fm);
+        }
+
+        /**
+         * @return the number of pages to display
+         */
+        @Override
+        public int getCount() {
+            return 2;
+        }
+
+        /**
+         * Return the title of the item at {@code position}. This is important as what this method
+         * returns is what is displayed in the {@link io.ucoin.app.view.SlidingTabLayout}.
+         * <p>
+         * Here we construct one using the position value, but for real application the title should
+         * refer to the item's contents.
+         */
+        @Override
+        public CharSequence getPageTitle(int position) {
+            if(position == 0)
+                return getString(R.string.rules);
+            else
+                return getString(R.string.peers);
+        }
+
+        @Override
+        public android.app.Fragment getItem(int i) {
+
+            android.app.Fragment fragment;
+
+            // Rules page
+            if(i == 0) {
+                Currency currency = (Currency) getArguments()
+                        .getSerializable(Currency.class.getSimpleName());
+                fragment =  CurrencyRulesFragment.newInstance(currency);
+            }
+
+            // Network page
+            else {
+                Currency currency = (Currency) getArguments()
+                        .getSerializable(Currency.class.getSimpleName());
+                fragment = CurrencyNetworkFragment.newInstance(currency);
+                fragment.setHasOptionsMenu(true);
+            }
+
+            return fragment;
+        }
+    }
+
 }

@@ -22,6 +22,7 @@ import io.ucoin.app.database.Contract;
 import io.ucoin.app.model.BlockchainBlock;
 import io.ucoin.app.model.UnitType;
 import io.ucoin.app.model.Wallet;
+import io.ucoin.app.model.remote.TxHistoryResults;
 import io.ucoin.app.model.remote.TxSourceResults;
 import io.ucoin.app.service.exception.DuplicatePubkeyException;
 import io.ucoin.app.service.remote.BlockchainRemoteService;
@@ -74,7 +75,7 @@ public class WalletService extends BaseService {
         blockchainRemoteService = ServiceLocator.instance().getBlockchainRemoteService();
     }
 
-    public Wallet save(final Context context, final Wallet wallet) throws DuplicatePubkeyException {
+    public Wallet save(final Context context, final Wallet wallet, final boolean checkUniquePubKey) throws DuplicatePubkeyException {
         ObjectUtils.checkNotNull(wallet);
         ObjectUtils.checkNotNull(wallet.getCurrencyId());
         ObjectUtils.checkNotNull(wallet.getAccountId());
@@ -84,7 +85,9 @@ public class WalletService extends BaseService {
         ObjectUtils.checkNotNull(wallet.getCredit());
 
         // Make sure public key is unique
-        checkPubKeyUnique(context, wallet);
+        if (checkUniquePubKey) {
+            checkPubKeyUnique(context, wallet);
+        }
 
         // create if not exists
         if (wallet.getId() == null) {
@@ -99,6 +102,10 @@ public class WalletService extends BaseService {
 
         // return the updated wallet (id could have change)
         return wallet;
+    }
+
+    public Wallet save(final Context context, final Wallet wallet) throws DuplicatePubkeyException {
+        return save(context, wallet, true);
     }
 
     /**
@@ -183,6 +190,83 @@ public class WalletService extends BaseService {
         // Run the async task
         UpdateWalletsRemotelyTask task = new UpdateWalletsRemotelyTask(listener);
         task.execute(wallets.toArray(new Wallet[wallets.size()]));
+    }
+
+
+
+    /**
+     * Update wallet from remote nodes (from the blockchain)
+     * @param context
+     * @param wallet
+     */
+    protected void updateWalletRemotly(final Context context, final Wallet wallet) {
+        ObjectUtils.checkNotNull(wallet);
+        ObjectUtils.checkNotNull(wallet.getCurrencyId());
+
+        Log.d(TAG, String.format("Updating wallet [%s]", wallet.toString()));
+
+        long currencyId = wallet.getCurrencyId();
+        boolean computeUD = displayCreditAsUD(context);
+
+        // Get the current block number (using cache)
+        // This should be done BEFORE the call of getSources (in case a new block occur)
+        BlockchainBlock currentBlock = blockchainRemoteService.getCurrentBlock(currencyId, true /*use cache*/);
+        long currentBlockNumber = currentBlock == null ? 0 :currentBlock.getNumber();
+        boolean blockNumberHasChanged = wallet.getBlockNumber() != currentBlockNumber;
+
+        // Stop if no new block
+        if (!blockNumberHasChanged) {
+            return;
+        }
+
+        // Get sources and credit, from remote nodes
+        TxSourceResults txSourcesAndCredit = transactionRemoteService.getSourcesAndCredit(currencyId, wallet.getPubKeyHash());
+        long credit = txSourcesAndCredit.getCredit() == null ? 0 : txSourcesAndCredit.getCredit().longValue();
+        double creditAsUD = 0;
+        if (computeUD) {
+            creditAsUD = getCreditAsUD(context, currencyId, credit);
+        }
+
+        // Check if credit has been updated or not
+        boolean creditHasChanged = wallet.getCredit() == null
+                || wallet.getCredit().longValue() != credit;
+        boolean creditAsUDHasChanged = computeUD
+                && (wallet.getCreditAsUD() == null
+                || wallet.getCreditAsUD().doubleValue() != creditAsUD);
+
+
+        // If new block since the last update
+        if (blockNumberHasChanged) {
+            TxHistoryResults history = transactionRemoteService.getHistory(currencyId, wallet.getPubKeyHash(),
+                    wallet.getBlockNumber() == -1 ? 0 : wallet.getBlockNumber() + 1,
+                    currentBlockNumber);
+            // Process wallet's sources
+            movementService.updateMovementsFromHistory(context,
+                    wallet.getId(),
+                    wallet.getBlockNumber(),
+                    txSourcesAndCredit.getSources(),
+                    history);
+        }
+
+        // If credits has changed
+        if (creditHasChanged || creditAsUDHasChanged || blockNumberHasChanged) {
+
+            // Set new credits
+            wallet.setCredit(credit);
+            wallet.setCreditAsUD(creditAsUD);
+            wallet.setBlockNumber(currentBlockNumber);
+
+            // Save the wallet
+            try {
+                save(context, wallet);
+            } catch (DuplicatePubkeyException e) {
+                // Should never happend
+            }
+
+            // Mark as dirty (let's the UI known that something changed)
+            wallet.setDirty(true);
+        }
+
     }
 
     /**
@@ -295,77 +379,6 @@ public class WalletService extends BaseService {
         cursor.close();
 
         return result;
-    }
-
-
-    /**
-     * Update wallet from remote nodes (from the blockchain)
-     * @param context
-     * @param wallet
-     */
-    protected void updateWalletRemotly(final Context context, final Wallet wallet) {
-        ObjectUtils.checkNotNull(wallet);
-        ObjectUtils.checkNotNull(wallet.getCurrencyId());
-
-        Log.d(TAG, String.format("Updating wallet [%s]", wallet.toString()));
-
-        long currencyId = wallet.getCurrencyId();
-        boolean computeUD = displayCreditAsUD(context);
-
-        // Get the current block number (using cache)
-        // This should be done BEFORE the call of getSources (in case a new block occur)
-        BlockchainBlock currentBlock = blockchainRemoteService.getCurrentBlock(currencyId, true /*use cache*/);
-        long currentBlockNumber = currentBlock == null ? 0 :currentBlock.getNumber();
-        boolean blockNumberHasChanged = wallet.getBlockNumber() != currentBlockNumber;
-
-        // Stop if no new block
-        if (!blockNumberHasChanged) {
-            return;
-        }
-
-        // Get sources and credit, from remote nodes
-        TxSourceResults txSourcesAndCredit = transactionRemoteService.getSourcesAndCredit(currencyId, wallet.getPubKeyHash());
-        long credit = txSourcesAndCredit.getCredit() == null ? 0 : txSourcesAndCredit.getCredit().longValue();
-        double creditAsUD = 0;
-        if (computeUD) {
-            creditAsUD = getCreditAsUD(context, currencyId, credit);
-        }
-
-        // Check if credit has been updated or not
-        boolean creditHasChanged = wallet.getCredit() == null
-                || wallet.getCredit().longValue() != credit;
-        boolean creditAsUDHasChanged = computeUD
-                && (wallet.getCreditAsUD() == null
-                || wallet.getCreditAsUD().doubleValue() != creditAsUD);
-
-
-        // If new block since the last update
-        if (blockNumberHasChanged) {
-            // Process wallet's sources
-            movementService.updateMovementsFromSources(context, wallet.getId(),
-                    wallet.getBlockNumber(),
-                    txSourcesAndCredit.getSources());
-        }
-
-        // If credits has changed
-        if (creditHasChanged || creditAsUDHasChanged || blockNumberHasChanged) {
-
-            // Set new credits
-            wallet.setCredit(credit);
-            wallet.setCreditAsUD(creditAsUD);
-            wallet.setBlockNumber(currentBlockNumber);
-
-            // Save the wallet
-            try {
-                save(context, wallet);
-            } catch (DuplicatePubkeyException e) {
-                // Should never happend
-            }
-
-            // Mark as dirty (let's the UI known that something changed)
-            wallet.setDirty(true);
-        }
-
     }
 
     private void checkPubKeyUnique(

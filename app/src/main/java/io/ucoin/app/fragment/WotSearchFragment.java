@@ -99,7 +99,7 @@ public class WotSearchFragment extends ListFragment
         activity.setTitle("/" + query);
         if (activity instanceof IToolbarActivity) {
             ((IToolbarActivity) activity).setToolbarBackButtonEnabled(true);
-            ((IToolbarActivity) activity).setToolbarColor(R.color.primary);
+            ((IToolbarActivity) activity).setToolbarColor(getResources().getColor(R.color.primary));
         }
 
         SearchManager searchManager = (SearchManager) getActivity()
