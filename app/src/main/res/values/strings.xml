@@ -108,8 +108,34 @@
     <string name="node_address">Node address</string>
     <string name="node_port">Node port</string>
     <string name="rules">Rules</string>
+    <string name="money">Money</string>
+    <string name="wot">Web of Trust</string>
+    <string name="blockchain">Blockchain</string>
+    <string name="c_and_dt">Fundamental growth (c) / Time period (dt) between two UD</string>
+    <string name="c_and_dt_value">%1$.0f %% / %2$.0f days (%3$d seconds)</string>
+    <string name="ud0">Initial Universal Dividend UD(0) in units</string>
+    <string name="ud0_value">%d units</string>
+    <string name="value_days_and_seconds">%1$.0f days (%2$d s)</string>
+    <string name="value_minutes_and_seconds">%1$.0f min %2$d s (%3$d s)</string>
+    <string name="sig_delay">Minimum delay between 2 identical certifications (same pubkeys)</string>
+    <string name="sig_validity">Maximum age of a valid signature</string>
+    <string name="sig_qty">Minimum quantity of signatures to be part of the WoT</string>
+    <string name="sig_qty_value">%d signatures</string>
+    <string name="sig_woT">Minimum quantity of valid made certifications to be part of the WoT for distance rule</string>
+    <string name="ms_validity">Maximum age of a valid membership</string>
+    <string name="step_max">Maximum distance between each WoT member and a newcomer</string>
+    <string name="median_time_blocks">Number of blocks used for calculating median time.</string>
+    <string name="median_time_blocks_value">%d blocks</string>
+    <string name="avg_gen_time">The average time for writing 1 block (wished time)</string>
+    <string name="dt_diff_eval">The number of blocks required to evaluate again PoWMin value</string>
+    <string name="dt_diff_eval_value">%d blocks</string>
+    <string name="blocks_rot">The number of previous blocks to check for personalized difficulty</string>
+    <string name="blocks_rot_value">%d blocks</string>
+    <string name="percent_rot">The percent of previous issuers to reach for personalized difficulty</string>
+    <string name="percent_rot_value">%.0f %%</string>
+
     <string name="peers">Peers</string>
-    <string name="growth">Growth</string>
+
     <string name="currency">Currency</string>
     <string name="no_currency">No currency</string>
     <string name="no_transfer">No transfer</string>
@@ -126,6 +152,9 @@
     <string name="join_sended">Registration sended.\nWaiting network processing.</string>
     <string name="join_error">Could not send registration (technical error)</string>
     <string name="duplicate_currency_name">Currency [%s] already exists.</string>
+
+    <!-- Strings related to currency/rule -->
+
 
     <!-- Strings related to peer/node -->
     <string name="enter_node_info">Enter node info</string>

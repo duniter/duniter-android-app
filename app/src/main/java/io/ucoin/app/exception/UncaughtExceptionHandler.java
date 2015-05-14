@@ -1,7 +1,5 @@
 package io.ucoin.app.exception;
 
-import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
 import android.util.Log;
 import android.widget.Toast;
@@ -25,7 +23,7 @@ public class UncaughtExceptionHandler implements java.lang.Thread.UncaughtExcept
 
     protected void displayMessageBox(final String title, final String message) {
 
-        if (context instanceof Activity) {
+        /*if (context instanceof Activity) {
             final Activity activity = (Activity)context;
             activity.runOnUiThread(new Runnable() {
                 @Override
@@ -41,8 +39,8 @@ public class UncaughtExceptionHandler implements java.lang.Thread.UncaughtExcept
                 }
             });
         }
-        else {
+        else {*/
             Toast.makeText(this.context, message, Toast.LENGTH_LONG).show();
-        }
+        //}
     }
 }

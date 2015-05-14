@@ -17,6 +17,8 @@ import io.ucoin.app.technical.task.AsyncTaskHandleException;
 
 public class CurrencyRulesFragment extends Fragment {
 
+    private final int SECONDS_IN_DAY = 24 * 60 * 60;
+
     private ProgressViewAdapter mProgressViewAdapter;
 
     public static CurrencyRulesFragment newInstance(Currency parameter) {
@@ -80,36 +82,67 @@ public class CurrencyRulesFragment extends Fragment {
 
     protected void bind(View view, BlockchainParameter parameter) {
 
+        // Get views
+
+
+        // growth
+        {
+            TextView growth = (TextView) view.findViewById(R.id.growth);
+            Double cPercent = parameter.getC() * 100;
+            Double dtDays = (double)parameter.getDt() / SECONDS_IN_DAY;
+            growth.setText(getString(R.string.c_and_dt_value, cPercent, dtDays, parameter.getDt()));
+        }
+
         TextView mUd0 = (TextView) view.findViewById(R.id.ud0);
+        mUd0.setText(getString(R.string.ud0_value, parameter.getUd0()));
+
         TextView mSigDelay = (TextView) view.findViewById(R.id.sig_delay);
+        mSigDelay.setText(getStringFromSeconds(parameter.getSigDelay()));
+
         TextView mSigValidity = (TextView) view.findViewById(R.id.sig_validity);
+        mSigValidity.setText(getStringFromSeconds(parameter.getSigDelay()));
+
         TextView mSigQty = (TextView) view.findViewById(R.id.sig_qty);
+        mSigQty.setText(getString(R.string.sig_qty_value, parameter.getSigQty()));
+
         TextView mSigWoT = (TextView) view.findViewById(R.id.sig_woT);
-        TextView mMsValidity = (TextView) view.findViewById(R.id.ms_validity);
-        TextView mStepMax = (TextView) view.findViewById(R.id.step_max);
-        TextView mMedianTimeBlocks = (TextView) view.findViewById(R.id.median_time_blocks);
-        TextView mAvgGenTime = (TextView) view.findViewById(R.id.avg_gen_time);
-        TextView mDtDiffEval = (TextView) view.findViewById(R.id.dt_diff_eval);
-        TextView mBlocksRot = (TextView) view.findViewById(R.id.blocks_rot);
-        TextView mPercentRot = (TextView) view.findViewById(R.id.percent_rot);
-
-        TextView growth = (TextView) view.findViewById(R.id.growth);
-        growth.setText(getString(R.string.growth) + ": " +
-                Double.toString(parameter.getC()) + " / " + Integer.toString(parameter.getDt()));
-
-
-        mUd0.setText(Long.toString(parameter.getUd0()));
-        mSigDelay.setText(Integer.toString(parameter.getSigDelay()));
-        mSigValidity.setText(Integer.toString(parameter.getSigValidity()));
-        mSigQty.setText(Integer.toString(parameter.getSigQty()));
         mSigWoT.setText(Integer.toString(parameter.getSigWoT()));
-        mMsValidity.setText(Integer.toString(parameter.getMsValidity()));
+
+        TextView mMsValidity = (TextView) view.findViewById(R.id.ms_validity);
+        mMsValidity.setText(getStringFromSeconds(parameter.getMsValidity()));
+
+        TextView mStepMax = (TextView) view.findViewById(R.id.step_max);
         mStepMax.setText(Integer.toString(parameter.getStepMax()));
-        mMedianTimeBlocks.setText(Integer.toString(parameter.getMedianTimeBlocks()));
-        mAvgGenTime.setText(Integer.toString(parameter.getAvgGenTime()));
-        mDtDiffEval.setText(Integer.toString(parameter.getDtDiffEval()));
-        mBlocksRot.setText(Integer.toString(parameter.getBlocksRot()));
-        mPercentRot.setText(Double.toString(parameter.getPercentRot()));
+
+        TextView mMedianTimeBlocks = (TextView) view.findViewById(R.id.median_time_blocks);
+        mMedianTimeBlocks.setText(getString(R.string.median_time_blocks_value, parameter.getMedianTimeBlocks()));
+
+        TextView mAvgGenTime = (TextView) view.findViewById(R.id.avg_gen_time);
+        mAvgGenTime.setText(getStringFromSeconds(parameter.getAvgGenTime()));
+
+        TextView mDtDiffEval = (TextView) view.findViewById(R.id.dt_diff_eval);
+        mDtDiffEval.setText(getString(R.string.dt_diff_eval_value, parameter.getDtDiffEval()));
+
+        TextView mBlocksRot = (TextView) view.findViewById(R.id.blocks_rot);
+        mBlocksRot.setText(getString(R.string.blocks_rot_value, parameter.getBlocksRot()));
+
+        TextView mPercentRot = (TextView) view.findViewById(R.id.percent_rot);
+        mPercentRot.setText(getString(R.string.percent_rot_value, parameter.getPercentRot()));
+    }
+
+    /* -- protected methods -- */
+
+    protected String getStringFromSeconds(int seconds) {
+        // One day or more :
+        if (seconds >= SECONDS_IN_DAY) {
+            double days = (double) seconds / SECONDS_IN_DAY;
+            return getString(R.string.value_days_and_seconds, days, seconds);
+        }
+
+        // Less than a day :
+        double minutesPart = (double) seconds / 60;
+        int secondsPart = seconds - (int)minutesPart * 60;
+        return getString(R.string.value_minutes_and_seconds, minutesPart, secondsPart, seconds);
     }
 
 
@@ -148,5 +181,6 @@ public class CurrencyRulesFragment extends Fragment {
             mProgressViewAdapter.showProgress(false);
         }
     }
+
 
 }

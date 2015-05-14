@@ -28,6 +28,7 @@
         android:text="@string/no_transfer"
         android:textAppearance="?android:textAppearanceMedium"
         android:textColor="@color/hideable_text_color"
-        android:textSize="18sp"/>
+        android:textSize="18sp"
+        android:layout_margin="8dp"/>
 
 </RelativeLayout>
