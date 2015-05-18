@@ -16,9 +16,10 @@ public class BlockchainBlock implements Serializable {
     private String version;
     private Integer nonce;
     private Integer number;
-    private Integer date;
-    private Integer confirmedDate;
+    private Integer time;
+    private Integer medianTime;
     private Integer membersCount;
+    private Long   monetaryMass;
     private String currency;
     private String issuer;
     private String signature;
@@ -56,23 +57,29 @@ public class BlockchainBlock implements Serializable {
     public void setNumber(Integer number) {
         this.number = number;
     }
-    public Integer getDate() {
-        return date;
+    public Integer getTime() {
+        return time;
     }
-    public void setDate(Integer date) {
-        this.date = date;
+    public void setTime(Integer time) {
+        this.time = time;
     }
-    public Integer getConfirmedDate() {
-        return confirmedDate;
+    public Integer getMedianTime() {
+        return medianTime;
     }
-    public void setConfirmedDate(Integer confirmedDate) {
-        this.confirmedDate = confirmedDate;
+    public void setMedianTime(Integer medianTime) {
+        this.medianTime = medianTime;
     }
     public Integer getMembersCount() {
         return membersCount;
     }
     public void setMembersCount(Integer membersCount) {
         this.membersCount = membersCount;
+    }
+    public Long getMonetaryMass() {
+        return monetaryMass;
+    }
+    public void setMonetaryMass(Long monetaryMass) {
+        this.monetaryMass = monetaryMass;
     }
     public String getCurrency() {
         return currency;

@@ -20,6 +20,8 @@ import io.ucoin.app.technical.StringUtils;
 
 public class ContactCursorAdapter extends CursorAdapter {
 
+    private static final String TAG = "ContactCursorAdapter";
+
     public static int DEFAULT_LAYOUT_RES = R.layout.list_item_contact;
 
     public ContactCursorAdapter(Context context, Cursor c, int flags) {

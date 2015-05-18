@@ -14,6 +14,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ListView;
 
 import io.ucoin.app.Application;
 import io.ucoin.app.R;
@@ -22,6 +23,8 @@ import io.ucoin.app.adapter.ContactCursorAdapter;
 import io.ucoin.app.adapter.ProgressViewAdapter;
 import io.ucoin.app.content.Provider;
 import io.ucoin.app.database.Contract;
+import io.ucoin.app.model.Contact;
+import io.ucoin.app.service.ServiceLocator;
 
 
 public class ContactListFragment extends ListFragment {
@@ -30,9 +33,13 @@ public class ContactListFragment extends ListFragment {
 
     private ContactCursorAdapter mCursorAdapter;
     private ProgressViewAdapter mProgressViewAdapter;
+    private ContactListListener mListener;
 
-    static public ContactListFragment newInstance() {
+    static public ContactListFragment newInstance(ContactListListener listener) {
         ContactListFragment fragment = new ContactListFragment();
+        fragment.setOnClickListener(listener);
+        Bundle args = new Bundle();
+        fragment.setArguments(args);
         return fragment;
     }
 
@@ -109,4 +116,32 @@ public class ContactListFragment extends ListFragment {
             }
         });
     }
+
+    @Override
+    public void onListItemClick(ListView l, View v, int position, long id) {
+        if (mListener == null) {
+            return;
+        }
+
+        Cursor cursor = (Cursor) mCursorAdapter.getItem(position);
+        Contact contact = ServiceLocator.instance().getContactService().toContactFromView(cursor);
+
+        Bundle bundle = new Bundle();
+        bundle.putSerializable(Contact.class.getSimpleName(), contact);
+        mListener.onPositiveClick(bundle);
+    }
+
+    /* -- Inner class -- */
+
+    public interface ContactListListener {
+        public void onPositiveClick(Bundle args);
+    }
+
+    /* -- Internal methods -- */
+
+    private void setOnClickListener(ContactListListener listener) {
+        mListener = listener;
+    }
+
+
 }

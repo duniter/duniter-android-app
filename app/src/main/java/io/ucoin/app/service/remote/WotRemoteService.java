@@ -18,6 +18,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import io.ucoin.app.model.BlockchainBlock;
+import io.ucoin.app.model.BlockchainParameter;
 import io.ucoin.app.model.Identity;
 import io.ucoin.app.model.Wallet;
 import io.ucoin.app.model.WotCertification;
@@ -57,6 +58,7 @@ public class WotRemoteService extends BaseRemoteService {
 
     private CryptoService cryptoService;
     private PeerService peerService;
+    private BlockchainRemoteService bcService;
 
     public WotRemoteService() {
         super();
@@ -67,6 +69,7 @@ public class WotRemoteService extends BaseRemoteService {
         super.initialize();
         cryptoService = ServiceLocator.instance().getCryptoService();
         peerService = ServiceLocator.instance().getPeerService();
+        bcService = ServiceLocator.instance().getBlockchainRemoteService();
     }
 
     public List<Identity> findIdentities(Set<Long> currenciesIds, String uidOrPubKey) {
@@ -303,12 +306,19 @@ public class WotRemoteService extends BaseRemoteService {
 
     protected Collection<WotCertification> getCertificationsByPubkeyForMember(long currencyId, String pubkey) {
 
+        BlockchainParameter bcParameter = bcService.getParameters(currencyId, true);
+        BlockchainBlock currentBlock = bcService.getCurrentBlock(currencyId, true);
+        long medianTime = currentBlock.getMedianTime();
+        int sigValidity = bcParameter.getSigValidity();
+        int sigQty = bcParameter.getSigQty();
+
         Collection<WotCertification> result = new TreeSet<WotCertification>(WotCertificationComparators.newComparator());
 
         // Certifiers of
         WotIdentityCertifications certifiersOfList = getCertifiersOf(currencyId, pubkey);
         boolean certifiersOfIsEmpty = (certifiersOfList == null
                 || certifiersOfList.getCertifications() == null);
+        int validWrittenCertifiersCount = 0;
         if (!certifiersOfIsEmpty) {
             for (WotCertification certifier : certifiersOfList.getCertifications()) {
                 certifier.setCertifiedBy(false);
@@ -317,7 +327,25 @@ public class WotRemoteService extends BaseRemoteService {
                 certifier.setCurrencyId(currencyId);
 
                 result.add(certifier);
+
+                long certificationAge = medianTime - certifier.getTimestamp();
+                if(certificationAge <= sigValidity) {
+                    if (certifier.isMember() && certifier.isWritten()) {
+                        validWrittenCertifiersCount++;
+                    }
+                    certifier.setValid(true);
+                }
+                else {
+                    certifier.setValid(false);
+                }
             }
+        }
+
+        if (validWrittenCertifiersCount >= sigQty) {
+            Log.d(TAG, String.format("pubkey [%s] has %s valid signatures: should be a member", pubkey, validWrittenCertifiersCount));
+        }
+        else {
+            Log.d(TAG, String.format("pubkey [%s] has %s valid signatures: not a member", pubkey, validWrittenCertifiersCount));
         }
 
         // Certified by
@@ -334,6 +362,14 @@ public class WotRemoteService extends BaseRemoteService {
                 certifiedBy.setCurrencyId(currencyId);
 
                 result.add(certifiedBy);
+
+                long certificationAge = medianTime - certifiedBy.getTimestamp();
+                if(certificationAge <= sigValidity) {
+                    certifiedBy.setValid(true);
+                }
+                else {
+                    certifiedBy.setValid(false);
+                }
             }
         }
 

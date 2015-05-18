@@ -19,7 +19,10 @@ import android.widget.Toast;
 import io.ucoin.app.R;
 import io.ucoin.app.activity.IToolbarActivity;
 import io.ucoin.app.activity.MainActivity;
+import io.ucoin.app.model.Contact;
+import io.ucoin.app.model.Identity;
 import io.ucoin.app.model.Wallet;
+import io.ucoin.app.technical.CollectionUtils;
 import io.ucoin.app.technical.ViewUtils;
 import io.ucoin.app.view.SlidingTabLayout;
 
@@ -55,22 +58,6 @@ public class HomeFragment extends Fragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Tab host
-        /*mTabs = (TabHost)view.findViewById(R.id.tabHost);
-        mTabs.setup();
-        {
-            TabHost.TabSpec spec = mTabs.newTabSpec("tab1");
-            spec.setContent(R.id.tab1);
-            spec.setIndicator(getString(R.string.wallets));
-            mTabs.addTab(spec);
-        }
-        {
-            TabHost.TabSpec spec = mTabs.newTabSpec("tab2");
-            spec.setContent(R.id.tab2);
-            spec.setIndicator(getString(R.string.favorites));
-            mTabs.addTab(spec);
-        }*/
-
         mStatusPanel = view.findViewById(R.id.status_panel);
         mStatusPanel.setVisibility(View.GONE);
 
@@ -79,32 +66,6 @@ public class HomeFragment extends Fragment {
 
         // Image
         mStatusImage = (ImageView) view.findViewById(R.id.status_image);
-
-        /*
-        // Tab 1: wallet list
-        {
-            WalletListFragment fragment1 = WalletListFragment.newInstance(
-                    // Manage click on wallet
-                    new WalletListFragment.OnClickListener() {
-                        @Override
-                        public void onPositiveClick(Bundle args) {
-                            Wallet wallet = (Wallet) args.getSerializable(Wallet.class.getSimpleName());
-                            onWalletClick(wallet);
-                        }
-                    });
-            mWalletResultListener = fragment1;
-            getFragmentManager().beginTransaction()
-                    .replace(R.id.tab1, fragment1, "tab1")
-                    .commit();
-        }
-
-        // Tab 2: contact list
-        {
-            ContactListFragment fragment2 = ContactListFragment.newInstance();
-            getFragmentManager().beginTransaction()
-                .replace(R.id.tab2, fragment2, "tab2")
-                .commit();
-        }*/
 
         // Get the ViewPager and set it's PagerAdapter so that it can display items
         ViewPager viewPager;
@@ -149,6 +110,36 @@ public class HomeFragment extends Fragment {
                 .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
                 .addToBackStack(fragment.getClass().getSimpleName())
                 .commit();
+    }
+
+    protected void onContactClick(final Contact contact) {
+        if (CollectionUtils.isEmpty(contact.getIdentities())) {
+            return;
+        }
+
+        Identity identity = null;
+        if (contact.getIdentities().size() == 1) {
+            identity = contact.getIdentities().get(0);
+        }
+        else {
+            // TODO : open a dialog with multi choice
+        }
+
+        if (identity != null) {
+            Fragment fragment = IdentityFragment.newInstance(identity);
+            FragmentManager fragmentManager = getFragmentManager();
+            // Insert the Home at the first place in back stack
+            fragmentManager.popBackStack(HomeFragment.class.getSimpleName(), 0);
+            fragmentManager.beginTransaction()
+                    .setCustomAnimations(
+                            R.animator.delayed_slide_in_up,
+                            R.animator.fade_out,
+                            R.animator.delayed_fade_in,
+                            R.animator.slide_out_up)
+                    .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
+                    .addToBackStack(fragment.getClass().getSimpleName())
+                    .commit();
+        }
     }
 
     private class HomePagerAdapter extends FragmentPagerAdapter {
@@ -205,7 +196,15 @@ public class HomeFragment extends Fragment {
 
             // Contact page
             else {
-                fragment = ContactListFragment.newInstance();
+                fragment = ContactListFragment.newInstance(
+                        // Manage click on wallet
+                        new ContactListFragment.ContactListListener() {
+                            @Override
+                            public void onPositiveClick(Bundle args) {
+                                Contact contact = (Contact) args.getSerializable(Contact.class.getSimpleName());
+                                onContactClick(contact);
+                            }
+                        });
                 fragment.setHasOptionsMenu(true);
             }
 

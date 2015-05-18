@@ -8,6 +8,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.AsyncTask;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -98,7 +99,8 @@ public class CurrencyService extends BaseService {
         result.setCurrencyName(cursor.getString(mSelectHolder.nameIndex));
         result.setMembersCount(cursor.getInt(mSelectHolder.membersCountIndex));
         result.setFirstBlockSignature(cursor.getString(mSelectHolder.firstBlockSignatureIndex));
-
+        result.setLastUD(cursor.getLong(mSelectHolder.lastUDIndex));
+        result.setAccountId(cursor.getLong(mSelectHolder.accountIdIndex));
         return result;
     }
 
@@ -170,7 +172,7 @@ public class CurrencyService extends BaseService {
     public void loadCache(Application application) {
         if (mCurrencyCache == null || mUDCache == null) {
             // Create and fill the currency cache
-            List<Currency> currencies = currencies = getCurrencies(application);
+            List<Currency> currencies = getCurrencies(application);
             if (mCurrencyCache == null) {
 
                 mCurrencyCache = new SimpleCache<Long, Currency>() {
@@ -195,15 +197,20 @@ public class CurrencyService extends BaseService {
                         // Retrieve the last UD from the blockchain
                         final long lastUD = blockchainRemoteService.getLastUD(currencyId);
 
-                        new Runnable() {
-                            public void run() {
+                        // Update currency in async thread
+                        AsyncTask<Void, Void, Void> updateCurrencyTask = new AsyncTask<Void, Void, Void>() {
+                            @Override
+                            protected Void doInBackground(Void... params) {
                                 Currency currency = getCurrencyById(context, currencyId);
                                 if (!ObjectUtils.equals(currency.getLastUD(), lastUD)) {
                                     currency.setLastUD(lastUD);
                                     save(context, currency);
                                 }
+                                return null;
                             }
                         };
+                        updateCurrencyTask.execute();
+
                         return lastUD;
                     }
                 };
@@ -283,8 +290,9 @@ public class CurrencyService extends BaseService {
 
         ContentValues target = toContentValues(source);
 
-        Uri uri = ContentUris.withAppendedId(getContentUri(), source.getId());
-        int rowsUpdated = resolver.update(uri, target, null, null);
+        String whereClause = "_id=?";
+        String[] whereArgs = new String[]{String.valueOf(source.getId())};
+        int rowsUpdated = resolver.update(getContentUri(), target, whereClause, whereArgs);
         if (rowsUpdated != 1) {
             throw new UCoinTechnicalException(String.format("Error while updating currency. %s rows updated.", rowsUpdated));
         }
@@ -327,12 +335,16 @@ public class CurrencyService extends BaseService {
         int membersCountIndex;
         int nameIndex;
         int firstBlockSignatureIndex;
+        int lastUDIndex;
+        int accountIdIndex;
 
         private SelectCursorHolder(final Cursor cursor ) {
             idIndex = cursor.getColumnIndex(Contract.Currency._ID);
             nameIndex = cursor.getColumnIndex(Contract.Currency.NAME);
             membersCountIndex = cursor.getColumnIndex(Contract.Currency.MEMBERS_COUNT);
             firstBlockSignatureIndex = cursor.getColumnIndex(Contract.Currency.FIRST_BLOCK_SIGNATURE);
+            lastUDIndex = cursor.getColumnIndex(Contract.Currency.LAST_UD);
+            accountIdIndex = cursor.getColumnIndex(Contract.Currency.ACCOUNT_ID);
         }
     }
 }

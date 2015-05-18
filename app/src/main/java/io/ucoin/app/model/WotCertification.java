@@ -26,6 +26,13 @@ public class WotCertification extends Identity  {
      */
     private WotCertification otherEnd;
 
+
+    /**
+     * Indicate whether the certification is valid for membership request.
+     * (not in protocol: fill by the service)
+     */
+    private boolean valid = false;
+
     /**
      * Given the certification side. If true, certified-by,
      * if false, certifier of
@@ -76,6 +83,14 @@ public class WotCertification extends Identity  {
         this.isCertifiedBy = isCertifiedBy;
     }
 
+    public boolean isValid() {
+        return valid;
+    }
+
+    public void setValid(boolean valid) {
+        this.valid = valid;
+    }
+
     public long getTimestamp() {
         if (cert_time != null){
             return cert_time.getMedianTime();
@@ -99,6 +114,7 @@ public class WotCertification extends Identity  {
         this.cert_time = certification.cert_time;
         this.written = certification.written;
         this.isCertifiedBy = certification.isCertifiedBy;
+        this.valid = certification.valid;
     }
 
     @Override

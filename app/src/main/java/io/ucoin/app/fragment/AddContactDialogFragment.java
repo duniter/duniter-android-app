@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.text.Html;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -42,8 +43,7 @@ public class AddContactDialogFragment extends DialogFragment {
     }
 
     // UI references.
-    private TextView mNameView;
-    private TextView mUidView;
+    private TextView mAliasView;
     private ProgressViewAdapter mProgressViewAdapter;
 
     @Override
@@ -60,16 +60,25 @@ public class AddContactDialogFragment extends DialogFragment {
         final Identity identity = (Identity) newInstanceArgs
                 .getSerializable(Identity.class.getSimpleName());
 
-        // Uid
-        mUidView = (TextView) view.findViewById(R.id.uid);
-        if (identity != null) {
-            mUidView.setText(identity.getUid());
+        // Confirmation message
+        TextView confirmationMessageView = (TextView) view.findViewById(R.id.confirm_message);
+        if (StringUtils.isNotBlank(identity.getUid())) {
+            confirmationMessageView.setText(Html.fromHtml(
+                    getString(R.string.add_contact_confirm, identity.getUid())));
+
+        }
+        else if (StringUtils.isNotBlank(identity.getPubkey())) {
+            confirmationMessageView.setText(Html.fromHtml(
+                    getString(R.string.add_contact_confirm, StringUtils.truncate(identity.getPubkey(), 6))));
+        }
+        else {
+            confirmationMessageView.setVisibility(View.GONE);
         }
 
         // Alias
-        mNameView = (TextView) view.findViewById(R.id.name);
-        mNameView.requestFocus();
-        mNameView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+        mAliasView = (TextView) view.findViewById(R.id.alias);
+        mAliasView.requestFocus();
+        mAliasView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
                 if (id == EditorInfo.IME_ACTION_DONE) {
@@ -106,30 +115,29 @@ public class AddContactDialogFragment extends DialogFragment {
     public void attemptAddContact(final Identity identity) {
 
         // Reset errors.
-        mUidView.setError(null);
-        mNameView.setError(null);
+        mAliasView.setError(null);
 
         // Store values at the time of the login attempt.
-        String name = mNameView.getText().toString();
+        String alias = mAliasView.getText().toString();
 
         boolean cancel = false;
         View focusView = null;
 
-        // Check for a valid name (mandatory if uid is not set)
-        if (!TextUtils.isEmpty(name)) {
-            // Use UID as default name
+        // Check for a valid alias (mandatory if uid is not set)
+        if (TextUtils.isEmpty(alias)) {
+            // Use UID as default alias
             if (!TextUtils.isEmpty(identity.getUid())) {
-                name = identity.getUid();
+                alias = identity.getUid();
             }
             else {
-                mNameView.setError(getString(R.string.field_required));
-                if (focusView == null) focusView = mNameView;
+                mAliasView.setError(getString(R.string.field_required));
+                if (focusView == null) focusView = mAliasView;
                 cancel = true;
             }
         }
-        else if (!isNameValid(name)) {
-            mNameView.setError(getString(R.string.name_too_short));
-            if (focusView == null) focusView = mNameView;
+        else if (!isNameValid(alias)) {
+            mAliasView.setError(getString(R.string.name_too_short));
+            if (focusView == null) focusView = mAliasView;
             cancel = true;
         }
 
@@ -140,7 +148,7 @@ public class AddContactDialogFragment extends DialogFragment {
         } else {
             // Will show the progress bar, and create the wallet
             AddContactTask task = new AddContactTask();
-            task.execute(identity, name);
+            task.execute(identity, alias);
         }
     }
 
@@ -197,6 +205,9 @@ public class AddContactDialogFragment extends DialogFragment {
         @Override
         protected void onSuccess(Contact contact) {
             dismiss();
+            Toast.makeText(getContext(),
+                    getString(R.string.contact_added),
+                    Toast.LENGTH_SHORT).show();
         }
 
         @Override

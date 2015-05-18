@@ -148,7 +148,8 @@
     <string name="transfer_error">Could not send transfer (technical error)</string>
     <string name="cert_error">Could not send certification (technical error)</string>
     <string name="cert_sended">Certification sended.\nWaiting network processing.</string>
-    <string name="cert_date">signature date</string>
+    <string name="cert_date">signature time</string>
+    <string name="cert_not_written">not written</string>
     <string name="join_sended">Registration sended.\nWaiting network processing.</string>
     <string name="join_error">Could not send registration (technical error)</string>
     <string name="duplicate_currency_name">Currency [%s] already exists.</string>
@@ -195,9 +196,12 @@
     <string name="test">Test</string>
 
     <!-- Strings related to contact -->
-    <string name="contact_name_hint">Name (optional)</string>
+    <string name="contact_name_hint">Alias (optional)</string>
     <string name="add_contact">New contact</string>
     <string name="contact_uid">(%s)</string>
+    <string name="add_contact_confirm"><![CDATA[You are about to add <b>%s</b> as contact.\nAre you sure ?]]></string>
+    <string name="contact_added">Contact successfully added</string>
+
 
     <!-- Validation messages -->
     <string name="login_too_short">This login is too short</string>

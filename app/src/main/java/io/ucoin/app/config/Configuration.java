@@ -37,16 +37,12 @@ public class Configuration  {
         return ConfigurationOption.VERSION.getDefaultValue();
     }
 
-    public String getNodeHost() {
-        return ConfigurationOption.NODE_HOST.getDefaultValue();
+    public int getNetworkTimeout() {
+        return Integer.parseInt(ConfigurationOption.NETWORK_TIMEOUT.getDefaultValue());
     }
 
-    public int getNodePort() {
-        return Integer.parseInt(ConfigurationOption.NODE_PORT.getDefaultValue());
-    }
-
-    public int getNodeTimeout() {
-        return Integer.parseInt(ConfigurationOption.NODE_TIMEOUT.getDefaultValue());
+    public int getNetworkCacheTimeInMillis() {
+        return Integer.parseInt(ConfigurationOption.NETWORK_CACHE_TIME_IN_MILLIS.getDefaultValue());
     }
 
     public String getForumUrl() {

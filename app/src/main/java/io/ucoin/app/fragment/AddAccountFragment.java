@@ -96,13 +96,6 @@ public class AddAccountFragment extends Fragment {
             }
         });
 
-        // TODO FOR DEV ONLY (to remove later)
-        {
-            mUidView.setText("kimamila");
-            mSaltView.setText("benoit.lavenier@e-is.pro");
-            mPasswordView.setText("priezPourMoi!");
-            mConfirmPasswordView.setText("priezPourMoi!");
-        }
     }
 
     public boolean attemptAddAccount() {

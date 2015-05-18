@@ -41,7 +41,7 @@ public class MovementCursorAdapter extends CursorAdapter{
         // Icon
         {
             boolean isWritten = !cursor.isNull(viewHolder.blockNumberIndex);
-            // Is write in blokchain ?
+            // Is write in blockchain ?
             if (isWritten) {
                 //viewHolder.iconView.setImageResource(ImageUtils.IMAGE_MOVEMENT_VALID);
                 viewHolder.iconView.setVisibility(View.GONE);
@@ -54,7 +54,7 @@ public class MovementCursorAdapter extends CursorAdapter{
 
         // Date/time
         String dateTime = DateUtils.formatFriendlyDateTime(context, cursor.getLong(viewHolder.timeIndex));
-        viewHolder.dateView.setText(dateTime);
+        viewHolder.timeView.setText(dateTime);
 
         // Amount
         int amount = cursor.getInt(viewHolder.amountIndex);
@@ -67,7 +67,7 @@ public class MovementCursorAdapter extends CursorAdapter{
 
     // View lookup cache
     private static class ViewHolder {
-        TextView dateView;
+        TextView timeView;
         TextView amountView;
         TextView commentView;
         ImageView iconView;
@@ -79,7 +79,7 @@ public class MovementCursorAdapter extends CursorAdapter{
 
         ViewHolder(View view, Cursor cursor) {
             iconView = (ImageView) view.findViewById(R.id.icon);
-            dateView = (TextView) view.findViewById(R.id.date);
+            timeView = (TextView) view.findViewById(R.id.time);
             amountView = (TextView) view.findViewById(R.id.amount);
             commentView = (TextView) view.findViewById(R.id.comment);
 

@@ -12,6 +12,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.ucoin.app.config.Configuration;
 import io.ucoin.app.model.BlockchainBlock;
 import io.ucoin.app.model.BlockchainParameter;
 import io.ucoin.app.model.Currency;
@@ -53,14 +54,15 @@ public class BlockchainRemoteService extends BaseRemoteService {
     // execute a download of the current block
     private SimpleCache<Long, BlockchainBlock> mCurrentBlockCache;
 
+    // Cache on blockchain parameters
+    private SimpleCache<Long, BlockchainParameter> mParametersCache;
+
     public BlockchainRemoteService() {
         super();
-        mCurrentBlockCache = new SimpleCache<Long, BlockchainBlock>(10000 /*= 10s*/) {
-            @Override
-            public BlockchainBlock load(Context context, Long currencyId) {
-                return getCurrentBlock(currencyId);
-            }
-        };
+
+        // Initialize caches
+        initCaches();
+
     }
 
     @Override
@@ -69,6 +71,21 @@ public class BlockchainRemoteService extends BaseRemoteService {
         networkRemoteService = ServiceLocator.instance().getNetworkRemoteService();
     }
 
+
+    /**
+     * get the blockchain parameters (currency parameters)
+     * @param currencyId
+     * @param useCache
+     * @return
+     */
+    public BlockchainParameter getParameters(long currencyId, boolean useCache) {
+        if (!useCache) {
+            return getParameters(currencyId);
+        }
+        else {
+            return mParametersCache.get(null, currencyId);
+        }
+    }
 
     /**
      * get the blockchain parameters (currency parameters)
@@ -282,6 +299,28 @@ public class BlockchainRemoteService extends BaseRemoteService {
 
 
     /* -- Internal methods -- */
+
+    /**
+     * Initialize caches
+     */
+    protected void initCaches() {
+        int cacheTimeInMillis = Configuration.instance().getNetworkCacheTimeInMillis();
+
+        mCurrentBlockCache = new SimpleCache<Long, BlockchainBlock>(cacheTimeInMillis) {
+            @Override
+            public BlockchainBlock load(Context context, Long currencyId) {
+                return getCurrentBlock(currencyId);
+            }
+        };
+
+        mParametersCache = new SimpleCache<Long, BlockchainParameter>(/*eternal cache*/) {
+            @Override
+            public BlockchainParameter load(Context context, Long currencyId) {
+                return getParameters(currencyId);
+            }
+        };
+    }
+
 
     protected void loadMembership(Long currencyId, Peer peer, Identity identity, boolean checkLookupForNonMember) {
         ObjectUtils.checkNotNull(identity);

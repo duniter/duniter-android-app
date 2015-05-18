@@ -1,6 +1,7 @@
 package io.ucoin.app.adapter;
 
 import android.content.Context;
+import android.graphics.Paint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,12 +39,7 @@ public class CertificationListAdapter extends ArrayAdapter<WotCertification> {
         if (convertView == null) {
             convertView = LayoutInflater.from(this.getContext())
                     .inflate(DEFAULT_LAYOUT_RES, container, false);
-            viewHolder = new ViewHolder();
-            viewHolder.icon = (ImageView) convertView.findViewById(R.id.icon);
-            viewHolder.uid = (TextView) convertView.findViewById(R.id.uid);
-            viewHolder.pubkey = (TextView) convertView.findViewById(R.id.pubkey);
-            viewHolder.cert_time = (TextView) convertView.findViewById(R.id.cert_time);
-            viewHolder.cert_time_label = (View) convertView.findViewById(R.id.cert_time_label);
+            viewHolder = new ViewHolder(getContext(), convertView);
             convertView.setTag(viewHolder);
         } else {
             viewHolder = (ViewHolder) convertView.getTag();
@@ -53,24 +49,47 @@ public class CertificationListAdapter extends ArrayAdapter<WotCertification> {
         viewHolder.icon.setImageResource(ImageUtils.getCertificationImage(certification));
 
         // Uid
-        viewHolder.uid.setText(certification.getUid());
+        {
+            viewHolder.uid.setText(certification.getUid());
+            int paintFlags = viewHolder.uid.getPaintFlags();
+            if (certification.isMember()) {
+                paintFlags &= ~Paint.STRIKE_THRU_TEXT_FLAG;
+            } else {
+                paintFlags |= Paint.STRIKE_THRU_TEXT_FLAG;
+            }
+            viewHolder.uid.setPaintFlags(paintFlags);
+        }
 
         // PubKey
         String pubKey = certification.getPubkey();
         viewHolder.pubkey.setText(pubKey);
 
-        // Timestamp (join date)
-        long timestamp = -1;
-        if (certification.getCert_time() != null) {
-            timestamp = certification.getCert_time().getMedianTime();
-        }
-        if (timestamp != -1) {
-            viewHolder.cert_time.setText(DateUtils.format(timestamp));
+        // Timestamp (certification date)
+        long certTime = certification.getTimestamp();
+        if (certTime != -1) {
+            String certTimeStr = DateUtils.format(certTime);
+            viewHolder.cert_time.setText(certTimeStr);
             viewHolder.cert_time_label.setVisibility(View.VISIBLE);
+
+            int paintFlags = viewHolder.cert_time.getPaintFlags();
+            if (certification.isValid()) {
+                paintFlags &= ~Paint.STRIKE_THRU_TEXT_FLAG;
+            }
+            else {
+                paintFlags |= Paint.STRIKE_THRU_TEXT_FLAG;
+            }
+
+            viewHolder.cert_time.setPaintFlags(paintFlags);
         }
         else {
-            viewHolder.cert_time.setText("");
             viewHolder.cert_time_label.setVisibility(View.GONE);
+
+            if (!certification.isWritten()) {
+                viewHolder.cert_time.setText(viewHolder.cert_not_written);
+            }
+            else {
+                viewHolder.cert_time.setText("");
+            }
         }
 
         return convertView;
@@ -83,6 +102,16 @@ public class CertificationListAdapter extends ArrayAdapter<WotCertification> {
         TextView pubkey;
         TextView cert_time;
         View cert_time_label;
+        String cert_not_written;
+
+        public ViewHolder(Context context, View convertView) {
+            icon = (ImageView) convertView.findViewById(R.id.icon);
+            uid = (TextView) convertView.findViewById(R.id.uid);
+            pubkey = (TextView) convertView.findViewById(R.id.pubkey);
+            cert_time = (TextView) convertView.findViewById(R.id.cert_time);
+            cert_time_label = (View) convertView.findViewById(R.id.cert_time_label);
+            cert_not_written = context.getString(R.string.cert_not_written);
+        }
     }
 
 }

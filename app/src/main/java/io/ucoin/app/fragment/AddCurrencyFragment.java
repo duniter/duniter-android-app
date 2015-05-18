@@ -11,7 +11,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import io.ucoin.app.R;
-import io.ucoin.app.config.Configuration;
 import io.ucoin.app.model.Peer;
 
 public class AddCurrencyFragment extends Fragment {
@@ -68,11 +67,6 @@ public class AddCurrencyFragment extends Fragment {
             }
         });
 
-        // TODO FOR DEV ONLY (to remove later)
-        {
-            mAddress.setText(Configuration.instance().getNodeHost());
-            mPort.setText(String.valueOf(Configuration.instance().getNodePort()));
-        }
     }
 
     private boolean attemptAddCurrency() {

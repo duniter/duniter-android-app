@@ -100,7 +100,7 @@ public class CurrencyRulesFragment extends Fragment {
         mSigDelay.setText(getStringFromSeconds(parameter.getSigDelay()));
 
         TextView mSigValidity = (TextView) view.findViewById(R.id.sig_validity);
-        mSigValidity.setText(getStringFromSeconds(parameter.getSigDelay()));
+        mSigValidity.setText(getStringFromSeconds(parameter.getSigValidity()));
 
         TextView mSigQty = (TextView) view.findViewById(R.id.sig_qty);
         mSigQty.setText(getString(R.string.sig_qty_value, parameter.getSigQty()));

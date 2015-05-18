@@ -49,7 +49,7 @@ public class HttpService extends BaseService implements Closeable{
         Configuration config = Configuration.instance();
 
         this.gson = GsonUtils.newBuilder().create();
-        this.baseTimeOut = config.getNodeTimeout();
+        this.baseTimeOut = config.getNetworkTimeout();
         this.httpClient = createHttpClient();
     }
 

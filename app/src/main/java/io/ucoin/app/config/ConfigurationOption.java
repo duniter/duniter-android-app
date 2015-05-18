@@ -70,40 +70,10 @@ public enum ConfigurationOption {
     // -- READ-WRITE OPTIONS --------------------------------------------------//
     // ------------------------------------------------------------------------//
 
-    NODE_CURRENCY(
-            "ucoin.node.currency",
-            "ucoin.config.option.node.currency.description",
-            "meta_brouzouf",
-            String.class,
-            false),
-
-    NODE_PROTOCOL(
-            "ucoin.node.protocol",
-            "ucoin.config.option.node.protocol.description",
-            "http",
-            String.class,
-            false),
-
-    NODE_HOST(
-            "ucoin.node.host",
-            "ucoin.config.option.node.host.description",
-            "metab.ucoin.io",
-            //"server.e-is.pro",
-            String.class,
-            false),
-
-    NODE_PORT(
-            "ucoin.node.port",
-            "ucoin.config.option.node.port.description",
-            //"9101",
-            "9201",
-            Integer.class,
-            false),
-
-    NODE_TIMEOUT(
-            "ucoin.node.timeout",
-            "ucoin.config.option.node.timeout.description",
-            "3000",
+    NETWORK_TIMEOUT(
+            "ucoin.network.timeout",
+            "ucoin.config.option.network.timeout.description",
+            "10000", // = 10 s
             Integer.class,
             false),
 
@@ -112,8 +82,14 @@ public enum ConfigurationOption {
                     "ucoin.config.option.forum.url.description",
                     "http://forum.ucoin.io",
             String.class,
-            false)
+            false),
 
+    NETWORK_CACHE_TIME_IN_MILLIS (
+            "ucoin.network.cacheTimeInMillis",
+            "ucoin.config.option.network.cacheTimeInMillis.description",
+            "10000",  // = 10 s
+            Integer.class,
+            false)
     // ------------------------------------------------------------------------//
     // -- EXT CONSTANTS --------------------------------------------------//
     // ------------------------------------------------------------------------//

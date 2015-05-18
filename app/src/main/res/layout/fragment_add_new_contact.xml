@@ -8,25 +8,16 @@
         android:orientation="vertical"
         android:padding="10dip">
 
-        <!-- uid name -->
+        <!-- confirmation message -->
         <TextView
+            android:id="@+id/confirm_message"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/uid" />
+            android:text="@string/add_contact_confirm" />
 
-        <TextView
-            android:id="@+id/uid"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="20dip"
-            android:layout_marginTop="5dip"
-            android:layout_marginLeft="5dip"
-            android:singleLine="true"
-            android:textSize="@dimen/abc_text_size_body_2_material"/>
-
-        <!-- name -->
+        <!-- alias -->
         <EditText
-            android:id="@+id/name"
+            android:id="@+id/alias"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="20dip"

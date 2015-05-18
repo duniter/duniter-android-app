@@ -78,7 +78,7 @@ public class ViewUtils {
         // Hide the keyboard, in case we come from imeDone)
         InputMethodManager inputManager = (InputMethodManager)
                 activity.getSystemService(Context.INPUT_METHOD_SERVICE);
-        inputManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
+        inputManager.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT, InputMethodManager.HIDE_IMPLICIT_ONLY);
 
     }
 
@@ -91,6 +91,10 @@ public class ViewUtils {
                         ? null
                         : activity.getCurrentFocus().getWindowToken(),
                 InputMethodManager.HIDE_NOT_ALWAYS|InputMethodManager.HIDE_IMPLICIT_ONLY);
+    }
+
+    public static long getShortAnimTime() {
+        return mAnimTime;
     }
 
     /* -- Internal methods -- */

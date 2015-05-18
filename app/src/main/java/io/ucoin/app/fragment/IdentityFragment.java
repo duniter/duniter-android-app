@@ -11,6 +11,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.ListView;
@@ -38,13 +39,22 @@ import io.ucoin.app.technical.task.AsyncTaskHandleException;
 
 public class IdentityFragment extends Fragment {
 
+    private static String TAG = "IdentityFragment";
     private static String ARGS_TAB_INDEX = "tabIndex";
 
     private ProgressViewAdapter mProgressViewAdapter;
+    private View mHeaderView;
     private CertificationListAdapter mCertificationListAdapter;
+    private int headerHeight;
+    private int minHeaderTranslation;
+    private int toolbarTitleLeftMargin;
+    private int toolbarTitleTextSize;
     private ImageButton mFavorite;
+    private TextView mUidView;
     private TextView mTimestampView;
     private TabHost mTabs;
+    private ListView mWotListView;
+    private int mWotListScrollState;
 
     private boolean mSignatureSingleLine = true;
     private boolean mPubKeySingleLine = true;
@@ -92,6 +102,13 @@ public class IdentityFragment extends Fragment {
                 .getSerializable(Identity.class.getSimpleName());
         final int tabIndex = newInstanceArgs.getInt(ARGS_TAB_INDEX);
 
+        mHeaderView = (View) view.findViewById(R.id.header_layout);
+        headerHeight = getResources().getDimensionPixelSize(R.dimen.header_height);
+        toolbarTitleLeftMargin = getResources().getDimensionPixelSize(R.dimen.header_height);
+        toolbarTitleTextSize = getResources().getDimensionPixelSize(R.dimen.header_text_size);
+        minHeaderTranslation = -headerHeight +
+                getResources().getDimensionPixelOffset(R.dimen.action_bar_height);
+
         // Tab host
         mTabs = (TabHost)view.findViewById(R.id.tabHost);
         mTabs.setup();
@@ -110,8 +127,8 @@ public class IdentityFragment extends Fragment {
         mTabs.setCurrentTab(tabIndex);
 
         //Uid
-        TextView uidView = (TextView) view.findViewById(R.id.uid);
-        uidView.setText(identity.getUid());
+        mUidView = (TextView) view.findViewById(R.id.uid);
+        mUidView.setText(identity.getUid());
 
         // Icon
         mFavorite = (ImageButton)view.findViewById(R.id.favorite_button);
@@ -131,14 +148,14 @@ public class IdentityFragment extends Fragment {
         pubkeyView.setText(identity.getPubkey());
 
         // Wot list
-        ListView wotListView = (ListView) view.findViewById(R.id.wot_list);
-        wotListView.setVisibility(View.GONE);
+        mWotListView = (ListView) view.findViewById(R.id.wot_list);
+        mWotListView.setVisibility(View.GONE);
         mCertificationListAdapter = new CertificationListAdapter(getActivity());
-        wotListView.setAdapter(mCertificationListAdapter);
+        mWotListView.setAdapter(mCertificationListAdapter);
 
         //this listener is not called unless WotExpandableListAdapter.isChildSelectable return true
         //and convertView.onClickListener is not set (in WotExpandableListAdapter)
-        wotListView.setOnItemClickListener(new ListView.OnItemClickListener() {
+        mWotListView.setOnItemClickListener(new ListView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
@@ -150,12 +167,70 @@ public class IdentityFragment extends Fragment {
             }
         });
 
+        AbsListView.OnScrollListener onScrollListener = new AbsListView.OnScrollListener() {
+
+            @Override
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+
+            }
+
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+                View c = view.getChildAt(0);
+
+                if (c == null)
+                    return;
+
+                int firstVisiblePosition = view.getFirstVisiblePosition();
+                int top = c.getTop();
+
+
+                int scrollY = top;
+                if (firstVisiblePosition >= 1) {
+                    scrollY -= firstVisiblePosition * c.getHeight(); // + headerHeight;
+                }
+
+                // This will collapse the header when scrolling, until its height reaches
+                // the toolbar height
+                int translationY = scrollY; //Math.max(0, scrollY/* + minHeaderTranslation*/);
+                if (translationY < minHeaderTranslation)
+                    translationY = minHeaderTranslation;
+                mHeaderView.setTranslationY(translationY);
+
+                // Scroll ratio (0 <= ratio <= 1).
+                // The ratio value is 0 when the header is completely expanded,
+                // 1 when it is completely collapsed
+                float offset = (float) (translationY) / minHeaderTranslation;
+
+
+                // Now that we have this ratio, we only have to apply translations, scales,
+                // alpha, etc. to the header views
+
+                // For instance, this will move the toolbar title & subtitle on the X axis
+                // from its original position when the ListView will be completely scrolled
+                // down, to the Toolbar title position when it will be scrolled up.
+                mUidView.setTranslationX(toolbarTitleLeftMargin * offset);
+                //mUidView.setTranslationY(heard * offset);
+                //mUidView.setTextSize(TypedValue.COMPLEX_UNIT_PX, toolbarTitleTextSize * offset);
+
+                // Or we can make the FAB disappear when the ListView is scrolled
+                mTimestampView.setAlpha(1- offset);
+                mFavorite.setAlpha(1- offset);
+                mTabs.setTranslationY(translationY);
+                //mTabs.setTop(mHeaderView.getBottom());
+            }
+
+        };
+
+        // TODO : make this works
+        //mWotListView.setOnScrollListener(onScrollListener);
+
         //PROGRESS VIEW
         View progressView = view.findViewById(R.id.load_progress);
         progressView.setVisibility(View.VISIBLE);
         mProgressViewAdapter = new ProgressViewAdapter(
                 progressView,
-                wotListView);
+                mWotListView);
 
         // Make sure to hide the keyboard
         ViewUtils.hideKeyboard(getActivity());
@@ -163,6 +238,24 @@ public class IdentityFragment extends Fragment {
         // Load WOT data
         LoadTask task = new LoadTask(identity);
         task.execute((Void) null);
+    }
+
+    // Method that allows us to get the scroll Y position of the ListView
+    public int getScrollY(AbsListView view)
+    {
+        View c = view.getChildAt(0);
+
+        if (c == null)
+            return 0;
+
+        int firstVisiblePosition = view.getFirstVisiblePosition();
+        int top = c.getTop();
+
+        int headerHeight = 0;
+        if (firstVisiblePosition >= 1)
+            headerHeight = this.headerHeight;
+
+        return top + firstVisiblePosition * c.getHeight() + headerHeight;
     }
 
     @Override

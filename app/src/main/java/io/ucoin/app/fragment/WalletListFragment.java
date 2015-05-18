@@ -189,10 +189,6 @@ public class WalletListFragment extends ListFragment implements MainActivity.Que
                 });
     }
 
-    private void setOnClickListener(WalletListListener listener) {
-         mListener = listener;
-     }
-
     protected void onAddWalletClick() {
         Bundle args = getArguments();
         Currency currency = (Currency)args.getSerializable(Currency.class.getSimpleName());
@@ -210,6 +206,10 @@ public class WalletListFragment extends ListFragment implements MainActivity.Que
         // Reload wallet list
         LoadWalletsTask task = new LoadWalletsTask();
         task.execute();
+    }
+
+    private void setOnClickListener(WalletListListener listener) {
+        mListener = listener;
     }
 
     public class LoadWalletsTask extends AsyncTaskHandleException<Void, Void, List<Wallet>> {

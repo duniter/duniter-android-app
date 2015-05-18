@@ -241,11 +241,11 @@ public class WalletService extends BaseService {
                     wallet.getBlockNumber() == -1 ? 0 : wallet.getBlockNumber() + 1,
                     currentBlockNumber);
             // Process wallet's sources
-            movementService.updateMovementsFromHistory(context,
+            /*movementService.updateMovementsFromHistory(context,
                     wallet.getId(),
                     wallet.getBlockNumber(),
                     txSourcesAndCredit.getSources(),
-                    history);
+                    history);*/
         }
 
         // If credits has changed

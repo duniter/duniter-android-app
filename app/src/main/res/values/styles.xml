@@ -41,6 +41,12 @@
         <item name="android:paddingBottom">16sp</item>
     </style>
 
+    <style name="HeaderTitle">
+        <item name="android:textSize">@dimen/abc_text_size_display_1_material</item>
+        <item name="android:textColor">@color/textPrimary</item>
+        <item name="android:singleLine">true</item>
+    </style>
+
     <style name="headline">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>

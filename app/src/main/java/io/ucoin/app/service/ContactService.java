@@ -227,7 +227,7 @@ public class ContactService extends BaseService {
         return result;
     }
 
-    protected Contact toContactFromView(final Cursor cursor) {
+    public Contact toContactFromView(final Cursor cursor) {
         // Init the holder is need
         if (mSelectViewHolder == null) {
             mSelectViewHolder = new SelectViewCursorHolder(cursor);

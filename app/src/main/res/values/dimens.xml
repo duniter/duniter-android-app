@@ -1,0 +1,13 @@
+<resources>
+
+    <dimen name="header_height">120dp</dimen>
+
+    <dimen name="header_text_size">12dp</dimen>
+
+    <!-- The height of your fully collapsed header view. Actually the Toolbar height (56dp) -->
+    <dimen name="action_bar_height">56dp</dimen>
+
+    <!-- The left margin of the Toolbar title (according to specs, 72dp) -->
+    <dimen name="toolbar_left_margin">72dp</dimen>
+
+</resources>
