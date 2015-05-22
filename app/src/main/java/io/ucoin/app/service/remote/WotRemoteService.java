@@ -20,6 +20,7 @@ import java.util.TreeSet;
 import io.ucoin.app.model.BlockchainBlock;
 import io.ucoin.app.model.BlockchainParameter;
 import io.ucoin.app.model.Identity;
+import io.ucoin.app.model.Peer;
 import io.ucoin.app.model.Wallet;
 import io.ucoin.app.model.WotCertification;
 import io.ucoin.app.model.WotIdentityCertifications;
@@ -130,10 +131,36 @@ public class WotRemoteService extends BaseRemoteService {
         return uniqueResult;
     }
 
+    public WotLookupUId findByUidAndPublicKey(Peer peer, String uid, String pubKey) {
+        Log.d(TAG, String.format("Try to find user info by uid [%s] and pubKey [%s]", uid, pubKey));
+
+        // call lookup
+        String path = String.format(URL_LOOKUP, uid);
+        WotLookupResults lookupResults = executeRequest(peer, path, WotLookupResults.class);
+
+        // Retrieve the exact uid
+        WotLookupUId uniqueResult = getUidByUidAndPublicKey(lookupResults, uid, pubKey);
+        if (uniqueResult == null) {
+            return null;
+        }
+
+        return uniqueResult;
+    }
+
     public Identity getIdentity(long currencyId, String uid, String pubKey) {
         Log.d(TAG, String.format("Get identity by uid [%s] and pubKey [%s]", uid, pubKey));
 
         WotLookupUId lookupUid = findByUidAndPublicKey(currencyId, uid, pubKey);
+        if (lookupUid == null) {
+            return null;
+        }
+        return toIdentity(lookupUid);
+    }
+
+    public Identity getIdentity(Peer peer, String uid, String pubKey) {
+        Log.d(TAG, String.format("Get identity by uid [%s] and pubKey [%s]", uid, pubKey));
+
+        WotLookupUId lookupUid = findByUidAndPublicKey(peer, uid, pubKey);
         if (lookupUid == null) {
             return null;
         }

@@ -19,7 +19,7 @@ public abstract class AsyncTaskHandleException<Param, Progress, Result>
     public static final String TAG = "AsyncTask";
 
     private Throwable error;
-    private AsyncTaskListener mListener;
+    private AsyncTaskListener<Result> mListener;
 
 
     public AsyncTaskHandleException(ProgressBar progressBar, TextView progressText) {
@@ -39,7 +39,7 @@ public abstract class AsyncTaskHandleException<Param, Progress, Result>
         }
     }
 
-    public AsyncTaskHandleException(AsyncTaskListener listener) {
+    public AsyncTaskHandleException(AsyncTaskListener<Result> listener) {
         ObjectUtils.checkNotNull(listener);
         this.mListener = listener;
     }

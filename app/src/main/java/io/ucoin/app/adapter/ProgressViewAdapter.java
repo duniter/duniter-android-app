@@ -35,9 +35,16 @@ public class ProgressViewAdapter {
     }
 
     /**
-     * Shows the progress UI and hides the login form.
+     * Shows the progress view and hides the given view.
      */
     public void showProgress(final boolean show) {
         ViewUtils.toogleViews(mView, mProgressView, show, mAnimTime);
+    }
+
+    /**
+     * Return if the progress view is visible or not
+     */
+    public boolean isProgressVisible() {
+        return mProgressView.getVisibility() == View.VISIBLE;
     }
 }

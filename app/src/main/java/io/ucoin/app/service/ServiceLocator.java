@@ -1,6 +1,11 @@
 package io.ucoin.app.service;
 
-import android.app.Application;
+import android.app.Service;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Binder;
+import android.os.Bundle;
+import android.os.IBinder;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -13,7 +18,7 @@ import io.ucoin.app.service.remote.TransactionRemoteService;
 import io.ucoin.app.service.remote.WotRemoteService;
 import io.ucoin.app.technical.UCoinTechnicalException;
 
-public class ServiceLocator implements Closeable {
+public class ServiceLocator extends Service implements Closeable {
 
 
     private static final String TAG = "ServiceLocator";
@@ -23,21 +28,38 @@ public class ServiceLocator implements Closeable {
      */
     private static ServiceLocator instance = new ServiceLocator();
 
-    private final Map<Class<?>, Object> serviceCache;
+    private final Map<Class<?>, Object> mServiceCache;
 
+    private Boolean mIsCacheLoaded = false;
 
     protected ServiceLocator() {
         // shouldn't be instantiated
-        serviceCache = new HashMap<Class<?>, Object>();
+        mServiceCache = new HashMap<Class<?>, Object>();
     }
 
-    public void init() {
+    public class MyBinder extends Binder {
+        public ServiceLocator getService() {
+            return ServiceLocator.this;
+        }
+    }
 
+    private final IBinder mBinder = new MyBinder();
+
+    @Override
+    public IBinder onBind(Intent arg0) {
+        Bundle extras = arg0.getExtras();
+        //Log.d("service","onBind");
+        // Get messager from the Activity
+        if (extras != null) {
+            //Log.d("service","onBind with extra");
+            //outMessenger = (Messenger) extras.get("MESSENGER");
+        }
+        return mBinder;
     }
 
     @Override
     public void close() throws IOException {
-        for(Object service: serviceCache.values()) {
+        for(Object service: mServiceCache.values()) {
             if (service instanceof Closeable) {
                 ((Closeable)service).close();
             }
@@ -106,25 +128,30 @@ public class ServiceLocator implements Closeable {
         return getService(MovementService.class);
     }
 
+    public void loadCaches(Context context, long accountId) {
 
-    public void loadCaches(Application application) {
+        synchronized (mIsCacheLoaded) {
 
-        // Load currencies cache
-        getCurrencyService().loadCache(application);
+            if (!mIsCacheLoaded) {
+                // Load currencies cache
+                getCurrencyService().loadCache(context, accountId);
 
-        // Load peers cache
-        getPeerService().loadCache(application);
+                // Load peers cache
+                getPeerService().loadCache(context, accountId);
 
+                mIsCacheLoaded = true;
+            }
+        }
     }
 
     /* -- Internal methods -- */
     protected <S extends BaseService> S getService(Class<S> clazz) {
-        if (serviceCache.containsKey(clazz)) {
-            return (S)serviceCache.get(clazz);
+        if (mServiceCache.containsKey(clazz)) {
+            return (S) mServiceCache.get(clazz);
         }
         try {
             S service = (S)clazz.newInstance();
-            serviceCache.put(clazz, service);
+            mServiceCache.put(clazz, service);
 
             // Call initialization
             service.initialize();

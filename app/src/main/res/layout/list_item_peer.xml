@@ -1,0 +1,25 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:minHeight="?android:listPreferredItemHeightSmall"
+    android:gravity="center_vertical"
+    android:duplicateParentState="true"
+    android:paddingLeft="8dp"
+    android:paddingRight="8dp"
+    android:layout_margin="0dp"
+    android:orientation="vertical"
+    android:showDividers="middle">
+
+    <TextView
+        android:id="@+id/currency_name"
+        android:text="currency_name"
+        style="@style/ListItemHead.Dark"
+        android:layout_gravity="center_horizontal" />
+
+    <TextView
+        android:id="@+id/peer"
+        android:text="peer"
+        style="@style/ListItemSubhead.Dark"
+        android:layout_gravity="center_horizontal" />
+
+</LinearLayout>

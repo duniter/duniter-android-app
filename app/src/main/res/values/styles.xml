@@ -108,6 +108,10 @@
         <item name="android:textSize">18sp</item>
     </style>
 
+    <style name="ListItemHead.Dark">
+        <item name="android:textColor">@color/primary_text_default_material_dark</item>
+    </style>
+
     <style name="ListItemSubhead">
         <item name="android:duplicateParentState">true</item>
         <item name="android:layout_width">wrap_content</item>
@@ -119,8 +123,42 @@
         <item name="android:textSize">12sp</item>
     </style>
 
+    <style name="ListItemSubhead.Dark">
+        <item name="android:textColor">#dddddd</item>
+    </style>
+
     <style name="FormSpinner">
         <item name="android:background">@drawable/shape_item_wallet</item>
+    </style>
+
+    <style name="ButtonText">
+        <item name="android:layout_width">fill_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">#ffffff</item>
+        <item name="android:gravity">center</item>
+        <item name="android:layout_margin">3dp</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:shadowColor">#000000</item>
+        <item name="android:shadowDx">1</item>
+        <item name="android:shadowDy">1</item>
+        <item name="android:shadowRadius">2</item>
+        <item name="android:background">@drawable/button_positive_bg</item>
+    </style>
+
+    <style name="ButtonText.Neutral">
+        <item name="android:textColor">#666666</item>
+        <item name="android:shadowColor">#eeeeee</item>
+        <item name="android:shadowDx">1</item>
+        <item name="android:shadowDy">1</item>
+        <item name="android:shadowRadius">1</item>
+        <item name="android:background">@drawable/button_neutral_bg</item>
+    </style>
+
+    <style name="ButtonText.Small">
+        <item name="android:layout_margin">3dp</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textSize">20sp</item>
     </style>
 
 

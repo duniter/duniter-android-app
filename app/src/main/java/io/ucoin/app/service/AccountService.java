@@ -17,6 +17,9 @@ import io.ucoin.app.model.Peer;
 import io.ucoin.app.model.Wallet;
 import io.ucoin.app.service.exception.DuplicatePubkeyException;
 import io.ucoin.app.service.exception.PeerConnectionException;
+import io.ucoin.app.service.exception.PubkeyAlreadyUsedException;
+import io.ucoin.app.service.exception.UidAlreadyUsedException;
+import io.ucoin.app.service.exception.UidAndPubkeyNotFoundException;
 import io.ucoin.app.service.exception.UidMatchAnotherPubkeyException;
 import io.ucoin.app.service.remote.BlockchainRemoteService;
 import io.ucoin.app.service.remote.TransactionRemoteService;
@@ -45,12 +48,18 @@ public class AccountService extends BaseService {
             String uid,
             String salt,
             String password,
-            Peer peer) throws DuplicatePubkeyException, UidMatchAnotherPubkeyException, PeerConnectionException {
+            boolean isNewRegistration,
+            Peer peer) throws DuplicatePubkeyException, UidMatchAnotherPubkeyException,
+            PeerConnectionException,
+            UidAlreadyUsedException,
+            PubkeyAlreadyUsedException,
+            UidAndPubkeyNotFoundException {
         return create(
                 context,
                 uid,
                 salt,
                 password,
+                isNewRegistration,
                 peer,
                 new NullProgressModel());
     }
@@ -60,12 +69,16 @@ public class AccountService extends BaseService {
             String uid,
             String salt,
             String password,
+            boolean isNewRegistration,
             Peer peer,
-            ProgressModel progressModel) throws DuplicatePubkeyException, UidMatchAnotherPubkeyException, PeerConnectionException {
+            ProgressModel progressModel) throws DuplicatePubkeyException,
+            UidMatchAnotherPubkeyException, PeerConnectionException,
+            UidAlreadyUsedException,
+            PubkeyAlreadyUsedException,
+            UidAndPubkeyNotFoundException{
 
         progressModel.setProgress(0);
-        progressModel.setMax(9);
-
+        progressModel.setMax(10);
 
         // Generate keys
         progressModel.setMessage(context.getString(R.string.computing_keys));
@@ -90,12 +103,37 @@ public class AccountService extends BaseService {
                 keys.getPubKey(),
                 null /*do no save the secret key of the main account*/
         );
-        blockchainService.loadAndCheckMembership(peer, wallet);
+        if (progressModel.isCancelled()) {
+            return null;
+        }
+
+        // If new registration: check that UID and pubkey are not already used
+        if (isNewRegistration) {
+            blockchainService.checkNotMemberIdentity(peer, wallet.getIdentity());
+            wallet.getIdentity().setMember(false);
+        }
+        // If login, check UID and pubkey exists, and load membership state
+        else {
+            blockchainService.loadAndCheckMembership(peer, wallet);
+
+            if (wallet.getIdentity().getTimestamp() == -1) {
+                throw new UidAndPubkeyNotFoundException(wallet.getPubKeyHash());
+            }
+        }
+
+        if (progressModel.isCancelled()) {
+            return null;
+        }
 
         // Get credit
         progressModel.increment(context.getString(R.string.loading_wallet_credit));
         TransactionRemoteService txService = ServiceLocator.instance().getTransactionRemoteService();
         Long credit = txService.getCredit(peer, pubKeyHash);
+
+
+        if (progressModel.isCancelled()) {
+            return null;
+        }
 
         // Create account in DB
         io.ucoin.app.model.Account account;
@@ -137,11 +175,21 @@ public class AccountService extends BaseService {
             ServiceLocator.instance().getPeerService().save(context, peer);
         }
 
-        progressModel.increment(context.getString(R.string.starting_home));
-
         // Set the secret key into the wallet (will be available for this session only)
         // (must be done AFTER the walletService.save(), to avoid to write in DB)
         wallet.setSecKey(keys.getSecKey());
+
+
+        if (progressModel.isCancelled()) {
+            return null;
+        }
+
+        // Send registration
+        if (isNewRegistration) {
+            progressModel.increment(context.getString(R.string.saving_wallet));
+            WalletService walletService = ServiceLocator.instance().getWalletService();
+            walletService.sendSelfAndSave(context, wallet);
+        }
 
         return account;
     }

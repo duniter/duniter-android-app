@@ -9,10 +9,6 @@ public class NullAsyncTaskListener<Result> extends NullProgressModel implements 
 
     private Context mContext;
 
-    public NullAsyncTaskListener() {
-        this.mContext = null;
-    }
-
     public NullAsyncTaskListener(Context context) {
         this.mContext = context;
     }

@@ -74,6 +74,8 @@ public class MainActivity extends ActionBarActivity
     private Toolbar mToolbar;
     private boolean mUnitPreferenceChanged = false;
 
+    private ServiceLocator mServiceLocator;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -111,11 +113,6 @@ public class MainActivity extends ActionBarActivity
             Toast.makeText(this, "Could Not load account", Toast.LENGTH_LONG).show();
             finish();
             return;
-        }
-
-        // Loading caches
-        else {
-            ServiceLocator.instance().loadCaches(getApplication());
         }
 
         setContentView(R.layout.activity_main);
@@ -436,7 +433,7 @@ public class MainActivity extends ActionBarActivity
             }
         }
 
-        // By default, open home fragment
+        // Open the home screen
         openHomeFragment();
     }
 
@@ -457,7 +454,11 @@ public class MainActivity extends ActionBarActivity
                 .add(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
                 .addToBackStack(fragment.getClass().getSimpleName())
                 .commit();
+
+        // Init app (caches) in background thread
+        new InitTask().execute();
     }
+
 
 
     protected void openTransfertFragment(Identity identity) {
@@ -518,6 +519,25 @@ public class MainActivity extends ActionBarActivity
         public void onQueryFailed(String message);
 
         public void onQueryCancelled();
+    }
+
+    /**
+     * Initialize the app (load caches)
+     */
+    public class InitTask extends AsyncTaskHandleException<Void, Void, Void> {
+
+        private final long mAccountId;
+
+        public InitTask() {
+            super(MainActivity.this.getApplicationContext());
+            mAccountId = ((io.ucoin.app.Application)getApplication()).getAccountId();
+        }
+
+        @Override
+        protected Void doInBackgroundHandleException(Void... params) throws Exception {
+            ServiceLocator.instance().loadCaches(getContext(), mAccountId);
+            return null;
+        }
     }
 
     public class SearchTask extends AsyncTaskHandleException<String, Void, List<Identity>> {

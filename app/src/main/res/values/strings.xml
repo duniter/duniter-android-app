@@ -11,6 +11,9 @@
     <!-- Strings related to account creation -->
     <string name="creating_account_title">Hello.</string>
     <string name="creating_account_welcome"><![CDATA[Welcome to <b>uCoin</b>.<br/><small>A decentralized system for free currencies.</small>]]></string>
+    <string name="login">Login</string>
+    <string name="register">Register</string>
+    <string name="spinner_default_item">[Empty]</string>
     <string name="loading_dots">Loading...</string>
     <string name="computing_keys">Computing keys...</string>
     <string name="saving_account">Saving account locally...</string>
@@ -21,6 +24,7 @@
     <string name="loading_wallet_credit">Getting wallet credit...</string>
     <string name="saving_wallet">Saving wallet locally...</string>
     <string name="saving_peer">Saving node address locally...</string>
+    <string name="sending_certification">Sending registration data...</string>
     <string name="starting_home">Initializing app...</string>
 
     <!-- Strings related to connection -->
@@ -73,6 +77,11 @@
     <string name="amount_not_decimal">Amount must a valid decimal</string>
     <string name="transactions">Transactions</string>
     <string name="movement_ud">Universal Dividend</string>
+    <string name="sync">Refresh transactions</string>
+    <string name="resync">Download all transactions</string>
+    <string name="resync_confirm">Are you sure you want to download all transactions ? This operation could be long.</string>
+    <string name="resync_started">Downloading...</string>
+    <string name="sync_succeed">%1$s transactions downloads in %2$s</string>
 
     <!-- Strings related to actions -->
     <string name="send">Send</string>
@@ -104,9 +113,13 @@
 
     <!-- Strings related to currency -->
     <string name="lookup">Lookup</string>
-    <string name="add_currency">Add currency</string>
-    <string name="node_address">Node address</string>
-    <string name="node_port">Node port</string>
+    <string name="add_currency">Currency</string>
+    <string name="preselected_peers">Select a predefine currency:</string>
+    <string name="peer_hint">Or fill parameters of a currency node:</string>
+    <string name="node_address">Host</string>
+    <string name="node_address_hint">my.domain.com</string>
+    <string name="node_port">Port</string>
+    <string name="node_port_hint">(optional)</string>
     <string name="rules">Rules</string>
     <string name="money">Money</string>
     <string name="wot">Web of Trust</string>
@@ -161,12 +174,13 @@
     <string name="enter_node_info">Enter node info</string>
     <string name="enter_remote_address">Enter remote address</string>
     <string name="add_node">Add node</string>
-    <string name="dialog_text_add_node">Please enter either a full qualified domain name, an IPv4, or an IPv6 address, and a port number</string>
+    <string name="dialog_text_add_node">Please enter either a full qualified domain name, an IPv4, or an IPv6 address, and a port number.</string>
 
     <!-- Strings related to identities -->
     <string name="identity">Identity</string>
     <string name="uid_or_public_key">user or public key</string>
-    <string name="uid">User identifier (UID)</string>
+    <string name="uid">User</string>
+    <string name="uid_hint">User identifier</string>
     <string name="identity_icon">Identity icon</string>
     <string name="certified_by">Certified by</string>
     <string name="certifiers_of">Certifiers of</string>
@@ -177,16 +191,16 @@
     <string name="community">Community</string>
 
     <!-- Strings related to account/authentication --> -->
-    <string name="login">Login</string>
-    <string name="next">Next</string>
+    <string name="next">Next &gt;</string>
     <string name="password">Password</string>
     <string name="confirm">Confirm</string>
     <string name="confirm_password">Confirm password</string>
     <string name="pin_code">PIN code</string>
-    <string name="add_account">Add account</string>
+    <string name="add_account">Register</string>
     <string name="add_wallet">Add wallet</string>
     <string name="add_wallet_title">New wallet</string>
     <string name="salt">Salt</string>
+    <string name="salt_hint">Salt (email, phone or words)</string>
     <string name="salt_instructions">Salt: We advice you to choose your personal e-mail as value for this
         field. But you can put any other value: it only has to carry enough entropy to avoid key
         collision. Typically, your personal e-mail is a good choice, added to the fact it is easy to
@@ -204,17 +218,20 @@
 
 
     <!-- Validation messages -->
-    <string name="login_too_short">This login is too short</string>
-    <string name="name_or_uid_required">One of name or user ID is required</string>
+    <string name="uid_already_used">This identifier is already used.</string>
+    <string name="uid_and_pubkey_not_registred">This identifier is incorrect</string>
+    <string name="pubkey_already_used">This salt and password are incorrect.</string>
+    <string name="login_too_short">This identifier is too short</string>
+    <string name="name_or_uid_required">One of name or user identifier is required</string>
     <string name="name_too_short">This name is too short</string>
     <string name="salt_too_short">This salt is too short</string>
     <string name="password_too_short">This password is too short</string>
-    <string name="login_incorrect">This login is incorrect</string>
+    <string name="login_incorrect">This identifier is incorrect</string>
     <string name="password_incorrect">This password is incorrect</string>
     <string name="field_required">This field is required</string>
     <string name="duplicate_wallet_pubkey">Salt and password already used by another wallet</string>
-    <string name="uid_match_another_pubkey">This UID match another public key. Choose another UID or check your salt and password.</string>
-    <string name="uid_instructions">User ID: If you choose an UID which is already used inside a community, you won\'t be able to join this community. So ensure not to collide with someone else\'s UID.</string>
+    <string name="uid_match_another_pubkey">This salt and password does not match to given identifier.</string>
+    <string name="uid_instructions">User identifier: If you choose an UID which is already used inside a community, you won\'t be able to join this community. So ensure not to collide with someone else\'s UID.</string>
     <string name="uid_cannot_be_empty">UID cannot be empty</string>
     <string name="salt_cannot_be_empty">Salt cannot be empty</string>
     <string name="password_cannot_be_empty">Password cannot be empty</string>

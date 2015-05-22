@@ -113,6 +113,11 @@ public class CurrencyService extends BaseService {
         return getCurrenciesByAccountId(application.getContentResolver(), accountId);
     }
 
+    public List<Currency> getCurrencies(Context context, long accountId) {
+        return getCurrenciesByAccountId(context.getContentResolver(), accountId);
+    }
+
+
     public Currency getCurrencyById(Context context, long currencyId) {
         return mCurrencyCache.get(context, currencyId);
     }
@@ -167,12 +172,12 @@ public class CurrencyService extends BaseService {
 
     /**
      * Fill all cache need for currencies
-     * @param application
+     * @param context
      */
-    public void loadCache(Application application) {
+    public void loadCache(Context context, long accountId) {
         if (mCurrencyCache == null || mUDCache == null) {
             // Create and fill the currency cache
-            List<Currency> currencies = getCurrencies(application);
+            List<Currency> currencies = getCurrencies(context, accountId);
             if (mCurrencyCache == null) {
 
                 mCurrencyCache = new SimpleCache<Long, Currency>() {

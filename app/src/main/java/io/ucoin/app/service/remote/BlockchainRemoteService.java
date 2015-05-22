@@ -23,6 +23,8 @@ import io.ucoin.app.model.remote.BlockchainMembershipResults;
 import io.ucoin.app.service.CryptoService;
 import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.service.exception.HttpBadRequestException;
+import io.ucoin.app.service.exception.PubkeyAlreadyUsedException;
+import io.ucoin.app.service.exception.UidAlreadyUsedException;
 import io.ucoin.app.service.exception.UidMatchAnotherPubkeyException;
 import io.ucoin.app.technical.ObjectUtils;
 import io.ucoin.app.technical.StringUtils;
@@ -216,6 +218,35 @@ public class BlockchainRemoteService extends BaseRemoteService {
         return lastUD.longValue();
     }
 
+    /**
+     * Check is a identity is not already used by a existing member
+     * @param peer
+     * @param identity
+     * @throws UidAlreadyUsedException if UID already used by another member
+     * @throws PubkeyAlreadyUsedException if pubkey already used by another member
+     */
+    public void checkNotMemberIdentity(Peer peer, Identity identity) throws UidAlreadyUsedException, PubkeyAlreadyUsedException {
+        ObjectUtils.checkNotNull(peer);
+        ObjectUtils.checkNotNull(identity);
+        ObjectUtils.checkArgument(StringUtils.isNotBlank(identity.getUid()));
+        ObjectUtils.checkArgument(StringUtils.isNotBlank(identity.getPubkey()));
+
+        // Read membership data from the UID
+        BlockchainMembershipResults result = getMembershipByPubkeyOrUid(peer, identity.getUid());
+
+        // uid already used by another member
+        if (result != null) {
+            throw new UidAlreadyUsedException(String.format("User identifier '%s' is already used by another member", identity.getUid()));
+        }
+
+        result = getMembershipByPubkeyOrUid(peer, identity.getPubkey());
+
+        // pubkey already used by another member
+        if (result != null) {
+            throw new PubkeyAlreadyUsedException(String.format("Pubkey key '%s' is already used by another member", identity.getPubkey()));
+        }
+    }
+
      /**
      * Check is a wallet is a member, and load its attribute isMember and certTimestamp
       * @param wallet
@@ -339,14 +370,16 @@ public class BlockchainRemoteService extends BaseRemoteService {
 
             if (checkLookupForNonMember) {
                 WotRemoteService wotService = ServiceLocator.instance().getWotRemoteService();
-                Identity lookupIdentity = wotService.getIdentity(currencyId, identity.getUid(), identity.getPubkey());
+                Identity lookupIdentity = peer != null
+                    ? wotService.getIdentity(peer, identity.getUid(), identity.getPubkey())
+                    : wotService.getIdentity(currencyId, identity.getUid(), identity.getPubkey());
 
                 // Self certification exists, update the cert timestamp
                 if (lookupIdentity != null) {
                     identity.setTimestamp(lookupIdentity.getTimestamp());
                 }
 
-                // Self certitification not exists: make sure the cert time is cleaning
+                // Self certification not exists: make sure the cert time is cleaning
                 else {
                     identity.setTimestamp(-1);
                 }

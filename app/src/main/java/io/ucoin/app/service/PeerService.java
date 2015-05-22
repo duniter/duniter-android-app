@@ -1,6 +1,5 @@
 package io.ucoin.app.service;
 
-import android.app.Application;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -151,20 +150,21 @@ public class PeerService extends BaseService {
 
     /**
      * Fill all cache need for currencies
-     * @param application
+     * @param context
+     * @param accountId
      */
-    public void loadCache(Application application) {
+    public void loadCache(Context context, long accountId) {
         if (peersByCurrencyIdCache != null) {
             return;
         }
 
         peersByCurrencyIdCache = new HashMap<Long, List<Peer>>();
 
-        List<Currency> currencies = ServiceLocator.instance().getCurrencyService().getCurrencies(application);
+        List<Currency> currencies = ServiceLocator.instance().getCurrencyService().getCurrencies(context, accountId);
 
         for (Currency currency: currencies) {
             // Get peers from DB
-            List<Peer> peers = getPeersByCurrencyId(application.getContentResolver(), currency.getId());
+            List<Peer> peers = getPeersByCurrencyId(context.getContentResolver(), currency.getId());
 
             // Then fill the cache
             if (CollectionUtils.isNotEmpty(peers)) {

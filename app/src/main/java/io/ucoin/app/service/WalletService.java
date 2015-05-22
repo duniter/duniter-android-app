@@ -158,7 +158,7 @@ public class WalletService extends BaseService {
     }
 
     /**
-     * Get wallets form database, and update it from remote node if ask
+     * Get wallets from database, and update it from remote node if ask
      *
      * @param accountId account Id
      * @param updateRemotely Should wallet must be update from remote nodes ?
@@ -191,8 +191,6 @@ public class WalletService extends BaseService {
         UpdateWalletsRemotelyTask task = new UpdateWalletsRemotelyTask(listener);
         task.execute(wallets.toArray(new Wallet[wallets.size()]));
     }
-
-
 
     /**
      * Update wallet from remote nodes (from the blockchain)
@@ -241,7 +239,7 @@ public class WalletService extends BaseService {
                     wallet.getBlockNumber() == -1 ? 0 : wallet.getBlockNumber() + 1,
                     currentBlockNumber);
             // Process wallet's sources
-            /*movementService.updateMovementsFromHistory(context,
+            /*movementService.refreshMovements(context,
                     wallet.getId(),
                     wallet.getBlockNumber(),
                     txSourcesAndCredit.getSources(),
@@ -287,6 +285,35 @@ public class WalletService extends BaseService {
                 result.add(wallet);
             }
         }
+
+        return result;
+    }
+
+    /**
+     * Get wallet by id, from database
+     *
+     * @param walletId wallet Id
+     */
+    public Wallet getWalletById(final Context context,
+                                      final long walletId) {
+
+
+        String selection = Contract.Wallet._ID + "=?";
+        String[] selectionArgs = {
+                String.valueOf(walletId)
+        };
+
+        Cursor cursor = context.getContentResolver()
+                .query(getContentUri(),
+                        new String[]{}, selection, selectionArgs, null);
+
+        if (!cursor.moveToNext()) {
+            throw new UCoinTechnicalException(String.format("Could not retrieve wallet with id [%s]", walletId));
+        }
+
+        Wallet result = toWallet(cursor);
+
+        cursor.close();
 
         return result;
     }
@@ -629,14 +656,14 @@ public class WalletService extends BaseService {
 
     }
 
-    private class UpdateWalletsRemotelyTask extends AsyncTaskHandleException<Wallet, Void, List<Wallet>> {
+    private class UpdateWalletsRemotelyTask extends AsyncTaskHandleException<Wallet, Void, List<? extends Wallet>> {
 
         public UpdateWalletsRemotelyTask(AsyncTaskListener<List<? extends Wallet>> listener) {
             super(listener);
         }
 
         @Override
-        protected List<Wallet> doInBackgroundHandleException(final Wallet... wallets) {
+        protected List<? extends Wallet> doInBackgroundHandleException(final Wallet... wallets) {
             int i=0;
             int count = wallets.length;
 

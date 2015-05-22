@@ -88,7 +88,7 @@ public class DatabaseHelper extends SQLiteOpenHelper implements Contract {
                 Movement.COMMENT + TEXT + COMMA +
                 Movement.TIME + INTEGER + COMMA +
                 Movement.BLOCK + INTEGER + COMMA +
-                UNIQUE + "(" + Movement.FINGERPRINT + ")" + COMMA +
+                UNIQUE + "(" + Movement.WALLET_ID + COMMA + Movement.FINGERPRINT + ")" + COMMA +
                 "FOREIGN KEY (" + Movement.WALLET_ID + ") REFERENCES " +
                 Wallet.TABLE_NAME + "(" + Wallet._ID + ")" +
                 ")";

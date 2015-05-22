@@ -3,108 +3,83 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+
     <TextView
+        android:id="@+id/title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="8dp"
         android:gravity="center_horizontal"
-        android:text="@string/add_account"
-        android:textSize="@dimen/abc_text_size_display_1_material"
-        android:layout_marginBottom="8dp"/>
+        android:text="@string/login"
+        android:textSize="@dimen/abc_text_size_display_1_material" />
 
-    <LinearLayout
+    <!--TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/uid"
+        style="@style/FormLabel"/-->
+
+    <EditText
+        android:id="@+id/uid"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:hint="@string/uid_hint"
+        android:imeOptions="actionNext"
+        android:inputType="textNoSuggestions"
+        android:singleLine="true"
+        android:textSize="@dimen/abc_text_size_body_2_material" />
 
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.25"
-            android:text="@string/uid" />
 
-        <EditText
-            android:id="@+id/uid"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.75"
-            android:hint="@string/uid"
-            android:imeOptions="actionNext"
-            android:inputType="textNoSuggestions"
-            android:singleLine="true"
-            android:textSize="@dimen/abc_text_size_body_2_material"/>
-    </LinearLayout>
-
-    <LinearLayout
+    <!--TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:text="@string/salt"/-->
 
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.25"
-            android:text="@string/salt" />
-
-        <EditText
-            android:id="@+id/salt"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.75"
-            android:hint="@string/salt"
-            android:imeOptions="actionNext"
-            android:inputType="textNoSuggestions"
-            android:singleLine="true"
-            android:textSize="@dimen/abc_text_size_body_2_material" />
-    </LinearLayout>
-
-    <LinearLayout
+    <EditText
+        android:id="@+id/salt"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:hint="@string/salt_hint"
+        android:imeOptions="actionNext"
+        android:inputType="textNoSuggestions"
+        android:singleLine="true"
+        android:textSize="@dimen/abc_text_size_body_2_material" />
 
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.25"
-            android:text="@string/password" />
+    <!--TextView
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.25"
+        android:text="@string/password"
+        android:gravity="right"
+        android:layout_marginRight="8dp" /-->
 
-        <EditText
-            android:id="@+id/password"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.75"
-            android:hint="@string/password"
-            android:imeOptions="actionNext"
-            android:inputType="textPassword"
-            android:singleLine="true"
-            android:textSize="@dimen/abc_text_size_body_2_material" />
-    </LinearLayout>
-
-    <LinearLayout
+    <EditText
+        android:id="@+id/password"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:hint="@string/password"
+        android:imeOptions="actionNext"
+        android:inputType="textPassword"
+        android:singleLine="true"
+        android:textSize="@dimen/abc_text_size_body_2_material" />
 
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.25"
-            android:text="@string/confirm" />
+    <!--TextView
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.25"
+        android:text="@string/confirm"
+        android:gravity="right" /-->
 
-        <EditText
-            android:id="@+id/confirm_password"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.75"
-            android:hint="@string/confirm_password"
-            android:imeOptions="actionDone"
-            android:inputType="textPassword"
-            android:paddingLeft="8dp"
-            android:paddingRight="8dp"
-            android:singleLine="true"
-            android:textSize="@dimen/abc_text_size_body_2_material" />
-    </LinearLayout>
+    <EditText
+        android:id="@+id/confirm_password"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/confirm_password"
+        android:imeOptions="actionDone"
+        android:inputType="textPassword"
+        android:singleLine="true"
+        android:textSize="@dimen/abc_text_size_body_2_material" />
 
     <TextView
         android:id="@+id/uid_tip"
@@ -123,7 +98,6 @@
         android:textSize="@dimen/abc_text_size_body_2_material"
         android:visibility="gone" />
 
-
     <TextView
         android:id="@+id/password_tip"
         android:layout_width="match_parent"
@@ -131,6 +105,13 @@
         android:text="@string/password_instructions"
         android:textSize="@dimen/abc_text_size_body_2_material"
         android:visibility="gone" />
+
+    <Button
+        android:id="@+id/button_login"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:text="@string/login"
+        style="@style/ButtonText.Small"/>
 
 </LinearLayout>
 

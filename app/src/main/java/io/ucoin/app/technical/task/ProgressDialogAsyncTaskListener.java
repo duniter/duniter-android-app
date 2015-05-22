@@ -3,9 +3,7 @@ package io.ucoin.app.technical.task;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.util.Log;
-import android.widget.Toast;
 
-import io.ucoin.app.technical.ExceptionUtils;
 import io.ucoin.app.technical.ObjectUtils;
 
 /**
@@ -54,10 +52,10 @@ public class ProgressDialogAsyncTaskListener<Result> implements AsyncTaskListene
         }
 
         Log.d(TAG, "Error during [" + mProgressMessage + "]", error);
-        Toast.makeText(mProgressDialog.getContext(),
+        /*Toast.makeText(mProgressDialog.getContext(),
                 ExceptionUtils.getMessage(error),
                 Toast.LENGTH_LONG)
-                .show();
+                .show();*/
     }
 
     @Override

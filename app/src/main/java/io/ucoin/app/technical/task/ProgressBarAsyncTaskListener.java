@@ -29,14 +29,14 @@ public class ProgressBarAsyncTaskListener<Result> implements AsyncTaskListener<R
         ObjectUtils.checkNotNull(progressBar);
         mProgressBar = progressBar;
         mProgressTextView = progressText;
-        mContext = mProgressBar.getContext();
+        mContext = mProgressBar.getContext().getApplicationContext();
     }
 
     public ProgressBarAsyncTaskListener(ProgressBar progressBar) {
         ObjectUtils.checkNotNull(progressBar);
         mProgressBar = progressBar;
         mProgressTextView = null;
-        mContext = mProgressBar.getContext();
+        mContext = mProgressBar.getContext().getApplicationContext();
     }
 
     @Override

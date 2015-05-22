@@ -146,7 +146,7 @@ public class TransactionRemoteService extends BaseRemoteService {
         ObjectUtils.checkArgument(fromBlockNumber >= 0);
         ObjectUtils.checkArgument(fromBlockNumber <= toBlockNumber);
 
-        Log.d(TAG, String.format("Get TX history by pubKey [%s], from block [%s]", pubKey, fromBlockNumber));
+        Log.d(TAG, String.format("Get TX history by pubKey [%s], from block [%s -> %s]", pubKey, fromBlockNumber, toBlockNumber));
 
         // get parameter
         String path = String.format(URL_TX_HISTORY, pubKey, fromBlockNumber, toBlockNumber);

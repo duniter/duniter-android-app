@@ -214,14 +214,11 @@ public class WalletListFragment extends ListFragment implements MainActivity.Que
 
     public class LoadWalletsTask extends AsyncTaskHandleException<Void, Void, List<Wallet>> {
 
-        private long mAccountId;
-        private Application mApplication;
+        private final long mAccountId;
 
         public LoadWalletsTask() {
-            super(getActivity());
-
-            mApplication = (Application)getActivity().getApplication();
-            mAccountId = mApplication.getAccountId();
+            super(getActivity().getApplicationContext());
+            mAccountId = ((Application)getActivity().getApplication()).getAccountId();
 
             ProgressDialog progressDialog = new ProgressDialog(getActivity());
             //progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);

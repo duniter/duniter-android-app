@@ -213,7 +213,7 @@ public class TransferFragment extends Fragment {
                 // Mask unused views
                 view.findViewById(R.id.receiver_contact).setVisibility(View.GONE);
                 view.findViewById(R.id.receiver_pubkey).setVisibility(View.GONE);
-                view.findViewById(R.id.browse_button).setVisibility(View.GONE);
+                //view.findViewById(R.id.browse_button).setVisibility(View.GONE);
             }
 
             // If receiver identity is fixed, display only pubkey
@@ -260,13 +260,13 @@ public class TransferFragment extends Fragment {
                 mContactSpinner.setVisibility(View.GONE);
 
 
-                Button browseButton = (Button)view.findViewById(R.id.browse_button);
+                /*Button browseButton = (Button)view.findViewById(R.id.browse_button);
                 browseButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         pickContact();
                     }
-                });
+                });*/
 
                 // Mask unused views
                 view.findViewById(R.id.receiver_uid).setVisibility(View.GONE);

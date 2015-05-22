@@ -73,6 +73,31 @@ public class ViewUtils {
         }
     }
 
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
+    public static void setVisibleWithAnimation(final View view, final boolean visible) {
+        initAnimTime(view);
+
+        // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
+        // for very easy animations. If available, use these APIs to fade-in
+        // the progress spinner.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
+            view.setVisibility(visible ? View.VISIBLE : View.GONE);
+            view.animate().setDuration(mAnimTime).alpha(
+                    visible ? 1 : 0).setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    view.setVisibility(visible ? View.VISIBLE : View.GONE);
+                }
+            });
+        }
+
+        else {
+            // The ViewPropertyAnimator APIs are not available, so simply show
+            // and hide the relevant UI components.
+            view.setVisibility(visible ? View.VISIBLE : View.GONE);
+        }
+    }
+
     public static void showKeyboard(Activity activity) {
 
         // Hide the keyboard, in case we come from imeDone)

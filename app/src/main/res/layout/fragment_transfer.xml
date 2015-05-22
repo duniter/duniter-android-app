@@ -70,13 +70,13 @@
             android:textColor="#372c24"
             android:imeOptions="actionNext"/>
 
-        <Button
+        <!--Button
             style="?android:attr/buttonStyleSmall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Browse"
             android:id="@+id/browse_button"
-            android:layout_gravity="right" />
+            android:layout_gravity="right" /-->
       </LinearLayout>
 
         <TextView
