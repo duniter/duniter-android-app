@@ -155,6 +155,6 @@ public class MovementListFragment extends ListFragment {
                 DateUtils.formatFriendlyDateTime(getActivity(), timeInMillis / 1000));
         Toast.makeText(getActivity(),
                 message
-                , Toast.LENGTH_SHORT).show();
+                , Toast.LENGTH_LONG).show();
     }
 }

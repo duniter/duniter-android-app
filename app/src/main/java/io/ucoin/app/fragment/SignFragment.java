@@ -55,7 +55,7 @@ public class SignFragment extends Fragment {
         setHasOptionsMenu(true);
 
         long accountId = ((Application)getActivity().getApplication()).getAccountId();
-        final List<Wallet> wallets = ServiceLocator.instance().getWalletService().getUidWalletsByAccountId(getActivity(), accountId);
+        final List<Wallet> wallets = ServiceLocator.instance().getWalletService().getUidWalletsByAccountId(getActivity(), accountId, false);
         mWalletAdapter = new WalletArrayAdapter(
                 getActivity(),
                 android.R.layout.simple_spinner_item,

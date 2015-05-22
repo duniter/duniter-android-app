@@ -47,7 +47,7 @@ public class MovementService extends BaseService {
      */
     private static final String TAG = "MovementService";
 
-    private static final int TX_BLOCK_BATCH_SIZE = 100;
+    private static final int TX_BLOCK_BATCH_SIZE = 500;
 
     // a cache instance of the movement Uri
     // Could NOT be static, because Uri is initialize in Provider.onCreate() method ;(

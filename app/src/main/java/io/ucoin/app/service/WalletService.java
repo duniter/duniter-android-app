@@ -274,10 +274,21 @@ public class WalletService extends BaseService {
      * @return
      */
     public List<Wallet> getUidWalletsByAccountId(Context context, long accountId) {
+        return getUidWalletsByAccountId(context, accountId, displayCreditAsUD(context));
+    }
+
+    /**
+     * Return wallets that have a uid (e.g. that could be used to sign another identity)
+     * @param context
+     * @param accountId
+     * @param updateCreditAsUD
+     * @return
+     */
+    public List<Wallet> getUidWalletsByAccountId(Context context, long accountId, boolean updateCreditAsUD) {
         List<Wallet> allWallets = getWalletsByAccountId(
                 context,
                 accountId,
-                displayCreditAsUD(context));
+                updateCreditAsUD);
 
         List<Wallet> result = new ArrayList<Wallet>();
         for (Wallet wallet: allWallets) {
