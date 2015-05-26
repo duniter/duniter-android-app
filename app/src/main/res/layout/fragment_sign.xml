@@ -54,7 +54,8 @@
                 android:id="@+id/sign_button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/sign" />
+                android:text="@string/sign"
+                style="@style/ButtonText"/>
 
             <!-- Login progress -->
             <ProgressBar

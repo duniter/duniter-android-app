@@ -59,7 +59,8 @@ public interface Contract {
         public static final String AMOUNT = "amount";
         public static final String BLOCK = "block";
         public static final String TIME = "time";
-        public static final String PUBLIC_KEY = "public_key";
+        public static final String ISSUERS = "issuers";
+        public static final String RECEIVERS = "receivers";
     }
 
     public static final class Contact implements BaseColumns {

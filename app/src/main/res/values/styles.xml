@@ -5,12 +5,18 @@
 
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar" />
 
+    <attr name="listTextColorHead" format="color|reference"/>
+    <attr name="listTextColorSubhead" format="color|reference"/>
+
     <style name="AppTheme.Base">
         <item name="colorPrimary">@color/primary</item>
         <item name="colorPrimaryDark">@color/primaryDark</item>
         <item name="colorAccent">@color/accent</item>
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowActionBar">false</item>
+
+        <item name="listTextColorHead">@color/primary_text_default_material_light</item>
+        <item name="listTextColorSubhead">@color/hideable_text_color</item>
     </style>
 
     <style name="DarkTheme" parent="Theme.AppCompat.NoActionBar" >
@@ -20,6 +26,10 @@
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowActionBar">false</item>
         <item name="android:windowBackground">@color/primary</item>
+
+        <item name="listTextColorHead">@color/primary_text_default_material_dark</item>
+        <item name="listTextColorSubhead">#f6f6f6f6</item>
+
     </style>
 
 
@@ -102,14 +112,10 @@
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:textAppearance">?android:textAppearanceMedium</item>
-        <item name="android:textColor">@color/primary_text_default_material_light</item>
+        <item name="android:textColor">?attr/listTextColorHead</item>
         <item name="android:singleLine">true</item>
         <item name="android:layout_gravity">left|top</item>
         <item name="android:textSize">18sp</item>
-    </style>
-
-    <style name="ListItemHead.Dark">
-        <item name="android:textColor">@color/primary_text_default_material_dark</item>
     </style>
 
     <style name="ListItemSubhead">
@@ -117,14 +123,10 @@
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:textAppearance">?android:textAppearanceMedium</item>
-        <item name="android:textColor">@color/hideable_text_color</item>
+        <item name="android:textColor">?attr/listTextColorSubhead</item>
         <item name="android:singleLine">true</item>
         <item name="android:layout_gravity">left|top</item>
         <item name="android:textSize">12sp</item>
-    </style>
-
-    <style name="ListItemSubhead.Dark">
-        <item name="android:textColor">#dddddd</item>
     </style>
 
     <style name="FormSpinner">

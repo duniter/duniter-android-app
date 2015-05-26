@@ -30,6 +30,7 @@ import io.ucoin.app.activity.IToolbarActivity;
 import io.ucoin.app.activity.SettingsActivity;
 import io.ucoin.app.adapter.CertificationListAdapter;
 import io.ucoin.app.adapter.ProgressViewAdapter;
+import io.ucoin.app.model.Movement;
 import io.ucoin.app.model.UnitType;
 import io.ucoin.app.model.Wallet;
 import io.ucoin.app.model.WotCertification;
@@ -131,7 +132,7 @@ public class WalletFragment extends Fragment {
         }
         mTabs.setCurrentTab(tabIndex);
 
-        //Uid
+        // Uid
         mUidView = (TextView) view.findViewById(R.id.uid);
 
         // details view
@@ -172,7 +173,12 @@ public class WalletFragment extends Fragment {
         mCreditView = (TextView) view.findViewById(R.id.credit);
 
         // Tab 1: transfer list
-        mMovementListFragment = MovementListFragment.newInstance(wallet);
+        mMovementListFragment = MovementListFragment.newInstance(wallet, new MovementListFragment.MovementListListener() {
+            @Override
+            public void onPositiveClick(Bundle args) {
+                onMovementClick(args);
+            }
+        });
         getFragmentManager().beginTransaction()
                 .replace(R.id.tab1, mMovementListFragment, "tab1")
                 .commit();
@@ -384,18 +390,12 @@ public class WalletFragment extends Fragment {
 
     protected void onWotIdentityClick(int position) {
 
-        // Get certification
-        WotCertification cert = (WotCertification) mCertificationListAdapter
+        // Get the selected certification
+        WotCertification cert = mCertificationListAdapter
                 .getItem(position);
 
         Fragment fragment = IdentityFragment.newInstance(cert, mTabs.getCurrentTab());
         FragmentManager fragmentManager = getFragmentManager();
-
-        /*fragmentManager.beginTransaction()
-                .setCustomAnimations(R.animator.slide_in_right,
-                        R.animator.slide_out_left)
-                .remove(WalletFragment.this)
-                .commit();*/
 
         fragmentManager.beginTransaction()
                 .setCustomAnimations(R.animator.slide_in_right,
@@ -406,6 +406,19 @@ public class WalletFragment extends Fragment {
                 .addToBackStack(fragment.getClass().getSimpleName())
                 .commit();
     }
+
+    protected void onMovementClick(Bundle args) {
+
+        // Get select movement
+        Movement movement = (Movement) args.getSerializable(Movement.class.getSimpleName());
+        if (movement == null) {
+            return;
+        }
+
+        Log.d(TAG, "Click on movement with fingerprint: " + movement.getFingerprint());
+        // TODO: open the identity from pubkey
+    }
+
 
     protected void onDeleteClick() {
         // Retrieve wallet

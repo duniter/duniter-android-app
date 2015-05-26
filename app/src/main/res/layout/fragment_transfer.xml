@@ -190,7 +190,8 @@
                 android:id="@+id/send_button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/send" />
+                android:text="@string/send"
+                style="@style/ButtonText" />
 
             <!-- progress -->
             <ProgressBar

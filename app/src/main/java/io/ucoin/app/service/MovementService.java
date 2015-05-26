@@ -27,8 +27,6 @@ import io.ucoin.app.model.Movement;
 import io.ucoin.app.model.Wallet;
 import io.ucoin.app.model.remote.TxHistoryMovement;
 import io.ucoin.app.model.remote.TxHistoryResults;
-import io.ucoin.app.model.remote.TxSource;
-import io.ucoin.app.model.remote.TxSourceResults;
 import io.ucoin.app.service.exception.DuplicatePubkeyException;
 import io.ucoin.app.service.remote.TransactionRemoteService;
 import io.ucoin.app.technical.CollectionUtils;
@@ -51,6 +49,8 @@ public class MovementService extends BaseService {
     private static final String TAG = "MovementService";
 
     private static final int TX_BLOCK_BATCH_SIZE = 500;
+    private static final String MOVEMENT_ISSUER_SEPARATOR = ",";
+    private static final String MOVEMENT_RECEIVERS_SEPARATOR = ",";
 
     // a cache instance of the movement Uri
     // Could NOT be static, because Uri is initialize in Provider.onCreate() method ;(
@@ -147,7 +147,7 @@ public class MovementService extends BaseService {
         long currentBlockNumber = currentBlock.getNumber();
         long syncTxBlockNumber = wallet.getTxBlockNumber();
 
-        progressModel.setMax(4);
+        progressModel.setMax(3);
         progressModel.setMessage(context.getString(R.string.resync_started));
 
         // Delete existing movement if need
@@ -161,9 +161,6 @@ public class MovementService extends BaseService {
             return 0;
         }
 
-        progressModel.increment();
-        TransactionRemoteService txService = ServiceLocator.instance().getTransactionRemoteService();
-        TxSourceResults sourceResults = txService.getSourcesAndCredit(wallet.getCurrencyId(), wallet.getPubKeyHash());
 
         // Load movement that waiting block
         progressModel.increment();
@@ -171,19 +168,21 @@ public class MovementService extends BaseService {
         Map<String, Movement> waitingMovementByFingerprint = ModelUtils.movementsToFingerprintMap(waitingMovements);
 
 
+        // Read TX history, by N blocks
         progressModel.increment();
+        TransactionRemoteService txService = ServiceLocator.instance().getTransactionRemoteService();
         long start = syncTxBlockNumber == -1 ? 0 : syncTxBlockNumber + 1;
         long end = Math.min(start + TX_BLOCK_BATCH_SIZE, currentBlockNumber);
-
         long txCount = 0;
-
         while(start < currentBlockNumber) {
-            TxHistoryResults history = txService.getHistory(wallet.getCurrencyId(),
+            TxHistoryResults txPartialHistory = txService.getHistory(wallet.getCurrencyId(),
                     wallet.getPubKeyHash(),
                     start, end);
 
-            txCount += updateMovementsFromHistory(context, walletId, start - 1,
-                    waitingMovementByFingerprint, sourceResults.getSources(), history);
+            txCount += updateMovementsFromHistory(context,
+                    walletId,
+                    waitingMovementByFingerprint,
+                    txPartialHistory);
 
             start += TX_BLOCK_BATCH_SIZE;
             end = Math.min(end + TX_BLOCK_BATCH_SIZE, currentBlockNumber);
@@ -201,14 +200,12 @@ public class MovementService extends BaseService {
      * Update wallet's movements from tx history
      * @param context
      * @param walletId
-     * @param lastUpdateBlockNumber
-     * @param sources
+     * @param waitingMovementByFingerprint
+     * @param historyResults
      */
     public long updateMovementsFromHistory(final Context context,
                                            long walletId,
-                                           long lastUpdateBlockNumber,
                                            Map<String, Movement> waitingMovementByFingerprint,
-                                           List<TxSource> sources,
                                            TxHistoryResults historyResults) {
 
         List<Movement> movementsToUpdate = new ArrayList<Movement>();
@@ -231,6 +228,9 @@ public class MovementService extends BaseService {
                         waitingMovement.setBlockNumber(txHistoryMovement.getBlockNumber());
                         waitingMovement.setTime(txHistoryMovement.getTime());
                         movementsToUpdate.add(waitingMovement);
+
+                        // Remove it from pending movement list
+                        waitingMovementByFingerprint.remove(txHistoryMovement.getFingerprint());
                     }
 
                     // Movement was not exists, so insert it
@@ -259,6 +259,9 @@ public class MovementService extends BaseService {
                         waitingMovement.setBlockNumber(txHistoryMovement.getBlockNumber());
                         waitingMovement.setTime(txHistoryMovement.getTime());
                         movementsToUpdate.add(waitingMovement);
+
+                        // Remove it from pending movement list
+                        waitingMovementByFingerprint.remove(txHistoryMovement.getFingerprint());
                     }
 
                     // Movement was not exists, so insert it
@@ -275,44 +278,23 @@ public class MovementService extends BaseService {
             }
         }
 
-        // UD received
-        /*for (TxSource source: sources) {
-            // If UD
-            if (TxSource.SOURCE_TYPE_UD.equals(source.getType())) {
-                // If not processed block
-                if (source.getNumber() > lastUpdateBlockNumber) {
-                    Log.d(TAG, "Detected a received UD : " + source.toString() + ". Should be processed ???");
-                    // TODO : check the block number to known if already processed or not
-                    Movement udMovement = new Movement();
-                    udMovement.setWalletId(walletId);
-                    udMovement.setFingerprint(source.getFingerprint());
-                    udMovement.setComment(context.getString(R.string.movement_ud));
-                    udMovement.setAmount(source.getAmount());
-                    udMovement.setUD(true);
-                    udMovement.setBlockNumber(source.getNumber());
-                    // TODO : udMovement.setTime();
-                    movementsToInsert.add(udMovement);
-                }
-            }
-        }*/
-
-        long count = 0;
+        long nbInsertOrUpdate = 0;
 
         // Update existing movements to update
         if (CollectionUtils.isNotEmpty(movementsToUpdate)) {
             // bulk updates
             update(context.getContentResolver(), movementsToUpdate);
-            count += movementsToUpdate.size();
+            nbInsertOrUpdate += movementsToUpdate.size();
         }
 
         // Insert new movements
         if (CollectionUtils.isNotEmpty(movementsToInsert)) {
             // bulk insert
             insert(context.getContentResolver(), movementsToInsert, false);
-            count += movementsToInsert.size();
+            nbInsertOrUpdate += movementsToInsert.size();
         }
 
-        return count;
+        return nbInsertOrUpdate;
     }
 
     /* -- internal methods-- */
@@ -325,8 +307,11 @@ public class MovementService extends BaseService {
             return null;
         }
 
-        // Read issuers pubkeys
-        String pubkeys = computeOtherPubkeys(source, pubkey);
+        // Read issuers
+        String issuers = computeIssuers(source, pubkey);
+
+        // Read receivers
+        String receivers = computeReceivers(source, pubkey);
 
         Movement target = new Movement();
         target.setWalletId(walletId);
@@ -336,22 +321,29 @@ public class MovementService extends BaseService {
         target.setUD(false);
         target.setBlockNumber(source.getBlockNumber());
         target.setTime(source.getTime());
-        target.setPubkey(pubkeys);
+        target.setIssuers(issuers);
+        target.setReceivers(receivers);
         return target;
     }
 
-    private long getAmountFromTxInput(String version, String inlineTxSource) {
-        int lastIndex = inlineTxSource.lastIndexOf(':');
-        return Long.parseLong(inlineTxSource.substring(lastIndex + 1));
+    private long getAmountFromTxInput(String version, String inlineTxInput) {
+        int lastIndex = inlineTxInput.lastIndexOf(':');
+        return Long.parseLong(inlineTxInput.substring(lastIndex + 1));
     }
 
-    private long getAmountFromTxOutput(String version, String inlineTxSource) {
-        int lastIndex = inlineTxSource.lastIndexOf(':');
-        return Long.parseLong(inlineTxSource.substring(lastIndex+1));
+    private long getAmountFromTxOutput(String version, String inlineTxOutput) {
+        int lastIndex = inlineTxOutput.lastIndexOf(':');
+        return Long.parseLong(inlineTxOutput.substring(lastIndex + 1));
+    }
+
+    private String getPubkeyFromTxOutput(String version, String inlineTxOutput) {
+        int lastIndex = inlineTxOutput.lastIndexOf(':');
+        return inlineTxOutput.substring(0, lastIndex);
     }
 
     private long computeAmount(TxHistoryMovement movement, String pubkey) {
         long result = 0;
+        String txVersion = movement.getVersion();
 
         int issuerIndex = -1;
         int i=0;
@@ -366,37 +358,55 @@ public class MovementService extends BaseService {
         if (issuerIndex != -1) {
             for (String input : movement.getInputs()) {
                 if (input.startsWith(issuerIndex + ":")) {
-                    result -= getAmountFromTxInput(movement.getVersion(), input);
+                    result -= getAmountFromTxInput(txVersion, input);
                 }
             }
         }
 
         for (String output : movement.getOutputs()) {
             if (output.startsWith(pubkey + ":")) {
-                result += getAmountFromTxOutput(movement.getVersion(), output);
+                result += getAmountFromTxOutput(txVersion, output);
             }
         }
 
         return result;
     }
 
-    private String computeOtherPubkeys(TxHistoryMovement movement, String pubkey) {
-        Set<String> pubKeys = new HashSet<String>();
+    private String computeIssuers(TxHistoryMovement movement, String pubkey) {
+        Set<String> issuerPubKeys = new HashSet<String>();
 
         for (String issuer: movement.getIssuers()) {
             if (!pubkey.equals(issuer)) {
-                pubKeys.add(issuer);
+                issuerPubKeys.add(issuer);
             }
         }
-        if (pubKeys.size() == 0) {
+        if (issuerPubKeys.size() == 0) {
             return null;
         }
 
-        StringBuilder sb = new StringBuilder();
-        for (String pubKey: pubKeys) {
-            sb.append(", ").append(pubKey);
+        StringBuilder result = new StringBuilder();
+        for (String pubKey: issuerPubKeys) {
+            result.append(MOVEMENT_ISSUER_SEPARATOR).append(pubKey);
         }
-        return sb.substring(2);
+        return result.substring(2);
+    }
+
+    private String computeReceivers(TxHistoryMovement movement, String pubkey) {
+        StringBuilder result = new StringBuilder();
+
+        String txVersion = movement.getVersion();
+
+        for (String output: movement.getOutputs()) {
+            String receiverPubkey = getPubkeyFromTxOutput(txVersion, output);
+            if (!pubkey.equals(receiverPubkey)) {
+                result.append(MOVEMENT_RECEIVERS_SEPARATOR)
+                        .append(receiverPubkey);
+            }
+        }
+        if (result.length() == 0) {
+            return null;
+        }
+        return result.substring(2);
     }
 
     private List<Movement> getMovementsByWalletId(final ContentResolver resolver, final long walletId) {
@@ -553,13 +563,16 @@ public class MovementService extends BaseService {
         if (StringUtils.isNotBlank(source.getComment())) {
             target.put(Contract.Movement.COMMENT, source.getComment());
         }
-        if (StringUtils.isNotBlank(source.getPubkey())) {
-            target.put(Contract.Movement.PUBLIC_KEY, source.getPubkey());
+        if (StringUtils.isNotBlank(source.getIssuers())) {
+            target.put(Contract.Movement.ISSUERS, source.getIssuers());
+        }
+        if (StringUtils.isNotBlank(source.getReceivers())) {
+            target.put(Contract.Movement.RECEIVERS, source.getReceivers());
         }
         return target;
     }
 
-    private Movement toMovement(final Cursor cursor) {
+    public Movement toMovement(final Cursor cursor) {
         // Init the holder is need
         if (mSelectHolder == null) {
             mSelectHolder = new SelectCursorHolder(cursor);
@@ -574,7 +587,8 @@ public class MovementService extends BaseService {
         result.setBlockNumber(cursor.getLong(mSelectHolder.blockIndex));
         result.setTime(cursor.getLong(mSelectHolder.timeIndex));
         result.setComment(cursor.getString(mSelectHolder.commentIndex));
-        result.setPubkey(cursor.getString(mSelectHolder.pubkeyIndex));
+        result.setIssuers(cursor.getString(mSelectHolder.issuersIndex));
+        result.setReceivers(cursor.getString(mSelectHolder.receiversIndex));
 
         return result;
     }
@@ -597,7 +611,8 @@ public class MovementService extends BaseService {
         int blockIndex;
         int timeIndex;
         int commentIndex;
-        int pubkeyIndex;
+        int issuersIndex;
+        int receiversIndex;
 
         private SelectCursorHolder(final Cursor cursor ) {
             idIndex = cursor.getColumnIndex(Contract.Movement._ID);
@@ -608,7 +623,8 @@ public class MovementService extends BaseService {
             blockIndex = cursor.getColumnIndex(Contract.Movement.BLOCK);
             timeIndex = cursor.getColumnIndex(Contract.Movement.TIME);
             commentIndex = cursor.getColumnIndex(Contract.Movement.COMMENT);
-            pubkeyIndex = cursor.getColumnIndex(Contract.Movement.PUBLIC_KEY);
+            issuersIndex = cursor.getColumnIndex(Contract.Movement.ISSUERS);
+            receiversIndex = cursor.getColumnIndex(Contract.Movement.RECEIVERS);
         }
     }
 

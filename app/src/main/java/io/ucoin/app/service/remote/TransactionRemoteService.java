@@ -223,7 +223,7 @@ public class TransactionRemoteService extends BaseRemoteService {
 		// Output
 		sb.append("Outputs:\n");
 		for (TxOutput output : outputs) {
-			// PUBLIC_KEY:AMOUNT
+			// ISSUERS:AMOUNT
 			sb.append(output.getPubKey()).append(':')
 					.append(output.getAmount()).append('\n');
 		}
@@ -265,7 +265,7 @@ public class TransactionRemoteService extends BaseRemoteService {
 
 		// Output
 		for (TxOutput output : outputs) {
-			// PUBLIC_KEY:AMOUNT
+			// ISSUERS:AMOUNT
 			sb.append(output.getPubKey()).append(':')
 					.append(output.getAmount()).append('\n');
 		}

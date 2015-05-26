@@ -45,6 +45,7 @@
             <TextView
                 android:id="@+id/pubkey"
                 android:text="G2CBgZBPLe6FSFUgpx2Jf1Aqsgta6iib3vmDRA1yLiqU"
+                android:maxWidth="@dimen/list_item_max_width_pubkey"
                 style="@style/ListItemSubhead"/>
         </LinearLayout>
     </LinearLayout>

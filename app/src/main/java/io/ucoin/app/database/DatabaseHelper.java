@@ -89,7 +89,8 @@ public class DatabaseHelper extends SQLiteOpenHelper implements Contract {
                 Movement.COMMENT + TEXT + COMMA +
                 Movement.TIME + INTEGER + COMMA +
                 Movement.BLOCK + INTEGER + COMMA +
-                Movement.PUBLIC_KEY + TEXT + COMMA +
+                Movement.ISSUERS + TEXT + COMMA +
+                Movement.RECEIVERS + TEXT + COMMA +
                 UNIQUE + "(" + Movement.WALLET_ID + COMMA + Movement.FINGERPRINT + ")" + COMMA +
                 "FOREIGN KEY (" + Movement.WALLET_ID + ") REFERENCES " +
                 Wallet.TABLE_NAME + "(" + Wallet._ID + ")" +
@@ -152,7 +153,7 @@ public class DatabaseHelper extends SQLiteOpenHelper implements Contract {
                 "FOREIGN KEY (" + Source.CURRENCY_NAME + ") REFERENCES " +
                 Currency.TABLE_NAME + "(" + Currency.NAME + ")" + COMMA +
                 "FOREIGN KEY (" + Source.WALLET_PUBLIC_KEY + ") REFERENCES " +
-                Wallet.TABLE_NAME + "(" + Wallet.PUBLIC_KEY + ")" +
+                Wallet.TABLE_NAME + "(" + Wallet.ISSUERS + ")" +
                 ")";
         db.execSQL(CREATE_TABLE_SOURCE);
 

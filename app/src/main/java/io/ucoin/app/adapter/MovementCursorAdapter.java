@@ -71,9 +71,24 @@ public class MovementCursorAdapter extends CursorAdapter{
         String comment= cursor.getString(viewHolder.commentIndex);
         viewHolder.commentView.setText(comment);
 
-        // public key
-        String pubkey = cursor.getString(viewHolder.pubkeyIndex);
-        viewHolder.pubkeyView.setText(pubkey == null ? "" : pubkey);
+        // issuers or receivers
+        String issuersOrReceivers;
+        if (amount > 0) {
+            issuersOrReceivers = cursor.getString(viewHolder.issuersIndex);
+        }
+        else {
+            issuersOrReceivers = cursor.getString(viewHolder.receiversIndex);
+        }
+        viewHolder.issuerOrReceiverView.setText(
+                issuersOrReceivers == null
+                        ? ""
+                        : issuersOrReceivers);
+        viewHolder.issuerOrReceiverView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
     }
 
     // View lookup cache
@@ -81,27 +96,29 @@ public class MovementCursorAdapter extends CursorAdapter{
         TextView timeView;
         TextView amountView;
         TextView commentView;
-        TextView pubkeyView;
+        TextView issuerOrReceiverView;
         ImageView iconView;
 
         int timeIndex;
         int amountIndex;
         int commentIndex;
         int blockNumberIndex;
-        int pubkeyIndex;
+        int issuersIndex;
+        int receiversIndex;
 
         ViewHolder(View view, Cursor cursor) {
             iconView = (ImageView) view.findViewById(R.id.icon);
             timeView = (TextView) view.findViewById(R.id.time);
             amountView = (TextView) view.findViewById(R.id.amount);
             commentView = (TextView) view.findViewById(R.id.comment);
-            pubkeyView = (TextView) view.findViewById(R.id.pubkey);
+            issuerOrReceiverView = (TextView) view.findViewById(R.id.issuer_or_receiver);
 
             timeIndex = cursor.getColumnIndex(Contract.Movement.TIME);
             amountIndex = cursor.getColumnIndex(Contract.Movement.AMOUNT);
             commentIndex = cursor.getColumnIndex(Contract.Movement.COMMENT);
             blockNumberIndex = cursor.getColumnIndex(Contract.Movement.BLOCK);
-            pubkeyIndex = cursor.getColumnIndex(Contract.Movement.PUBLIC_KEY);
+            issuersIndex = cursor.getColumnIndex(Contract.Movement.ISSUERS);
+            receiversIndex = cursor.getColumnIndex(Contract.Movement.RECEIVERS);
         }
     }
 

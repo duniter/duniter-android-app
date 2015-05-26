@@ -11,13 +11,16 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ListView;
 
 import io.ucoin.app.R;
 import io.ucoin.app.adapter.MovementCursorAdapter;
 import io.ucoin.app.adapter.ProgressViewAdapter;
 import io.ucoin.app.content.Provider;
 import io.ucoin.app.database.Contract;
+import io.ucoin.app.model.Movement;
 import io.ucoin.app.model.Wallet;
+import io.ucoin.app.service.ServiceLocator;
 
 
 public class MovementListFragment extends ListFragment {
@@ -26,12 +29,16 @@ public class MovementListFragment extends ListFragment {
 
     private MovementCursorAdapter mCursorAdapter;
     private ProgressViewAdapter mProgressViewAdapter;
+    private MovementListListener mListener;
 
-    public static MovementListFragment newInstance(Wallet wallet) {
+    public static MovementListFragment newInstance(Wallet wallet, MovementListListener listener) {
         MovementListFragment fragment = new MovementListFragment();
         Bundle args = new Bundle();
         args.putLong(BUNDLE_WALLET_ID, wallet.getId());
         fragment.setArguments(args);
+
+        fragment.setOnClickListener(listener);
+
         return fragment;
     }
 
@@ -79,7 +86,31 @@ public class MovementListFragment extends ListFragment {
         mCursorAdapter.notifyDataSetChanged();
     }
 
-    /* -- -- */
+    @Override
+    public void onListItemClick(ListView l, View v, int position, long id) {
+        if (mListener == null) {
+            return;
+        }
+
+        Cursor cursor = (Cursor) mCursorAdapter.getItem(position);
+        Movement movement = ServiceLocator.instance().getMovementService().toMovement(cursor);
+
+        Bundle bundle = new Bundle();
+        bundle.putSerializable(Movement.class.getSimpleName(), movement);
+        mListener.onPositiveClick(bundle);
+    }
+
+    /* -- Inner class -- */
+
+    public interface MovementListListener {
+        public void onPositiveClick(Bundle args);
+    }
+
+    /* -- Internal methods -- */
+
+    private void setOnClickListener(MovementListListener listener) {
+        mListener = listener;
+    }
 
     protected Cursor getNewCursor() {
         long walletId = getArguments().getLong(BUNDLE_WALLET_ID);

@@ -13,13 +13,13 @@
     <TextView
         android:id="@+id/currency_name"
         android:text="currency_name"
-        style="@style/ListItemHead.Dark"
+        style="@style/ListItemHead"
         android:layout_gravity="center_horizontal" />
 
     <TextView
         android:id="@+id/peer"
         android:text="peer"
-        style="@style/ListItemSubhead.Dark"
+        style="@style/ListItemSubhead"
         android:layout_gravity="center_horizontal" />
 
 </LinearLayout>

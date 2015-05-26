@@ -44,26 +44,27 @@
         android:src="@drawable/ic_check_24dp"/>
 
     <TextView
+        android:id="@+id/issuer_or_receiver"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/amount"
+        android:layout_alignParentLeft="true"
+        android:text="5ocqzyDMMWf1V8bsoNhWb1iNwax1e9M7VTUN6navs8of"
+        android:singleLine="true"
+        android:maxWidth="@dimen/list_item_max_width_pubkey"
+        style="@style/ListItemSubhead"/>
+
+    <TextView
         android:id="@+id/comment"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="@color/hideable_text_color"
-        android:textSize="@dimen/abc_text_size_caption_material"
         android:layout_below="@+id/amount"
-        android:layout_alignParentLeft="true"
-        android:text="comment"/>
-
-    <TextView
-        android:id="@+id/pubkey"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="@color/hideable_text_color"
-        android:textSize="@dimen/abc_text_size_caption_material"
-        android:layout_below="@+id/amount"
-        android:layout_toRightOf="@+id/comment"
-        android:text="issuer"
-        android:layout_marginStart="10dp"
+        android:layout_toRightOf="@+id/issuer_or_receiver"
+        android:layout_marginStart="50dp"
         android:layout_marginLeft="10dp"
-        android:singleLine="true"
-        android:maxWidth="50dp"/>
+        style="@style/ListItemSubhead"
+        android:textStyle="italic"
+        android:singleLine="false"
+        android:text="this is a very long long long long long long long long long long long long comment"/>
+
 </RelativeLayout>

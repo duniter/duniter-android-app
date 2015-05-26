@@ -130,6 +130,7 @@ public class LoginFragment extends Fragment {
                 return false;
             }
         });
+        mPasswordView.requestFocus();
 
         Button mSignInButton = (Button) view.findViewById(R.id.sign_in_button);
         mSignInButton.setOnClickListener(new View.OnClickListener() {
@@ -263,7 +264,7 @@ public class LoginFragment extends Fragment {
         List<String> walletPubkeys = new ArrayList<String>();
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
-            walletPubkeys.add(cursor.getString(WalletQuery.PUBLIC_KEY));
+            walletPubkeys.add(cursor.getString(WalletQuery.ISSUERS));
             cursor.moveToNext();
         }
 
@@ -277,11 +278,11 @@ public class LoginFragment extends Fragment {
     private interface WalletQuery {
         String[] PROJECTION = {
                 Contract.Wallet._ID,
-                Contract.Wallet.PUBLIC_KEY,
+                Contract.Wallet.ISSUERS,
         };
 
         int ID = 0;
-        int PUBLIC_KEY = 1;
+        int ISSUERS = 1;
     }
     */
 
