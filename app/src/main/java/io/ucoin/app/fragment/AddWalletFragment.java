@@ -192,7 +192,7 @@ public class AddWalletFragment extends Fragment {
 
         // Check for a valid name (mandatory if uid is not set)
         if (TextUtils.isEmpty(name) && TextUtils.isEmpty(uid)) {
-            mNameView.setError(getString(R.string.name_or_uid_required));
+            mNameView.setError(getString(R.string.alias_or_uid_required));
             if (focusView == null) focusView = mNameView;
             cancel = true;
         }

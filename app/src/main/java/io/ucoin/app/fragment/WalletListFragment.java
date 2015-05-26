@@ -27,8 +27,13 @@ import io.ucoin.app.adapter.WalletArrayAdapter;
 import io.ucoin.app.model.Currency;
 import io.ucoin.app.model.Wallet;
 import io.ucoin.app.service.ServiceLocator;
+import io.ucoin.app.service.WalletService;
+import io.ucoin.app.service.exception.DuplicatePubkeyException;
 import io.ucoin.app.service.exception.PeerConnectionException;
+import io.ucoin.app.service.exception.UidMatchAnotherPubkeyException;
+import io.ucoin.app.technical.ExceptionUtils;
 import io.ucoin.app.technical.task.AsyncTaskHandleException;
+import io.ucoin.app.technical.task.NullAsyncTaskListener;
 import io.ucoin.app.technical.task.ProgressDialogAsyncTaskListener;
 
 
@@ -193,19 +198,56 @@ public class WalletListFragment extends ListFragment implements MainActivity.Que
         Bundle args = getArguments();
         Currency currency = (Currency)args.getSerializable(Currency.class.getSimpleName());
 
+        AddWalletDialogFragment.OnClickListener listener = new AddWalletDialogFragment.OnClickListener() {
+            public void onPositiveClick(Bundle args) {
+
+                Currency currency = (Currency)args.getSerializable(AddWalletDialogFragment.BUNDLE_CURRENCY);
+                String alias = args.getString(AddWalletDialogFragment.BUNDLE_ALIAS);
+                String uid = args.getString(AddWalletDialogFragment.BUNDLE_UID);
+                String salt = args.getString(AddWalletDialogFragment.BUNDLE_SALT);
+                String password = args.getString(AddWalletDialogFragment.BUNDLE_PASSWORD);
+
+                WalletService walletService = ServiceLocator.instance().getWalletService();
+                walletService.create(currency,
+                        alias,
+                        uid, salt, password,
+                        new NullAsyncTaskListener<Wallet>(getActivity().getApplicationContext()) {
+
+                            @Override
+                            public void onSuccess(Wallet result) {
+                                if (!getActivity().isDestroyed() && !getActivity().isFinishing()) {
+                                    new LoadWalletsTask().execute();
+                                }
+                            }
+
+                            @Override
+                            public void onFailed(Throwable error) {
+                                String errorMessage = ExceptionUtils.getMessage(error);
+                                if (error instanceof DuplicatePubkeyException) {
+                                    errorMessage = getString(R.string.duplicate_wallet_pubkey);
+                                }
+                                else if (error instanceof UidMatchAnotherPubkeyException) {
+                                    errorMessage = getString(R.string.uid_match_another_pubkey);
+                                }
+                                else {
+                                    Log.d(TAG, "Error in AddWalletTask", error);
+                                }
+                                Toast.makeText(getContext(),
+                                        errorMessage,
+                                        Toast.LENGTH_LONG).show();
+                            }
+                });
+            }
+        };
         DialogFragment fragment;
         if (currency == null) {
-            fragment = AddWalletDialogFragment.newInstance(getActivity());
+            fragment = AddWalletDialogFragment.newInstance(getActivity(), listener);
         }
         else {
-            fragment = AddWalletDialogFragment.newInstance(currency);
+            fragment = AddWalletDialogFragment.newInstance(currency, listener);
         }
         fragment.show(getFragmentManager(),
                 fragment.getClass().getSimpleName());
-
-        // Reload wallet list
-        LoadWalletsTask task = new LoadWalletsTask();
-        task.execute();
     }
 
     private void setOnClickListener(WalletListListener listener) {
@@ -266,4 +308,5 @@ public class WalletListFragment extends ListFragment implements MainActivity.Que
             }
         }
     }
+
 }

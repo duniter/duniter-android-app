@@ -2,6 +2,7 @@ package io.ucoin.app.adapter;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -59,10 +60,20 @@ public class MovementCursorAdapter extends CursorAdapter{
         // Amount
         int amount = cursor.getInt(viewHolder.amountIndex);
         viewHolder.amountView.setText(CurrencyUtils.formatCoin(amount));
+        if (amount > 0) {
+            viewHolder.amountView.setTypeface(Typeface.DEFAULT_BOLD);
+        }
+        else {
+            viewHolder.amountView.setTypeface(Typeface.DEFAULT);
+        }
 
         // Comment
         String comment= cursor.getString(viewHolder.commentIndex);
         viewHolder.commentView.setText(comment);
+
+        // public key
+        String pubkey = cursor.getString(viewHolder.pubkeyIndex);
+        viewHolder.pubkeyView.setText(pubkey == null ? "" : pubkey);
     }
 
     // View lookup cache
@@ -70,24 +81,27 @@ public class MovementCursorAdapter extends CursorAdapter{
         TextView timeView;
         TextView amountView;
         TextView commentView;
+        TextView pubkeyView;
         ImageView iconView;
 
         int timeIndex;
         int amountIndex;
         int commentIndex;
         int blockNumberIndex;
+        int pubkeyIndex;
 
         ViewHolder(View view, Cursor cursor) {
             iconView = (ImageView) view.findViewById(R.id.icon);
             timeView = (TextView) view.findViewById(R.id.time);
             amountView = (TextView) view.findViewById(R.id.amount);
             commentView = (TextView) view.findViewById(R.id.comment);
-
+            pubkeyView = (TextView) view.findViewById(R.id.pubkey);
 
             timeIndex = cursor.getColumnIndex(Contract.Movement.TIME);
             amountIndex = cursor.getColumnIndex(Contract.Movement.AMOUNT);
             commentIndex = cursor.getColumnIndex(Contract.Movement.COMMENT);
             blockNumberIndex = cursor.getColumnIndex(Contract.Movement.BLOCK);
+            pubkeyIndex = cursor.getColumnIndex(Contract.Movement.PUBLIC_KEY);
         }
     }
 

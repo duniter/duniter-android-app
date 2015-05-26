@@ -72,6 +72,7 @@ public class DatabaseHelper extends SQLiteOpenHelper implements Contract {
                 Wallet.IS_MEMBER + INTEGER + NOTNULL + COMMA +
                 Wallet.CREDIT + INTEGER + NOTNULL + COMMA +
                 Wallet.BLOCK_NUMBER + INTEGER + NOTNULL + COMMA +
+                Wallet.TX_BLOCK_NUMBER + INTEGER + NOTNULL + COMMA +
                 "FOREIGN KEY (" + Wallet.ACCOUNT_ID + ") REFERENCES " + Account.TABLE_NAME + "(" + Account._ID + ")" +
                 "FOREIGN KEY (" + Wallet.CURRENCY_ID + ") REFERENCES " + Currency.TABLE_NAME + "(" + Currency._ID + ")" +
                 UNIQUE + "(" + Wallet.CURRENCY_ID + COMMA + Wallet.PUBLIC_KEY + ")" +
@@ -88,6 +89,7 @@ public class DatabaseHelper extends SQLiteOpenHelper implements Contract {
                 Movement.COMMENT + TEXT + COMMA +
                 Movement.TIME + INTEGER + COMMA +
                 Movement.BLOCK + INTEGER + COMMA +
+                Movement.PUBLIC_KEY + TEXT + COMMA +
                 UNIQUE + "(" + Movement.WALLET_ID + COMMA + Movement.FINGERPRINT + ")" + COMMA +
                 "FOREIGN KEY (" + Movement.WALLET_ID + ") REFERENCES " +
                 Wallet.TABLE_NAME + "(" + Wallet._ID + ")" +

@@ -16,6 +16,7 @@ public class Movement implements LocalEntity, Serializable {
     private boolean isUD = false;
     private String fingerprint;
     private String comment;
+    private String pubkey;
 
     @Override
     public Long getId() {
@@ -85,5 +86,13 @@ public class Movement implements LocalEntity, Serializable {
 
     public boolean isValidate() {
         return blockNumber != null;
+    }
+
+    public String getPubkey() {
+        return pubkey;
+    }
+
+    public void setPubkey(String pubkey) {
+        this.pubkey = pubkey;
     }
 }

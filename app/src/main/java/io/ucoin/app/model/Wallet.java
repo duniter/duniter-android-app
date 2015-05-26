@@ -22,6 +22,7 @@ public class Wallet extends KeyPair implements LocalEntity, Serializable {
     private Identity identity;
     private Double creditAsUD;
     private long blockNumber = -1;
+    private long txBlockNumber = -1;
     private Collection<WotCertification> certifications;
 
     /**
@@ -196,6 +197,14 @@ public class Wallet extends KeyPair implements LocalEntity, Serializable {
 
     public void setBlockNumber(long blockNumber) {
         this.blockNumber = blockNumber;
+    }
+
+    public long getTxBlockNumber() {
+        return txBlockNumber;
+    }
+
+    public void setTxBlockNumber(long txBlockNumber) {
+        this.txBlockNumber = txBlockNumber;
     }
 
     @Override

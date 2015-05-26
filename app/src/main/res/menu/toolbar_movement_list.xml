@@ -1,20 +1,6 @@
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:ucoin="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".MainActivity"
-    >
+<menu xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".MainActivity">
 
-    <item android:id="@+id/action_sync"
-        android:title="@string/sync"
-        android:icon="@drawable/ic_menu_refresh"
-        ucoin:iconifiedByDefault="true"
-        ucoin:showAsAction="always"/>
-
-    <item android:id="@+id/action_resync"
-        android:title="@string/resync"
-        android:icon="@drawable/ic_menu_refresh"
-        ucoin:iconifiedByDefault="true"
-        ucoin:showAsAction="ifRoom"/>
 
 </menu>
 

@@ -4,9 +4,7 @@ import android.content.Context;
 import android.util.Log;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import io.ucoin.app.technical.ExceptionUtils;
 import io.ucoin.app.technical.ObjectUtils;
 
 /**
@@ -50,10 +48,10 @@ public class ProgressBarAsyncTaskListener<Result> implements AsyncTaskListener<R
     @Override
     public void onFailed(Throwable error) {
         Log.d(TAG, "Error during [" + mProgressMessage + "]", error);
-        Toast.makeText(mProgressBar.getContext(),
+        /*Toast.makeText(mProgressBar.getContext(),
                 ExceptionUtils.getMessage(error),
                 Toast.LENGTH_LONG)
-                .show();
+                .show();*/
     }
 
     @Override

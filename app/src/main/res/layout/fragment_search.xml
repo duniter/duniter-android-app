@@ -25,7 +25,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentTop="true"
-        android:text="@string/no_results"
+        android:text="@string/no_result"
         android:textAppearance="?android:textAppearanceMedium"
         android:textColor="@color/hideable_text_color"
         android:textSize="18sp"

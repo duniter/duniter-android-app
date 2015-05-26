@@ -1,11 +1,13 @@
 package io.ucoin.app.fragment;
 
-import android.app.Fragment;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.DialogFragment;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -23,7 +25,7 @@ import io.ucoin.app.model.Peer;
 import io.ucoin.app.model.ext.PeerWithCurrency;
 import io.ucoin.app.service.exception.PeerConnectionException;
 
-public class AddCurrencyFragment extends Fragment {
+public class AddCurrencyDialogFragment extends DialogFragment {
 
     private static final String BUNDLE_ERROR = "ERROR";
 
@@ -35,8 +37,8 @@ public class AddCurrencyFragment extends Fragment {
     private PeerWithCurrencyArrayAdapter mPeerArrayAdapter;
 
 
-    public static AddCurrencyFragment newInstance(OnClickListener listener, Bundle args) {
-        AddCurrencyFragment fragment = new AddCurrencyFragment();
+    public static AddCurrencyDialogFragment newInstance(OnClickListener listener, Bundle args) {
+        AddCurrencyDialogFragment fragment = new AddCurrencyDialogFragment();
         fragment.setOnClickListener(listener);
 
         Bundle inputArgs = new Bundle();
@@ -46,17 +48,23 @@ public class AddCurrencyFragment extends Fragment {
         return fragment;
     }
 
-    public static AddCurrencyFragment newInstance(OnClickListener listener) {
-        AddCurrencyFragment fragment = new AddCurrencyFragment();
+    public static AddCurrencyDialogFragment newInstance(OnClickListener listener) {
+        AddCurrencyDialogFragment fragment = new AddCurrencyDialogFragment();
         fragment.setOnClickListener(listener);
         return fragment;
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        super.onCreateView(inflater, container, savedInstanceState);
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
+        LayoutInflater inflater = getActivity().getLayoutInflater();
+        final View view = inflater.inflate(R.layout.fragment_add_currency, null);
+        builder.setView(view);
+        builder.setTitle(R.string.add_currency);
+
+        // title : hide it
+        view.findViewById(R.id.title).setVisibility(View.GONE);
 
         // Init preselected peers list
         mPeerArrayAdapter = new PeerWithCurrencyArrayAdapter(
@@ -65,15 +73,6 @@ public class AddCurrencyFragment extends Fragment {
         );
         mPeerArrayAdapter.setDropDownViewResource(PeerWithCurrencyArrayAdapter.DEFAULT_LAYOUT_RES);
         mPeerArrayAdapter.addAll(getDefaultPeers());
-
-
-        return inflater.inflate(R.layout.fragment_add_currency,
-                container, false);
-    }
-
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
 
         // Preselected peers spinner
         mPreselectedPeers = ((Spinner) view.findViewById(R.id.preselected_peers));
@@ -123,14 +122,25 @@ public class AddCurrencyFragment extends Fragment {
             }
         });
 
-        // Next button
+        // Next button (set as invisible)
         Button nextButton = (Button)view.findViewById(R.id.button_next);
-        nextButton.setOnClickListener(new View.OnClickListener() {
+        nextButton.setVisibility(View.GONE);
+
+
+        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             @Override
-            public void onClick(View v) {
+            public void onClick(DialogInterface dialog, int id) {
                 attemptAddCurrency();
             }
         });
+
+        builder.setNegativeButton(R.string.CANCEL, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+                dismiss();
+            }
+        });
+
 
         // Read bundle
         // Display error if present in input arguments
@@ -138,8 +148,10 @@ public class AddCurrencyFragment extends Fragment {
 
         // Bind input args to view
         bindViews(args);
-    }
 
+
+        return builder.create();
+    }
 
     protected void bindViews(Bundle args) {
         if (args == null) {

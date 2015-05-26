@@ -7,7 +7,6 @@ import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,57 +14,63 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.List;
 
 import io.ucoin.app.R;
 import io.ucoin.app.adapter.CurrencyArrayAdapter;
 import io.ucoin.app.model.Currency;
-import io.ucoin.app.model.Wallet;
 import io.ucoin.app.service.CurrencyService;
 import io.ucoin.app.service.ServiceLocator;
-import io.ucoin.app.service.exception.DuplicatePubkeyException;
-import io.ucoin.app.service.exception.UidMatchAnotherPubkeyException;
-import io.ucoin.app.service.remote.TransactionRemoteService;
-import io.ucoin.app.technical.ExceptionUtils;
 import io.ucoin.app.technical.ObjectUtils;
-import io.ucoin.app.technical.StringUtils;
 import io.ucoin.app.technical.ViewUtils;
-import io.ucoin.app.technical.crypto.KeyPair;
-import io.ucoin.app.technical.task.AsyncTaskHandleException;
 
 /**
  * A screen used to add a wallet via currency, uid, salt and password.
  */
 public class AddWalletDialogFragment extends DialogFragment {
 
-    public static final String TAG = "AddWalletDialog";
+    private static final String TAG = "AddWalletDialog";
 
-    public static AddWalletDialogFragment newInstance(Activity activity) {
+    public static final String BUNDLE_ALIAS = "alias";
+    public static final String BUNDLE_UID = "uid";
+    public static final String BUNDLE_SALT = "salt";
+    public static final String BUNDLE_PASSWORD = "password";
+    public static final String BUNDLE_CURRENCY = Currency.class.getSimpleName();
+
+    private OnClickListener mListener;
+
+    public static AddWalletDialogFragment newInstance(Activity activity, OnClickListener listener) {
         ObjectUtils.checkNotNull(activity);
+        ObjectUtils.checkNotNull(listener);
 
         // If only ONE currency in database, force to select this one
         CurrencyService currencyService = ServiceLocator.instance().getCurrencyService();
         int currencyCount = currencyService.getCurrencyCount();
         if (currencyCount == 1) {
-            return newInstance(currencyService.getCurrencies(activity).iterator().next());
+            return newInstance(currencyService.getCurrencies(activity).iterator().next(), listener);
         }
 
         AddWalletDialogFragment fragment = new AddWalletDialogFragment();
         Bundle args = new Bundle();
         fragment.setArguments(args);
 
+        fragment.setOnClickListener(listener);
+
         return fragment;
     }
 
-    public static AddWalletDialogFragment newInstance(Currency currency) {
+    public static AddWalletDialogFragment newInstance(Currency currency, OnClickListener listener) {
         ObjectUtils.checkNotNull(currency);
+        ObjectUtils.checkNotNull(listener);
 
         AddWalletDialogFragment fragment = new AddWalletDialogFragment();
         Bundle args = new Bundle();
         args.putSerializable(Currency.class.getSimpleName(), currency);
         fragment.setArguments(args);
+
+        fragment.setOnClickListener(listener);
+
         return fragment;
     }
 
@@ -118,7 +123,7 @@ public class AddWalletDialogFragment extends DialogFragment {
         // UID
         final TextView mUidTip = (TextView) view.findViewById(R.id.uid_tip);
         mUidView = (TextView) view.findViewById(R.id.uid);
-        mUidView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+        /*mUidView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if(hasFocus) {
@@ -127,12 +132,12 @@ public class AddWalletDialogFragment extends DialogFragment {
                     mUidTip.setVisibility(View.GONE);
                 }
             }
-        });
+        });*/
 
         // Salt
         final TextView saltTip = (TextView) view.findViewById(R.id.salt_tip);
         mSaltView = (EditText) view.findViewById(R.id.salt);
-        mSaltView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+        /*mSaltView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
             if(hasFocus) {
@@ -141,12 +146,12 @@ public class AddWalletDialogFragment extends DialogFragment {
                 saltTip.setVisibility(View.GONE);
             }
             }
-        });
+        });*/
 
         // Password
         final TextView passwordTip = (TextView) view.findViewById(R.id.password_tip);
         mPasswordView = (EditText) view.findViewById(R.id.password);
-        mPasswordView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+        /*mPasswordView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
             if(hasFocus) {
@@ -155,7 +160,7 @@ public class AddWalletDialogFragment extends DialogFragment {
                 passwordTip.setVisibility(View.GONE);
             }
             }
-        });
+        });*/
 
         // Confirm password
         mConfirmPasswordView = (EditText) view.findViewById(R.id.confirm_password);
@@ -208,7 +213,7 @@ public class AddWalletDialogFragment extends DialogFragment {
         if (currency == null) {
             currency = (Currency) mCurrencySpinner.getSelectedItem();
         }
-        String name = mAliasView.getText().toString();
+        String alias = mAliasView.getText().toString();
         String uid = mUidView.getText().toString();
         String salt = mSaltView.getText().toString();
         String password = mPasswordView.getText().toString();
@@ -223,9 +228,9 @@ public class AddWalletDialogFragment extends DialogFragment {
             cancel = true;
         }
 
-        // Check for a valid name (mandatory if uid is not set)
-        if (TextUtils.isEmpty(name) && TextUtils.isEmpty(uid)) {
-            mAliasView.setError(getString(R.string.name_or_uid_required));
+        // Check for a valid alias (mandatory if uid is not set)
+        if (TextUtils.isEmpty(alias) && TextUtils.isEmpty(uid)) {
+            mAliasView.setError(getString(R.string.alias_or_uid_required));
             if (focusView == null) focusView = mAliasView;
             cancel = true;
         }
@@ -269,9 +274,17 @@ public class AddWalletDialogFragment extends DialogFragment {
             // form field with an error.
             focusView.requestFocus();
         } else {
-            // Will show the progress bar, and create the wallet
-            AddWalletTask task = new AddWalletTask();
-            task.execute(currency, name, uid, salt, password);
+            Bundle args = new Bundle();
+            args.putSerializable(Currency.class.getSimpleName(), currency);
+            args.putString(BUNDLE_ALIAS, alias);
+            args.putString(BUNDLE_UID, uid);
+            args.putString(BUNDLE_SALT, salt);
+            args.putString(BUNDLE_PASSWORD, password);
+            mListener.onPositiveClick(args);
+
+            ViewUtils.hideKeyboard(getActivity());
+
+            dismiss();
         }
     }
 
@@ -289,100 +302,12 @@ public class AddWalletDialogFragment extends DialogFragment {
         return password.length() >= 3;
     }
 
-    /**
-     * Represents an asynchronous login/registration task used to authenticate
-     * the user.
-     */
-    public class AddWalletTask extends AsyncTaskHandleException<Object, Void, Wallet> {
+    private void setOnClickListener(OnClickListener listener) {
+        mListener = listener;
+    }
 
-        public AddWalletTask() {
-
-            super(getActivity(), true/*use progress dialog*/);
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            ViewUtils.hideKeyboard(getActivity());
-        }
-
-        @Override
-        protected Wallet doInBackgroundHandleException(Object... args) throws Exception {
-            ObjectUtils.checkNotNull(args);
-            ObjectUtils.checkArgument(args.length == 5);
-
-            Currency currency = (Currency)args[0];
-            String name = (String)args[1];
-            String uid = (String)args[2];
-            String salt = (String)args[3];
-            String password = (String)args[4];
-
-            // Compute a name is not set
-            if (StringUtils.isBlank(name)) {
-                name = uid;
-            }
-
-            long accountId = ((io.ucoin.app.Application) getActivity().getApplication()).getAccountId();
-
-            // Create a seed from salt and password
-            KeyPair keyPair = ServiceLocator.instance().getCryptoService().getKeyPair(salt, password);
-
-            // Create a new wallet
-            Wallet wallet = new Wallet(currency.getCurrencyName(), uid, keyPair.publicKey, keyPair.secretKey);
-            wallet.setCurrencyId(currency.getId());
-            wallet.setSalt(salt);
-            wallet.setAccountId(accountId);
-            wallet.setName(name);
-
-            // Load membership
-            ServiceLocator.instance().getBlockchainRemoteService().loadMembership(currency.getId(), wallet.getIdentity(), true);
-            // If isMember is null, the UID is already used by another pubkey !
-            if (wallet.getIsMember() == null) {
-                throw new UidMatchAnotherPubkeyException();
-            }
-
-            // Get credit
-            TransactionRemoteService txService = ServiceLocator.instance().getTransactionRemoteService();
-            Long credit = txService.getCredit(currency.getId(), wallet.getPubKeyHash());
-            wallet.setCredit(credit == null ? 0 : credit);
-
-            // Save the wallet in DB
-            // (reset private key first)
-            wallet.setSecKey(null);
-            ServiceLocator.instance().getWalletService().save(getActivity(), wallet);
-
-            return wallet;
-        }
-
-        @Override
-        protected void onSuccess(Wallet wallet) {
-            dismiss();
-        }
-
-        @Override
-        protected void onFailed(Throwable t) {
-
-            if (t instanceof DuplicatePubkeyException) {
-                mUidView.setError(getString(R.string.duplicate_wallet_pubkey));
-                mUidView.requestFocus();
-            }
-            else if (t instanceof UidMatchAnotherPubkeyException) {
-                mUidView.setError(getString(R.string.uid_match_another_pubkey));
-                mUidView.requestFocus();
-            }
-            else {
-                Log.d(TAG, "Error in AddWalletTask", t);
-                Toast.makeText(getActivity(),
-                        ExceptionUtils.getMessage(t),
-                        Toast.LENGTH_LONG).show();
-            }
-
-        }
-
-        @Override
-        protected void onCancelled() {
-            dismiss();
-        }
+    public interface OnClickListener {
+        public void onPositiveClick(Bundle args);
     }
 }
 

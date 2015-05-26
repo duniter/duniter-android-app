@@ -41,9 +41,13 @@ public interface Contract {
         public static final String SECRET_KEY = "secret_key";
         public static final String CREDIT = "credit";
         /*
-        * Last block number synchronized
+        * Last block number synchronized, for credit
         * */
         public static final String BLOCK_NUMBER = "block_number";
+        /*
+        * Last block number synchronized, for transactions
+        * */
+        public static final String TX_BLOCK_NUMBER = "tx_block_number";
     }
 
     public static final class Movement implements BaseColumns {
@@ -55,6 +59,7 @@ public interface Contract {
         public static final String AMOUNT = "amount";
         public static final String BLOCK = "block";
         public static final String TIME = "time";
+        public static final String PUBLIC_KEY = "public_key";
     }
 
     public static final class Contact implements BaseColumns {

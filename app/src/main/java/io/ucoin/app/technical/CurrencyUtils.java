@@ -61,6 +61,10 @@ public class CurrencyUtils {
      * @return
      */
     public static String formatWithSmartDecimal(long amount) {
+        if (amount < 0) {
+            return "- " + formatWithSmartDecimal(-amount);
+        }
+
         String result = currencyFormatter.format(amount);
         return result.replace(resultPartToIgnore, "");
     }

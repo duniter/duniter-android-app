@@ -1,6 +1,7 @@
 package io.ucoin.app.fragment.currency;
 
 import android.app.Activity;
+import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.ListFragment;
@@ -25,7 +26,7 @@ import io.ucoin.app.adapter.CurrencyCursorAdapter;
 import io.ucoin.app.adapter.ProgressViewAdapter;
 import io.ucoin.app.content.Provider;
 import io.ucoin.app.database.Contract;
-import io.ucoin.app.fragment.AddCurrencyFragment;
+import io.ucoin.app.fragment.AddCurrencyDialogFragment;
 import io.ucoin.app.model.Currency;
 import io.ucoin.app.model.Peer;
 import io.ucoin.app.service.CurrencyService;
@@ -114,29 +115,16 @@ public class CurrencyListFragment extends ListFragment {
 
 
     private void onAddCurrencyClick() {
-        // Retrieve the fragment to pop after transfer
-        FragmentManager fragmentManager = getFragmentManager();
-        FragmentManager.BackStackEntry backStackEntry = fragmentManager.getBackStackEntryAt(
-                fragmentManager.getBackStackEntryCount() - 1);
-        final String popBackStackName = backStackEntry.getName();
-
-        AddCurrencyFragment fragment = AddCurrencyFragment.newInstance(new AddCurrencyFragment.OnClickListener() {
+        DialogFragment fragment = AddCurrencyDialogFragment.newInstance(new AddCurrencyDialogFragment.OnClickListener() {
             @Override
             public void onPositiveClick(Bundle args) {
                 Peer peer = (Peer) args.getSerializable(Peer.class.getSimpleName());
-                AddCurrencyTask task = new AddCurrencyTask(popBackStackName);
+                AddCurrencyTask task = new AddCurrencyTask();
                 task.execute(peer);
             }
         });
-        fragmentManager.beginTransaction()
-                .setCustomAnimations(
-                        R.animator.delayed_slide_in_up,
-                        R.animator.fade_out,
-                        R.animator.delayed_fade_in,
-                        R.animator.slide_out_up)
-                .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
-                .addToBackStack(fragment.getClass().getSimpleName())
-                .commit();
+        fragment.show(getFragmentManager(),
+                fragment.getClass().getSimpleName());
     }
 
     private void onOpenCurrency(final Currency currency) {
@@ -155,11 +143,8 @@ public class CurrencyListFragment extends ListFragment {
 
     public class AddCurrencyTask extends AsyncTaskHandleException<Peer, Void, Currency> {
 
-         private String popStackTraceName;
-
-        public AddCurrencyTask(String popStackTraceName) {
+        public AddCurrencyTask() {
             super(getActivity());
-            this.popStackTraceName = popStackTraceName;
         }
 
         @Override
@@ -194,7 +179,6 @@ public class CurrencyListFragment extends ListFragment {
         protected void onSuccess(Currency currency) {
             mProgressViewAdapter.showProgress(false);
             if (currency != null) {
-                getFragmentManager().popBackStack(popStackTraceName, 0); // return back
                 onOpenCurrency(currency);
             }
         }
@@ -202,7 +186,6 @@ public class CurrencyListFragment extends ListFragment {
         @Override
         protected void onFailed(Throwable t) {
             mProgressViewAdapter.showProgress(false);
-            getFragmentManager().popBackStack(popStackTraceName, 0); // return back
             Toast.makeText(getContext(),
                     ExceptionUtils.getMessage(t),
                     Toast.LENGTH_LONG)

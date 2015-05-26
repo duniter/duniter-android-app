@@ -98,6 +98,15 @@ public class TransactionRemoteService extends BaseRemoteService {
 		return result;
 	}
 
+    public long getCreditOrZero(long currencyId, String pubKey) {
+        Long credit = getCredit(currencyId, pubKey);
+
+        if (credit == null) {
+            return 0;
+        }
+        return credit.longValue();
+    }
+
     public Long getCredit(long currencyId, String pubKey) {
         Log.d(TAG, String.format("Get credit by pubKey [%s] for currency [id=%s]", pubKey, currencyId));
 

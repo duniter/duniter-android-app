@@ -39,7 +39,7 @@ public class ProgressDialogAsyncTaskListener<Result> implements AsyncTaskListene
     }
 
     @Override
-    public void onSuccess(Object o) {
+    public void onSuccess(Result o) {
         if (mAutoClose) {
             mProgressDialog.dismiss();
         }

@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import io.ucoin.app.R;
 import io.ucoin.app.content.Provider;
 import io.ucoin.app.database.Contract;
 import io.ucoin.app.model.BlockchainBlock;
@@ -36,6 +37,8 @@ import io.ucoin.app.technical.StringUtils;
 import io.ucoin.app.technical.UCoinTechnicalException;
 import io.ucoin.app.technical.task.AsyncTaskHandleException;
 import io.ucoin.app.technical.task.AsyncTaskListener;
+import io.ucoin.app.technical.task.NullProgressModel;
+import io.ucoin.app.technical.task.ProgressModel;
 
 /**
  * Created by eis on 07/02/15.
@@ -55,6 +58,8 @@ public class MovementService extends BaseService {
 
     private SelectCursorHolder mSelectHolder = null;
 
+    private WalletService walletService;
+
 
     public MovementService() {
         super();
@@ -63,6 +68,7 @@ public class MovementService extends BaseService {
     @Override
     public void initialize() {
         super.initialize();
+        walletService = ServiceLocator.instance().getWalletService();
     }
 
     public Movement save(final Context context, final Movement movement) throws DuplicatePubkeyException {
@@ -103,18 +109,92 @@ public class MovementService extends BaseService {
 
 
     /**
-     * Get wallets form database, and update it from remote node if ask
+     * Update movements from remote node (async mode)
      *
-     * @param accountId account Id
      * @param walletId Wallet to refresh
+     * @param doCompleteRefresh if true, do a full sync (after a delete of all transactions)
+     * @param listener
      */
-    public void refreshMovements(final long accountId,
-                                 long walletId,
-                                 boolean doCompleteRefresh,
+    public void refreshMovements(final long walletId,
+                                 final boolean doCompleteRefresh,
                                  final AsyncTaskListener<Long> listener) {
 
-        new RefreshMovementsTask(listener, doCompleteRefresh)
-                .execute(walletId);
+        new RefreshMovementTask(walletId, doCompleteRefresh, listener).execute();
+    }
+
+
+    /**
+     * Update movements from remote node
+     *
+     * @param context
+     * @param walletId
+     * @param completeRefresh
+     * @return number of movements updated or inserted
+     */
+    public long refreshMovements(Context context, long walletId, boolean completeRefresh, ProgressModel progressModel) {
+        ServiceLocator serviceLocator = ServiceLocator.instance();
+
+        if (progressModel == null) {
+            progressModel = new NullProgressModel();
+        }
+
+        // Get wallet from database
+        Wallet wallet = walletService.getWalletById(context, walletId);
+        long currencyId = wallet.getCurrencyId();
+
+        // Get the current block number
+        BlockchainBlock currentBlock = serviceLocator.getBlockchainRemoteService().getCurrentBlock(currencyId, true);
+        long currentBlockNumber = currentBlock.getNumber();
+        long syncTxBlockNumber = wallet.getTxBlockNumber();
+
+        progressModel.setMax(4);
+        progressModel.setMessage(context.getString(R.string.resync_started));
+
+        // Delete existing movement if need
+        if (completeRefresh) {
+            deleteByWalletId(context, walletId);
+            syncTxBlockNumber = -1;
+        }
+
+        // If current block has NOT changed: exit
+        else if (syncTxBlockNumber == currentBlockNumber) {
+            return 0;
+        }
+
+        progressModel.increment();
+        TransactionRemoteService txService = ServiceLocator.instance().getTransactionRemoteService();
+        TxSourceResults sourceResults = txService.getSourcesAndCredit(wallet.getCurrencyId(), wallet.getPubKeyHash());
+
+        // Load movement that waiting block
+        progressModel.increment();
+        List<Movement> waitingMovements = getWaitingMovementsByWalletId(context.getContentResolver(), walletId);
+        Map<String, Movement> waitingMovementByFingerprint = ModelUtils.movementsToFingerprintMap(waitingMovements);
+
+
+        progressModel.increment();
+        long start = syncTxBlockNumber == -1 ? 0 : syncTxBlockNumber + 1;
+        long end = Math.min(start + TX_BLOCK_BATCH_SIZE, currentBlockNumber);
+
+        long txCount = 0;
+
+        while(start < currentBlockNumber) {
+            TxHistoryResults history = txService.getHistory(wallet.getCurrencyId(),
+                    wallet.getPubKeyHash(),
+                    start, end);
+
+            txCount += updateMovementsFromHistory(context, walletId, start - 1,
+                    waitingMovementByFingerprint, sourceResults.getSources(), history);
+
+            start += TX_BLOCK_BATCH_SIZE;
+            end = Math.min(end + TX_BLOCK_BATCH_SIZE, currentBlockNumber);
+        }
+
+        // Update the wallet with the new TX block number
+        progressModel.increment();
+        wallet.setTxBlockNumber(currentBlockNumber);
+        walletService.update(context.getContentResolver(), wallet);
+
+        return txCount;
     }
 
     /**
@@ -127,13 +207,9 @@ public class MovementService extends BaseService {
     public long updateMovementsFromHistory(final Context context,
                                            long walletId,
                                            long lastUpdateBlockNumber,
+                                           Map<String, Movement> waitingMovementByFingerprint,
                                            List<TxSource> sources,
                                            TxHistoryResults historyResults) {
-
-        // Load movement that waiting block
-        List<Movement> waitingMovements = getWaitingMovementsByWalletId(context.getContentResolver(), walletId);
-
-        Map<String, Movement> waitingMovementByFingerprint = ModelUtils.movementsToFingerprintMap(waitingMovements);
 
         List<Movement> movementsToUpdate = new ArrayList<Movement>();
         List<Movement> movementsToInsert = new ArrayList<Movement>();
@@ -241,13 +317,16 @@ public class MovementService extends BaseService {
 
     /* -- internal methods-- */
     private Movement toMovement(TxHistoryMovement source, long walletId, String pubkey) {
+        // Read the amount
         long amount = computeAmount(source, pubkey);
-
         if (amount == 0) {
             Log.w(TAG, String.format("Invalid TX (amount=0) with fingerprint [%s].", source.getFingerprint()));
             amount = computeAmount(source, pubkey);
             return null;
         }
+
+        // Read issuers pubkeys
+        String pubkeys = computeOtherPubkeys(source, pubkey);
 
         Movement target = new Movement();
         target.setWalletId(walletId);
@@ -257,7 +336,7 @@ public class MovementService extends BaseService {
         target.setUD(false);
         target.setBlockNumber(source.getBlockNumber());
         target.setTime(source.getTime());
-
+        target.setPubkey(pubkeys);
         return target;
     }
 
@@ -299,6 +378,25 @@ public class MovementService extends BaseService {
         }
 
         return result;
+    }
+
+    private String computeOtherPubkeys(TxHistoryMovement movement, String pubkey) {
+        Set<String> pubKeys = new HashSet<String>();
+
+        for (String issuer: movement.getIssuers()) {
+            if (!pubkey.equals(issuer)) {
+                pubKeys.add(issuer);
+            }
+        }
+        if (pubKeys.size() == 0) {
+            return null;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (String pubKey: pubKeys) {
+            sb.append(", ").append(pubKey);
+        }
+        return sb.substring(2);
     }
 
     private List<Movement> getMovementsByWalletId(final ContentResolver resolver, final long walletId) {
@@ -455,6 +553,9 @@ public class MovementService extends BaseService {
         if (StringUtils.isNotBlank(source.getComment())) {
             target.put(Contract.Movement.COMMENT, source.getComment());
         }
+        if (StringUtils.isNotBlank(source.getPubkey())) {
+            target.put(Contract.Movement.PUBLIC_KEY, source.getPubkey());
+        }
         return target;
     }
 
@@ -473,6 +574,7 @@ public class MovementService extends BaseService {
         result.setBlockNumber(cursor.getLong(mSelectHolder.blockIndex));
         result.setTime(cursor.getLong(mSelectHolder.timeIndex));
         result.setComment(cursor.getString(mSelectHolder.commentIndex));
+        result.setPubkey(cursor.getString(mSelectHolder.pubkeyIndex));
 
         return result;
     }
@@ -495,6 +597,7 @@ public class MovementService extends BaseService {
         int blockIndex;
         int timeIndex;
         int commentIndex;
+        int pubkeyIndex;
 
         private SelectCursorHolder(final Cursor cursor ) {
             idIndex = cursor.getColumnIndex(Contract.Movement._ID);
@@ -505,79 +608,26 @@ public class MovementService extends BaseService {
             blockIndex = cursor.getColumnIndex(Contract.Movement.BLOCK);
             timeIndex = cursor.getColumnIndex(Contract.Movement.TIME);
             commentIndex = cursor.getColumnIndex(Contract.Movement.COMMENT);
+            pubkeyIndex = cursor.getColumnIndex(Contract.Movement.PUBLIC_KEY);
         }
     }
 
-    /**
-     *
-     * @param context
-     * @param walletId
-     * @param completeRefresh
-     * @return number of movements updated or inserted
-     */
-    protected long refreshMovements(Context context, long walletId, boolean completeRefresh) {
-        ServiceLocator serviceLocator = ServiceLocator.instance();
+    class RefreshMovementTask extends AsyncTaskHandleException<Void, Void, Long> {
 
-        // Get wallet from database
-        Wallet wallet = serviceLocator.getWalletService().getWalletById(context, walletId);
-        long currencyId = wallet.getCurrencyId();
-
-        // Get the current block number
-        BlockchainBlock currentBlock = serviceLocator.getBlockchainRemoteService().getCurrentBlock(currencyId, true);
-        long currentBlockNumber = currentBlock.getNumber();
-        long syncBlockNumber = wallet.getBlockNumber();
-
-        // Delete existing movement if need
-        if (completeRefresh) {
-            deleteByWalletId(context, walletId);
-            syncBlockNumber = -1;
-        }
-
-        // If current block has NOT changed
-        if (syncBlockNumber == currentBlockNumber) {
-            return 0;
-        }
-
-        TransactionRemoteService txService = ServiceLocator.instance().getTransactionRemoteService();
-        TxSourceResults sourceResults = txService.getSourcesAndCredit(wallet.getCurrencyId(), wallet.getPubKeyHash());
-
-
-        long start = syncBlockNumber == -1 ? 0 : syncBlockNumber + 1;
-        long end = Math.min(start + TX_BLOCK_BATCH_SIZE, currentBlockNumber);
-
-        long txCount = 0;
-
-        while(start < currentBlockNumber) {
-            TxHistoryResults history = txService.getHistory(wallet.getCurrencyId(),
-                    wallet.getPubKeyHash(),
-                    start, end);
-
-            txCount += updateMovementsFromHistory(context, walletId, start - 1, sourceResults.getSources(), history);
-
-            start += TX_BLOCK_BATCH_SIZE;
-            end = Math.min(end + TX_BLOCK_BATCH_SIZE, currentBlockNumber);
-        }
-
-        return txCount;
-    }
-
-    private class RefreshMovementsTask extends AsyncTaskHandleException<Long, Void, Long> {
-
+        private final long walletId;
         private final boolean doCompleteRefresh;
-        public RefreshMovementsTask(AsyncTaskListener<Long> listener, boolean doCompleteRefresh) {
+
+        public RefreshMovementTask(long walletId, boolean doCompleteRefresh, AsyncTaskListener<Long> listener) {
             super(listener);
+            this.walletId = walletId;
             this.doCompleteRefresh = doCompleteRefresh;
         }
 
         @Override
-        protected Long doInBackgroundHandleException(Long... walletIds) {
-            long walletId = walletIds[0];
-
+        protected Long doInBackgroundHandleException(Void... params) {
             long nbUpdates = refreshMovements(getContext(),
-                    walletId, doCompleteRefresh);
-
+                    walletId, doCompleteRefresh, RefreshMovementTask.this);
             return nbUpdates;
         }
-
     }
 }

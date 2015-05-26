@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.List;
 
@@ -171,7 +172,10 @@ public class WotSearchFragment extends ListFragment
     public void onQueryFailed(String message) {
         mProgressViewAdapter.showProgress(false);
         isWaitingResult = false;
-        // TODO: display the message
+
+        Toast.makeText(getActivity(),
+                getString(R.string.search_error, message),
+                Toast.LENGTH_LONG);
     }
 
     @Override

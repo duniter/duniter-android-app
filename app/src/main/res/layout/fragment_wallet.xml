@@ -181,14 +181,31 @@
                             android:layout_gravity="center_horizontal"
                             android:visibility="gone" />
 
-                        <ListView
-                            android:id="@+id/wot_list"
+                        <LinearLayout
+                            android:id="@+id/wot_list_parent"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentLeft="true"
-                            android:scrollbarStyle="outsideOverlay"
-                            />
+                            android:layout_height="match_parent"
+                            android:orientation="vertical">
 
+                            <TextView
+                                android:id="@+id/wot_empty"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_alignParentTop="true"
+                                android:text="@string/no_certification"
+                                android:textAppearance="?android:textAppearanceMedium"
+                                android:textColor="@color/hideable_text_color"
+                                android:textSize="18sp"
+                                android:layout_margin="8dp"/>
+
+                            <ListView
+                                android:id="@+id/wot_list"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentLeft="true"
+                                android:scrollbarStyle="outsideOverlay"
+                                />
+                            </LinearLayout>
                         </LinearLayout>
 
                 </FrameLayout>

@@ -89,7 +89,7 @@ public class DateUtils {
         long timeInMillis = timestamp * 1000;
         Date date =  new Date(timeInMillis);
 
-        // Last year
+        // Last year or before
         if (timeInMillis < FIRST_DAY_OF_YEAR_CACHE) {
             return DEFAULT_SHORT_DATE_FORMAT.format(date);
         }
@@ -111,6 +111,26 @@ public class DateUtils {
         }
 
         return DEFAULT_TIME_FORMAT.format(date);
+    }
+
+    public static String formatFriendlyTime(Context context, long timeInMillis) {
+        if (timeInMillis <= 0) {
+            return null;
+        }
+
+        // more than 1 min
+        if (timeInMillis > 1000 * 60) {
+            // TODO BLA
+            return Long.toString(timeInMillis) + " ms";
+        }
+
+        // more than 1 seconds
+        if (timeInMillis > 1000) {
+            return Integer.toString((int)Math.floor(timeInMillis / 1000)) + "s";
+        }
+
+        // less than a seconds
+        return Long.toString(timeInMillis) + " ms";
     }
 
     public static long getCurrentTimestampSeconds() {

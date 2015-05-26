@@ -671,12 +671,16 @@ public class TransferFragment extends Fragment {
 
         private String popStackTraceName;
         private String mPubkey;
-        private long mAmount;
+        private String mAmountStr;
         private String mComment;
+        private boolean mIsCoinUnit;
+        private Long mUniversalDividend;
 
         public TransferTask(String popStackTraceName) {
             super(getActivity());
             this.popStackTraceName = popStackTraceName;
+            this.mIsCoinUnit = TransferFragment.this.mIsCoinUnit;
+            this.mUniversalDividend =  TransferFragment.this.mUniversalDividend;
         }
 
         @Override
@@ -698,14 +702,8 @@ public class TransferFragment extends Fragment {
             }
 
             // Amount
-            String amountStr;
-            if (mIsCoinUnit) {
-                amountStr = mAmountText.getText().toString();
-            }
-            else {
-                amountStr = mConvertedText.getText().toString();
-            }
-            mAmount = CurrencyUtils.parseLong(amountStr);
+            mAmountStr = mAmountText.getText().toString();
+
 
             // Comment
             mComment = mCommentText.getText().toString().trim();
@@ -716,18 +714,28 @@ public class TransferFragment extends Fragment {
             Wallet wallet = wallets[0];
             TransactionRemoteService txService = ServiceLocator.instance().getTransactionRemoteService();
 
+            // Get amount in coin (convert using UD if need)
+            long amountInCoin;
+            if (mIsCoinUnit) {
+                amountInCoin = CurrencyUtils.parseLong(mAmountStr);
+            }
+            else {
+                double amountInUD = CurrencyUtils.parse(mAmountStr);
+                amountInCoin = (long)Math.ceil(amountInUD * mUniversalDividend);
+            }
+
             // Transfer
             String fingerprint = txService.transfert(
                     wallet,
                     mPubkey,
-                    mAmount,
+                    amountInCoin,
                     mComment
                     );
 
             // Add as new movement
             Movement movement = new Movement();
             movement.setFingerprint(fingerprint);
-            movement.setAmount(mAmount);
+            movement.setAmount(-1 * amountInCoin);
             movement.setComment(mComment);
             movement.setTime(DateUtils.getCurrentTimestampSeconds());
             movement.setWalletId(wallet.getId());

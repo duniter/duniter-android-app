@@ -5,24 +5,13 @@
     android:gravity="center_vertical"
     android:duplicateParentState="true"
     android:paddingLeft="16dp"
-    android:paddingRight="16dp">
+    android:paddingRight="6dp">
 
-    <ImageView
-        android:id="@+id/icon"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:duplicateParentState="true"
-        android:layout_marginRight="10dp"
-        android:scaleType="fitCenter"
-        android:layout_centerVertical="true"
-        android:src="@drawable/ic_check_24dp"/>
 
     <TextView
         android:id="@+id/time"
         android:layout_alignParentTop="true"
-        android:layout_toRightOf="@+id/icon"
+        android:layout_alignParentLeft="true"
         android:duplicateParentState="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -40,8 +29,19 @@
         android:textColor="@color/wallet_holo_blue_light"
         android:layout_alignParentTop="true"
         android:layout_alignParentRight="true"
+        android:layout_marginRight="30dp"
         android:text="100"/>
 
+    <ImageView
+        android:id="@+id/icon"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:duplicateParentState="true"
+        android:scaleType="fitCenter"
+        android:layout_centerVertical="true"
+        android:src="@drawable/ic_check_24dp"/>
 
     <TextView
         android:id="@+id/comment"
@@ -49,7 +49,21 @@
         android:layout_height="wrap_content"
         android:textColor="@color/hideable_text_color"
         android:textSize="@dimen/abc_text_size_caption_material"
-        android:layout_below="@+id/time"
-        android:layout_toRightOf="@+id/icon"
+        android:layout_below="@+id/amount"
+        android:layout_alignParentLeft="true"
         android:text="comment"/>
+
+    <TextView
+        android:id="@+id/pubkey"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/hideable_text_color"
+        android:textSize="@dimen/abc_text_size_caption_material"
+        android:layout_below="@+id/amount"
+        android:layout_toRightOf="@+id/comment"
+        android:text="issuer"
+        android:layout_marginStart="10dp"
+        android:layout_marginLeft="10dp"
+        android:singleLine="true"
+        android:maxWidth="50dp"/>
 </RelativeLayout>

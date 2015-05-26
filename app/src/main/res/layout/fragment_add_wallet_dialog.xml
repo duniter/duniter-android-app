@@ -28,10 +28,16 @@
             android:id="@+id/alias"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/alias"
+            android:hint="@string/alias_hint"
             android:imeOptions="actionNext"
             android:inputType="textNoSuggestions"
             android:singleLine="true"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/wallet_account_subtitle"
+            android:layout_marginTop="30dp"/>
 
         <TextView
             android:id="@+id/uid_tip"
@@ -42,12 +48,13 @@
             android:textSize="@dimen/abc_text_size_caption_material"
             android:visibility="gone" />
 
+
         <!-- user ID -->
         <EditText
             android:id="@+id/uid"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/uid"
+            android:hint="@string/uid_hint"
             android:imeOptions="actionNext"
             android:inputType="textNoSuggestions"
             android:singleLine="true"/>
@@ -66,7 +73,7 @@
             android:id="@+id/salt"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/salt"
+            android:hint="@string/salt_hint"
             android:imeOptions="actionNext"
             android:inputType="textNoSuggestions"
             android:singleLine="true" />

@@ -38,7 +38,7 @@
     <!-- Strings related to status -->
     <string name="cancelled">Cancelled</string>
     <string name="failed">Failed</string>
-    <string name="no_results">No results</string>
+    <string name="no_result">No result</string>
 
     <!-- Strings related to presentation -->
     <string name="open_drawer">Open the navigation drawer</string>
@@ -47,12 +47,13 @@
     <!-- Strings related to wallet -->
     <string name="wallets">Wallets</string>
     <string name="wallet_title">Wallet</string>
-    <string name="no_wallet">No wallet</string>
     <string name="credit_message">credit: %s</string>
     <string name="credit">credit</string>
     <string name="not_registred">not registred</string>
     <string name="wallet_uid">(%s)</string>
-    <string name="alias">Local alias (optional)</string>
+    <string name="alias">Alias</string>
+    <string name="alias_hint">Wallet alias (optional)</string>
+    <string name="wallet_account_subtitle">Account parameters:</string>
     <string name="delete_wallet">Delete wallet</string>
     <string name="delete_wallet_error">Could not delete wallet (technical error)\n%s</string>
     <string name="delete_wallet_confirm">Are you sure ?</string>
@@ -60,6 +61,7 @@
     <string name="universal_dividend_value">%s UD</string>
     <string name="loading_wallets">Loading wallets...</string>
     <string name="updating_balances">Updating balances...</string>
+
 
     <!-- Strings related to transfer/transaction -->
     <string name="wallet_transmitter">Wallet</string>
@@ -76,12 +78,14 @@
     <string name="amount_not_long">Amount must a valid integer</string>
     <string name="amount_not_decimal">Amount must a valid decimal</string>
     <string name="transactions">Transactions</string>
+    <string name="no_transaction">No transaction</string>
     <string name="movement_ud">Universal Dividend</string>
     <string name="sync">Refresh transactions</string>
     <string name="resync">Download all transactions</string>
     <string name="resync_confirm">Are you sure you want to download all transactions ? This operation could be long.</string>
-    <string name="resync_started">Downloading...</string>
+    <string name="resync_started">Downloading transactions...</string>
     <string name="sync_succeed">%1$s transactions downloads in %2$s</string>
+    <string name="sync_no_tx">No new transactions</string>
 
     <!-- Strings related to actions -->
     <string name="send">Send</string>
@@ -113,7 +117,7 @@
 
     <!-- Strings related to currency -->
     <string name="lookup">Lookup</string>
-    <string name="add_currency">Currency</string>
+    <string name="add_currency">Add currency</string>
     <string name="preselected_peers">Select a predefine currency:</string>
     <string name="peer_hint">Or fill parameters of a currency node:</string>
     <string name="node_address">Host</string>
@@ -151,8 +155,10 @@
 
     <string name="currency">Currency</string>
     <string name="no_currency">No currency</string>
-    <string name="no_transfer">No transfer</string>
+    <string name="no_transfer">No transaction</string>
+    <string name="no_certification">No certification</string>
     <string name="no_contact">No contact</string>
+    <string name="no_wallet">No wallet</string>
     <string name="currencies">Currencies</string>
     <string name="members">Members</string>
     <string name="members_count">%s members</string>
@@ -222,7 +228,7 @@
     <string name="uid_and_pubkey_not_registred">This identifier is incorrect</string>
     <string name="pubkey_already_used">This salt and password are incorrect.</string>
     <string name="login_too_short">This identifier is too short</string>
-    <string name="name_or_uid_required">One of name or user identifier is required</string>
+    <string name="alias_or_uid_required">One of \'alias\' or \'user identifier\' is required</string>
     <string name="name_too_short">This name is too short</string>
     <string name="salt_too_short">This salt is too short</string>
     <string name="password_too_short">This password is too short</string>
@@ -243,6 +249,7 @@
     <string name="transfer_to">Transfer to %s</string>
     <string name="sign_to">Sign %s</string>
     <string name="yesterday">yesterday</string>
+    <string name="search_error">Search error (%s). Please retry.</string>
 
 
     <!-- Strings related to extension (ext) -->

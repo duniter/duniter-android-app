@@ -4,11 +4,12 @@
     android:orientation="vertical">
 
     <TextView
+        android:id="@+id/title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:gravity="center_horizontal"
-        android:text="@string/add_currency"
+        android:text="@string/currency"
         android:textSize="@dimen/abc_text_size_display_1_material"
         android:layout_marginBottom="8dp"/>
 

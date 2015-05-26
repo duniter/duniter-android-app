@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -43,6 +44,7 @@ import io.ucoin.app.technical.ImageUtils;
 import io.ucoin.app.technical.StringUtils;
 import io.ucoin.app.technical.ViewUtils;
 import io.ucoin.app.technical.task.AsyncTaskHandleException;
+import io.ucoin.app.technical.task.ProgressDialogAsyncTaskListener;
 
 
 public class WalletFragment extends Fragment {
@@ -51,7 +53,7 @@ public class WalletFragment extends Fragment {
 
     private static String ARGS_TAB_INDEX = "tabIndex";
 
-    private ProgressViewAdapter mProgressViewAdapter;
+    private ProgressViewAdapter mWotProgressViewAdapter;
     private CertificationListAdapter mCertificationListAdapter;
     private TextView mUidView;
     private ImageButton mIcon;
@@ -60,7 +62,9 @@ public class WalletFragment extends Fragment {
     private TextView mPubkeyView;
     private TextView mCreditView;
     private TextView mCurrencyView;
+    private TextView mWotEmptyTextView;
     private TabHost mTabs;
+    private MovementListFragment mMovementListFragment;
 
     private String mUnitType;
 
@@ -168,14 +172,13 @@ public class WalletFragment extends Fragment {
         mCreditView = (TextView) view.findViewById(R.id.credit);
 
         // Tab 1: transfer list
-        MovementListFragment tab1Fragment = MovementListFragment.newInstance(wallet);
+        mMovementListFragment = MovementListFragment.newInstance(wallet);
         getFragmentManager().beginTransaction()
-                .replace(R.id.tab1, tab1Fragment, "tab1")
+                .replace(R.id.tab1, mMovementListFragment, "tab1")
                 .commit();
 
         // Wot list
         ListView wotListView = (ListView) view.findViewById(R.id.wot_list);
-        wotListView.setVisibility(View.GONE);
         mCertificationListAdapter = new CertificationListAdapter(getActivity());
         wotListView.setAdapter(mCertificationListAdapter);
 
@@ -188,10 +191,13 @@ public class WalletFragment extends Fragment {
             }
         });
 
+        mWotEmptyTextView = (TextView) view.findViewById(R.id.wot_empty);
+
         //PROGRESS VIEW
-        mProgressViewAdapter = new ProgressViewAdapter(
-                view.findViewById(R.id.load_progress),
-                wotListView);
+        mWotProgressViewAdapter = new ProgressViewAdapter(
+                view,
+                R.id.load_progress,
+                R.id.wot_list_parent);
 
         // Make sure to hide the keyboard
         ViewUtils.hideKeyboard(getActivity());
@@ -238,6 +244,12 @@ public class WalletFragment extends Fragment {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.action_sync:
+                onRefreshMovements();
+                return true;
+            case R.id.action_resync:
+                onRefreshAllMovements();
+                return true;
             case R.id.action_transfer:
                 onTransferClick();
                 return true;
@@ -308,7 +320,7 @@ public class WalletFragment extends Fragment {
             mCertificationListAdapter.clear();
             mCertificationListAdapter.addAll(wallet.getCertifications());
             mCertificationListAdapter.notifyDataSetChanged();
-            mProgressViewAdapter.showProgress(false);
+            mWotProgressViewAdapter.showProgress(false);
         }
 
         // Load WOT data
@@ -431,6 +443,73 @@ public class WalletFragment extends Fragment {
 
     }
 
+
+    protected void onRefreshAllMovements() {
+
+        // Launch after user confirmation
+        new AlertDialog.Builder(getActivity())
+                .setTitle(getString(R.string.sync))
+                .setMessage(getString(R.string.resync_confirm))
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        // Launch
+                        doOnRefreshMovements(true);
+                    }})
+                .setNegativeButton(android.R.string.no, null).show();
+
+    }
+
+    protected void onRefreshMovements() {
+        doOnRefreshMovements(false);
+    }
+
+    protected void doOnRefreshMovements(final boolean doCompleteRefresh) {
+        Wallet wallet = (Wallet)getArguments().getSerializable(Wallet.class.getSimpleName());
+        long walletId = wallet.getId();
+
+        final long time1 = System.currentTimeMillis();
+        ServiceLocator serviceLocator = ServiceLocator.instance();
+
+        ProgressDialog progressDialog = new ProgressDialog(getActivity());
+        //progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+        ProgressDialogAsyncTaskListener<Long> listener = new ProgressDialogAsyncTaskListener<Long>(progressDialog) {
+            @Override
+            public void onSuccess(final Long nbUpdates) {
+                super.onSuccess(nbUpdates);
+                long duration = System.currentTimeMillis() - time1;
+                onFinishRefresh(nbUpdates == null ? 0 : nbUpdates.longValue(),
+                        duration);
+            }
+        };
+
+        // Refresh movements
+        serviceLocator.getMovementService().refreshMovements(
+                walletId,
+                doCompleteRefresh,
+                listener);
+
+       // Toast.makeText(getActivity(), getString(R.string.resync_started), Toast.LENGTH_SHORT).show();
+    }
+
+    protected void onFinishRefresh(long nbUpdates, long timeInMillis) {
+
+        String message;
+        if (nbUpdates > 0) {
+            mMovementListFragment.notifyDataSetChanged();
+
+            message = getString(R.string.sync_succeed,
+                    nbUpdates,
+                    DateUtils.formatFriendlyTime(getActivity(), timeInMillis));
+        }
+        else {
+            message = getString(R.string.sync_no_tx);
+        }
+        Toast.makeText(getActivity(),
+                message
+                , Toast.LENGTH_LONG).show();
+    }
+
     public class LoadTask extends AsyncTaskHandleException<Wallet, Void, Collection<WotCertification>> {
 
         public LoadTask() {
@@ -440,7 +519,7 @@ public class WalletFragment extends Fragment {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            mProgressViewAdapter.showProgress(true);
+            mWotProgressViewAdapter.showProgress(true);
         }
 
         @Override
@@ -471,22 +550,28 @@ public class WalletFragment extends Fragment {
             mCertificationListAdapter.clear();
             if (CollectionUtils.isNotEmpty(certifications)) {
                 mCertificationListAdapter.addAll(certifications);
-                mCertificationListAdapter.notifyDataSetChanged();
+                mWotEmptyTextView.setVisibility(View.GONE);
+            }
+            else {
+                mWotEmptyTextView.setVisibility(View.VISIBLE);
             }
 
-            mProgressViewAdapter.showProgress(false);
+            mCertificationListAdapter.notifyDataSetChanged();
+            mWotProgressViewAdapter.showProgress(false);
         }
 
         @Override
         protected void onFailed(Throwable t) {
             mCertificationListAdapter.clear();
-            mProgressViewAdapter.showProgress(false);
+            mWotProgressViewAdapter.showProgress(false);
+            mWotEmptyTextView.setVisibility(View.VISIBLE);
             onError(t);
         }
 
         @Override
         protected void onCancelled() {
-            mProgressViewAdapter.showProgress(false);
+            mWotEmptyTextView.setVisibility(View.VISIBLE);
+            mWotProgressViewAdapter.showProgress(false);
         }
     }
 
@@ -506,7 +591,7 @@ public class WalletFragment extends Fragment {
             ViewUtils.hideKeyboard(getActivity());
 
             // Show the progress bar
-            mProgressViewAdapter.showProgress(true);
+            mWotProgressViewAdapter.showProgress(true);
         }
 
         @Override
@@ -526,7 +611,7 @@ public class WalletFragment extends Fragment {
 
         @Override
         protected void onSuccess(Wallet wallet) {
-            mProgressViewAdapter.showProgress(false);
+            mWotProgressViewAdapter.showProgress(false);
             if (wallet == null || wallet.getCertTimestamp() <= 0) {
                 Toast.makeText(getContext(),
                         getString(R.string.join_error),
@@ -553,12 +638,12 @@ public class WalletFragment extends Fragment {
                             + ExceptionUtils.getMessage(error),
                     Toast.LENGTH_SHORT).show();
 
-            mProgressViewAdapter.showProgress(false);
+            mWotProgressViewAdapter.showProgress(false);
         }
 
         @Override
         protected void onCancelled() {
-            mProgressViewAdapter.showProgress(false);
+            mWotProgressViewAdapter.showProgress(false);
         }
     }
 
@@ -577,9 +662,6 @@ public class WalletFragment extends Fragment {
             super.onPreExecute();
             // Hide the keyboard, in case we come from imeDone)
             ViewUtils.hideKeyboard(mActivity);
-
-            // Show the progress bar
-            mProgressViewAdapter.showProgress(true);
         }
 
         @Override
@@ -600,7 +682,6 @@ public class WalletFragment extends Fragment {
 
         @Override
         protected void onSuccess(Wallet wallet) {
-            mProgressViewAdapter.showProgress(false);
             if (wallet == null || wallet.getCertTimestamp() <= 0) {
                 Toast.makeText(mActivity,
                         getString(R.string.join_error),
@@ -626,13 +707,6 @@ public class WalletFragment extends Fragment {
                             + "\n"
                             + ExceptionUtils.getMessage(error),
                     Toast.LENGTH_SHORT).show();
-
-            mProgressViewAdapter.showProgress(false);
-        }
-
-        @Override
-        protected void onCancelled() {
-            mProgressViewAdapter.showProgress(false);
         }
     }
 
@@ -648,8 +722,6 @@ public class WalletFragment extends Fragment {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            // Show the progress bar
-            mProgressViewAdapter.showProgress(true);
         }
 
         @Override
@@ -664,7 +736,6 @@ public class WalletFragment extends Fragment {
 
         @Override
         protected void onSuccess(Void args) {
-            mProgressViewAdapter.showProgress(false);
             getFragmentManager().popBackStack(popStackTraceName, 0); // return back
 
             Toast.makeText(getContext(),
@@ -679,13 +750,7 @@ public class WalletFragment extends Fragment {
             Toast.makeText(getContext(),
                     getString(R.string.delete_wallet_error, ExceptionUtils.getMessage(error)),
                             Toast.LENGTH_SHORT).show();
-
-            mProgressViewAdapter.showProgress(false);
         }
 
-        @Override
-        protected void onCancelled() {
-            mProgressViewAdapter.showProgress(false);
-        }
     }
 }

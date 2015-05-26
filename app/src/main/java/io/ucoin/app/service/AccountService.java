@@ -126,10 +126,15 @@ public class AccountService extends BaseService {
         }
 
         // Get credit
-        progressModel.increment(context.getString(R.string.loading_wallet_credit));
-        TransactionRemoteService txService = ServiceLocator.instance().getTransactionRemoteService();
-        Long credit = txService.getCredit(peer, pubKeyHash);
-
+        Long credit = null;
+        if (!isNewRegistration) {
+            progressModel.increment(context.getString(R.string.loading_wallet_credit));
+            TransactionRemoteService txService = ServiceLocator.instance().getTransactionRemoteService();
+            credit = txService.getCredit(peer, pubKeyHash);
+        }
+        else {
+            progressModel.increment();
+        }
 
         if (progressModel.isCancelled()) {
             return null;
@@ -155,6 +160,17 @@ public class AccountService extends BaseService {
             currency = currencyService.save(context, currency);
         }
 
+        // Create the peer in DB
+        {
+            progressModel.increment(context.getString(R.string.saving_peer));
+            PeerService peerService = ServiceLocator.instance().getPeerService();
+            peer.setCurrencyId(currency.getId());
+            peerService.save(context, peer);
+            // Load caches - need for calling walletService.sendSelfAndSave()
+            peerService.loadCache(context, account.getId());
+        }
+
+
         // Create the main wallet in DB
         {
             progressModel.increment(context.getString(R.string.saving_wallet));
@@ -167,14 +183,6 @@ public class AccountService extends BaseService {
             WalletService walletService = ServiceLocator.instance().getWalletService();
             wallet = walletService.save(context, wallet);
         }
-
-        // Create the peer in DB
-        {
-            progressModel.increment(context.getString(R.string.saving_peer));
-            peer.setCurrencyId(currency.getId());
-            ServiceLocator.instance().getPeerService().save(context, peer);
-        }
-
         // Set the secret key into the wallet (will be available for this session only)
         // (must be done AFTER the walletService.save(), to avoid to write in DB)
         wallet.setSecKey(keys.getSecKey());
@@ -186,9 +194,12 @@ public class AccountService extends BaseService {
 
         // Send registration
         if (isNewRegistration) {
-            progressModel.increment(context.getString(R.string.saving_wallet));
+            progressModel.increment(context.getString(R.string.sending_certification));
             WalletService walletService = ServiceLocator.instance().getWalletService();
             walletService.sendSelfAndSave(context, wallet);
+        }
+        else {
+            progressModel.increment();
         }
 
         return account;

@@ -20,11 +20,11 @@ import io.ucoin.app.activity.SettingsActivity;
 import io.ucoin.app.content.Provider;
 import io.ucoin.app.database.Contract;
 import io.ucoin.app.model.BlockchainBlock;
+import io.ucoin.app.model.Currency;
 import io.ucoin.app.model.UnitType;
 import io.ucoin.app.model.Wallet;
-import io.ucoin.app.model.remote.TxHistoryResults;
-import io.ucoin.app.model.remote.TxSourceResults;
 import io.ucoin.app.service.exception.DuplicatePubkeyException;
+import io.ucoin.app.service.exception.UidMatchAnotherPubkeyException;
 import io.ucoin.app.service.remote.BlockchainRemoteService;
 import io.ucoin.app.service.remote.TransactionRemoteService;
 import io.ucoin.app.technical.CollectionUtils;
@@ -34,6 +34,7 @@ import io.ucoin.app.technical.ObjectUtils;
 import io.ucoin.app.technical.StringUtils;
 import io.ucoin.app.technical.UCoinTechnicalException;
 import io.ucoin.app.technical.crypto.CryptoUtils;
+import io.ucoin.app.technical.crypto.KeyPair;
 import io.ucoin.app.technical.task.AsyncTaskHandleException;
 import io.ucoin.app.technical.task.AsyncTaskListener;
 import io.ucoin.app.technical.task.NullProgressModel;
@@ -73,6 +74,92 @@ public class WalletService extends BaseService {
         peerService = ServiceLocator.instance().getPeerService();
         movementService = ServiceLocator.instance().getMovementService();
         blockchainRemoteService = ServiceLocator.instance().getBlockchainRemoteService();
+    }
+
+    /**
+     * Create a new wallet (using an async task)
+     * @param currency
+     * @param alias
+     * @param uid
+     * @param salt
+     * @param password
+     * @param listener
+     */
+    public void create(Currency currency,
+                         String alias,
+                         String uid,
+                         String salt,
+                         String password,
+                         AsyncTaskListener<Wallet> listener
+    ) {
+        ObjectUtils.checkNotNull(currency);
+        ObjectUtils.checkNotNull(currency.getAccountId());
+        ObjectUtils.checkArgument(StringUtils.isNotBlank(alias) || StringUtils.isNotBlank(uid));
+        ObjectUtils.checkNotNull(salt);
+        ObjectUtils.checkNotNull(password);
+        ObjectUtils.checkNotNull(listener);
+        ObjectUtils.checkNotNull(listener.getContext());
+
+        new AddWalletTask(listener).execute(currency, alias, uid, salt, password);
+    }
+
+    /**
+     * Create a new wallet
+     * @param context
+     * @param currency
+     * @param alias
+     * @param uid
+     * @param salt
+     * @param password
+     */
+    public Wallet create(Context context,
+                         Currency currency,
+                         String alias,
+                         String uid,
+                         String salt,
+                         String password
+                         ) throws UidMatchAnotherPubkeyException, DuplicatePubkeyException{
+
+        ObjectUtils.checkNotNull(currency);
+        ObjectUtils.checkNotNull(currency.getAccountId());
+        ObjectUtils.checkArgument(StringUtils.isNotBlank(alias) || StringUtils.isNotBlank(uid));
+        ObjectUtils.checkNotNull(salt);
+        ObjectUtils.checkNotNull(password);
+
+        // Compute a alias is not set
+        if (StringUtils.isBlank(alias)) {
+            alias = uid;
+        }
+
+        long accountId = currency.getAccountId();
+
+        // Create a seed from salt and password
+        KeyPair keyPair = ServiceLocator.instance().getCryptoService().getKeyPair(salt, password);
+
+        // Create a new wallet
+        Wallet wallet = new Wallet(currency.getCurrencyName(), uid, keyPair.publicKey, keyPair.secretKey);
+        wallet.setCurrencyId(currency.getId());
+        wallet.setSalt(salt);
+        wallet.setAccountId(accountId);
+        wallet.setName(alias);
+
+        // Load membership
+        blockchainRemoteService.loadMembership(currency.getId(), wallet.getIdentity(), true);
+        // If isMember is null, the UID is already used by another pubkey !
+        if (wallet.getIsMember() == null) {
+            throw new UidMatchAnotherPubkeyException();
+        }
+
+        // Get credit
+        Long credit = transactionRemoteService.getCredit(currency.getId(), wallet.getPubKeyHash());
+        wallet.setCredit(credit == null ? 0 : credit);
+
+        // Save the wallet in DB
+        // (reset private key first)
+        wallet.setSecKey(null);
+        save(context, wallet, true);
+
+        return wallet;
     }
 
     public Wallet save(final Context context, final Wallet wallet, final boolean checkUniquePubKey) throws DuplicatePubkeyException {
@@ -217,9 +304,8 @@ public class WalletService extends BaseService {
             return;
         }
 
-        // Get sources and credit, from remote nodes
-        TxSourceResults txSourcesAndCredit = transactionRemoteService.getSourcesAndCredit(currencyId, wallet.getPubKeyHash());
-        long credit = txSourcesAndCredit.getCredit() == null ? 0 : txSourcesAndCredit.getCredit().longValue();
+        // Get credit, from remote nodes
+        long credit = transactionRemoteService.getCreditOrZero(currencyId, wallet.getPubKeyHash());
         double creditAsUD = 0;
         if (computeUD) {
             creditAsUD = getCreditAsUD(context, currencyId, credit);
@@ -232,22 +318,8 @@ public class WalletService extends BaseService {
                 && (wallet.getCreditAsUD() == null
                 || wallet.getCreditAsUD().doubleValue() != creditAsUD);
 
-
-        // If new block since the last update
-        if (blockNumberHasChanged) {
-            TxHistoryResults history = transactionRemoteService.getHistory(currencyId, wallet.getPubKeyHash(),
-                    wallet.getBlockNumber() == -1 ? 0 : wallet.getBlockNumber() + 1,
-                    currentBlockNumber);
-            // Process wallet's sources
-            /*movementService.refreshMovements(context,
-                    wallet.getId(),
-                    wallet.getBlockNumber(),
-                    txSourcesAndCredit.getSources(),
-                    history);*/
-        }
-
         // If credits has changed
-        if (creditHasChanged || creditAsUDHasChanged || blockNumberHasChanged) {
+        if (creditHasChanged || creditAsUDHasChanged) {
 
             // Set new credits
             wallet.setCredit(credit);
@@ -258,13 +330,12 @@ public class WalletService extends BaseService {
             try {
                 save(context, wallet);
             } catch (DuplicatePubkeyException e) {
-                // Should never happend
+                // Should never occur
             }
 
             // Mark as dirty (let's the UI known that something changed)
             wallet.setDirty(true);
         }
-
     }
 
     /**
@@ -521,6 +592,7 @@ public class WalletService extends BaseService {
         target.put(Contract.Wallet.IS_MEMBER, source.getIsMember().booleanValue() ? 1 : 0);
         target.put(Contract.Wallet.CREDIT, source.getCredit());
         target.put(Contract.Wallet.BLOCK_NUMBER, source.getBlockNumber());
+        target.put(Contract.Wallet.TX_BLOCK_NUMBER, source.getTxBlockNumber());
         return target;
     }
 
@@ -548,6 +620,7 @@ public class WalletService extends BaseService {
         result.setCertTimestamp(cursor.getLong(mSelectHolder.certTimestampIndex));
         result.setSalt(cursor.getString(mSelectHolder.saltIndex));
         result.setBlockNumber(cursor.getLong(mSelectHolder.blockNumberIndex));
+        result.setTxBlockNumber(cursor.getLong(mSelectHolder.txBlockNumberIndex));
 
         return result;
     }
@@ -599,6 +672,7 @@ public class WalletService extends BaseService {
         int certTimestampIndex;
         int saltIndex;
         int blockNumberIndex;
+        int txBlockNumberIndex;
 
         private SelectCursorHolder(final Cursor cursor ) {
             idIndex = cursor.getColumnIndex(Contract.Wallet._ID);
@@ -613,6 +687,7 @@ public class WalletService extends BaseService {
             creditIndex = cursor.getColumnIndex(Contract.Wallet.CREDIT);
             saltIndex = cursor.getColumnIndex(Contract.Wallet.SALT);
             blockNumberIndex = cursor.getColumnIndex(Contract.Wallet.BLOCK_NUMBER);
+            txBlockNumberIndex = cursor.getColumnIndex(Contract.Wallet.TX_BLOCK_NUMBER);
         }
     }
 
@@ -702,5 +777,29 @@ public class WalletService extends BaseService {
             return result;
         }
 
+    }
+
+    public class AddWalletTask extends AsyncTaskHandleException<Object, Void, Wallet> {
+
+        public AddWalletTask(AsyncTaskListener<Wallet> listener) {
+            super(listener);
+        }
+
+        @Override
+        protected Wallet doInBackgroundHandleException(Object... args) throws Exception {
+            ObjectUtils.checkNotNull(args);
+            ObjectUtils.checkArgument(args.length == 5);
+
+            Currency currency = (Currency)args[0];
+            String name = (String)args[1];
+            String uid = (String)args[2];
+            String salt = (String)args[3];
+            String password = (String)args[4];
+
+            // Run the wallet creation
+            Wallet result = create(getContext(), currency, name, uid, salt, password);
+
+            return result;
+        }
     }
 }
