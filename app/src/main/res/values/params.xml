@@ -5,6 +5,6 @@
     <string name="ACCOUNT_TYPE">io.ucoin</string>
     <string name="AUTHORITY">io.ucoin.provider</string>
     <string name="DBNAME">ucoin.db</string>
-    <integer name="DBVERSION">4</integer>
+    <integer name="DBVERSION">5</integer>
 
 </resources>
