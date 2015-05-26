@@ -11,6 +11,6 @@
     <dimen name="toolbar_left_margin">72dp</dimen>
 
     <!-- max width of TextView that display a pubkey -->
-    <dimen name="list_item_max_width_pubkey">75dp</dimen>
+    <dimen name="list_item_max_width_pubkey">80dp</dimen>
 
 </resources>

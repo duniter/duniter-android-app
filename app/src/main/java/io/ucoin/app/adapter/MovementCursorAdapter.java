@@ -83,12 +83,12 @@ public class MovementCursorAdapter extends CursorAdapter{
                 issuersOrReceivers == null
                         ? ""
                         : issuersOrReceivers);
-        viewHolder.issuerOrReceiverView.setOnClickListener(new View.OnClickListener() {
+        /*viewHolder.issuerOrReceiverView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
             }
-        });
+        });*/
     }
 
     // View lookup cache

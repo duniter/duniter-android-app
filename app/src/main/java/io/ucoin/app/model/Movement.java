@@ -93,8 +93,8 @@ public class Movement implements LocalEntity, Serializable {
         return issuers;
     }
 
-    public void setIssuers(String pubkey) {
-        this.receivers = pubkey;
+    public void setIssuers(String issuers) {
+        this.issuers = issuers;
     }
 
     public void setReceivers(String receivers) {
