@@ -31,8 +31,24 @@ uses-permission#android.permission.READ_CONTACTS
 ADDED from AndroidManifest.xml:12:5
 	android:name
 		ADDED from AndroidManifest.xml:12:22
-application
+uses-permission#android.permission.ACCESS_NETWORK_STATE
 ADDED from AndroidManifest.xml:14:5
+	android:name
+		ADDED from AndroidManifest.xml:14:22
+uses-permission#android.permission.READ_SYNC_SETTINGS
+ADDED from AndroidManifest.xml:15:5
+	android:name
+		ADDED from AndroidManifest.xml:15:22
+uses-permission#android.permission.WRITE_SYNC_SETTINGS
+ADDED from AndroidManifest.xml:16:5
+	android:name
+		ADDED from AndroidManifest.xml:16:22
+uses-permission#android.permission.AUTHENTICATE_ACCOUNTS
+ADDED from AndroidManifest.xml:17:5
+	android:name
+		ADDED from AndroidManifest.xml:17:22
+application
+ADDED from AndroidManifest.xml:19:5
 MERGED from com.android.support:appcompat-v7:21.0.3:16:5
 MERGED from com.android.support:support-v4:21.0.3:16:5
 MERGED from com.android.support:support-v4:21.0.3:16:5
@@ -41,153 +57,137 @@ MERGED from com.android.support:support-v4:21.0.3:16:5
 MERGED from com.google.android.gms:play-services:6.5.87:20:5
 MERGED from com.android.support:support-v4:21.0.3:16:5
 	android:label
-		ADDED from AndroidManifest.xml:18:9
+		ADDED from AndroidManifest.xml:23:9
 	android:allowBackup
-		ADDED from AndroidManifest.xml:16:9
+		ADDED from AndroidManifest.xml:21:9
 	android:icon
-		ADDED from AndroidManifest.xml:17:9
+		ADDED from AndroidManifest.xml:22:9
 	android:theme
-		ADDED from AndroidManifest.xml:19:9
+		ADDED from AndroidManifest.xml:24:9
 	android:name
-		ADDED from AndroidManifest.xml:15:9
+		ADDED from AndroidManifest.xml:20:9
 activity#io.ucoin.app.activity.MainActivity
-ADDED from AndroidManifest.xml:21:9
+ADDED from AndroidManifest.xml:26:9
 	android:label
-		ADDED from AndroidManifest.xml:24:13
+		ADDED from AndroidManifest.xml:29:13
 	android:windowSoftInputMode
-		ADDED from AndroidManifest.xml:25:13
+		ADDED from AndroidManifest.xml:30:13
 	android:configChanges
-		ADDED from AndroidManifest.xml:23:13
+		ADDED from AndroidManifest.xml:28:13
 	android:name
-		ADDED from AndroidManifest.xml:22:13
+		ADDED from AndroidManifest.xml:27:13
 intent-filter#android.intent.action.MAIN+android.intent.category.LAUNCHER
-ADDED from AndroidManifest.xml:26:13
-action#android.intent.action.MAIN
-ADDED from AndroidManifest.xml:27:17
-	android:name
-		ADDED from AndroidManifest.xml:27:25
-category#android.intent.category.LAUNCHER
-ADDED from AndroidManifest.xml:29:17
-	android:name
-		ADDED from AndroidManifest.xml:29:27
-intent-filter#android.intent.action.SEARCH
 ADDED from AndroidManifest.xml:31:13
-action#android.intent.action.SEARCH
+action#android.intent.action.MAIN
 ADDED from AndroidManifest.xml:32:17
 	android:name
 		ADDED from AndroidManifest.xml:32:25
+category#android.intent.category.LAUNCHER
+ADDED from AndroidManifest.xml:34:17
+	android:name
+		ADDED from AndroidManifest.xml:34:27
+intent-filter#android.intent.action.SEARCH
+ADDED from AndroidManifest.xml:36:13
+action#android.intent.action.SEARCH
+ADDED from AndroidManifest.xml:37:17
+	android:name
+		ADDED from AndroidManifest.xml:37:25
 intent-filter#android.intent.action.VIEW+android.intent.category.BROWSABLE+android.intent.category.DEFAULT
-ADDED from AndroidManifest.xml:42:13
+ADDED from AndroidManifest.xml:47:13
 action#android.intent.action.VIEW
-ADDED from AndroidManifest.xml:43:17
+ADDED from AndroidManifest.xml:48:17
 	android:name
-		ADDED from AndroidManifest.xml:43:25
+		ADDED from AndroidManifest.xml:48:25
 category#android.intent.category.DEFAULT
-ADDED from AndroidManifest.xml:44:17
+ADDED from AndroidManifest.xml:49:17
 	android:name
-		ADDED from AndroidManifest.xml:44:27
+		ADDED from AndroidManifest.xml:49:27
 category#android.intent.category.BROWSABLE
-ADDED from AndroidManifest.xml:45:17
+ADDED from AndroidManifest.xml:50:17
 	android:name
-		ADDED from AndroidManifest.xml:45:27
+		ADDED from AndroidManifest.xml:50:27
 data
-ADDED from AndroidManifest.xml:47:17
+ADDED from AndroidManifest.xml:52:17
 	android:host
-		ADDED from AndroidManifest.xml:48:21
+		ADDED from AndroidManifest.xml:53:21
 	android:scheme
-		ADDED from AndroidManifest.xml:49:21
+		ADDED from AndroidManifest.xml:54:21
 meta-data#android.app.searchable
-ADDED from AndroidManifest.xml:52:13
+ADDED from AndroidManifest.xml:57:13
 	android:resource
-		ADDED from AndroidManifest.xml:54:17
+		ADDED from AndroidManifest.xml:59:17
 	android:name
-		ADDED from AndroidManifest.xml:53:17
+		ADDED from AndroidManifest.xml:58:17
 activity#io.ucoin.app.activity.AddAccountActivity
-ADDED from AndroidManifest.xml:57:9
+ADDED from AndroidManifest.xml:62:9
 	android:label
-		ADDED from AndroidManifest.xml:60:13
-	android:windowSoftInputMode
-		ADDED from AndroidManifest.xml:61:13
-	android:configChanges
-		ADDED from AndroidManifest.xml:59:13
-	android:theme
-		ADDED from AndroidManifest.xml:62:13
-	android:name
-		ADDED from AndroidManifest.xml:58:13
-activity#io.ucoin.app.activity.SettingsActivity
-ADDED from AndroidManifest.xml:64:9
-	android:label
-		ADDED from AndroidManifest.xml:66:13
-	android:name
 		ADDED from AndroidManifest.xml:65:13
+	android:windowSoftInputMode
+		ADDED from AndroidManifest.xml:66:13
+	android:configChanges
+		ADDED from AndroidManifest.xml:64:13
+	android:theme
+		ADDED from AndroidManifest.xml:67:13
+	android:name
+		ADDED from AndroidManifest.xml:63:13
+activity#io.ucoin.app.activity.SettingsActivity
+ADDED from AndroidManifest.xml:69:9
+	android:label
+		ADDED from AndroidManifest.xml:71:13
+	android:name
+		ADDED from AndroidManifest.xml:70:13
 service#io.ucoin.app.service.AuthenticatorService
-ADDED from AndroidManifest.xml:68:9
+ADDED from AndroidManifest.xml:73:9
 	android:name
-		ADDED from AndroidManifest.xml:68:18
+		ADDED from AndroidManifest.xml:73:18
 intent-filter#android.accounts.AccountAuthenticator
-ADDED from AndroidManifest.xml:69:13
+ADDED from AndroidManifest.xml:74:13
 action#android.accounts.AccountAuthenticator
-ADDED from AndroidManifest.xml:70:17
+ADDED from AndroidManifest.xml:75:17
 	android:name
-		ADDED from AndroidManifest.xml:70:25
+		ADDED from AndroidManifest.xml:75:25
 meta-data#android.accounts.AccountAuthenticator
-ADDED from AndroidManifest.xml:72:13
+ADDED from AndroidManifest.xml:77:13
 	android:resource
-		ADDED from AndroidManifest.xml:74:17
+		ADDED from AndroidManifest.xml:79:17
 	android:name
-		ADDED from AndroidManifest.xml:73:17
+		ADDED from AndroidManifest.xml:78:17
 service#io.ucoin.app.service.SyncService
-ADDED from AndroidManifest.xml:77:9
+ADDED from AndroidManifest.xml:82:9
 	android:process
-		ADDED from AndroidManifest.xml:80:13
+		ADDED from AndroidManifest.xml:85:13
 	android:exported
-		ADDED from AndroidManifest.xml:79:13
+		ADDED from AndroidManifest.xml:84:13
 	android:name
-		ADDED from AndroidManifest.xml:78:13
+		ADDED from AndroidManifest.xml:83:13
 intent-filter#android.content.SyncAdapter
-ADDED from AndroidManifest.xml:81:13
+ADDED from AndroidManifest.xml:86:13
 action#android.content.SyncAdapter
-ADDED from AndroidManifest.xml:82:17
+ADDED from AndroidManifest.xml:87:17
 	android:name
-		ADDED from AndroidManifest.xml:82:25
+		ADDED from AndroidManifest.xml:87:25
 meta-data#android.content.SyncAdapter
-ADDED from AndroidManifest.xml:84:13
+ADDED from AndroidManifest.xml:89:13
 	android:resource
-		ADDED from AndroidManifest.xml:86:17
+		ADDED from AndroidManifest.xml:91:17
 	android:name
-		ADDED from AndroidManifest.xml:85:17
+		ADDED from AndroidManifest.xml:90:17
 service#io.ucoin.app.service.remote.BlockchainRemoteService
-ADDED from AndroidManifest.xml:89:9
+ADDED from AndroidManifest.xml:94:9
 	android:exported
-		ADDED from AndroidManifest.xml:91:13
-	android:name
-		ADDED from AndroidManifest.xml:90:13
-provider#io.ucoin.app.content.Provider
-ADDED from AndroidManifest.xml:95:9
-	android:authorities
-		ADDED from AndroidManifest.xml:97:13
-	android:syncable
-		ADDED from AndroidManifest.xml:99:13
-	android:exported
-		ADDED from AndroidManifest.xml:98:13
-	android:name
 		ADDED from AndroidManifest.xml:96:13
-uses-permission#android.permission.ACCESS_NETWORK_STATE
-ADDED from AndroidManifest.xml:103:5
 	android:name
-		ADDED from AndroidManifest.xml:103:22
-uses-permission#android.permission.READ_SYNC_SETTINGS
-ADDED from AndroidManifest.xml:104:5
+		ADDED from AndroidManifest.xml:95:13
+provider#io.ucoin.app.content.Provider
+ADDED from AndroidManifest.xml:100:9
+	android:authorities
+		ADDED from AndroidManifest.xml:102:13
+	android:syncable
+		ADDED from AndroidManifest.xml:104:13
+	android:exported
+		ADDED from AndroidManifest.xml:103:13
 	android:name
-		ADDED from AndroidManifest.xml:104:22
-uses-permission#android.permission.WRITE_SYNC_SETTINGS
-ADDED from AndroidManifest.xml:105:5
-	android:name
-		ADDED from AndroidManifest.xml:105:22
-uses-permission#android.permission.AUTHENTICATE_ACCOUNTS
-ADDED from AndroidManifest.xml:106:5
-	android:name
-		ADDED from AndroidManifest.xml:106:22
+		ADDED from AndroidManifest.xml:101:13
 uses-sdk
 INJECTED from AndroidManifest.xml:0:0 reason: use-sdk injection requested
 MERGED from com.android.support:appcompat-v7:21.0.3:15:5
