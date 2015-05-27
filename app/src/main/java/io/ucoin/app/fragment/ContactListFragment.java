@@ -88,9 +88,8 @@ public class ContactListFragment extends ListFragment {
     public void onPrepareOptionsMenu(Menu menu) {
 
         SearchManager searchManager = (SearchManager) getActivity()
-                .getSystemService(getActivity().SEARCH_SERVICE);
+                .getSystemService(Context.SEARCH_SERVICE);
         final MenuItem searchItem = menu.findItem(R.id.action_search);
-
         final SearchView searchView = (SearchView) searchItem.getActionView();
         searchView.setSearchableInfo(searchManager
                 .getSearchableInfo(getActivity().getComponentName()));
