@@ -11,8 +11,8 @@ android {
         applicationId "io.ucoin.ucoin"
         minSdkVersion 14
         targetSdkVersion 21
-        versionCode 6
-        versionName '0.6'
+        versionCode 7
+        versionName '0.7'
         signingConfig signingConfigs.config
     }
     sourceSets.main {
@@ -55,6 +55,9 @@ android {
         }
     }
     productFlavors {
+    }
+    lintOptions {
+        abortOnError false
     }
 }
 
