@@ -169,7 +169,7 @@ public class HttpService extends BaseService implements Closeable{
     protected Object parseResponse(HttpResponse response, Class<?> ResultClass) throws IOException {
         Object result;
 
-        boolean stringOutput = ResultClass.equals(String.class);
+        boolean stringOutput = ResultClass != null && ResultClass.equals(String.class);
 
         // If trace enable, log the response before parsing
         if (stringOutput) {
@@ -194,7 +194,12 @@ public class HttpService extends BaseService implements Closeable{
             try {
                 content = response.getEntity().getContent();
                 Reader reader = new InputStreamReader(content, StandardCharsets.UTF_8);
-                result = gson.fromJson(reader, ResultClass);
+                if (ResultClass != null) {
+                    result = gson.fromJson(reader, ResultClass);
+                }
+                else {
+                    result = null;
+                }
             }
             finally {
                 if (content!= null) {

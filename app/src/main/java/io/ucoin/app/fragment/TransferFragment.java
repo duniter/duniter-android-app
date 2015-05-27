@@ -769,7 +769,7 @@ public class TransferFragment extends Fragment {
         protected void onFailed(Throwable error) {
             super.onFailed(error);
             if (error instanceof InsufficientCreditException) {
-                mAmountText.setError(getString(R.string.not_enough_credit));
+                mAmountText.setError(getString(R.string.insufficient_credit));
             }
             else {
                 Log.d(TAG, "Could not send transaction: " + error.getMessage(), error);

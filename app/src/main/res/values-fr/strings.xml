@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--
+    No need to name a string longer
+    than the words it contains.
+    its name should be the snake case of its main words
+    -->
+    <string name="title_activity_account">Compte</string>
+
+    <!-- Strings related to account creation -->
+    <string name="creating_account_title">Bonjour.</string>
+    <string name="creating_account_welcome"><![CDATA[Bienvenue dans <b>uCoin</b>.<br/><small>Un système décentralisé pour monnaies libres.</small>]]></string>
+    <string name="login">Connexion</string>
+    <string name="register">S\'inscrire</string>
+    <string name="spinner_default_item">[Vide]</string>
+    <string name="loading_dots">Chargement...</string>
+    <string name="computing_keys">Generation des clefs de cryptage...</string>
+    <string name="saving_account">Sauvegarde du compte...</string>
+    <string name="connecting_peer">Connexion au noeud\n%s...</string>
+    <string name="loading_currency">Chargement de la monnaie depuis\n%s...</string>
+    <string name="saving_currency">Sauvegarde de la monnaie...</string>
+    <string name="loading_membership">Récupération des autorisations...</string>
+    <string name="loading_wallet_credit">Récupération du solde...</string>
+    <string name="saving_wallet">Sauvegarde du portefeuille...</string>
+    <string name="saving_peer">Sauvegarde des paramètres du noeud...</string>
+    <string name="sending_certification">Envoi de la demande d\'inscription...</string>
+    <string name="starting_home">Démarrage de l\'application...</string>
+
+    <!-- Strings related to connection -->
+    <string name="connection">Connexion</string>
+    <string name="connecting_dots">Connexion…</string>
+    <string name="not_connected">Non connecté</string>
+    <string name="connected_error">Connexion impossible (%s)</string>
+
+    <!-- Strings related to status -->
+    <string name="cancelled">Annulé</string>
+    <string name="failed">Echec</string>
+    <string name="no_result">Aucun résultat</string>
+
+    <!-- Strings related to presentation -->
+    <string name="open_drawer">Ouverture du panneau de navigation</string>
+    <string name="close_drawer">Fermeture du panneau de navigation</string>
+
+    <!-- Strings related to wallet -->
+    <string name="wallets">Portefeuilles</string>
+    <string name="wallet_title">Portefeuille</string>
+    <string name="credit_message">solde: %s</string>
+    <string name="credit">solde</string>
+    <string name="not_registred">non inscrit</string>
+    <string name="wallet_uid">(%s)</string>
+    <string name="alias">Nom</string>
+    <string name="alias_hint">Nom du portefeuille (optionel)</string>
+    <string name="wallet_account_subtitle">Paramètre du compte:</string>
+    <string name="delete_wallet">Supprimer le portefeuille</string>
+    <string name="delete_wallet_error">Impossible de supprimer le portefeuille (erreur technique)\n%s</string>
+    <string name="delete_wallet_confirm">Etes-vous sûr de vouloir ce portefeuille ?</string>
+    <string name="wallet_deleted">Portefeuille supprimé</string>
+    <string name="universal_dividend_value">%s DU</string>
+    <string name="loading_wallets">Chargement des portefeuilles...</string>
+    <string name="updating_balances">Récupération du solde...</string>
+
+    <!-- Strings related to transfer/transaction -->
+    <string name="wallet_transmitter">Portefeuille</string>
+    <string name="wallet_transmitter_hint">Portefeuille</string>
+    <string name="receiver">Destinataire</string>
+    <string name="receiver_hint">Destinataire</string>
+    <string name="amount">Montant</string>
+    <string name="amount_hint">Montant</string>
+    <string name="universal_dividend_acronym">DU</string>
+    <string name="unit_coins_label">unité</string>
+    <string name="comment_optional">Commentaire (optionel)</string>
+    <string name="comment_hint">Commentaire (optionel)</string>
+    <string name="amount_not_long">Le montant doit etre une valeur entière</string>
+    <string name="amount_not_decimal">Le montant doit être une valeur décimal</string>
+    <string name="transactions">Opérations</string>
+    <string name="no_transaction">Aucune opérations</string>
+    <string name="movement_ud">Dividende Universel</string>
+    <string name="sync">Rafraichir</string>
+    <string name="resync">Réimporter toutes les opérations</string>
+    <string name="resync_confirm">Etes-vous sûr de vouloir réimporter toutes les opérations ? Cette opération peut durer plusieurs minutes.</string>
+    <string name="resync_started">Téléchargement des opérations...</string>
+    <string name="sync_succeed">%1$s opération(s) téléchargée(s) en %2$s</string>
+    <string name="sync_no_tx">Aucune nouvelle opération</string>
+
+    <!-- Strings related to actions -->
+    <string name="send">Envoyer</string>
+    <string name="transfer">Payer</string>
+    <string name="sign">Certifier</string>
+    <string name="home">Accueil</string>
+    <string name="search">Rechercher</string>
+    <string name="sign_in">Identification</string>
+    <string name="dev">Test (dev)</string>
+    <string name="settings">Configuration</string>
+    <string name="back">Précédent</string>
+    <string name="forward">Suivant</string>
+    <string name="copy">Copier</string>
+    <string name="add">Ajouter</string>
+    <string name="refresh">Rafraichir</string>
+    <string name="CANCEL">Annuller</string>
+    <string name="ok">OK</string>
+    <string name="join">Devenir membre</string>
+    <string name="delete">Supprimer</string>
+    <string name="remove">Enlever</string>
+    <string name="add_as_new_contact">Ajouter comme nouveau contact</string>
+    <string name="add_as_new_contact_title">Nouveau contact</string>
+    <string name="add_as_existing_contact">Ajouter à un contact existant</string>
+
+    <!-- Strings related to home -->
+    <string name="favorites">Contacts</string>
+
+    <!-- Strings related to currency -->
+    <string name="add_currency">Add currency</string>
+    <string name="preselected_peers">Sélectionnez une monnaie prédefinie :</string>
+    <string name="peer_hint">Ou remplissez les paramètres de connexion:</string>
+    <string name="node_address">Hôte</string>
+    <string name="node_address_hint">mon.domaine.com</string>
+    <string name="node_port">Port</string>
+    <string name="node_port_hint">(optionel)</string>
+    <string name="rules">Règles</string>
+    <string name="money">Monnaie</string>
+    <string name="wot">Toiel de confiance</string>
+    <string name="blockchain">Blockchain</string>
+    <string name="c_and_dt">Fundamental growth (c) / Time period (dt) between two UD</string>
+    <string name="c_and_dt_value">%1$.0f %% / %2$.0f days (%3$d seconds)</string>
+    <string name="ud0">Dividende Universel initial UD(0) en unité</string>
+    <string name="ud0_value">%d unités</string>
+    <string name="value_days_and_seconds">%1$.0f jours (%2$d s)</string>
+    <string name="value_minutes_and_seconds">%1$.0f min %2$d s (%3$d s)</string>
+    <string name="sig_delay">Minimum delay between 2 identical certifications (same pubkeys)</string>
+    <string name="sig_validity">Maximum age of a valid signature</string>
+    <string name="sig_qty">Minimum quantity of signatures to be part of the WoT</string>
+    <string name="sig_qty_value">%d signatures</string>
+    <string name="sig_woT">Minimum quantity of valid made certifications to be part of the WoT for distance rule</string>
+    <string name="ms_validity">Maximum age of a valid membership</string>
+    <string name="step_max">Maximum distance between each WoT member and a newcomer</string>
+    <string name="median_time_blocks">Number of blocks used for calculating median time.</string>
+    <string name="median_time_blocks_value">%d blocks</string>
+    <string name="avg_gen_time">The average time for writing 1 block (wished time)</string>
+    <string name="dt_diff_eval">The number of blocks required to evaluate again PoWMin value</string>
+    <string name="dt_diff_eval_value">%d blocks</string>
+    <string name="blocks_rot">The number of previous blocks to check for personalized difficulty</string>
+    <string name="blocks_rot_value">%d blocks</string>
+    <string name="percent_rot">The percent of previous issuers to reach for personalized difficulty</string>
+    <string name="percent_rot_value">%.0f %%</string>
+
+    <string name="peers">Noeuds</string>
+
+    <string name="currency">Monnaie</string>
+    <string name="no_currency">Aucune monnaie</string>
+    <string name="no_transfer">Aucune opération</string>
+    <string name="no_certification">Aucune certification</string>
+    <string name="no_contact">Aucun contact</string>
+    <string name="no_wallet">Aucun portefeuille</string>
+    <string name="currencies">Monnaies</string>
+    <string name="members">Membres</string>
+    <string name="members_count">%s membres</string>
+    <string name="transfer_sended">Paiement envoyé.\nEn attente de traitement par le réseau.</string>
+    <string name="transfer_error">Echec de l\'envoi du paiement (erreur technique)</string>
+    <string name="cert_error">Echec de l\'envoi de la certification (erreur technique)</string>
+    <string name="cert_sended">Certification envoyée.\nEn attente de traitement par le réseau.</string>
+    <string name="cert_date">date de signature</string>
+    <string name="cert_not_written">attente de traitement</string>
+    <string name="join_sended">Inscription envoyée.\nEn attente de traitement par le réseau.</string>
+    <string name="join_error">Echec de l\'envoi de l\'inscription (erreur technique)</string>
+    <string name="duplicate_currency_name">La monnaie [%s] existe déjà.</string>
+
+    <!-- Strings related to currency/rule -->
+
+
+    <!-- Strings related to peer/node -->
+    <string name="dialog_text_add_node">Please enter either a full qualified domain name, an IPv4, or an IPv6 address, and a port number.</string>
+
+    <!-- Strings related to identities -->
+    <string name="identity">Identité</string>
+    <string name="uid_or_public_key">identifiant ou clé</string>
+    <string name="uid">Identifiant</string>
+    <string name="uid_hint">Identifiant</string>
+    <string name="registration_date">Date d\'inscription</string>
+    <string name="signature">Signature</string>
+    <string name="public_key">Clé publique</string>
+    <string name="identity_details">Général</string>
+    <string name="community">Communauté</string>
+
+    <!-- Strings related to account/authentication --> -->
+    <string name="next">Suivant &gt;</string>
+    <string name="password">Mot de passe</string>
+    <string name="confirm">Confirmation</string>
+    <string name="confirm_password">Confirmation du mot de passe</string>
+    <string name="pin_code">PIN code</string>
+    <string name="add_wallet">Ajouter un portefeuille</string>
+    <string name="add_wallet_title">Nouveau portefeuille</string>
+    <string name="salt">Sel</string>
+    <string name="salt_hint">Sel (un email, téléphone ou autre)</string>
+    <string name="salt_instructions">Sel: Nous vous recommandons d\'utiliser votre e-mail personnel.
+        Mais vous pouvez choisir une autre valeur : l\'essentiel étant qu\'elle est assez d\'entropie pour
+        éviter une collision de clé publique.
+        Votre e-personnel est typiquement un bon choix, d\'autant qu\'il est facile à se rappeller.</string>
+    <string name="password_instructions">Mot de passe : choisir un mot de passe compliqué, pour éviter tout risque
+        de piratage. Choisissez le avec attention, car il ne peut plus être changé par la suite.</string>
+    <string name="test">Test</string>
+
+    <!-- Strings related to contact -->
+    <string name="contact_name_hint">Nom (optionel)</string>
+    <string name="add_contact">Nouveau contact</string>
+    <string name="contact_uid">(%s)</string>
+    <string name="add_contact_confirm"><![CDATA[Vous êtes sur le point d\'ajouter <b>%s</b> dans vos contacts.\nEtes-vous sûr ?]]></string>
+    <string name="contact_added">Contact ajouté</string>
+
+
+    <!-- Validation messages -->
+    <string name="uid_already_used">Identifiant déjà utilisé</string>
+    <string name="uid_and_pubkey_not_registred">Identifiant incorrect</string>
+    <string name="pubkey_already_used">Sel et/ou mot de passe incorrects.</string>
+    <string name="login_too_short">Identifiant trop court</string>
+    <string name="alias_or_uid_required">Au moins un champ \'nom\' or \'identifiant\' doit être renseigné</string>
+    <string name="name_too_short">Nom trop court</string>
+    <string name="salt_too_short">Sel trop court</string>
+    <string name="password_too_short">Mot de passe trop court</string>
+    <string name="login_incorrect">Identifiant incorrect</string>
+    <string name="password_incorrect">Mot de passe incorrect</string>
+    <string name="field_required">Champ obligatoire</string>
+    <string name="duplicate_wallet_pubkey">Sel et mot de passe déjà utilisé par un autre portefeuille</string>
+    <string name="uid_match_another_pubkey">Sel et mot de passe incorrect pour cet identifiant</string>
+    <string name="uid_instructions">Identifiant: Si vous choissisez un identifiant déjà utilisé par quelqu\'un d\'autre,
+        vous ne pourrez pas vous rejoindre la communauté. Assurez vous de ne pas utiliser un identifiant déjà existant.</string>
+    <string name="uid_cannot_be_empty">Identifiant requis</string>
+    <string name="salt_cannot_be_empty">Sel requis</string>
+    <string name="password_cannot_be_empty">Mot de passe requis</string>
+    <string name="confirm_password_cannot_be_empty">La confirmation du mot de passe est requise</string>
+    <string name="passwords_dont_match">Les mots de passe de correspondent pas</string>
+    <string name="insufficient_credit">Solde insuffisant</string>
+    <string name="duplicate_pubkey">Un portefeuille avec la même clé publique existe déjà</string>
+    <string name="query_too_short">%s caractères minimum</string>
+    <string name="transfer_to">Payer %s</string>
+    <string name="sign_to">Certifier %s</string>
+    <string name="yesterday">hier</string>
+    <string name="search_error">Echec de la recherche (%s). Veuillez réessayer.</string>
+
+
+    <!-- Strings related to extension (ext) -->
+    <string name="forum">Forum</string>
+
+
+    <string-array name="drawer_items">
+        <item>@string/home</item>
+        <item>@string/currencies</item>
+        <item>@string/forum</item>
+        <item>@string/settings</item>
+    </string-array>
+</resources>

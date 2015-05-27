@@ -389,15 +389,17 @@ public class WalletService extends BaseService {
                 .query(getContentUri(),
                         new String[]{}, selection, selectionArgs, null);
 
-        if (!cursor.moveToNext()) {
-            throw new UCoinTechnicalException(String.format("Could not retrieve wallet with id [%s]", walletId));
+        try {
+            if (!cursor.moveToNext()) {
+                throw new UCoinTechnicalException(String.format("Could not retrieve wallet with id [%s]", walletId));
+            }
+
+            Wallet result = toWallet(cursor);
+            return result;
         }
-
-        Wallet result = toWallet(cursor);
-
-        cursor.close();
-
-        return result;
+        finally {
+            cursor.close();
+        }
     }
 
     /**

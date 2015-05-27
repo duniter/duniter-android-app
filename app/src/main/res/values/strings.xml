@@ -32,8 +32,6 @@
     <string name="connecting_dots">Connecting…</string>
     <string name="not_connected">Not connected</string>
     <string name="connected_error">Unable to connect (%s)</string>
-    <string name="connected_label"><![CDATA[You are connected to free currency \'<b/>%s</b>\'.]]></string>
-    <string name="connection_details">Successfully connected to a free currency.\n\tCurrency name: %1$s\n\tInitial UD: %2$s\n\tUD interval: %3$s</string>
 
     <!-- Strings related to status -->
     <string name="cancelled">Cancelled</string>
@@ -56,7 +54,7 @@
     <string name="wallet_account_subtitle">Account parameters:</string>
     <string name="delete_wallet">Delete wallet</string>
     <string name="delete_wallet_error">Could not delete wallet (technical error)\n%s</string>
-    <string name="delete_wallet_confirm">Are you sure ?</string>
+    <string name="delete_wallet_confirm">Are you sure you want to delete this wallet ?</string>
     <string name="wallet_deleted">Wallet successfully deleted</string>
     <string name="universal_dividend_value">%s UD</string>
     <string name="loading_wallets">Loading wallets...</string>
@@ -72,7 +70,6 @@
     <string name="amount_hint">Amount</string>
     <string name="universal_dividend_acronym">UD</string>
     <string name="unit_coins_label">coins</string>
-    <string name="main_wallet">Main wallet</string>
     <string name="comment_optional">Comment (optional)</string>
     <string name="comment_hint">Comment (optional)</string>
     <string name="amount_not_long">Amount must a valid integer</string>
@@ -90,9 +87,7 @@
     <!-- Strings related to actions -->
     <string name="send">Send</string>
     <string name="transfer">Transfer</string>
-    <string name="generate_seed">Generate seed</string>
     <string name="sign">Sign</string>
-    <string name="self">Register User ID</string>
     <string name="home">Home</string>
     <string name="search">Search</string>
     <string name="sign_in">Sign in</string>
@@ -116,7 +111,6 @@
     <string name="favorites">Contacts</string>
 
     <!-- Strings related to currency -->
-    <string name="lookup">Lookup</string>
     <string name="add_currency">Add currency</string>
     <string name="preselected_peers">Select a predefine currency:</string>
     <string name="peer_hint">Or fill parameters of a currency node:</string>
@@ -162,7 +156,6 @@
     <string name="currencies">Currencies</string>
     <string name="members">Members</string>
     <string name="members_count">%s members</string>
-    <string name="not_enough_credit">Not enough credit</string>
     <string name="transfer_sended">Transfer sended.\nWaiting network processing.</string>
     <string name="transfer_error">Could not send transfer (technical error)</string>
     <string name="cert_error">Could not send certification (technical error)</string>
@@ -177,9 +170,6 @@
 
 
     <!-- Strings related to peer/node -->
-    <string name="enter_node_info">Enter node info</string>
-    <string name="enter_remote_address">Enter remote address</string>
-    <string name="add_node">Add node</string>
     <string name="dialog_text_add_node">Please enter either a full qualified domain name, an IPv4, or an IPv6 address, and a port number.</string>
 
     <!-- Strings related to identities -->
@@ -187,9 +177,6 @@
     <string name="uid_or_public_key">user or public key</string>
     <string name="uid">User</string>
     <string name="uid_hint">User identifier</string>
-    <string name="identity_icon">Identity icon</string>
-    <string name="certified_by">Certified by</string>
-    <string name="certifiers_of">Certifiers of</string>
     <string name="registration_date">Registration Date</string>
     <string name="signature">Signature</string>
     <string name="public_key">Public key</string>
@@ -202,7 +189,6 @@
     <string name="confirm">Confirm</string>
     <string name="confirm_password">Confirm password</string>
     <string name="pin_code">PIN code</string>
-    <string name="add_account">Register</string>
     <string name="add_wallet">Add wallet</string>
     <string name="add_wallet_title">New wallet</string>
     <string name="salt">Salt</string>

@@ -325,7 +325,7 @@ public class BlockchainRemoteService extends BaseRemoteService {
         Log.d(TAG, "received from /tx/process: " + membershipResult);
 
 
-        executeRequest(httpPost, null);
+        executeRequest(httpPost, String.class);
     }
 
 

@@ -1,37 +1,46 @@
 TODO - in french, sorry ;/
 
-V0.3
+
+V0.4
 ~~~~
 
- - Sign
-    * après le sign, retour à identity fragment
+ - Transfer :
+    * après transfer refermer keyboard
 
  - Service :
     * revoir le loadMembership pour exploiter le lookup/isMember
+    * faire que le creditUD soit mis à jour quand on fait un updateWallet dans WalletService
+
+vérifier si tous les cursor sont fermé :
+http://stackoverflow.com/questions/9801304/android-contentprovider-calls-bursts-of-setnotificationuri-to-cursoradapter-wh
 
  - Contact :
-    * Pouvoir ajouter un contact depuis une fiche identity
     * Pouvoir ajouter un contact depuis un bouton add (depuis home)
 
  -  Wallet :
     * add a "renew" if member but expired
 
- - Transfer :
-    * après transfer retour à identity fragment
-    * après transfer refermer keyboard
+ - Sign a identity again always failed (Bad Request)
 
-- sur les Wallets (home) :
-    * gérer le rafraichissement du solde, en tache de fond à l'ouverture et après un transfert
-     => fait, mais il manque un délai avant de recommencer la mise à jour. et un bouton pour le déclencher
-    * il faudra un "credit" et un "expected_credit" calculé localement
+ - http://www.slf4j.org/android/
+
+ - Wot/Community : Pourqoi je ne peux pas signer pschofonni ?
+
+ - Enlever le controle des doubles dans le traitement de /tx/history
+   => En attente de la correction de : https://github.com/ucoin-io/ucoin/issues/71
+
+
 ~~~~
 
-V0.4
+V0.5
 
 ~~~~
  - Cache :
     * ajouter une cache dans : ServiceLocator.instance().getBlockchainRemoteService().getParameters()
     * idem pour getLastUD()
+
+ - Contact :
+    * implement 'add to existing contact'
 
  -  Wallet :
     * WOT : on scroll down: reduce header
@@ -41,7 +50,7 @@ V0.4
     * WOT : on scroll down: reduce header
 
  - WOT community
-    * trier par date de signature (DESC)
+    * trier par time de signature (DESC)
     * barrer les signatures trop vielles
     * masquer les plus anciennes, sous un bouton (afficher l'historique)
 
@@ -54,7 +63,21 @@ V0.4
     * dans l'assistance de création de compte
     * au niveau des transfer, quand un login est nécessaire
 
-- Login :
+ - Login :
     * Ajouter une case à cocher "se rappeller de moi pendant XXX minutes" (XXX dans les settings)
 
+
+ - sur les Wallets (home) :
+    * rafraichissement du solde : il manque un délai avant de recommencer la mise à jour
+    * il faudra un "credit" et un "expected_credit" calculé localement
+
+V0.5
+
+~~~~
+
+ - Use RecyclerView (+ refresh) instead of ListView :
+   * Home/WalletList
+   * Community
+   * Movements
+   *
 ~~~~

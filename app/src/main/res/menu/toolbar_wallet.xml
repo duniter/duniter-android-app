@@ -16,7 +16,7 @@
 
     <item
         android:id="@+id/action_self"
-        android:title="@string/self"
+        android:title="@string/register"
         ucoin:showAsAction="ifRoom|withText" />
 
     <item
