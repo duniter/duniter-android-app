@@ -10,16 +10,18 @@ import org.apache.http.message.BasicNameValuePair;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import io.ucoin.app.config.Configuration;
-import io.ucoin.app.model.BlockchainBlock;
-import io.ucoin.app.model.BlockchainParameter;
-import io.ucoin.app.model.Currency;
-import io.ucoin.app.model.Identity;
-import io.ucoin.app.model.Peer;
-import io.ucoin.app.model.Wallet;
+import io.ucoin.app.model.local.Peer;
+import io.ucoin.app.model.local.Wallet;
+import io.ucoin.app.model.remote.BlockchainBlock;
 import io.ucoin.app.model.remote.BlockchainMembershipResults;
+import io.ucoin.app.model.remote.BlockchainParameter;
+import io.ucoin.app.model.remote.Currency;
+import io.ucoin.app.model.remote.Identity;
 import io.ucoin.app.service.CryptoService;
 import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.service.exception.HttpBadRequestException;
@@ -35,6 +37,7 @@ public class BlockchainRemoteService extends BaseRemoteService {
 
     private static final String TAG = "BlockchainRemoteService";
 
+    private static final String JSON_DIVIDEND_ATTR = "\"dividend\":";
 
     public static final String URL_BASE = "/blockchain";
 
@@ -49,6 +52,7 @@ public class BlockchainRemoteService extends BaseRemoteService {
     public static final String URL_MEMBERSHIP = URL_BASE + "/membership";
 
     public static final String URL_MEMBERSHIP_SEARCH = URL_BASE + "/memberships/%s";
+
 
     private NetworkRemoteService networkRemoteService;
 
@@ -76,6 +80,7 @@ public class BlockchainRemoteService extends BaseRemoteService {
 
     /**
      * get the blockchain parameters (currency parameters)
+     *
      * @param currencyId
      * @param useCache
      * @return
@@ -83,14 +88,14 @@ public class BlockchainRemoteService extends BaseRemoteService {
     public BlockchainParameter getParameters(long currencyId, boolean useCache) {
         if (!useCache) {
             return getParameters(currencyId);
-        }
-        else {
+        } else {
             return mParametersCache.get(null, currencyId);
         }
     }
 
     /**
      * get the blockchain parameters (currency parameters)
+     *
      * @param currencyId
      * @return
      */
@@ -102,6 +107,7 @@ public class BlockchainRemoteService extends BaseRemoteService {
 
     /**
      * get the blockchain parameters (currency parameters)
+     *
      * @param peer the peer to use for request
      * @return
      */
@@ -113,11 +119,12 @@ public class BlockchainRemoteService extends BaseRemoteService {
 
     /**
      * Retrieve a block, by id (from 0 to current)
+     *
      * @param currencyId
      * @param number
      * @return
      */
-    public BlockchainBlock getBlock(long currencyId, int number) {
+    public BlockchainBlock getBlock(long currencyId, long number) {
         // get blockchain parameter
         String path = String.format(URL_BLOCK, number);
         BlockchainBlock result = executeRequest(currencyId, path, BlockchainBlock.class);
@@ -125,8 +132,41 @@ public class BlockchainRemoteService extends BaseRemoteService {
     }
 
     /**
+     * Retrieve the dividend of a block, by id (from 0 to current).
+     * Usefull method to avoid to deserialize all the block
+     *
+     * @param currencyId
+     * @param number
+     * @return
+     */
+    public Long getBlockDividend(long currencyId, long number) {
+        // get blockchain parameter
+        String path = String.format(URL_BLOCK, number);
+        String json = executeRequest(currencyId, path, String.class);
+
+        int startIndex = json.indexOf(JSON_DIVIDEND_ATTR);
+        if (startIndex == -1) {
+            return null;
+        }
+        startIndex += JSON_DIVIDEND_ATTR.length();
+        int endIndex = json.indexOf(',', startIndex);
+        if (endIndex == -1) {
+            return null;
+        }
+
+        String dividendStr = json.substring(startIndex, endIndex).trim();
+        if (dividendStr.length() == 0
+                || "null".equals(dividendStr)) {
+            return null;
+        }
+
+        return Long.parseLong(dividendStr);
+    }
+
+    /**
      * Retrieve a block, by id (from 0 to current)
-     * @param peer the peer to use for request
+     *
+     * @param peer   the peer to use for request
      * @param number the block number
      * @return
      */
@@ -139,19 +179,20 @@ public class BlockchainRemoteService extends BaseRemoteService {
 
     /**
      * Retrieve the current block (with short cache)
+     *
      * @return
      */
     public BlockchainBlock getCurrentBlock(long currencyId, boolean useCache) {
         if (!useCache) {
             return getCurrentBlock(currencyId);
-        }
-        else {
+        } else {
             return mCurrentBlockCache.get(null, currencyId);
         }
     }
 
     /**
      * Retrieve the current block
+     *
      * @return
      */
     public BlockchainBlock getCurrentBlock(long currencyId) {
@@ -162,6 +203,7 @@ public class BlockchainRemoteService extends BaseRemoteService {
 
     /**
      * Retrieve the current block
+     *
      * @param peer the peer to use for request
      * @return the last block
      */
@@ -173,6 +215,7 @@ public class BlockchainRemoteService extends BaseRemoteService {
 
     /**
      * Retrieve the currency data, from peer
+     *
      * @param peer
      * @return
      */
@@ -192,6 +235,7 @@ public class BlockchainRemoteService extends BaseRemoteService {
 
     /**
      * Retrieve the last block with UD
+     *
      * @param currencyId id of currency
      * @return
      */
@@ -208,10 +252,9 @@ public class BlockchainRemoteService extends BaseRemoteService {
         }
 
         // Get the UD from the last block with UD
-        BlockchainBlock block = getBlock(currencyId, blockNumber);
-        Long lastUD = block.getDividend();
+        Long lastUD = getBlockDividend(currencyId, blockNumber);
 
-        // Check not null (should never happend)
+        // Check not null (should never append)
         if (lastUD == null) {
             throw new UCoinTechnicalException("Unable to get last UD from server");
         }
@@ -220,9 +263,10 @@ public class BlockchainRemoteService extends BaseRemoteService {
 
     /**
      * Check is a identity is not already used by a existing member
+     *
      * @param peer
      * @param identity
-     * @throws UidAlreadyUsedException if UID already used by another member
+     * @throws UidAlreadyUsedException    if UID already used by another member
      * @throws PubkeyAlreadyUsedException if pubkey already used by another member
      */
     public void checkNotMemberIdentity(Peer peer, Identity identity) throws UidAlreadyUsedException, PubkeyAlreadyUsedException {
@@ -247,9 +291,10 @@ public class BlockchainRemoteService extends BaseRemoteService {
         }
     }
 
-     /**
+    /**
      * Check is a wallet is a member, and load its attribute isMember and certTimestamp
-      * @param wallet
+     *
+     * @param wallet
      * @throws UidMatchAnotherPubkeyException is uid already used by another pubkey
      */
     public void loadAndCheckMembership(Peer peer, Wallet wallet) throws UidMatchAnotherPubkeyException {
@@ -266,6 +311,7 @@ public class BlockchainRemoteService extends BaseRemoteService {
 
     /**
      * Load identity attribute isMember and timestamp
+     *
      * @param identity
      */
     public void loadMembership(long currencyId, Identity identity, boolean checkLookupForNonMember) {
@@ -328,6 +374,92 @@ public class BlockchainRemoteService extends BaseRemoteService {
         executeRequest(httpPost, String.class);
     }
 
+    public BlockchainMembershipResults getMembershipByPubkeyOrUid(long currencyId, String uidOrPubkey) {
+        String path = String.format(URL_MEMBERSHIP_SEARCH, uidOrPubkey);
+
+        // search blockchain membership
+        try {
+            BlockchainMembershipResults result = executeRequest(currencyId, path, BlockchainMembershipResults.class);
+            return result;
+        } catch (HttpBadRequestException e) {
+            Log.d(TAG, "No member matching this pubkey or uid: " + uidOrPubkey);
+            return null;
+        }
+    }
+
+    public BlockchainMembershipResults getMembershipByPubkeyOrUid(Peer peer, String uidOrPubkey) {
+        String path = String.format(URL_MEMBERSHIP_SEARCH, uidOrPubkey);
+
+        // search blockchain membership
+        try {
+            BlockchainMembershipResults result = executeRequest(peer, path, BlockchainMembershipResults.class);
+            return result;
+        } catch (HttpBadRequestException e) {
+            Log.d(TAG, "No member matching this pubkey or uid: " + uidOrPubkey);
+            return null;
+        }
+    }
+
+    public String getMembership(Wallet wallet,
+                                BlockchainBlock block,
+                                boolean sideIn
+    ) {
+
+        // Create the member ship document
+        String membership = getMembership(wallet.getUid(),
+                wallet.getPubKeyHash(),
+                wallet.getCurrency(),
+                block.getNumber(),
+                block.getHash(),
+                sideIn,
+                wallet.getCertTimestamp()
+        );
+
+        // Add signature
+        CryptoService cryptoService = ServiceLocator.instance().getCryptoService();
+        String signature = cryptoService.sign(membership, wallet.getSecKey());
+
+        return new StringBuilder().append(membership).append(signature)
+                .append('\n').toString();
+    }
+
+    /**
+     * Get UD, by block number
+     *
+     * @param currencyId
+     * @param startOffset
+     * @return
+     */
+    public Map<Integer, Long> getUDs(long currencyId, long startOffset) {
+        Log.d(TAG, String.format("Getting block's UD from block [%s]", startOffset));
+
+        int[] blockNumbersWithUD = getBlocksWithUD(currencyId);
+        if (blockNumbersWithUD == null || blockNumbersWithUD.length == 0) {
+            return null;
+        }
+
+        Map<Integer, Long> result = new LinkedHashMap<Integer,Long>();
+
+        // Insert the UD0 (if need)
+        if (startOffset <= 0) {
+            BlockchainParameter parameters = getParameters(currencyId, true/*with cache*/);
+            result.put(0, parameters.getUd0());
+        }
+
+        for(Integer blockNumber: blockNumbersWithUD) {
+            if (blockNumber >= startOffset) {
+                Long ud = getBlockDividend(currencyId, blockNumber);
+                // Check not null (should never append)
+                if (ud == null) {
+                    throw new UCoinTechnicalException(String.format("Unable to get UD from server block [%s]", blockNumber));
+                }
+
+                result.put(blockNumber, ud);
+            }
+        }
+
+        return result;
+    }
 
     /* -- Internal methods -- */
 
@@ -371,8 +503,8 @@ public class BlockchainRemoteService extends BaseRemoteService {
             if (checkLookupForNonMember) {
                 WotRemoteService wotService = ServiceLocator.instance().getWotRemoteService();
                 Identity lookupIdentity = peer != null
-                    ? wotService.getIdentity(peer, identity.getUid(), identity.getPubkey())
-                    : wotService.getIdentity(currencyId, identity.getUid(), identity.getPubkey());
+                        ? wotService.getIdentity(peer, identity.getUid(), identity.getPubkey())
+                        : wotService.getIdentity(currencyId, identity.getUid(), identity.getPubkey());
 
                 // Self certification exists, update the cert timestamp
                 if (lookupIdentity != null) {
@@ -399,55 +531,38 @@ public class BlockchainRemoteService extends BaseRemoteService {
 
     }
 
-    public BlockchainMembershipResults getMembershipByPubkeyOrUid(long currencyId, String uidOrPubkey) {
-        String path = String.format(URL_MEMBERSHIP_SEARCH, uidOrPubkey);
+    private int[] getBlocksWithUD(long currencyId) {
+        Log.d(TAG, "Getting blocks with UD");
 
-        // search blockchain membership
-        try {
-            BlockchainMembershipResults result = executeRequest(currencyId, path, BlockchainMembershipResults.class);
-            return result;
-        }
-        catch(HttpBadRequestException e) {
-            Log.d(TAG, "No member matching this pubkey or uid: " + uidOrPubkey);
+        String json = executeRequest(currencyId, URL_BLOCK_WITH_UD, String.class);
+
+        int startIndex = json.indexOf("[");
+        int endIndex = json.lastIndexOf(']');
+        if (startIndex == -1 || endIndex == -1) {
             return null;
         }
-    }
 
-    public BlockchainMembershipResults getMembershipByPubkeyOrUid(Peer peer, String uidOrPubkey) {
-        String path = String.format(URL_MEMBERSHIP_SEARCH, uidOrPubkey);
 
-        // search blockchain membership
-        try {
-            BlockchainMembershipResults result = executeRequest(peer, path, BlockchainMembershipResults.class);
-            return result;
-        }
-        catch(HttpBadRequestException e) {
-            Log.d(TAG, "No member matching this pubkey or uid: " + uidOrPubkey);
+        String blockNumbersStr = json.substring(startIndex + 1, endIndex).trim();
+
+        if (StringUtils.isBlank(blockNumbersStr)) {
             return null;
         }
-    }
 
-    public String getMembership(Wallet wallet,
-                                BlockchainBlock block,
-                                boolean sideIn
-                                ) {
+        String[] blockNumbers = blockNumbersStr.split(",");
+        int[] result = new int[blockNumbers.length];
+        try {
+            int i=0;
+            for (String blockNumber : blockNumbers) {
+                result[i++] = Integer.parseInt(blockNumber.trim());
+            }
+        }
+        catch(NumberFormatException e){
+            Log.e(TAG, String.format("Bad format of the response '%s'.", URL_BLOCK_WITH_UD));
+            throw new UCoinTechnicalException("Unable to read block with UD numbers: " + e.getMessage(), e);
+        }
 
-        // Create the member ship document
-        String membership = getMembership(wallet.getUid(),
-                wallet.getPubKeyHash(),
-                wallet.getCurrency(),
-                block.getNumber(),
-                block.getHash(),
-                sideIn,
-                wallet.getCertTimestamp()
-        );
-
-        // Add signature
-        CryptoService cryptoService = ServiceLocator.instance().getCryptoService();
-        String signature = cryptoService.sign(membership, wallet.getSecKey());
-
-        return new StringBuilder().append(membership).append(signature)
-                .append('\n').toString();
+        return result;
     }
 
     private String getMembership(String uid,

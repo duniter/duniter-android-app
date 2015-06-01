@@ -1,7 +1,5 @@
 package io.ucoin.app.model.remote;
 
-import io.ucoin.app.model.BasicIdentity;
-
 public class BlockchainMembershipResults extends BasicIdentity{
 
 	/**

@@ -19,8 +19,15 @@ import io.ucoin.app.technical.ImageUtils;
 
 public class MovementCursorAdapter extends CursorAdapter{
 
+    private final String mUdComment;
+    private int textPrimaryColor;
+    private int textComputedColor;
+
     public MovementCursorAdapter(Context context, Cursor c, int flags) {
         super(context, c, flags);
+        mUdComment = context.getString(R.string.movement_ud);
+        textPrimaryColor = context.getResources().getColor(R.color.textPrimary);
+        textComputedColor = context.getResources().getColor(R.color.textComputed);
     }
 
     @Override
@@ -69,8 +76,15 @@ public class MovementCursorAdapter extends CursorAdapter{
 
         // Comment
         String comment= cursor.getString(viewHolder.commentIndex);
-        viewHolder.commentView.setText(comment);
-
+        if (comment == null && cursor.getInt(viewHolder.isUdIndex) == 1) {
+            // If = UD, use a special comment
+            viewHolder.commentView.setText(mUdComment);
+            viewHolder.commentView.setTextColor(textComputedColor);
+        }
+        else {
+            viewHolder.commentView.setText(comment);
+            viewHolder.commentView.setTextColor(textPrimaryColor);
+        }
         // issuers or receivers
         String issuersOrReceivers;
         if (amount > 0) {
@@ -103,6 +117,7 @@ public class MovementCursorAdapter extends CursorAdapter{
         int amountIndex;
         int commentIndex;
         int blockNumberIndex;
+        int isUdIndex;
         int issuersIndex;
         int receiversIndex;
 
@@ -117,6 +132,7 @@ public class MovementCursorAdapter extends CursorAdapter{
             amountIndex = cursor.getColumnIndex(Contract.Movement.AMOUNT);
             commentIndex = cursor.getColumnIndex(Contract.Movement.COMMENT);
             blockNumberIndex = cursor.getColumnIndex(Contract.Movement.BLOCK);
+            isUdIndex = cursor.getColumnIndex(Contract.Movement.IS_UD);
             issuersIndex = cursor.getColumnIndex(Contract.Movement.ISSUERS);
             receiversIndex = cursor.getColumnIndex(Contract.Movement.RECEIVERS);
         }

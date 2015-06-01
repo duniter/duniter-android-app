@@ -11,10 +11,10 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.ucoin.app.model.Peer;
-import io.ucoin.app.model.TxOutput;
-import io.ucoin.app.model.Wallet;
+import io.ucoin.app.model.local.Peer;
+import io.ucoin.app.model.local.Wallet;
 import io.ucoin.app.model.remote.TxHistoryResults;
+import io.ucoin.app.model.remote.TxOutput;
 import io.ucoin.app.model.remote.TxSource;
 import io.ucoin.app.model.remote.TxSourceResults;
 import io.ucoin.app.service.CryptoService;
@@ -150,7 +150,7 @@ public class TransactionRemoteService extends BaseRemoteService {
         return credit;
     }
 
-    public TxHistoryResults getHistory(long currencyId, String pubKey, long fromBlockNumber, long toBlockNumber) {
+    public TxHistoryResults getTxHistory(long currencyId, String pubKey, long fromBlockNumber, long toBlockNumber) {
         ObjectUtils.checkNotNull(pubKey);
         ObjectUtils.checkArgument(fromBlockNumber >= 0);
         ObjectUtils.checkArgument(fromBlockNumber <= toBlockNumber);

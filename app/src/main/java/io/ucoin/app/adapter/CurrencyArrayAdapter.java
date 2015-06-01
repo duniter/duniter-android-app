@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.ucoin.app.R;
-import io.ucoin.app.model.Currency;
+import io.ucoin.app.model.remote.Currency;
 
 public class CurrencyArrayAdapter extends ArrayAdapter<Currency> {
 

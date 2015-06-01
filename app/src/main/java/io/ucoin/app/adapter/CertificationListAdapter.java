@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.ucoin.app.R;
-import io.ucoin.app.model.WotCertification;
+import io.ucoin.app.model.remote.WotCertification;
 import io.ucoin.app.technical.DateUtils;
 import io.ucoin.app.technical.ImageUtils;
 

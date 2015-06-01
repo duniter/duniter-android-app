@@ -20,7 +20,7 @@ import java.io.Reader;
 import java.net.ConnectException;
 
 import io.ucoin.app.config.Configuration;
-import io.ucoin.app.model.Peer;
+import io.ucoin.app.model.local.Peer;
 import io.ucoin.app.service.exception.HttpBadRequestException;
 import io.ucoin.app.service.exception.PeerConnectionException;
 import io.ucoin.app.technical.StandardCharsets;

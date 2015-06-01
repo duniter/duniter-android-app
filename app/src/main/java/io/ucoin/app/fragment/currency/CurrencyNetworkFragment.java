@@ -7,7 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import io.ucoin.app.R;
-import io.ucoin.app.model.Currency;
+import io.ucoin.app.model.remote.Currency;
 
 public class CurrencyNetworkFragment extends Fragment {
 

@@ -3,8 +3,8 @@ package io.ucoin.app.technical.gson;
 
 import com.google.gson.GsonBuilder;
 
-import io.ucoin.app.model.Identity;
-import io.ucoin.app.model.Member;
+import io.ucoin.app.model.remote.Identity;
+import io.ucoin.app.model.remote.Member;
 
 public class GsonUtils {
 

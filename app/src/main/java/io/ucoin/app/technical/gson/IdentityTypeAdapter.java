@@ -1,14 +1,14 @@
 package io.ucoin.app.technical.gson;
 
-import io.ucoin.app.model.Identity;
-import io.ucoin.app.technical.StringUtils;
-
-import java.lang.reflect.Type;
-
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
+
+import java.lang.reflect.Type;
+
+import io.ucoin.app.model.remote.Identity;
+import io.ucoin.app.technical.StringUtils;
 
 public class IdentityTypeAdapter implements JsonDeserializer<Identity>{
 

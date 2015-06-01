@@ -21,11 +21,11 @@ import android.widget.TextView;
 import io.ucoin.app.Application;
 import io.ucoin.app.R;
 import io.ucoin.app.activity.IToolbarActivity;
-import io.ucoin.app.content.Provider;
 import io.ucoin.app.database.Contract;
-import io.ucoin.app.model.Currency;
-import io.ucoin.app.model.Peer;
-import io.ucoin.app.view.SlidingTabLayout;
+import io.ucoin.app.database.Provider;
+import io.ucoin.app.model.local.Peer;
+import io.ucoin.app.model.remote.Currency;
+import io.ucoin.app.technical.view.SlidingTabLayout;
 
 public class CurrencyFragment extends Fragment {
 
@@ -193,7 +193,7 @@ public class CurrencyFragment extends Fragment {
 
         /**
          * Return the title of the item at {@code position}. This is important as what this method
-         * returns is what is displayed in the {@link io.ucoin.app.view.SlidingTabLayout}.
+         * returns is what is displayed in the {@link io.ucoin.app.technical.view.SlidingTabLayout}.
          * <p>
          * Here we construct one using the position value, but for real application the title should
          * refer to the item's contents.

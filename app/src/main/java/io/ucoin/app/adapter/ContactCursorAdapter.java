@@ -12,8 +12,8 @@ import android.widget.TextView;
 
 import io.ucoin.app.R;
 import io.ucoin.app.database.Contract;
-import io.ucoin.app.service.ContactService;
 import io.ucoin.app.service.ServiceLocator;
+import io.ucoin.app.service.local.ContactService;
 import io.ucoin.app.technical.ImageUtils;
 import io.ucoin.app.technical.ObjectUtils;
 import io.ucoin.app.technical.StringUtils;

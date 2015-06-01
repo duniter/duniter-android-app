@@ -5,10 +5,10 @@ import android.test.suitebuilder.annotation.SmallTest;
 import junit.framework.Assert;
 
 import io.ucoin.app.TestFixtures;
-import io.ucoin.app.model.BasicIdentity;
-import io.ucoin.app.model.BlockchainBlock;
-import io.ucoin.app.model.BlockchainParameter;
-import io.ucoin.app.model.Member;
+import io.ucoin.app.model.remote.BasicIdentity;
+import io.ucoin.app.model.remote.BlockchainBlock;
+import io.ucoin.app.model.remote.BlockchainParameter;
+import io.ucoin.app.model.remote.Member;
 
 public class BlockchainServiceTest {
 

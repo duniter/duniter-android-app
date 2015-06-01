@@ -2,11 +2,11 @@ package io.ucoin.app.service.remote;
 
 import org.apache.http.client.methods.HttpUriRequest;
 
-import io.ucoin.app.model.Peer;
+import io.ucoin.app.model.local.Peer;
 import io.ucoin.app.service.BaseService;
 import io.ucoin.app.service.HttpService;
-import io.ucoin.app.service.PeerService;
 import io.ucoin.app.service.ServiceLocator;
+import io.ucoin.app.service.local.PeerService;
 
 /**
  * Created by eis on 05/02/15.

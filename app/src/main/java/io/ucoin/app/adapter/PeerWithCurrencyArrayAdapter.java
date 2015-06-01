@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.ucoin.app.R;
-import io.ucoin.app.model.ext.PeerWithCurrency;
+import io.ucoin.app.model.remote.ext.PeerWithCurrency;
 
 public class PeerWithCurrencyArrayAdapter extends ArrayAdapter<PeerWithCurrency> {
 

@@ -1,14 +1,14 @@
 package io.ucoin.app.technical.gson;
 
 
-import java.lang.reflect.Type;
-
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 
-import io.ucoin.app.model.Member;
+import java.lang.reflect.Type;
+
+import io.ucoin.app.model.remote.Member;
 import io.ucoin.app.technical.StringUtils;
 
 public class MemberTypeAdapter implements JsonDeserializer<Member> {

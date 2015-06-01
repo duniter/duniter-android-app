@@ -2,8 +2,8 @@ package io.ucoin.app.service;
 
 import java.util.List;
 
-import io.ucoin.app.model.BlockchainParameter;
-import io.ucoin.app.model.Wallet;
+import io.ucoin.app.model.local.Wallet;
+import io.ucoin.app.model.remote.BlockchainParameter;
 
 /**
  * Created by eis on 14/01/15.

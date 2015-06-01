@@ -9,8 +9,8 @@ import android.widget.TextView;
 
 import io.ucoin.app.R;
 import io.ucoin.app.adapter.ProgressViewAdapter;
-import io.ucoin.app.model.BlockchainParameter;
-import io.ucoin.app.model.Currency;
+import io.ucoin.app.model.remote.BlockchainParameter;
+import io.ucoin.app.model.remote.Currency;
 import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.service.remote.BlockchainRemoteService;
 import io.ucoin.app.technical.task.AsyncTaskHandleException;

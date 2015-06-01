@@ -17,22 +17,21 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import io.ucoin.app.model.BlockchainBlock;
-import io.ucoin.app.model.BlockchainParameter;
-import io.ucoin.app.model.Identity;
-import io.ucoin.app.model.Peer;
-import io.ucoin.app.model.Wallet;
-import io.ucoin.app.model.WotCertification;
-import io.ucoin.app.model.WotIdentityCertifications;
-import io.ucoin.app.model.WotLookupResult;
-import io.ucoin.app.model.WotLookupResults;
-import io.ucoin.app.model.WotLookupSignature;
-import io.ucoin.app.model.WotLookupUId;
-import io.ucoin.app.model.comparator.WotCertificationComparators;
+import io.ucoin.app.model.local.Peer;
+import io.ucoin.app.model.local.Wallet;
+import io.ucoin.app.model.remote.BlockchainBlock;
+import io.ucoin.app.model.remote.BlockchainParameter;
+import io.ucoin.app.model.remote.Identity;
+import io.ucoin.app.model.remote.WotCertification;
+import io.ucoin.app.model.remote.WotIdentityCertifications;
+import io.ucoin.app.model.remote.WotLookupResult;
+import io.ucoin.app.model.remote.WotLookupResults;
+import io.ucoin.app.model.remote.WotLookupSignature;
+import io.ucoin.app.model.remote.WotLookupUId;
 import io.ucoin.app.service.CryptoService;
-import io.ucoin.app.service.PeerService;
 import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.technical.CollectionUtils;
+import io.ucoin.app.technical.ModelUtils;
 import io.ucoin.app.technical.ObjectUtils;
 import io.ucoin.app.technical.UCoinTechnicalException;
 import io.ucoin.app.technical.crypto.CryptoUtils;
@@ -58,7 +57,6 @@ public class WotRemoteService extends BaseRemoteService {
     public static final String BLOCK_ZERO_HASH = "DA39A3EE5E6B4B0D3255BFEF95601890AFD80709";
 
     private CryptoService cryptoService;
-    private PeerService peerService;
     private BlockchainRemoteService bcService;
 
     public WotRemoteService() {
@@ -69,7 +67,6 @@ public class WotRemoteService extends BaseRemoteService {
     public void initialize() {
         super.initialize();
         cryptoService = ServiceLocator.instance().getCryptoService();
-        peerService = ServiceLocator.instance().getPeerService();
         bcService = ServiceLocator.instance().getBlockchainRemoteService();
     }
 
@@ -339,7 +336,7 @@ public class WotRemoteService extends BaseRemoteService {
         int sigValidity = bcParameter.getSigValidity();
         int sigQty = bcParameter.getSigQty();
 
-        Collection<WotCertification> result = new TreeSet<WotCertification>(WotCertificationComparators.newComparator());
+        Collection<WotCertification> result = new TreeSet<WotCertification>(ModelUtils.newWotCertificationComparator());
 
         // Certifiers of
         WotIdentityCertifications certifiersOfList = getCertifiersOf(currencyId, pubkey);
@@ -408,7 +405,7 @@ public class WotRemoteService extends BaseRemoteService {
 
     protected Collection<WotCertification> getCertificationsByPubkeyForNonMember(long currencyId, final String uid, final String pubkey) {
         // Ordered list, by uid/pubkey/cert time
-        Collection<WotCertification> result = new TreeSet<WotCertification>(WotCertificationComparators.newComparator());
+        Collection<WotCertification> result = new TreeSet<WotCertification>(ModelUtils.newWotCertificationComparator());
 
         Log.d(TAG, String.format("Get non member WOT, by uid [%s] and pubKey [%s]", uid, pubkey));
 

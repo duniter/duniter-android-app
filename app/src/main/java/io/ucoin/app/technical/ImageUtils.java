@@ -1,10 +1,10 @@
 package io.ucoin.app.technical;
 
 import io.ucoin.app.R;
-import io.ucoin.app.model.Identity;
-import io.ucoin.app.model.Movement;
-import io.ucoin.app.model.Wallet;
-import io.ucoin.app.model.WotCertification;
+import io.ucoin.app.model.local.Movement;
+import io.ucoin.app.model.local.Wallet;
+import io.ucoin.app.model.remote.Identity;
+import io.ucoin.app.model.remote.WotCertification;
 
 /**
  * Created by eis on 12/01/15.

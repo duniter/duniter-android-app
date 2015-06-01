@@ -3,9 +3,9 @@ package io.ucoin.app.service.remote;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.ucoin.app.model.NetworkPeerResults;
-import io.ucoin.app.model.NetworkPeering;
-import io.ucoin.app.model.Peer;
+import io.ucoin.app.model.local.Peer;
+import io.ucoin.app.model.remote.NetworkPeerResults;
+import io.ucoin.app.model.remote.NetworkPeering;
 
 /**
  * Created by eis on 05/02/15.

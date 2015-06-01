@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class DatabaseHelper extends SQLiteOpenHelper implements Contract {
 
     private static final String INTEGER = " INTEGER ";
+    private static final String LONG = " LONG ";
     private static final String REAL = " REAL ";
     private static final String TEXT = " TEXT ";
     private static final String BLOB = " BLOB ";
@@ -38,7 +39,7 @@ public class DatabaseHelper extends SQLiteOpenHelper implements Contract {
         String CREATE_TABLE_CURRENCY = "CREATE TABLE " + Currency.TABLE_NAME + "(" +
                 Currency._ID + " INTEGER PRIMARY KEY AUTOINCREMENT" + COMMA +
                 Currency.NAME + TEXT + NOTNULL + UNIQUE + COMMA +
-                Currency.ACCOUNT_ID + TEXT + NOTNULL + COMMA +
+                Currency.ACCOUNT_ID + INTEGER + NOTNULL + COMMA +
                 Currency.MEMBERS_COUNT + INTEGER + NOTNULL + COMMA +
                 Currency.FIRST_BLOCK_SIGNATURE + TEXT + UNIQUE + NOTNULL + COMMA +
                 Currency.LAST_UD + INTEGER + NOTNULL + COMMA +
@@ -46,6 +47,16 @@ public class DatabaseHelper extends SQLiteOpenHelper implements Contract {
                 Account.TABLE_NAME + "(" + Account._ID + ")" +
                 ")";
         db.execSQL(CREATE_TABLE_CURRENCY);
+
+        String CREATE_TABLE_BLOCK_WITH_UD = "CREATE TABLE " + UD.TABLE_NAME + "(" +
+                UD._ID + " INTEGER PRIMARY KEY AUTOINCREMENT" + COMMA +
+                UD.CURRENCY_ID + TEXT + NOTNULL + COMMA +
+                UD.BLOCK_NUMBER + INTEGER + NOTNULL + COMMA +
+                UD.AMOUNT + LONG + NOTNULL + COMMA +
+                "FOREIGN KEY (" + UD.CURRENCY_ID + ") REFERENCES " +
+                Currency.TABLE_NAME + "(" + Currency._ID + ")" +
+                ")";
+        db.execSQL(CREATE_TABLE_BLOCK_WITH_UD);
 
         String CREATE_TABLE_PEER = "CREATE TABLE " + Peer.TABLE_NAME + "(" +
                 Peer._ID + " INTEGER PRIMARY KEY AUTOINCREMENT" + COMMA +
@@ -70,7 +81,8 @@ public class DatabaseHelper extends SQLiteOpenHelper implements Contract {
                 Wallet.ACCOUNT_ID + INTEGER + NOTNULL + COMMA +
                 Wallet.CURRENCY_ID + INTEGER + NOTNULL + COMMA +
                 Wallet.IS_MEMBER + INTEGER + NOTNULL + COMMA +
-                Wallet.CREDIT + INTEGER + NOTNULL + COMMA +
+                Wallet.CREDIT + LONG + NOTNULL + COMMA +
+                Wallet.TIME_BANK_BALANCE + LONG + COMMA +
                 Wallet.BLOCK_NUMBER + INTEGER + NOTNULL + COMMA +
                 Wallet.TX_BLOCK_NUMBER + INTEGER + NOTNULL + COMMA +
                 "FOREIGN KEY (" + Wallet.ACCOUNT_ID + ") REFERENCES " + Account.TABLE_NAME + "(" + Account._ID + ")" +
@@ -85,8 +97,9 @@ public class DatabaseHelper extends SQLiteOpenHelper implements Contract {
                 Movement.WALLET_ID + INTEGER + NOTNULL + COMMA +
                 Movement.FINGERPRINT + TEXT + NOTNULL + COMMA +
                 Movement.IS_UD + INTEGER + NOTNULL + COMMA +
-                Movement.AMOUNT + INTEGER + NOTNULL + COMMA +
+                Movement.AMOUNT + LONG + NOTNULL + COMMA +
                 Movement.COMMENT + TEXT + COMMA +
+                Movement.DIVIDEND + LONG + NOTNULL + COMMA +
                 Movement.TIME + INTEGER + COMMA +
                 Movement.BLOCK + INTEGER + COMMA +
                 Movement.ISSUERS + TEXT + COMMA +
@@ -210,30 +223,50 @@ public class DatabaseHelper extends SQLiteOpenHelper implements Contract {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 
-        // TODO: for DEV only :
-        // Drop all tables
+        // if version < ???
+        if (oldVersion < 777) {
+            // Drop all tables
 
-        /* -- not used tables --*/
-        db.execSQL("DROP TABLE IF EXISTS " + TxOutput.TABLE_NAME);
-        db.execSQL("DROP TABLE IF EXISTS " + TxInput.TABLE_NAME);
-        db.execSQL("DROP TABLE IF EXISTS " + TxSignature.TABLE_NAME);
-        db.execSQL("DROP TABLE IF EXISTS " + Tx.TABLE_NAME);
-        db.execSQL("DROP TABLE IF EXISTS " + Source.TABLE_NAME);
+            /* -- not used tables --*/
+            db.execSQL("DROP TABLE IF EXISTS " + TxOutput.TABLE_NAME);
+            db.execSQL("DROP TABLE IF EXISTS " + TxInput.TABLE_NAME);
+            db.execSQL("DROP TABLE IF EXISTS " + TxSignature.TABLE_NAME);
+            db.execSQL("DROP TABLE IF EXISTS " + Tx.TABLE_NAME);
+            db.execSQL("DROP TABLE IF EXISTS " + Source.TABLE_NAME);
 
-        /* -- used tables --*/
-        db.execSQL("DROP TABLE IF EXISTS " + Contact2Currency.TABLE_NAME);
-        db.execSQL("DROP TABLE IF EXISTS " + Contact.TABLE_NAME);
-        db.execSQL("DROP TABLE IF EXISTS " + Movement.TABLE_NAME);
-        db.execSQL("DROP TABLE IF EXISTS " + Peer.TABLE_NAME);
-        db.execSQL("DROP TABLE IF EXISTS " + Currency.TABLE_NAME);
-        db.execSQL("DROP TABLE IF EXISTS " + Wallet.TABLE_NAME);
-        db.execSQL("DROP TABLE IF EXISTS " + Account.TABLE_NAME);
-        db.execSQL("DROP TABLE IF EXISTS " + Contact.TABLE_NAME);
-        db.execSQL("DROP TABLE IF EXISTS " + Contact2Currency.TABLE_NAME);
-        db.execSQL("DROP VIEW IF EXISTS " + ContactView.VIEW_NAME);
+            /* -- used tables --*/
+            db.execSQL("DROP TABLE IF EXISTS " + Contact2Currency.TABLE_NAME);
+            db.execSQL("DROP TABLE IF EXISTS " + Contact.TABLE_NAME);
+            db.execSQL("DROP TABLE IF EXISTS " + Movement.TABLE_NAME);
+            db.execSQL("DROP TABLE IF EXISTS " + Peer.TABLE_NAME);
+            db.execSQL("DROP TABLE IF EXISTS " + UD.TABLE_NAME);
+            db.execSQL("DROP TABLE IF EXISTS " + Currency.TABLE_NAME);
+            db.execSQL("DROP TABLE IF EXISTS " + Wallet.TABLE_NAME);
+            db.execSQL("DROP TABLE IF EXISTS " + Account.TABLE_NAME);
+            db.execSQL("DROP TABLE IF EXISTS " + Contact.TABLE_NAME);
+            db.execSQL("DROP TABLE IF EXISTS " + Contact2Currency.TABLE_NAME);
+            db.execSQL("DROP VIEW IF EXISTS " + ContactView.VIEW_NAME);
 
-        // then recreate
-        onCreate(db);
+            // then recreate
+            onCreate(db);
+
+            return;
+        }
+
+        //if (oldVersion <= 7X) {
+        //    upgradeToX(db);
+        //}
+
     }
 
+    /* -- internal methods -- */
+
+    /**
+     * patch for DB vX.Y
+     *
+     * @param db
+     */
+    protected void upgradeToXY(SQLiteDatabase db) {
+
+    }
 }

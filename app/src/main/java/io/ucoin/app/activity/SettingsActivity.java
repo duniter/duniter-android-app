@@ -44,6 +44,7 @@ public class SettingsActivity extends PreferenceActivity {
     public static final String PREF_UNIT = "unit";
     public static final String PREF_UNIT_COIN = "coin";
     public static final String PREF_UNIT_UD = "ud";
+    public static final String PREF_UNIT_TIME = "time";
 
 
     @Override

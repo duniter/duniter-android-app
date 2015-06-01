@@ -3,8 +3,8 @@ package io.ucoin.app.config;
 
 import java.io.File;
 
-import io.ucoin.app.model.Identity;
-import io.ucoin.app.model.Wallet;
+import io.ucoin.app.model.local.Wallet;
+import io.ucoin.app.model.remote.Identity;
 import io.ucoin.app.technical.crypto.CryptoUtils;
 import io.ucoin.app.technical.crypto.TestFixtures;
 

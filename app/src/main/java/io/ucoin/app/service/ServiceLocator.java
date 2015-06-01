@@ -12,9 +12,17 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import io.ucoin.app.service.local.AccountService;
+import io.ucoin.app.service.local.Contact2CurrencyService;
+import io.ucoin.app.service.local.ContactService;
+import io.ucoin.app.service.local.CurrencyService;
+import io.ucoin.app.service.local.MovementService;
+import io.ucoin.app.service.local.PeerService;
+import io.ucoin.app.service.local.WalletService;
 import io.ucoin.app.service.remote.BlockchainRemoteService;
 import io.ucoin.app.service.remote.NetworkRemoteService;
 import io.ucoin.app.service.remote.TransactionRemoteService;
+import io.ucoin.app.service.remote.UdRemoteService;
 import io.ucoin.app.service.remote.WotRemoteService;
 import io.ucoin.app.technical.UCoinTechnicalException;
 
@@ -127,6 +135,11 @@ public class ServiceLocator extends Service implements Closeable {
     public MovementService getMovementService() {
         return getService(MovementService.class);
     }
+
+    public UdRemoteService getUdRemoteService() {
+        return getService(UdRemoteService.class);
+    }
+
 
     public void loadCaches(Context context, long accountId) {
 

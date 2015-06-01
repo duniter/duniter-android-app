@@ -40,21 +40,21 @@ import java.util.Set;
 import io.ucoin.app.Application;
 import io.ucoin.app.R;
 import io.ucoin.app.config.Configuration;
-import io.ucoin.app.content.Provider;
 import io.ucoin.app.database.Contract;
-import io.ucoin.app.exception.UncaughtExceptionHandler;
-import io.ucoin.app.fragment.HomeFragment;
-import io.ucoin.app.fragment.TransferFragment;
-import io.ucoin.app.fragment.WebFragment;
-import io.ucoin.app.fragment.WotSearchFragment;
+import io.ucoin.app.database.Provider;
+import io.ucoin.app.fragment.common.HomeFragment;
 import io.ucoin.app.fragment.currency.CurrencyListFragment;
-import io.ucoin.app.model.Identity;
+import io.ucoin.app.fragment.wallet.TransferFragment;
+import io.ucoin.app.fragment.web.WebFragment;
+import io.ucoin.app.fragment.wot.WotSearchFragment;
+import io.ucoin.app.model.remote.Identity;
 import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.service.exception.PeerConnectionException;
 import io.ucoin.app.service.remote.WotRemoteService;
 import io.ucoin.app.technical.CurrencyUtils;
 import io.ucoin.app.technical.DateUtils;
 import io.ucoin.app.technical.ExceptionUtils;
+import io.ucoin.app.technical.exception.UncaughtExceptionHandler;
 import io.ucoin.app.technical.task.AsyncTaskHandleException;
 
 

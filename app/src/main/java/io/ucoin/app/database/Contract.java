@@ -13,12 +13,19 @@ public interface Contract {
     }
 
     public static final class Currency implements BaseColumns {
-        public static final String TABLE_NAME = "Currency";
+        public static final String TABLE_NAME = "currency";
         public static final String ACCOUNT_ID = "account_id";
         public static final String NAME = "name";
         public static final String MEMBERS_COUNT = "members_count";
         public static final String FIRST_BLOCK_SIGNATURE = "first_block_signature";
         public static final String LAST_UD = "last_ud";
+    }
+
+    public static final class UD implements BaseColumns {
+        public static final String TABLE_NAME = "ud";
+        public static final String CURRENCY_ID = "currency_id";
+        public static final String BLOCK_NUMBER = "block_number";
+        public static final String AMOUNT = "amount";
     }
 
     public static final class Peer implements BaseColumns {
@@ -40,8 +47,12 @@ public interface Contract {
         public static final String PUBLIC_KEY = "public_key";
         public static final String SECRET_KEY = "secret_key";
         public static final String CREDIT = "credit";
+        /**
+         * Time bank balance (in minutes)
+         */
+        public static final String TIME_BANK_BALANCE = "time_bank_balance";
         /*
-        * Last block number synchronized, for credit
+        * Last block number synchronized, for balance
         * */
         public static final String BLOCK_NUMBER = "block_number";
         /*
@@ -57,6 +68,7 @@ public interface Contract {
         public static final String FINGERPRINT = "fingerprint";
         public static final String COMMENT = "comment";
         public static final String AMOUNT = "amount";
+        public static final String DIVIDEND = "dividend";
         public static final String BLOCK = "block";
         public static final String TIME = "time";
         public static final String ISSUERS = "issuers";
@@ -87,6 +99,7 @@ public interface Contract {
         public static final String PUBLIC_KEY = "public_key";
         public static final String UID = "uid";
     }
+
 
     /* -- not used yet --*/
 

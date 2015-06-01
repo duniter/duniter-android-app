@@ -15,17 +15,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import io.ucoin.app.R;
-import io.ucoin.app.fragment.AddAccountFragment;
-import io.ucoin.app.fragment.AddCurrencyFragment;
-import io.ucoin.app.model.Account;
-import io.ucoin.app.model.Peer;
-import io.ucoin.app.service.AccountService;
+import io.ucoin.app.fragment.account.AddAccountFragment;
+import io.ucoin.app.fragment.account.AddCurrencyFragment;
+import io.ucoin.app.model.local.Account;
+import io.ucoin.app.model.local.Peer;
 import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.service.exception.PeerConnectionException;
 import io.ucoin.app.service.exception.PubkeyAlreadyUsedException;
 import io.ucoin.app.service.exception.UidAlreadyUsedException;
 import io.ucoin.app.service.exception.UidAndPubkeyNotFoundException;
 import io.ucoin.app.service.exception.UidMatchAnotherPubkeyException;
+import io.ucoin.app.service.local.AccountService;
 import io.ucoin.app.technical.ExceptionUtils;
 import io.ucoin.app.technical.ViewUtils;
 import io.ucoin.app.technical.task.AsyncTaskHandleException;
@@ -211,7 +211,7 @@ public class AddAccountActivity extends ActionBarActivity  {
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
      */
-    public class AddAccountTask extends AsyncTaskHandleException<Bundle, Integer, io.ucoin.app.model.Account> {
+    public class AddAccountTask extends AsyncTaskHandleException<Bundle, Integer, Account> {
 
         public AddAccountTask(ProgressBar progressBar, TextView progressText) {
             super(progressBar, progressText);
@@ -233,7 +233,7 @@ public class AddAccountActivity extends ActionBarActivity  {
         }
 
         @Override
-        protected io.ucoin.app.model.Account doInBackgroundHandleException(Bundle... bundles) throws Exception {
+        protected Account doInBackgroundHandleException(Bundle... bundles) throws Exception {
             Bundle bundle = bundles[0];
 
             // Read the result bundle
@@ -258,7 +258,7 @@ public class AddAccountActivity extends ActionBarActivity  {
         }
 
         @Override
-        protected void onSuccess(io.ucoin.app.model.Account account) {
+        protected void onSuccess(Account account) {
             mTask = null;
             //restart MainActivity
             Intent intent = new Intent(AddAccountActivity.this, MainActivity.class);

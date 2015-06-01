@@ -15,8 +15,8 @@ import java.util.List;
 
 import io.ucoin.app.R;
 import io.ucoin.app.activity.SettingsActivity;
-import io.ucoin.app.model.UnitType;
-import io.ucoin.app.model.Wallet;
+import io.ucoin.app.model.local.UnitType;
+import io.ucoin.app.model.local.Wallet;
 import io.ucoin.app.technical.CurrencyUtils;
 import io.ucoin.app.technical.ImageUtils;
 import io.ucoin.app.technical.ObjectUtils;

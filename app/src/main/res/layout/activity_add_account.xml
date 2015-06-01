@@ -106,17 +106,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_gravity="center_vertical"
-            android:layout_alignParentBottom="false"
-            android:padding="15dp"
-            android:gravity="center_vertical|center_horizontal"
-            android:background="@drawable/shape_linear_layout_bg"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="21dp"
-            android:layout_marginRight="21dp"
-            android:visibility="gone">
+            android:visibility="gone"
+            style="@style/WelcomeAlertDialog">
 
-            <io.ucoin.app.layout.FrameLayout
+            <io.ucoin.app.technical.layout.FrameLayout
                 android:id="@+id/frame_content"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"/>

@@ -12,8 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.ucoin.app.R;
-import io.ucoin.app.model.Contact;
-import io.ucoin.app.model.Identity;
+import io.ucoin.app.model.local.Contact;
+import io.ucoin.app.model.remote.Identity;
 import io.ucoin.app.technical.ImageUtils;
 import io.ucoin.app.technical.ObjectUtils;
 import io.ucoin.app.technical.StringUtils;

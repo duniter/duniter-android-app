@@ -18,7 +18,7 @@ public class TxHistoryMovement {
 
     private String hash;
 
-    private long block_number;
+    private int block_number;
 
     private long time;
 
@@ -87,7 +87,7 @@ public class TxHistoryMovement {
      * @return
      */
     @Deprecated
-    public long getBlock_number() {
+    public int getBlock_number() {
         return block_number;
     }
 
@@ -96,15 +96,15 @@ public class TxHistoryMovement {
      * @return
      */
     @Deprecated
-    public void setBlock_number(long block_number) {
+    public void setBlock_number(int block_number) {
         this.block_number = block_number;
     }
 
-    public long getBlockNumber() {
+    public int getBlockNumber() {
         return block_number;
     }
 
-    public void setNumber(long block_number) {
+    public void setNumber(int block_number) {
         this.block_number = block_number;
     }
 

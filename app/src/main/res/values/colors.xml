@@ -9,4 +9,6 @@
     <color name="textPrimary">#FFF</color>
     <color name="transparent">#00000000</color>
     <color name="gray">#AAAAAA</color>
+    <color name="textComputed">#0099CC</color>
+
 </resources>

@@ -22,7 +22,7 @@
             ucoin:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
             ucoin:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
 
-		<io.ucoin.app.layout.FrameLayout
+		<io.ucoin.app.technical.layout.FrameLayout
             android:id="@+id/frame_content"
             android:layout_width="match_parent"
             android:layout_height="match_parent"

@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.util.Log;
 
+import io.ucoin.app.R;
 import io.ucoin.app.technical.ObjectUtils;
 
 /**
@@ -14,7 +15,7 @@ public class ProgressDialogAsyncTaskListener<Result> implements AsyncTaskListene
     public static final String TAG = "AsyncTaskListener";
 
     private ProgressDialog mProgressDialog;
-    private String mProgressMessage = "async task";
+    private String mProgressMessage = "...";
     private int mProgressMax;
     private int mProgress;
     private Context mContext;
@@ -25,12 +26,14 @@ public class ProgressDialogAsyncTaskListener<Result> implements AsyncTaskListene
         ObjectUtils.checkNotNull(context);
         mProgressDialog = new ProgressDialog(context);
         mContext = context;
+        mProgressMessage = mContext.getString(R.string.loading_dots);
     }
 
     public ProgressDialogAsyncTaskListener(ProgressDialog progressDialog) {
         ObjectUtils.checkNotNull(progressDialog);
         mProgressDialog = progressDialog;
         mContext = progressDialog.getContext();
+        mProgressMessage = mContext.getString(R.string.loading_dots);
     }
 
     @Override

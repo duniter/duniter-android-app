@@ -6,7 +6,7 @@
     android:orientation="vertical">
 
 
-    <io.ucoin.app.view.SlidingTabLayout
+    <io.ucoin.app.technical.view.SlidingTabLayout
         android:id="@+id/sliding_tabs"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
