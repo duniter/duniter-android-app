@@ -15,6 +15,7 @@
     <string-array name="pref_unit_list_values">
         <item>coin</item>
         <item>ud</item>
+        <item>time</item>
     </string-array>
 
 

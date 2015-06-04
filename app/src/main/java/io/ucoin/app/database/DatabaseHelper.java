@@ -42,6 +42,7 @@ public class DatabaseHelper extends SQLiteOpenHelper implements Contract {
                 Currency.ACCOUNT_ID + INTEGER + NOTNULL + COMMA +
                 Currency.MEMBERS_COUNT + INTEGER + NOTNULL + COMMA +
                 Currency.FIRST_BLOCK_SIGNATURE + TEXT + UNIQUE + NOTNULL + COMMA +
+                Currency.BLOCK_NUMBER + INTEGER + NOTNULL + COMMA +
                 Currency.LAST_UD + INTEGER + NOTNULL + COMMA +
                 "FOREIGN KEY (" + Currency.ACCOUNT_ID + ") REFERENCES " +
                 Account.TABLE_NAME + "(" + Account._ID + ")" +

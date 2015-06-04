@@ -81,6 +81,7 @@
     <string name="resync">Download all transactions</string>
     <string name="resync_confirm">Are you sure you want to download all transactions ? This operation could be long.</string>
     <string name="resync_started">Downloading transactions...</string>
+    <string name="sync_ud">Downloading Universal Dividend...</string>
     <string name="sync_succeed">%1$s transactions downloads in %2$s</string>
     <string name="sync_no_tx">No new transactions</string>
 

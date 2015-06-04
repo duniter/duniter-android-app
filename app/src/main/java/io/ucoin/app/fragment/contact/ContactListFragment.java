@@ -1,6 +1,6 @@
 package io.ucoin.app.fragment.contact;
 
-import android.app.ListFragment;
+import android.support.v4.app.ListFragment;
 import android.app.SearchManager;
 import android.content.Context;
 import android.database.Cursor;

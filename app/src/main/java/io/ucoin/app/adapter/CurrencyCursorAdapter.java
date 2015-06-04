@@ -1,7 +1,9 @@
 package io.ucoin.app.adapter;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,10 +11,14 @@ import android.widget.CursorAdapter;
 import android.widget.TextView;
 
 import io.ucoin.app.R;
+import io.ucoin.app.activity.SettingsActivity;
 import io.ucoin.app.database.Contract;
+import io.ucoin.app.model.local.UnitType;
 
 
 public class CurrencyCursorAdapter extends CursorAdapter{
+
+
 
     public CurrencyCursorAdapter(Context context, Cursor c, int flags) {
         super(context, c, flags);

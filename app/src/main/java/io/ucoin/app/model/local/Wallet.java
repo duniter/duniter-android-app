@@ -15,7 +15,6 @@ import io.ucoin.app.technical.crypto.KeyPair;
  */
 public class Wallet extends KeyPair implements LocalEntity, Serializable {
 
-
     private Long id;
     private Long currencyId;
     private Long accountId;
@@ -23,8 +22,9 @@ public class Wallet extends KeyPair implements LocalEntity, Serializable {
     private Long credit;
     private Identity identity;
     private Double creditAsUD;
-    private long blockNumber = -1;
-    private long txBlockNumber = -1;
+    private Long creditAsTime;
+    private int blockNumber = -1;
+    private int txBlockNumber = -1;
     private Collection<WotCertification> certifications;
 
     /**
@@ -193,20 +193,28 @@ public class Wallet extends KeyPair implements LocalEntity, Serializable {
         this.certifications = certifications;
     }
 
-    public long getBlockNumber() {
+    public int getBlockNumber() {
         return blockNumber;
     }
 
-    public void setBlockNumber(long blockNumber) {
+    public void setBlockNumber(int blockNumber) {
         this.blockNumber = blockNumber;
     }
 
-    public long getTxBlockNumber() {
+    public int getTxBlockNumber() {
         return txBlockNumber;
     }
 
-    public void setTxBlockNumber(long txBlockNumber) {
+    public void setTxBlockNumber(int txBlockNumber) {
         this.txBlockNumber = txBlockNumber;
+    }
+
+    public Long getCreditAsTime() {
+        return creditAsTime;
+    }
+
+    public void setCreditAsTime(Long creditAsTime) {
+        this.creditAsTime = creditAsTime;
     }
 
     @Override

@@ -28,6 +28,11 @@ public class DateUtils {
     private static long YESTERDAY_CACHE;
     private static long FIRST_DAY_OF_WEEK_CACHE;
 
+
+    private static long DURATION_ONE_MINUTE_IN_MS = 60 * 1000;
+    private static long DURATION_ONE_HOUR_IN_MS = 60 * DURATION_ONE_MINUTE_IN_MS;
+    private static long DURATION_ONE_DAY_IN_MS = 24 * DURATION_ONE_HOUR_IN_MS;
+
     static {
         refreshDateCache();
     }
@@ -113,24 +118,45 @@ public class DateUtils {
         return DEFAULT_TIME_FORMAT.format(date);
     }
 
-    public static String formatFriendlyTime(Context context, long timeInMillis) {
-        if (timeInMillis <= 0) {
-            return null;
+    public static String formatFriendlyDuration(long durationInMillis) {
+        if (durationInMillis < 0) {
+            return "- " + formatFriendlyDuration(-durationInMillis);
+        }
+        if (durationInMillis == 0) {
+            return "";
+        }
+        // more than 1 days
+        if (durationInMillis > DURATION_ONE_DAY_IN_MS) {
+            long days = (long)Math.floor(((double)durationInMillis) / DURATION_ONE_DAY_IN_MS);
+            return Long.toString(days)
+                    + "j " // TODO NLS
+                    + formatFriendlyDuration(durationInMillis - days * DURATION_ONE_DAY_IN_MS);
+        }
+
+        // more than 1 h
+        if (durationInMillis > DURATION_ONE_HOUR_IN_MS) {
+            long hours = (long)Math.floor(((double)durationInMillis) / DURATION_ONE_HOUR_IN_MS);
+            return Long.toString(hours)
+                    + "h "
+                    + formatFriendlyDuration(durationInMillis - hours * DURATION_ONE_HOUR_IN_MS);
         }
 
         // more than 1 min
-        if (timeInMillis > 1000 * 60) {
-            // TODO BLA
-            return Long.toString(timeInMillis) + " ms";
+        if (durationInMillis > DURATION_ONE_MINUTE_IN_MS) {
+            long minutes = (long)Math.floor(((double)durationInMillis) / DURATION_ONE_MINUTE_IN_MS);
+            return Long.toString(minutes)
+                    + "min "
+                    + formatFriendlyDuration(durationInMillis - minutes * DURATION_ONE_MINUTE_IN_MS);
         }
 
         // more than 1 seconds
-        if (timeInMillis > 1000) {
-            return Integer.toString((int)Math.floor(timeInMillis / 1000)) + "s";
+        if (durationInMillis > 1000) {
+            long seconds = (long)Math.floor(((double)durationInMillis) / 1000);
+            return Long.toString(seconds) + "s";
         }
 
         // less than a seconds
-        return Long.toString(timeInMillis) + " ms";
+        return Long.toString(durationInMillis) + " ms";
     }
 
     public static long getCurrentTimestampSeconds() {

@@ -2,8 +2,8 @@ package io.ucoin.app.activity;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
-import android.app.Fragment;
-import android.app.FragmentManager;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.app.LoaderManager;
 import android.content.ContentResolver;
 import android.content.CursorLoader;
@@ -234,17 +234,19 @@ public class MainActivity extends ActionBarActivity
             return;
         }
 
-        int bsEntryCount = getFragmentManager().getBackStackEntryCount();
+        FragmentManager fragmentManager = getSupportFragmentManager();
+
+        int bsEntryCount = fragmentManager.getBackStackEntryCount();
         if (bsEntryCount <= 1) {
             super.onBackPressed();
             return;
         }
 
-        String currentFragment = getFragmentManager()
+        String currentFragment = fragmentManager
                 .getBackStackEntryAt(bsEntryCount - 1)
                 .getName();
 
-        Fragment fragment = getFragmentManager().findFragmentByTag(currentFragment);
+        Fragment fragment = fragmentManager.findFragmentByTag(currentFragment);
 
         //fragment that need to handle onBackPressed
         //shoud implements MainActivity.OnBackPressedInterface
@@ -254,13 +256,13 @@ public class MainActivity extends ActionBarActivity
             }
         }
 
-        getFragmentManager().popBackStack();
+        fragmentManager.popBackStack();
     }
 
     public boolean onQueryTextSubmit(MenuItem searchItem, String query) {
 
         searchItem.getActionView().clearFocus();
-        FragmentManager fm = getFragmentManager();
+        FragmentManager fm = getSupportFragmentManager();
         Fragment fragment = fm.findFragmentById(R.id.frame_content);
         boolean isWotFragmentExists = fragment == mQueryResultListener;
 
@@ -268,7 +270,7 @@ public class MainActivity extends ActionBarActivity
         if (!isWotFragmentExists) {
             fragment = WotSearchFragment.newInstance(query);
             mQueryResultListener = (WotSearchFragment)fragment;
-            getFragmentManager().beginTransaction()
+            getSupportFragmentManager().beginTransaction()
                     .setCustomAnimations(
                             R.animator.delayed_fade_in,
                             R.animator.fade_out,
@@ -316,7 +318,7 @@ public class MainActivity extends ActionBarActivity
         }
 
         //replace fragment
-        FragmentManager fragmentManager = getFragmentManager();
+        FragmentManager fragmentManager = getSupportFragmentManager();
         if (fragment == null) {
             fragmentManager.popBackStack(HomeFragment.class.getSimpleName(), 0);
         } else {
@@ -428,7 +430,7 @@ public class MainActivity extends ActionBarActivity
                 identity.setCurrency(pathSegments.get(0));
                 identity.setPubkey(pathSegments.get(1));
 
-                openTransfertFragment(identity);
+                openTransferFragment(identity);
                 return;
             }
         }
@@ -438,16 +440,22 @@ public class MainActivity extends ActionBarActivity
     }
 
     protected void openHomeFragment() {
+        FragmentManager fragmentManager = getSupportFragmentManager();
 
-        Fragment fragment = getFragmentManager().findFragmentById(R.id.frame_content);
+        Fragment fragment = fragmentManager.findFragmentById(R.id.frame_content);
         if (fragment != null && fragment instanceof HomeFragment) {
-            getFragmentManager().beginTransaction().remove(fragment).commit();
-            getFragmentManager().popBackStack();
+            fragmentManager.beginTransaction()
+                    .setCustomAnimations(
+                            R.animator.fade_in,
+                            R.animator.fade_out)
+                    .remove(fragment)
+                    .commit();
+            fragmentManager.popBackStack();
         }
 
         fragment = HomeFragment.newInstance();
 
-        getFragmentManager().beginTransaction()
+        fragmentManager.beginTransaction()
                 .setCustomAnimations(
                         R.animator.fade_in,
                         R.animator.fade_out)
@@ -461,18 +469,18 @@ public class MainActivity extends ActionBarActivity
 
 
 
-    protected void openTransfertFragment(Identity identity) {
+    protected void openTransferFragment(Identity identity) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
 
-        Fragment fragment = getFragmentManager().findFragmentById(R.id.frame_content);
+        Fragment fragment = fragmentManager.findFragmentById(R.id.frame_content);
         if (fragment != null && fragment instanceof TransferFragment) {
-            getFragmentManager().beginTransaction().remove(fragment).commit();
-            getFragmentManager().popBackStack();
+            fragmentManager.beginTransaction().remove(fragment).commit();
+            fragmentManager.popBackStack();
         }
-
 
         fragment = TransferFragment.newInstance(identity);
 
-        getFragmentManager().beginTransaction()
+        fragmentManager.beginTransaction()
                 .setCustomAnimations(
                         R.animator.fade_in,
                         R.animator.fade_out)
@@ -481,7 +489,7 @@ public class MainActivity extends ActionBarActivity
                 .commit();
     }
 
-    public Account loadLastAccountUsed(AccountManager accountManager, Account[] accounts) {
+    protected Account loadLastAccountUsed(AccountManager accountManager, Account[] accounts) {
 
         for (Account account : accounts) {
             String account_id = accountManager.getUserData(account, "_id");

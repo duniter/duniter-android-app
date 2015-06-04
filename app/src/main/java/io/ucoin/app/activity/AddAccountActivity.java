@@ -1,6 +1,7 @@
 package io.ucoin.app.activity;
 
-import android.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -98,7 +99,8 @@ public class AddAccountActivity extends ActionBarActivity  {
             mTask.cancel();
         }
 
-        int bsEntryCount = getFragmentManager().getBackStackEntryCount();
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        int bsEntryCount = fragmentManager.getBackStackEntryCount();
         if (bsEntryCount <= 1) {
 
             if (mToolbarLayout.getVisibility() == View.VISIBLE) {
@@ -106,11 +108,11 @@ public class AddAccountActivity extends ActionBarActivity  {
                 return;
             }
 
-            getFragmentManager().popBackStack();
+            fragmentManager.popBackStack();
             showWelcome();
         }
         else {
-            getFragmentManager().popBackStack();
+            fragmentManager.popBackStack();
         }
     }
 
@@ -150,6 +152,9 @@ public class AddAccountActivity extends ActionBarActivity  {
     }
 
     private void showStep1() {
+
+        FragmentManager fragmentManager = getSupportFragmentManager();
+
         // Second step: add currency
         AddCurrencyFragment fragment = AddCurrencyFragment.newInstance(new AddCurrencyFragment.OnClickListener() {
             public void onPositiveClick(Bundle args) {
@@ -159,10 +164,10 @@ public class AddAccountActivity extends ActionBarActivity  {
                 showStep2();
             }
         }, mResultBundle);
-        if (getFragmentManager().getBackStackEntryCount() > 0) {
-            getFragmentManager().popBackStack(fragment.getClass().getSimpleName(), 0);
+        if (fragmentManager.getBackStackEntryCount() > 0) {
+            fragmentManager.popBackStack(fragment.getClass().getSimpleName(), 0);
         }
-        getFragmentManager().beginTransaction()
+        fragmentManager.beginTransaction()
                 .setCustomAnimations(
                         R.animator.fade_in,
                         R.animator.fade_out)
@@ -175,6 +180,7 @@ public class AddAccountActivity extends ActionBarActivity  {
     }
 
     private void showStep2() {
+        FragmentManager fragmentManager = getSupportFragmentManager();
 
         // First step : add account fragment
         Fragment fragment = AddAccountFragment.newInstance(new AddAccountFragment.OnClickListener() {
@@ -185,8 +191,8 @@ public class AddAccountActivity extends ActionBarActivity  {
                 onFinishSteps();
             }
         }, mResultBundle);
-        getFragmentManager().popBackStack(fragment.getClass().getSimpleName(), 0);
-        getFragmentManager().beginTransaction()
+        fragmentManager.popBackStack(fragment.getClass().getSimpleName(), 0);
+        fragmentManager.beginTransaction()
                 .setCustomAnimations(
                         R.animator.slide_in_right,
                         R.animator.fade_out,
@@ -271,6 +277,8 @@ public class AddAccountActivity extends ActionBarActivity  {
         protected void onFailed(Throwable t) {
             mTask = null;
 
+            FragmentManager fragmentManager = getSupportFragmentManager();
+
             if (t instanceof UidMatchAnotherPubkeyException
               || t instanceof UidAlreadyUsedException
               || t instanceof PubkeyAlreadyUsedException
@@ -278,17 +286,17 @@ public class AddAccountActivity extends ActionBarActivity  {
               || t instanceof PeerConnectionException){
 
                 if (t instanceof PeerConnectionException) {
-                    getFragmentManager().popBackStack(0, 0);
+                    fragmentManager.popBackStack(0, 0);
                 }
                 else {
-                    getFragmentManager().popBackStack(1, 0);
+                    fragmentManager.popBackStack(1, 0);
                 }
 
                 // Give the args to fragment
                 mResultBundle.putSerializable(BUNDLE_ERROR, t);
-                Fragment fragment = getFragmentManager().findFragmentById(R.id.frame_content);
+                Fragment fragment = fragmentManager.findFragmentById(R.id.frame_content);
                 if (fragment != null) {
-                    getFragmentManager().popBackStack();
+                    fragmentManager.popBackStack();
                     if (t instanceof PeerConnectionException) {
                        showStep1();
                     }
@@ -299,7 +307,7 @@ public class AddAccountActivity extends ActionBarActivity  {
                 }
             }
             else {
-                getFragmentManager().popBackStack();
+                fragmentManager.popBackStack();
 
                 Log.e(TAG, Log.getStackTraceString(t));
                 Toast.makeText(AddAccountActivity.this,

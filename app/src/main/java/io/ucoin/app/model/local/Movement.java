@@ -11,9 +11,10 @@ public class Movement implements LocalEntity, Serializable {
     private Long id;
     private long walletId;
     private long amount;
+    private long amountTime; // amount time (in s)
     private Long time;
     private Integer blockNumber;
-    private Long dividend;
+    private long dividend;
     private boolean isUD = false;
     private String fingerprint;
     private String comment;
@@ -112,5 +113,13 @@ public class Movement implements LocalEntity, Serializable {
 
     public void setDividend(long dividend) {
         this.dividend = dividend;
+    }
+
+    public long getAmountTime() {
+        return amountTime;
+    }
+
+    public void setAmountTime(long amountTime) {
+        this.amountTime = amountTime;
     }
 }

@@ -1,6 +1,6 @@
 package io.ucoin.app.technical;
 
-import android.app.FragmentManager;
+import android.support.v4.app.FragmentManager;
 
 /**
  * Created by eis on 19/03/15.

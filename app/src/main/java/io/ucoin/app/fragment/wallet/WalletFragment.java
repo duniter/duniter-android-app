@@ -2,8 +2,8 @@ package io.ucoin.app.fragment.wallet;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Fragment;
-import android.app.FragmentManager;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
@@ -50,7 +50,7 @@ import io.ucoin.app.technical.task.AsyncTaskHandleException;
 import io.ucoin.app.technical.task.ProgressDialogAsyncTaskListener;
 
 
-public class WalletFragment extends Fragment {
+public class WalletFragment extends android.support.v4.app.Fragment {
 
     public static final String TAG = "WalletFragment";
 
@@ -304,23 +304,29 @@ public class WalletFragment extends Fragment {
         // Currency
         mCurrencyView.setText(wallet.getCurrency());
 
-        // If unit is coins
-        if (SettingsActivity.PREF_UNIT_COIN.equals(mUnitType)) {
-            // Credit as coins
-            mCreditView.setText(CurrencyUtils.formatCoin(wallet.getCredit()));
-        }
+        // Credit
+        {
+            // If unit is coins
+            if (SettingsActivity.PREF_UNIT_COIN.equals(mUnitType)) {
+                mCreditView.setText(CurrencyUtils.formatCoin(wallet.getCredit()));
+            }
 
-        // If unit is UD
-        else if (SettingsActivity.PREF_UNIT_UD.equals(mUnitType)) {
-            // Credit as UD
-            mCreditView.setText(getString(
-                    R.string.universal_dividend_value,
-                    CurrencyUtils.formatUD(wallet.getCreditAsUD())));
-        }
+            // If unit is UD
+            else if (SettingsActivity.PREF_UNIT_UD.equals(mUnitType)) {
+                mCreditView.setText(getString(
+                        R.string.universal_dividend_value,
+                        CurrencyUtils.formatUD(wallet.getCreditAsUD())));
+            }
 
-        // Other unit
-        else {
-            mCreditView.setVisibility(View.GONE);
+            // If unit is credit mutual
+            else if (SettingsActivity.PREF_UNIT_TIME.equals(mUnitType) && wallet.getCreditAsTime() != null) {
+                mCreditView.setText(DateUtils.formatFriendlyDuration(wallet.getCreditAsTime()));
+            }
+
+            // Other unit
+            else {
+                mCreditView.setVisibility(View.GONE);
+            }
         }
 
         // Use the pre-loaded WOT data if exists
@@ -516,7 +522,7 @@ public class WalletFragment extends Fragment {
 
             message = getString(R.string.sync_succeed,
                     nbUpdates,
-                    DateUtils.formatFriendlyTime(getActivity(), timeInMillis));
+                    DateUtils.formatFriendlyDuration(timeInMillis));
         }
         else {
             message = getString(R.string.sync_no_tx);

@@ -1,10 +1,10 @@
 package io.ucoin.app.fragment.common;
 
 import android.app.Activity;
-import android.app.Fragment;
-import android.app.FragmentManager;
 import android.os.Bundle;
 import android.support.v13.app.FragmentPagerAdapter;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -38,6 +38,7 @@ public class HomeFragment extends Fragment {
     private ImageView mStatusImage;
     //private TabHost mTabs;
     private SlidingTabLayout mSlidingTabLayout;
+    private ViewPager mViewPager;
     private MainActivity.QueryResultListener<Wallet> mWalletResultListener;
 
     public static HomeFragment newInstance() {
@@ -62,6 +63,22 @@ public class HomeFragment extends Fragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        // Tab host
+        /*mTabs = (TabHost)view.findViewById(R.id.tabHost);
+        mTabs.setup();
+        {
+            TabHost.TabSpec spec = mTabs.newTabSpec("tab1");
+            spec.setContent(R.id.tab1);
+            spec.setIndicator(getString(R.string.wallets));
+            mTabs.addTab(spec);
+        }
+        {
+            TabHost.TabSpec spec = mTabs.newTabSpec("tab2");
+            spec.setContent(R.id.tab2);
+            spec.setIndicator(getString(R.string.favorites));
+            mTabs.addTab(spec);
+        }*/
+
         mStatusPanel = view.findViewById(R.id.status_panel);
         mStatusPanel.setVisibility(View.GONE);
 
@@ -71,16 +88,41 @@ public class HomeFragment extends Fragment {
         // Image
         mStatusImage = (ImageView) view.findViewById(R.id.status_image);
 
+        /*
+        // Tab 1: wallet list
+        {
+            WalletListFragment fragment1 = WalletListFragment.newInstance(
+                    // Manage click on wallet
+                    new WalletListFragment.OnClickListener() {
+                        @Override
+                        public void onPositiveClick(Bundle args) {
+                            Wallet wallet = (Wallet) args.getSerializable(Wallet.class.getSimpleName());
+                            onWalletClick(wallet);
+                        }
+                    });
+            mWalletResultListener = fragment1;
+            getFragmentManager().beginTransaction()
+                    .replace(R.id.tab1, fragment1, "tab1")
+                    .commit();
+        }
+
+        // Tab 2: contact list
+        {
+            ContactListFragment fragment2 = ContactListFragment.newInstance();
+            getFragmentManager().beginTransaction()
+                .replace(R.id.tab2, fragment2, "tab2")
+                .commit();
+        }*/
+
         // Get the ViewPager and set it's PagerAdapter so that it can display items
-        ViewPager viewPager;
-        viewPager = (ViewPager) view.findViewById(R.id.viewpager);
-        viewPager.setAdapter(new HomePagerAdapter(getChildFragmentManager()));
+        mViewPager = (ViewPager) view.findViewById(R.id.viewpager);
+        mViewPager.setAdapter(new HomePagerAdapter(getChildFragmentManager()));
 
         // Give the SlidingTabLayout the ViewPager, this must be done AFTER the ViewPager has had
         // it's PagerAdapter set.
         mSlidingTabLayout = (SlidingTabLayout) view.findViewById(R.id.sliding_tabs);
         mSlidingTabLayout.setDistributeEvenly(true);
-        mSlidingTabLayout.setViewPager(viewPager);
+        mSlidingTabLayout.setViewPager(mViewPager);
 
     }
 
@@ -146,7 +188,7 @@ public class HomeFragment extends Fragment {
         }
     }
 
-    private class HomePagerAdapter extends FragmentPagerAdapter {
+    private class HomePagerAdapter extends android.support.v4.app.FragmentPagerAdapter {
 
         public HomePagerAdapter(FragmentManager fm) {
             super(fm);
@@ -176,9 +218,9 @@ public class HomeFragment extends Fragment {
         }
 
         @Override
-        public android.app.Fragment getItem(int i) {
+        public Fragment getItem(int i) {
 
-            android.app.Fragment fragment;
+            Fragment fragment;
 
             // Wallet list page
             if(i == 0) {

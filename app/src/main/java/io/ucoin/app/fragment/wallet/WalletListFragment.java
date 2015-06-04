@@ -1,7 +1,7 @@
 package io.ucoin.app.fragment.wallet;
 
-import android.app.DialogFragment;
-import android.app.ListFragment;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.ListFragment;
 import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -215,7 +215,8 @@ public class WalletListFragment extends ListFragment implements MainActivity.Que
 
                             @Override
                             public void onSuccess(Wallet result) {
-                                if (!getActivity().isDestroyed() && !getActivity().isFinishing()) {
+                                if (/*FIXME : API level 17 : !getActivity().isDestroyed() &&*/
+                                        !getActivity().isFinishing()) {
                                     new LoadWalletsTask().execute();
                                 }
                             }

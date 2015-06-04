@@ -1,14 +1,14 @@
 package io.ucoin.app.fragment.currency;
 
 import android.app.Activity;
-import android.app.Fragment;
-import android.app.FragmentManager;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v13.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -72,7 +72,7 @@ public class CurrencyFragment extends Fragment {
         // Get the ViewPager and set it's PagerAdapter so that it can display items
         ViewPager viewPager;
         viewPager = (ViewPager) view.findViewById(R.id.viewpager);
-        viewPager.setAdapter(new HomePagerAdapter(getChildFragmentManager(), currency));
+        viewPager.setAdapter(new CurrencyPagerAdapter(getChildFragmentManager(), currency));
 
         // Give the SlidingTabLayout the ViewPager, this must be done AFTER the ViewPager has had
         // it's PagerAdapter set.
@@ -177,9 +177,9 @@ public class CurrencyFragment extends Fragment {
     }
 
 
-    private class HomePagerAdapter extends FragmentPagerAdapter {
+    private class CurrencyPagerAdapter extends FragmentPagerAdapter {
 
-        public HomePagerAdapter(FragmentManager fm, Currency currency) {
+        public CurrencyPagerAdapter(FragmentManager fm, Currency currency) {
             super(fm);
         }
 
@@ -207,9 +207,9 @@ public class CurrencyFragment extends Fragment {
         }
 
         @Override
-        public android.app.Fragment getItem(int i) {
+        public Fragment getItem(int i) {
 
-            android.app.Fragment fragment;
+            Fragment fragment;
 
             // Rules page
             if(i == 0) {

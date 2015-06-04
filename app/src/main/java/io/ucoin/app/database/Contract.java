@@ -18,6 +18,7 @@ public interface Contract {
         public static final String NAME = "name";
         public static final String MEMBERS_COUNT = "members_count";
         public static final String FIRST_BLOCK_SIGNATURE = "first_block_signature";
+        public static final String BLOCK_NUMBER = "block_number";
         public static final String LAST_UD = "last_ud";
     }
 

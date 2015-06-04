@@ -1,7 +1,7 @@
 package io.ucoin.app.fragment.wot;
 
 import android.app.Activity;
-import android.app.Fragment;
+import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -56,7 +56,7 @@ public class SignFragment extends Fragment {
         setHasOptionsMenu(true);
 
         long accountId = ((Application)getActivity().getApplication()).getAccountId();
-        final List<Wallet> wallets = ServiceLocator.instance().getWalletService().getUidWalletsByAccountId(getActivity(), accountId, false);
+        final List<Wallet> wallets = ServiceLocator.instance().getWalletService().getUidWalletsByAccountId(getActivity(), accountId, false, false);
         mWalletAdapter = new WalletArrayAdapter(
                 getActivity(),
                 android.R.layout.simple_spinner_item,

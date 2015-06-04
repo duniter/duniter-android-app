@@ -37,6 +37,10 @@ public class CurrencyUtils {
         return ((double)coins) / ud;
     }
 
+    public static String convertToUDAndFormat(final long coins, final long ud) {
+        return formatUD(((double)coins) / ud);
+    }
+
     public static String formatCoin(final long amount) {
         return formatWithSmartDecimal(amount);
     }
@@ -76,6 +80,9 @@ public class CurrencyUtils {
      * @return
      */
     public static String formatWithSmartDecimal(double amount) {
+        if (amount < 0) {
+            return "- " + formatWithSmartDecimal(-amount);
+        }
         String result = currencyFormatter.format(amount);
         return result.replace(resultPartToIgnore, "");
     }

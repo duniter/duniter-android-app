@@ -10,7 +10,7 @@
     <string-array name="pref_unit_list_titles">
         <item>Classical</item>
         <item>Universal Dividend</item>
-        <item>Mutual Credit (Time Bank)</item>
+        <item>Mutual Credit (Time)</item>
     </string-array>
     <string-array name="pref_unit_list_values">
         <item>coin</item>

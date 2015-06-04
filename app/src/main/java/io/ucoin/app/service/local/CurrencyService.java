@@ -15,6 +15,7 @@ import android.os.AsyncTask;
 import android.os.RemoteException;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -71,6 +72,7 @@ public class CurrencyService extends BaseService {
         ObjectUtils.checkArgument(currency.getMembersCount().intValue() >= 0);
         ObjectUtils.checkNotNull(currency.getLastUD());
         ObjectUtils.checkArgument(currency.getLastUD().intValue() > 0);
+        ObjectUtils.checkArgument(currency.getBlockNumber() >= -1);
 
         ObjectUtils.checkArgument((currency.getAccount() != null && currency.getAccount().getId() != null)
             || currency.getAccountId() != null, "One of 'currency.account.id' or 'currency.accountId' is mandatory.");
@@ -107,6 +109,7 @@ public class CurrencyService extends BaseService {
         result.setCurrencyName(cursor.getString(mSelectHolder.nameIndex));
         result.setMembersCount(cursor.getInt(mSelectHolder.membersCountIndex));
         result.setFirstBlockSignature(cursor.getString(mSelectHolder.firstBlockSignatureIndex));
+        result.setBlockNumber(cursor.getInt(mSelectHolder.blockNumberIndex));
         result.setLastUD(cursor.getLong(mSelectHolder.lastUDIndex));
         result.setAccountId(cursor.getLong(mSelectHolder.accountIdIndex));
         return result;
@@ -244,14 +247,38 @@ public class CurrencyService extends BaseService {
      * Return a map of UD (key=blockNumber, value=amount)
      * @return
      */
-    public Map<Integer, Long> refreshAndGetUD(Context context, long currencyId, long lastSyncBlockNumber) {
+    public Map<Integer, Long> refreshAndGetUD(Context context, long currencyId, int currentBlockNumber) {
 
-        // Retrieve new UDs from blockchain
-        Map<Integer, Long> newUDs = blockchainRemoteService.getUDs(currencyId, lastSyncBlockNumber + 1);
+        Currency currency = getCurrencyById(context, currencyId);
+        int lastSyncBlockNumber = currency.getBlockNumber();
 
-        // If any, insert new into DB
-        if (newUDs != null && newUDs.size() > 0) {
-            insert(context.getContentResolver(), currencyId, newUDs);
+        // Refresh with new UDs (if need)
+        if (lastSyncBlockNumber < currentBlockNumber) {
+
+            // Retrieve new UDs from blockchain
+            Map<Integer, Long> newUDs = blockchainRemoteService.getUDs(currencyId, lastSyncBlockNumber + 1);
+
+            // If new UD, insert this new UD into database
+            if (newUDs != null && newUDs.size() > 0) {
+
+                // Insert new UD into the database
+                insert(context.getContentResolver(), currencyId, newUDs);
+
+                // Get the last block number synchronized
+                int lastBlockNumber = -1;
+                Iterator<Integer> blockNumberWithUDs = newUDs.keySet().iterator();
+                while (blockNumberWithUDs.hasNext()) {
+                    lastBlockNumber = blockNumberWithUDs.next();
+                }
+                currency.setBlockNumber(lastBlockNumber);
+
+                // Get the last UD found
+                long lastUD = newUDs.get(lastBlockNumber);
+                currency.setLastUD(lastUD);
+
+                // Update the currency
+                update(context.getContentResolver(), currency);
+            }
         }
 
         return getAllUD(context.getContentResolver(), currencyId);
@@ -380,6 +407,7 @@ public class CurrencyService extends BaseService {
         target.put(Contract.Currency.MEMBERS_COUNT, source.getMembersCount());
         target.put(Contract.Currency.FIRST_BLOCK_SIGNATURE, source.getFirstBlockSignature());
         target.put(Contract.Currency.LAST_UD, source.getLastUD());
+        target.put(Contract.Currency.BLOCK_NUMBER, source.getBlockNumber());
 
         return target;
     }
@@ -446,6 +474,7 @@ public class CurrencyService extends BaseService {
         int membersCountIndex;
         int nameIndex;
         int firstBlockSignatureIndex;
+        int blockNumberIndex;
         int lastUDIndex;
         int accountIdIndex;
 
@@ -455,6 +484,7 @@ public class CurrencyService extends BaseService {
             membersCountIndex = cursor.getColumnIndex(Contract.Currency.MEMBERS_COUNT);
             firstBlockSignatureIndex = cursor.getColumnIndex(Contract.Currency.FIRST_BLOCK_SIGNATURE);
             lastUDIndex = cursor.getColumnIndex(Contract.Currency.LAST_UD);
+            blockNumberIndex = cursor.getColumnIndex(Contract.Currency.BLOCK_NUMBER);
             accountIdIndex = cursor.getColumnIndex(Contract.Currency.ACCOUNT_ID);
         }
     }

@@ -212,12 +212,13 @@ public class WalletService extends BaseService {
         if (progressModel == null) {
             progressModel = new NullProgressModel();
         }
-
-        boolean needComputeUD = displayCreditAsUD(context);
+        progressModel.setMessage(context.getString(R.string.loading_wallets));
+        String unitType = getCreditUnitType(context);
+        boolean computeUD = isUnitUD(unitType);
+        boolean computeTime = isUnitTime(unitType);
 
         // Loading wallets from database
-        progressModel.setMessage(context.getString(R.string.loading_wallets));
-        List<Wallet> result = getWalletsByAccountId(context, accountId, needComputeUD);
+        List<Wallet> result = getWalletsByAccountId(context, accountId, computeUD, computeTime);
         progressModel.increment();
 
         // Check if cancelled
@@ -293,12 +294,13 @@ public class WalletService extends BaseService {
         Log.d(TAG, String.format("Updating wallet [%s]", wallet.toString()));
 
         long currencyId = wallet.getCurrencyId();
-        boolean computeUD = displayCreditAsUD(context);
+        String unitType = getCreditUnitType(context);
+        boolean computeUD = isUnitUD(unitType);
 
         // Get the current block number (using cache)
         // This should be done BEFORE the call of getSources (in case a new block occur)
         BlockchainBlock currentBlock = blockchainRemoteService.getCurrentBlock(currencyId, true /*use cache*/);
-        long currentBlockNumber = currentBlock == null ? 0 :currentBlock.getNumber();
+        int currentBlockNumber = currentBlock == null ? 0 :currentBlock.getNumber();
         boolean blockNumberHasChanged = wallet.getBlockNumber() != currentBlockNumber;
 
         // Stop if no new block
@@ -347,7 +349,10 @@ public class WalletService extends BaseService {
      * @return
      */
     public List<Wallet> getUidWalletsByAccountId(Context context, long accountId) {
-        return getUidWalletsByAccountId(context, accountId, displayCreditAsUD(context));
+        String unitType = getCreditUnitType(context);
+        boolean computeUD = isUnitUD(unitType);
+        boolean computeTime = isUnitTime(unitType);
+        return getUidWalletsByAccountId(context, accountId, computeUD, computeTime);
     }
 
     /**
@@ -355,13 +360,15 @@ public class WalletService extends BaseService {
      * @param context
      * @param accountId
      * @param updateCreditAsUD
+     * @param updateCreditAsTime
      * @return
      */
-    public List<Wallet> getUidWalletsByAccountId(Context context, long accountId, boolean updateCreditAsUD) {
+    public List<Wallet> getUidWalletsByAccountId(Context context, long accountId, boolean updateCreditAsUD, boolean updateCreditAsTime) {
         List<Wallet> allWallets = getWalletsByAccountId(
                 context,
                 accountId,
-                updateCreditAsUD);
+                updateCreditAsUD,
+                updateCreditAsTime);
 
         List<Wallet> result = new ArrayList<Wallet>();
         for (Wallet wallet: allWallets) {
@@ -461,13 +468,18 @@ public class WalletService extends BaseService {
     /* -- internal methods-- */
 
     protected List<Wallet> getWallets(Context context, long accountId) {
+        String unitType = getCreditUnitType(context);
+        boolean computeUD = isUnitUD(unitType);
+        boolean computeTime = isUnitTime(unitType);
+
         return getWalletsByAccountId(
                 context,
                 accountId,
-                displayCreditAsUD(context));
+                computeUD,
+                computeTime);
     }
 
-    private List<Wallet> getWalletsByAccountId(Context context, long accountId, boolean computeUD) {
+    private List<Wallet> getWalletsByAccountId(Context context, long accountId, boolean computeUD, boolean computeTime) {
 
         String selection = Contract.Wallet.ACCOUNT_ID + "=?";
         String[] selectionArgs = {
@@ -487,6 +499,9 @@ public class WalletService extends BaseService {
             // Update the wallet UD
             if (computeUD) {
                 updateCreditUD(context, wallet);
+            }
+            if (computeTime) {
+                // TODO BL : do a SUM() on credit_time
             }
         }
         cursor.close();
@@ -623,8 +638,8 @@ public class WalletService extends BaseService {
         result.setMember(cursor.getInt(mSelectHolder.isMemberIndex) == 1 ? true : false);
         result.setCertTimestamp(cursor.getLong(mSelectHolder.certTimestampIndex));
         result.setSalt(cursor.getString(mSelectHolder.saltIndex));
-        result.setBlockNumber(cursor.getLong(mSelectHolder.blockNumberIndex));
-        result.setTxBlockNumber(cursor.getLong(mSelectHolder.txBlockNumberIndex));
+        result.setBlockNumber(cursor.getInt(mSelectHolder.blockNumberIndex));
+        result.setTxBlockNumber(cursor.getInt(mSelectHolder.txBlockNumberIndex));
 
         return result;
     }
@@ -654,9 +669,21 @@ public class WalletService extends BaseService {
     }
 
     private boolean displayCreditAsUD(Context context) {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        return SettingsActivity.PREF_UNIT_UD.equals(preferences.getString(SettingsActivity.PREF_UNIT, UnitType.COIN));
+        return isUnitUD(getCreditUnitType(context));
     }
+    private String getCreditUnitType(Context context) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        return preferences.getString(SettingsActivity.PREF_UNIT, UnitType.COIN);
+    }
+
+    private boolean isUnitUD(String unit) {
+        return SettingsActivity.PREF_UNIT_UD.equals(unit);
+    }
+
+    private boolean isUnitTime(String unit) {
+        return SettingsActivity.PREF_UNIT_TIME.equals(unit);
+    }
+
 
     private long getAccountId(Activity activity) {
         return ((io.ucoin.app.Application) activity.getApplication()).getAccountId();
@@ -708,14 +735,16 @@ public class WalletService extends BaseService {
         protected List<Wallet> doInBackgroundHandleException(Long... accountIds) {
             Long accountId = accountIds[0];
             Context context = getContext();
-            boolean computeUD = displayCreditAsUD(context);
+            String unitType = getCreditUnitType(context);
+            boolean computeUD = isUnitUD(unitType);
+            boolean computeTime = isUnitTime(unitType);
 
             setMax(100);
             setProgress(0);
 
             // Loading wallets from database
             setMessage(getContext().getString(R.string.loading_wallets));
-            List<Wallet> result = getWalletsByAccountId(context, accountId, computeUD);
+            List<Wallet> result = getWalletsByAccountId(context, accountId, computeUD, computeTime);
             increment();
 
             // Check if cancelled

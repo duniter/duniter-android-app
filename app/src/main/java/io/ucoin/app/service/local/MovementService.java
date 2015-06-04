@@ -152,15 +152,14 @@ public class MovementService extends BaseService {
         Wallet wallet = walletService.getWalletById(context, walletId);
         long currencyId = wallet.getCurrencyId();
 
-
-
         // Get the current block number
         BlockchainRemoteService blockchainRemoteService = serviceLocator.getBlockchainRemoteService();
         BlockchainBlock currentBlock = blockchainRemoteService.getCurrentBlock(currencyId, true);
-        long currentBlockNumber = currentBlock.getNumber();
-        long syncTxBlockNumber = wallet.getTxBlockNumber();
+        int currentBlockNumber = currentBlock.getNumber();
+        int syncTxBlockNumber = wallet.getTxBlockNumber();
+        int udPeriod = blockchainRemoteService.getParameters(currencyId).getDt();
 
-        progressModel.setMax(4);
+        progressModel.setMax(5);
         progressModel.setMessage(context.getString(R.string.resync_started));
 
         // Delete existing movement if need
@@ -176,12 +175,13 @@ public class MovementService extends BaseService {
 
 
         // Load UD
-        Map<Integer, Long> udMap = currencyService.refreshAndGetUD(context, currencyId, syncTxBlockNumber);
+        progressModel.setMessage(context.getString(R.string.sync_ud));
+        Map<Integer, Long> udMap = currencyService.refreshAndGetUD(context, currencyId, currentBlockNumber);
 
         // Load pending movements
         progressModel.increment();
-        List<Movement> pendingsMovements = getPendingMovementsByWalletId(context.getContentResolver(), walletId);
-        Map<String, Movement> pendingMovementsByFingerprint = ModelUtils.movementsToFingerprintMap(pendingsMovements);
+        List<Movement> pendingMovements = getPendingMovementsByWalletId(context.getContentResolver(), walletId);
+        Map<String, Movement> pendingMovementsByFingerprint = ModelUtils.movementsToFingerprintMap(pendingMovements);
 
         // Read TX history, by N blocks
         long nbUpdatedMovements = 0;
@@ -200,6 +200,7 @@ public class MovementService extends BaseService {
                         walletId,
                         pendingMovementsByFingerprint,
                         udMap,
+                        udPeriod,
                         txPartialHistory);
 
                 start += TX_BLOCK_BATCH_SIZE;
@@ -238,6 +239,7 @@ public class MovementService extends BaseService {
                                              final long walletId,
                                              final Map<String, Movement> pendingMovementsByFingerprint,
                                              final Map<Integer, Long> udMap,
+                                             final int udPeriod,
                                              final TxHistoryResults historyResults) {
 
         List<Movement> movementsToUpdate = new ArrayList<Movement>();
@@ -248,8 +250,6 @@ public class MovementService extends BaseService {
         // Workaround for ucoin issue #71
         // TODO remove this map when fixed in ucoin
         Set<String> processedFringerprints = new HashSet<String>();
-
-        Iterator<Map.Entry<Integer, Long>> iteUD = udMap.entrySet().iterator();
 
         // Transfer Received
         if (historyResults.getHistory() != null && CollectionUtils.isNotEmpty(historyResults.getHistory().getReceived())) {
@@ -272,7 +272,7 @@ public class MovementService extends BaseService {
 
                     // Movement was not exists, so insert it
                     else {
-                        Movement newMovement = toMovement(txHistoryMovement, walletId, pubkey, dividend);
+                        Movement newMovement = toMovement(txHistoryMovement, walletId, pubkey, dividend, udPeriod);
 
                         if (newMovement != null) {
                             movementsToInsert.add(newMovement);
@@ -306,7 +306,7 @@ public class MovementService extends BaseService {
 
                     // Movement was not exists, so insert it
                     else {
-                        Movement newMovement = toMovement(txHistoryMovement, walletId, pubkey, dividend);
+                        Movement newMovement = toMovement(txHistoryMovement, walletId, pubkey, dividend, udPeriod);
                         if (newMovement != null) {
                             movementsToInsert.add(newMovement);
                         }
@@ -368,14 +368,14 @@ public class MovementService extends BaseService {
         return nbInsertOrUpdate;
     }
 
-
-    private Movement toMovement(TxHistoryMovement source, long walletId, String pubkey, long dividend) {
-        // Read the amount
+    private Movement toMovement(TxHistoryMovement source, long walletId, String pubkey, long dividend, int udPeriod) {
         long amount = computeAmount(source, pubkey);
         if (amount == 0) {
             Log.w(TAG, String.format("Invalid TX (amount=0) with fingerprint [%s].", source.getFingerprint()));
             return null;
         }
+
+        long amountInTime = amount * udPeriod / dividend;
 
         // Read issuers
         String issuers = computeIssuers(source, pubkey);
@@ -388,6 +388,7 @@ public class MovementService extends BaseService {
         target.setFingerprint(source.getFingerprint());
         target.setComment(source.getComment());
         target.setAmount(amount);
+        target.setAmountTime(amountInTime);
         target.setDividend(dividend);
         target.setUD(false);
         target.setBlockNumber(source.getBlockNumber());
@@ -756,12 +757,32 @@ public class MovementService extends BaseService {
      * @return
      */
     protected Long getUD(Map<Integer, Long> udMap, int blockNumber) {
-
-        for (Integer udBlockNumber: udMap.keySet()) {
-            if (blockNumber >= udBlockNumber.intValue()) {
-                return udMap.get(udBlockNumber);
-            }
+        if (udMap == null || udMap.size() == 0) {
+            return null;
         }
+
+        Integer resultUDBlockNumber = null;
+        for (Integer udBlockNumber: udMap.keySet()) {
+            if (udBlockNumber.intValue() > blockNumber) {
+                break;
+            }
+            resultUDBlockNumber = udBlockNumber;
+        }
+
+        if (resultUDBlockNumber == null) {
+            return null;
+        }
+
+        return udMap.get(resultUDBlockNumber);
+    }
+
+    /**
+     * Retrieve the movement amount in time (for mutual credit)
+     * @return
+     */
+    protected Long getTime() {
+
+
 
         return null;
     }

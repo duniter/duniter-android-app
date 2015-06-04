@@ -1,8 +1,10 @@
 package io.ucoin.app.adapter;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Typeface;
+import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,7 +13,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import io.ucoin.app.R;
+import io.ucoin.app.activity.SettingsActivity;
 import io.ucoin.app.database.Contract;
+import io.ucoin.app.model.local.UnitType;
 import io.ucoin.app.technical.CurrencyUtils;
 import io.ucoin.app.technical.DateUtils;
 import io.ucoin.app.technical.ImageUtils;
@@ -19,15 +23,17 @@ import io.ucoin.app.technical.ImageUtils;
 
 public class MovementCursorAdapter extends CursorAdapter{
 
+    private final String mUnitType;
     private final String mUdComment;
     private int textPrimaryColor;
     private int textComputedColor;
 
-    public MovementCursorAdapter(Context context, Cursor c, int flags) {
+    public MovementCursorAdapter(Context context, Cursor c, int flags, String unitType) {
         super(context, c, flags);
         mUdComment = context.getString(R.string.movement_ud);
-        textPrimaryColor = context.getResources().getColor(R.color.textPrimary);
+        textPrimaryColor = context.getResources().getColor(R.color.secondary_text_default_material_light);
         textComputedColor = context.getResources().getColor(R.color.textComputed);
+        mUnitType = unitType;
     }
 
     @Override
@@ -64,19 +70,51 @@ public class MovementCursorAdapter extends CursorAdapter{
         String dateTime = DateUtils.formatFriendlyDateTime(context, cursor.getLong(viewHolder.timeIndex));
         viewHolder.timeView.setText(dateTime);
 
+
+        boolean isUD = cursor.getInt(viewHolder.isUdIndex) == 1;
+
         // Amount
         int amount = cursor.getInt(viewHolder.amountIndex);
-        viewHolder.amountView.setText(CurrencyUtils.formatCoin(amount));
-        if (amount > 0) {
-            viewHolder.amountView.setTypeface(Typeface.DEFAULT_BOLD);
-        }
-        else {
-            viewHolder.amountView.setTypeface(Typeface.DEFAULT);
+        {
+            // If unit is coins
+            if (SettingsActivity.PREF_UNIT_COIN.equals(mUnitType)) {
+                viewHolder.amountView.setText(CurrencyUtils.formatCoin(amount));
+            }
+
+            // If unit is UD
+            else if (SettingsActivity.PREF_UNIT_UD.equals(mUnitType)) {
+                if (isUD) {
+                    viewHolder.amountView.setText(view.getResources().getString(
+                            R.string.universal_dividend_value, 1));
+                }
+                else {
+                    long dividend = cursor.getLong(viewHolder.dividendIndex);
+                    viewHolder.amountView.setText(view.getResources().getString(
+                            R.string.universal_dividend_value,
+                            CurrencyUtils.convertToUDAndFormat(amount, dividend)));
+                }
+            }
+
+            // If unit is mutual credit
+            else if (SettingsActivity.PREF_UNIT_TIME.equals(mUnitType)) {
+                // TODO BL: get it the blockchain parameter
+                long timeUdInSeconds = 86400;
+                long dividend = cursor.getLong(viewHolder.dividendIndex);
+
+                long durationInSeconds = (timeUdInSeconds * amount) / dividend;
+                String timeStr = DateUtils.formatFriendlyDuration(durationInSeconds * 1000);
+                viewHolder.amountView.setText(timeStr);
+            }
+            if (amount > 0) {
+                viewHolder.amountView.setTypeface(Typeface.DEFAULT_BOLD);
+            } else {
+                viewHolder.amountView.setTypeface(Typeface.DEFAULT);
+            }
         }
 
         // Comment
-        String comment= cursor.getString(viewHolder.commentIndex);
-        if (comment == null && cursor.getInt(viewHolder.isUdIndex) == 1) {
+        String comment = cursor.getString(viewHolder.commentIndex);
+        if (isUD) {
             // If = UD, use a special comment
             viewHolder.commentView.setText(mUdComment);
             viewHolder.commentView.setTextColor(textComputedColor);
@@ -115,6 +153,7 @@ public class MovementCursorAdapter extends CursorAdapter{
 
         int timeIndex;
         int amountIndex;
+        int dividendIndex;
         int commentIndex;
         int blockNumberIndex;
         int isUdIndex;
@@ -130,6 +169,7 @@ public class MovementCursorAdapter extends CursorAdapter{
 
             timeIndex = cursor.getColumnIndex(Contract.Movement.TIME);
             amountIndex = cursor.getColumnIndex(Contract.Movement.AMOUNT);
+            dividendIndex = cursor.getColumnIndex(Contract.Movement.DIVIDEND);
             commentIndex = cursor.getColumnIndex(Contract.Movement.COMMENT);
             blockNumberIndex = cursor.getColumnIndex(Contract.Movement.BLOCK);
             isUdIndex = cursor.getColumnIndex(Contract.Movement.IS_UD);

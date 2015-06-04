@@ -81,6 +81,7 @@
     <string name="resync_confirm">Etes-vous sûr de vouloir réimporter toutes les opérations ? Cette opération peut durer plusieurs minutes.</string>
     <string name="resync_started">Téléchargement des opérations...</string>
     <string name="sync_succeed">%1$s opération(s) téléchargée(s) en %2$s</string>
+    <string name="sync_ud">Téléchargement des DU...</string>
     <string name="sync_no_tx">Aucune nouvelle opération</string>
 
     <!-- Strings related to actions -->
