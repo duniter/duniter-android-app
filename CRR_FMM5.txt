@@ -1,0 +1,40 @@
+Compte rendu - FMM5
+-------------------
+
+04/06/2015
+
+Note perso "à creuser" :
+ - soft: qBittorrent
+
+Demande pour CuteCoin
+
+- Menu About > dans un menu "?"
+- License : GPL ?
+- Informations :
+   - Monnaie > Renommer en "paramètres" ?
+   - à déplacer dans un menu "?"
+- Rendre plus "formel" la demande de rejoindre la WoT
+
+Idées - Toile de confiance
+- penser à montrer un aspect temporel
+  - violet (jeune) -> rouge (plus âgée)
+  - et hauteur pour l'âge de présence
+  - ne pouvoir émettre une signature que 1 par jour ?
+
+ucoin core
+
+- Monnaie M :
+  - peut créditer des morts
+
+- Cryptographie :
+  - courbe elliptique EC
+  PGP pas utilisé car trop de fonctionnalités
+
+Questions :
+ - est-ce qu'un block après un fork ne pourrait pas accepter un autre block valide non validé par lui-même ?
+ - clef secrète stockée sur le noeud serveur
+ - qd bcp de sources, peut on les fusionner ? ou les découper ?
+
+ - Faut il récupérer tout les Peer depuis uCoinApps ?
+
+ - server.js : après listenBMA (Basic Merkle API)

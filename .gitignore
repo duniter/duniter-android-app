@@ -25,3 +25,6 @@ scrypt/src/main/obj/**/*.*
 kalium-jni/src/main/libs/**/*.so
 kalium-jni/src/main/obj/**/*.*
 .project
+
+CRR_FMM5.txt
+app/manifest-merger-release-report.txt
