@@ -9,8 +9,8 @@ import android.net.Uri;
 import android.os.Bundle;
 
 import io.ucoin.app.R;
-import io.ucoin.app.database.Contract;
-import io.ucoin.app.database.Provider;
+import io.ucoin.app.dao.sqlite.SQLiteTable;
+import io.ucoin.app.content.Provider;
 import io.ucoin.app.model.local.Account;
 import io.ucoin.app.model.local.Peer;
 import io.ucoin.app.model.local.Wallet;
@@ -236,10 +236,10 @@ public class AccountService extends BaseService {
 
         //Create account in database
         ContentValues values = new ContentValues();
-        values.put(Contract.Account.UID, account.getUid());
-        values.put(Contract.Account.PUBLIC_KEY, account.getPubkey());
-        values.put(Contract.Account.SALT, account.getSalt());
-        values.put(Contract.Account.CRYPT_PIN, account.getCryptPin());
+        values.put(SQLiteTable.Account.UID, account.getUid());
+        values.put(SQLiteTable.Account.PUBLIC_KEY, account.getPubkey());
+        values.put(SQLiteTable.Account.SALT, account.getSalt());
+        values.put(SQLiteTable.Account.CRYPT_PIN, account.getCryptPin());
 
         Uri uri = Uri.parse(Provider.CONTENT_URI + "/account/");
         uri = context.getContentResolver().insert(uri, values);
@@ -250,8 +250,8 @@ public class AccountService extends BaseService {
 
         //create account in android framework
         Bundle data = new Bundle();
-        data.putString(Contract.Account._ID, accountId.toString());
-        data.putString(Contract.Account.PUBLIC_KEY, account.getPubkey());
+        data.putString(SQLiteTable.Account._ID, accountId.toString());
+        data.putString(SQLiteTable.Account.PUBLIC_KEY, account.getPubkey());
         android.accounts.Account androidAccount = new android.accounts.Account(account.getUid(), context.getString(R.string.ACCOUNT_TYPE));
         AccountManager.get(context).addAccountExplicitly(androidAccount, null, data);
 

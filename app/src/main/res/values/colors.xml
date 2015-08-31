@@ -6,9 +6,11 @@
     <color name="primary_light">#e8eaf6</color>
     <color name="primaryDark">#003124</color>
     <color name="accent">#FF0057</color>
+    <color name="accentLight">#ffffd1dd</color>
     <color name="textPrimary">#FFF</color>
     <color name="transparent">#00000000</color>
-    <color name="gray">#AAAAAA</color>
+    <color name="grey">#AAAAAA</color>
     <color name="textComputed">#0099CC</color>
+    <color name="grey200">#FFEEEEEE</color>
 
 </resources>

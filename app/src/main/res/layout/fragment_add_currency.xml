@@ -75,7 +75,7 @@
             android:hint="@string/node_port_hint"
             android:imeOptions="actionNext"
             android:inputType="numberDecimal"
-            android:maxLength="4"
+            android:maxLength="6"
             android:paddingLeft="8dp"
             android:paddingRight="8dp"
             android:singleLine="true"

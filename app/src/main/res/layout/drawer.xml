@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/drawer_panel"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="start"
+    android:background="#FFF"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/drawer_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/accent"
+        android:orientation="vertical"
+        android:paddingEnd="16dp"
+        android:paddingBottom="16dp"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:paddingStart="16dp"
+        android:paddingTop="16dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:text="@string/menu"
+            android:textColor="@color/textPrimary"
+            android:gravity="center_horizontal"
+            android:textSize="@dimen/abc_text_size_display_1_material"
+            />
+        </LinearLayout>
+
+    <ListView
+        android:id="@+id/drawer_listview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:choiceMode="singleChoice"
+        android:divider="#333"
+        android:dividerHeight="0dp"
+        android:visibility="gone"/>
+
+    <TextView
+        android:id="@+id/drawer_empty_list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/no_currency"
+        android:visibility="gone"/>
+
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="1dip"
+        android:layout_marginBottom="8dp"
+        android:layout_marginTop="8dp"
+        android:background="@color/grey200" />
+
+    <TextView
+        android:id="@+id/drawer_add_currency"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:background="@drawable/textview_background_selector"
+        android:drawableLeft="@drawable/ic_plus_grey600_24dp"
+        android:drawablePadding="48dp"
+        android:drawableStart="@drawable/ic_plus_grey600_24dp"
+        android:gravity="center_vertical"
+        android:paddingEnd="16dp"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:paddingStart="16dp"
+        android:text="@string/add_currency"
+        android:textColor="#FF000000"
+        android:textSize="@dimen/abc_text_size_body_2_material" />
+
+    <TextView
+        android:id="@+id/drawer_settings"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:background="@drawable/textview_background_selector"
+        android:drawableLeft="@drawable/ic_settings_grey600_24dp"
+        android:drawablePadding="48dp"
+        android:drawableStart="@drawable/ic_settings_grey600_24dp"
+        android:gravity="center_vertical"
+        android:paddingEnd="16dp"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:paddingStart="16dp"
+        android:text="@string/settings"
+        android:textColor="#FF000000"
+        android:textSize="@dimen/abc_text_size_body_2_material" />
+
+</LinearLayout>

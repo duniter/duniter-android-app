@@ -92,13 +92,16 @@
         </service>
 
         <service
-            android:name=".service.remote.BlockchainRemoteService"
-            android:exported="false"
+            android:name=".task.TaskService"
+            android:exported="true"
             >
+            <intent-filter>
+                <action android:name="android.content.TaskService" />
+            </intent-filter>
         </service>
 
         <provider
-            android:name=".database.Provider"
+            android:name=".content.Provider"
             android:authorities="@string/AUTHORITY"
             android:exported="false"
             android:syncable="true" />

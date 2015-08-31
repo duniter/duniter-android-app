@@ -54,6 +54,12 @@ public class AddCurrencyDialogFragment extends DialogFragment {
         return fragment;
     }
 
+    public static AddCurrencyDialogFragment newInstance() {
+        AddCurrencyDialogFragment fragment = new AddCurrencyDialogFragment();
+        fragment.setOnClickListener(null); // no callback listener
+        return fragment;
+    }
+
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());

@@ -32,7 +32,7 @@ ndk.dir=/path/to/android-ndks/android-ndk-r10d
 
 - Install dependencies for needed for kalium-jni compilation
 ```
-sudo apt-get install build-essential libpcre3 libpcre3-dev libtool automake
+sudo apt-get install build-essential libpcre3 libpcre3-dev libtool automake python-dev
 ```
 - Clone the source repository from GitHub and generate static libsodium for all Android architectures using the following instructions :
 

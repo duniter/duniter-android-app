@@ -21,8 +21,8 @@ import io.ucoin.app.R;
 import io.ucoin.app.activity.MainActivity;
 import io.ucoin.app.adapter.ContactCursorAdapter;
 import io.ucoin.app.adapter.ProgressViewAdapter;
-import io.ucoin.app.database.Contract;
-import io.ucoin.app.database.Provider;
+import io.ucoin.app.dao.sqlite.SQLiteTable;
+import io.ucoin.app.content.Provider;
 import io.ucoin.app.model.local.Contact;
 import io.ucoin.app.service.ServiceLocator;
 
@@ -67,11 +67,11 @@ public class ContactListFragment extends ListFragment {
 
         Uri uri = Uri.parse(Provider.CONTENT_URI + "/contactView/");
 
-        String selection = Contract.Contact.ACCOUNT_ID + "=?";
+        String selection = SQLiteTable.Contact.ACCOUNT_ID + "=?";
         String[] selectionArgs = {
                 ((Application) getActivity().getApplication()).getAccountIdAsString()
         };
-        String orderBy = Contract.Contact.NAME + " ASC";
+        String orderBy = SQLiteTable.Contact.NAME + " ASC";
 
         Cursor cursor = getActivity().getContentResolver().query(uri, new String[]{}, selection,
                 selectionArgs, orderBy);

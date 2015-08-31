@@ -148,10 +148,12 @@ public class WalletFragment extends Fragment {
             public void onClick(View v) {
                 if (detailView.getVisibility() == View.VISIBLE) {
                     detailView.setVisibility(View.GONE);
-                    toogleDetailButton.setImageResource(R.drawable.expander_open_holo_dark);
+                    //TODO BLA
+                    //toogleDetailButton.setImageResource(R.drawable.expander_close_holo_dark);
                 } else {
                     detailView.setVisibility(View.VISIBLE);
-                    toogleDetailButton.setImageResource(R.drawable.expander_close_holo_dark);
+                    //TODO BLA
+                    //toogleDetailButton.setImageResource(R.drawable.expander_close_holo_dark);
                 }
             }
         });

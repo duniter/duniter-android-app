@@ -16,8 +16,8 @@ import android.widget.ListView;
 import io.ucoin.app.R;
 import io.ucoin.app.adapter.MovementCursorAdapter;
 import io.ucoin.app.adapter.ProgressViewAdapter;
-import io.ucoin.app.database.Contract;
-import io.ucoin.app.database.Provider;
+import io.ucoin.app.dao.sqlite.SQLiteTable;
+import io.ucoin.app.content.Provider;
 import io.ucoin.app.model.local.Movement;
 import io.ucoin.app.model.local.Wallet;
 import io.ucoin.app.service.ServiceLocator;
@@ -117,9 +117,9 @@ public class MovementListFragment extends ListFragment {
 
         Uri uri = Uri.parse(Provider.CONTENT_URI + "/movement/");
 
-        String selection = Contract.Movement.WALLET_ID + "=?";
+        String selection = SQLiteTable.Movement.WALLET_ID + "=?";
         String[] selectionArgs = {String.valueOf(walletId)};
-        String orderBy = Contract.Movement.TIME + " DESC";
+        String orderBy = SQLiteTable.Movement.TIME + " DESC";
 
         Cursor cursor = getActivity().getContentResolver().query(uri, new String[]{}, selection,
                 selectionArgs, orderBy);

@@ -17,8 +17,8 @@ import java.util.List;
 
 import io.ucoin.app.R;
 import io.ucoin.app.activity.SettingsActivity;
-import io.ucoin.app.database.Contract;
-import io.ucoin.app.database.Provider;
+import io.ucoin.app.dao.sqlite.SQLiteTable;
+import io.ucoin.app.content.Provider;
 import io.ucoin.app.model.local.UnitType;
 import io.ucoin.app.model.local.Wallet;
 import io.ucoin.app.model.remote.BlockchainBlock;
@@ -382,7 +382,7 @@ public class WalletService extends BaseService {
                                       final long walletId) {
 
 
-        String selection = Contract.Wallet._ID + "=?";
+        String selection = SQLiteTable.Wallet._ID + "=?";
         String[] selectionArgs = {
                 String.valueOf(walletId)
         };
@@ -441,7 +441,7 @@ public class WalletService extends BaseService {
 
         // First, delete movements
         {
-            String whereClause = Contract.Movement.WALLET_ID + "=?";
+            String whereClause = SQLiteTable.Movement.WALLET_ID + "=?";
             String[] whereArgs = new String[]{String.valueOf(walletId)};
             int rowsDeleted = resolver.delete(Uri.parse(Provider.CONTENT_URI + "/movement/"), whereClause, whereArgs);
             Log.d(TAG, " deleted movement count: " + rowsDeleted);
@@ -469,11 +469,11 @@ public class WalletService extends BaseService {
 
     private List<Wallet> getWalletsByAccountId(Context context, long accountId, boolean computeUD) {
 
-        String selection = Contract.Wallet.ACCOUNT_ID + "=?";
+        String selection = SQLiteTable.Wallet.ACCOUNT_ID + "=?";
         String[] selectionArgs = {
                 String.valueOf(accountId)
         };
-        String orderBy = Contract.Wallet.ALIAS + " ASC";
+        String orderBy = SQLiteTable.Wallet.ALIAS + " ASC";
 
         Cursor cursor = context.getContentResolver()
                 .query(getContentUri(),
@@ -518,9 +518,9 @@ public class WalletService extends BaseService {
         String[] selectionArgs;
         if (excludedWalletId != null) {
             selection = String.format("%s=? and %s=? and %s<>?",
-                    Contract.Wallet.ACCOUNT_ID,
-                    Contract.Wallet.PUBLIC_KEY,
-                    Contract.Wallet._ID
+                    SQLiteTable.Wallet.ACCOUNT_ID,
+                    SQLiteTable.Wallet.PUBLIC_KEY,
+                    SQLiteTable.Wallet._ID
             );
             selectionArgs = new String[] {
                     String.valueOf(accountId),
@@ -530,8 +530,8 @@ public class WalletService extends BaseService {
         }
         else {
             selection = String.format("%s=? and %s=?",
-                    Contract.Wallet.ACCOUNT_ID,
-                    Contract.Wallet.PUBLIC_KEY
+                    SQLiteTable.Wallet.ACCOUNT_ID,
+                    SQLiteTable.Wallet.PUBLIC_KEY
             );
             selectionArgs = new String[] {
                     String.valueOf(accountId),
@@ -579,24 +579,24 @@ public class WalletService extends BaseService {
     private ContentValues toContentValues(final Wallet source) {
         //Create account in database
         ContentValues target = new ContentValues();
-        target.put(Contract.Wallet.ACCOUNT_ID, source.getAccountId());
-        target.put(Contract.Wallet.CURRENCY_ID, source.getCurrencyId());
-        target.put(Contract.Wallet.ALIAS, source.getName());
-        target.put(Contract.Wallet.UID, source.getUid());
+        target.put(SQLiteTable.Wallet.ACCOUNT_ID, source.getAccountId());
+        target.put(SQLiteTable.Wallet.CURRENCY_ID, source.getCurrencyId());
+        target.put(SQLiteTable.Wallet.ALIAS, source.getName());
+        target.put(SQLiteTable.Wallet.UID, source.getUid());
         if (source.getSalt() != null) {
-            target.put(Contract.Wallet.SALT, source.getSalt());
+            target.put(SQLiteTable.Wallet.SALT, source.getSalt());
         }
-        target.put(Contract.Wallet.PUBLIC_KEY, source.getPubKeyHash());
+        target.put(SQLiteTable.Wallet.PUBLIC_KEY, source.getPubKeyHash());
         if (source.getCertTimestamp() != -1) {
-            target.put(Contract.Wallet.CERT_TS, source.getCertTimestamp());
+            target.put(SQLiteTable.Wallet.CERT_TS, source.getCertTimestamp());
         }
         if (source.getSecKey() != null) {
-            target.put(Contract.Wallet.SECRET_KEY, CryptoUtils.encodeBase58(source.getSecKey()));
+            target.put(SQLiteTable.Wallet.SECRET_KEY, CryptoUtils.encodeBase58(source.getSecKey()));
         }
-        target.put(Contract.Wallet.IS_MEMBER, source.getIsMember().booleanValue() ? 1 : 0);
-        target.put(Contract.Wallet.CREDIT, source.getCredit());
-        target.put(Contract.Wallet.BLOCK_NUMBER, source.getBlockNumber());
-        target.put(Contract.Wallet.TX_BLOCK_NUMBER, source.getTxBlockNumber());
+        target.put(SQLiteTable.Wallet.IS_MEMBER, source.getIsMember().booleanValue() ? 1 : 0);
+        target.put(SQLiteTable.Wallet.CREDIT, source.getCredit());
+        target.put(SQLiteTable.Wallet.BLOCK_NUMBER, source.getBlockNumber());
+        target.put(SQLiteTable.Wallet.TX_BLOCK_NUMBER, source.getTxBlockNumber());
         return target;
     }
 
@@ -679,19 +679,19 @@ public class WalletService extends BaseService {
         int txBlockNumberIndex;
 
         private SelectCursorHolder(final Cursor cursor ) {
-            idIndex = cursor.getColumnIndex(Contract.Wallet._ID);
-            accountIdIndex = cursor.getColumnIndex(Contract.Wallet.ACCOUNT_ID);
-            currencyIdIndex = cursor.getColumnIndex(Contract.Wallet.CURRENCY_ID);
-            nameIndex = cursor.getColumnIndex(Contract.Wallet.ALIAS);
-            pubKeyIndex = cursor.getColumnIndex(Contract.Wallet.PUBLIC_KEY);
-            uidIndex= cursor.getColumnIndex(Contract.Wallet.UID);
-            certTimestampIndex= cursor.getColumnIndex(Contract.Wallet.CERT_TS);
-            secKeyIndex = cursor.getColumnIndex(Contract.Wallet.SECRET_KEY);
-            isMemberIndex = cursor.getColumnIndex(Contract.Wallet.IS_MEMBER);
-            creditIndex = cursor.getColumnIndex(Contract.Wallet.CREDIT);
-            saltIndex = cursor.getColumnIndex(Contract.Wallet.SALT);
-            blockNumberIndex = cursor.getColumnIndex(Contract.Wallet.BLOCK_NUMBER);
-            txBlockNumberIndex = cursor.getColumnIndex(Contract.Wallet.TX_BLOCK_NUMBER);
+            idIndex = cursor.getColumnIndex(SQLiteTable.Wallet._ID);
+            accountIdIndex = cursor.getColumnIndex(SQLiteTable.Wallet.ACCOUNT_ID);
+            currencyIdIndex = cursor.getColumnIndex(SQLiteTable.Wallet.CURRENCY_ID);
+            nameIndex = cursor.getColumnIndex(SQLiteTable.Wallet.ALIAS);
+            pubKeyIndex = cursor.getColumnIndex(SQLiteTable.Wallet.PUBLIC_KEY);
+            uidIndex= cursor.getColumnIndex(SQLiteTable.Wallet.UID);
+            certTimestampIndex= cursor.getColumnIndex(SQLiteTable.Wallet.CERT_TS);
+            secKeyIndex = cursor.getColumnIndex(SQLiteTable.Wallet.SECRET_KEY);
+            isMemberIndex = cursor.getColumnIndex(SQLiteTable.Wallet.IS_MEMBER);
+            creditIndex = cursor.getColumnIndex(SQLiteTable.Wallet.CREDIT);
+            saltIndex = cursor.getColumnIndex(SQLiteTable.Wallet.SALT);
+            blockNumberIndex = cursor.getColumnIndex(SQLiteTable.Wallet.BLOCK_NUMBER);
+            txBlockNumberIndex = cursor.getColumnIndex(SQLiteTable.Wallet.TX_BLOCK_NUMBER);
         }
     }
 

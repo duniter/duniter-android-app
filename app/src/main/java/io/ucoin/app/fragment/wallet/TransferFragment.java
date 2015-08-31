@@ -739,6 +739,7 @@ public class TransferFragment extends Fragment {
             movement.setAmount(-1 * amountInCoin);
             movement.setComment(mComment);
             movement.setReceivers(mPubkey);
+            movement.setDividend(mUniversalDividend);
             movement.setTime(DateUtils.getCurrentTimestampSeconds());
             movement.setWalletId(wallet.getId());
             MovementService movementService = ServiceLocator.instance().getMovementService();

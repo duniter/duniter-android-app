@@ -29,15 +29,8 @@
             android:layout_below="@+id/toolbar"/>
 
     </LinearLayout>
-    
-    <!-- The navigation drawer -->
-    <ListView android:id="@+id/drawer_listview"
-        android:layout_width="280dp"
-        android:layout_height="match_parent"
-        android:layout_gravity="start"
-        android:choiceMode="singleChoice"
-        android:divider="#333"
-        android:dividerHeight="0dp"
-        android:background="#FFF"/>
+
+    !-- The navigation drawer -->
+    <include layout="@layout/drawer" />
 
 </android.support.v4.widget.DrawerLayout>

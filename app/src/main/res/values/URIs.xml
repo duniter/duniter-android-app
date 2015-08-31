@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="account_uri">account/</string>
+    <string name="currency_uri">currency/</string>
+    <string name="ud_uri">ud/</string>
+    <string name="wallet_uri">wallet/</string>
+    <string name="peer_uri">peer/</string>
+    <string name="movement_uri">movement/</string>
+    <string name="contact_uri">contact/</string>
+    <string name="contact2currency_uri">contact2currency/</string>
+    <string name="contact_view_uri">contactView/</string>
+
+</resources>

@@ -21,8 +21,8 @@ import android.widget.TextView;
 import io.ucoin.app.Application;
 import io.ucoin.app.R;
 import io.ucoin.app.activity.IToolbarActivity;
-import io.ucoin.app.database.Contract;
-import io.ucoin.app.database.Provider;
+import io.ucoin.app.dao.sqlite.SQLiteTable;
+import io.ucoin.app.content.Provider;
 import io.ucoin.app.model.local.Peer;
 import io.ucoin.app.model.remote.Currency;
 import io.ucoin.app.technical.view.SlidingTabLayout;
@@ -93,8 +93,8 @@ public class CurrencyFragment extends Fragment {
         Currency currency = (Currency) newInstanceArgs
                 .getSerializable(Currency.class.getSimpleName());
 
-        String selection = Contract.Currency.ACCOUNT_ID + "=? AND " +
-                Contract.Currency.FIRST_BLOCK_SIGNATURE + "=?";
+        String selection = SQLiteTable.Currency.ACCOUNT_ID + "=? AND " +
+                SQLiteTable.Currency.FIRST_BLOCK_SIGNATURE + "=?";
         String[] selectionArgs = new String[]{
                 ((Application) getActivity().getApplication()).getAccountIdAsString(),
                 currency.getFirstBlockSignature()
@@ -148,10 +148,10 @@ public class CurrencyFragment extends Fragment {
 
         //add Currency to database
         ContentValues values = new ContentValues();
-        values.put(Contract.Currency.ACCOUNT_ID, accountId);
-        values.put(Contract.Currency.NAME, currency.getCurrencyName());
-        values.put(Contract.Currency.MEMBERS_COUNT, currency.getMembersCount());
-        values.put(Contract.Currency.FIRST_BLOCK_SIGNATURE, currency.getFirstBlockSignature());
+        values.put(SQLiteTable.Currency.ACCOUNT_ID, accountId);
+        values.put(SQLiteTable.Currency.NAME, currency.getCurrencyName());
+        values.put(SQLiteTable.Currency.MEMBERS_COUNT, currency.getMembersCount());
+        values.put(SQLiteTable.Currency.FIRST_BLOCK_SIGNATURE, currency.getFirstBlockSignature());
 
         Uri uri = Uri.parse(Provider.CONTENT_URI + "/currency/");
         uri = getActivity().getContentResolver().insert(uri, values);
@@ -162,9 +162,9 @@ public class CurrencyFragment extends Fragment {
         if (peer != null) {
             Long id = ContentUris.parseId(uri);
             values = new ContentValues();
-            values.put(Contract.Peer.CURRENCY_ID, Long.toString(id));
-            values.put(Contract.Peer.HOST, peer.getHost());
-            values.put(Contract.Peer.PORT, Integer.toString(peer.getPort()));
+            values.put(SQLiteTable.Peer.CURRENCY_ID, Long.toString(id));
+            values.put(SQLiteTable.Peer.HOST, peer.getHost());
+            values.put(SQLiteTable.Peer.PORT, Integer.toString(peer.getPort()));
             uri = Uri.parse(Provider.CONTENT_URI + "/peer/");
             uri = getActivity().getContentResolver().insert(uri, values);
         }

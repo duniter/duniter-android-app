@@ -9,8 +9,8 @@ import android.net.Uri;
 
 import java.util.List;
 
-import io.ucoin.app.database.Contract;
-import io.ucoin.app.database.Provider;
+import io.ucoin.app.dao.sqlite.SQLiteTable;
+import io.ucoin.app.content.Provider;
 import io.ucoin.app.model.remote.Identity;
 import io.ucoin.app.service.BaseService;
 import io.ucoin.app.technical.ObjectUtils;
@@ -94,10 +94,10 @@ public class Contact2CurrencyService extends BaseService {
     private ContentValues toContentValues(final long contactId, final Identity source) {
         //Create account in database
         ContentValues target = new ContentValues();
-        target.put(Contract.Contact2Currency.CONTACT_ID, contactId);
-        target.put(Contract.Contact2Currency.UID, source.getUid());
-        target.put(Contract.Contact2Currency.PUBLIC_KEY, source.getPubkey());
-        target.put(Contract.Contact2Currency.CURRENCY_ID, source.getCurrencyId());
+        target.put(SQLiteTable.Contact2Currency.CONTACT_ID, contactId);
+        target.put(SQLiteTable.Contact2Currency.UID, source.getUid());
+        target.put(SQLiteTable.Contact2Currency.PUBLIC_KEY, source.getPubkey());
+        target.put(SQLiteTable.Contact2Currency.CURRENCY_ID, source.getCurrencyId());
         return target;
     }
 
@@ -133,11 +133,11 @@ public class Contact2CurrencyService extends BaseService {
         int pubkeyIdIndex;
 
         private SelectCursorHolder(final Cursor cursor ) {
-            idIndex = cursor.getColumnIndex(Contract.Contact2Currency._ID);
-            contactIdIndex = cursor.getColumnIndex(Contract.Contact2Currency.CONTACT_ID);
-            currencyIdIndex = cursor.getColumnIndex(Contract.Contact2Currency.CURRENCY_ID);
-            uidIdIndex = cursor.getColumnIndex(Contract.Contact2Currency.UID);
-            pubkeyIdIndex = cursor.getColumnIndex(Contract.Contact2Currency.PUBLIC_KEY);
+            idIndex = cursor.getColumnIndex(SQLiteTable.Contact2Currency._ID);
+            contactIdIndex = cursor.getColumnIndex(SQLiteTable.Contact2Currency.CONTACT_ID);
+            currencyIdIndex = cursor.getColumnIndex(SQLiteTable.Contact2Currency.CURRENCY_ID);
+            uidIdIndex = cursor.getColumnIndex(SQLiteTable.Contact2Currency.UID);
+            pubkeyIdIndex = cursor.getColumnIndex(SQLiteTable.Contact2Currency.PUBLIC_KEY);
         }
     }
 

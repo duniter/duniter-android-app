@@ -20,8 +20,8 @@ import java.util.Map;
 import java.util.Set;
 
 import io.ucoin.app.R;
-import io.ucoin.app.database.Contract;
-import io.ucoin.app.database.Provider;
+import io.ucoin.app.dao.sqlite.SQLiteTable;
+import io.ucoin.app.content.Provider;
 import io.ucoin.app.model.local.Movement;
 import io.ucoin.app.model.local.Wallet;
 import io.ucoin.app.model.remote.BlockchainBlock;
@@ -82,6 +82,7 @@ public class MovementService extends BaseService {
     public Movement save(final Context context, final Movement movement) throws DuplicatePubkeyException {
         ObjectUtils.checkNotNull(movement);
         ObjectUtils.checkArgument(StringUtils.isNotBlank(movement.getFingerprint()));
+        ObjectUtils.checkNotNull(movement.getTime());
 
         // create if not exists
         if (movement.getId() == null) {
@@ -504,7 +505,7 @@ public class MovementService extends BaseService {
 
     private List<Movement> getMovementsByWalletId(final ContentResolver resolver, final long walletId) {
 
-        String selection = Contract.Movement.WALLET_ID + "=?";
+        String selection = SQLiteTable.Movement.WALLET_ID + "=?";
         String[] selectionArgs = {
                 String.valueOf(walletId)
         };
@@ -514,8 +515,8 @@ public class MovementService extends BaseService {
     private List<Movement> getPendingMovementsByWalletId(final ContentResolver resolver, final long walletId) {
 
         String selection = String.format("%s=? AND %s is null",
-                Contract.Movement.WALLET_ID,
-                Contract.Movement.BLOCK
+                SQLiteTable.Movement.WALLET_ID,
+                SQLiteTable.Movement.BLOCK
         );
         String[] selectionArgs = {
                 String.valueOf(walletId)
@@ -638,7 +639,7 @@ public class MovementService extends BaseService {
 
         ContentResolver resolver = context.getContentResolver();
 
-        String whereClause = Contract.Movement.WALLET_ID + "=?";
+        String whereClause = SQLiteTable.Movement.WALLET_ID + "=?";
         String[] whereArgs = new String[]{String.valueOf(walletId)};
         int rowsDeleted = resolver.delete(Uri.parse(Provider.CONTENT_URI + "/movement/"), whereClause, whereArgs);
         Log.d(TAG, " deleted movement count: " + rowsDeleted);
@@ -647,21 +648,21 @@ public class MovementService extends BaseService {
     private ContentValues toContentValues(final Movement source) {
         //Create account in database
         ContentValues target = new ContentValues();
-        target.put(Contract.Movement.WALLET_ID, source.getWalletId());
-        target.put(Contract.Movement.IS_UD, source.isUD() ? 1 : 0);
-        target.put(Contract.Movement.AMOUNT, source.getAmount());
-        target.put(Contract.Movement.DIVIDEND, source.getDividend());
-        target.put(Contract.Movement.FINGERPRINT, source.getFingerprint());
-        target.put(Contract.Movement.BLOCK, source.getBlockNumber());
-        target.put(Contract.Movement.TIME, source.getTime());
+        target.put(SQLiteTable.Movement.WALLET_ID, source.getWalletId());
+        target.put(SQLiteTable.Movement.IS_UD, source.isUD() ? 1 : 0);
+        target.put(SQLiteTable.Movement.AMOUNT, source.getAmount());
+        target.put(SQLiteTable.Movement.DIVIDEND, source.getDividend());
+        target.put(SQLiteTable.Movement.FINGERPRINT, source.getFingerprint());
+        target.put(SQLiteTable.Movement.BLOCK, source.getBlockNumber());
+        target.put(SQLiteTable.Movement.TIME, source.getTime());
         if (StringUtils.isNotBlank(source.getComment())) {
-            target.put(Contract.Movement.COMMENT, source.getComment());
+            target.put(SQLiteTable.Movement.COMMENT, source.getComment());
         }
         if (StringUtils.isNotBlank(source.getIssuers())) {
-            target.put(Contract.Movement.ISSUERS, source.getIssuers());
+            target.put(SQLiteTable.Movement.ISSUERS, source.getIssuers());
         }
         if (StringUtils.isNotBlank(source.getReceivers())) {
-            target.put(Contract.Movement.RECEIVERS, source.getReceivers());
+            target.put(SQLiteTable.Movement.RECEIVERS, source.getReceivers());
         }
         return target;
     }
@@ -711,17 +712,17 @@ public class MovementService extends BaseService {
         int receiversIndex;
 
         private SelectCursorHolder(final Cursor cursor ) {
-            idIndex = cursor.getColumnIndex(Contract.Movement._ID);
-            walletIdIndex = cursor.getColumnIndex(Contract.Movement.WALLET_ID);
-            amountIndex = cursor.getColumnIndex(Contract.Movement.AMOUNT);
-            dividendIndex = cursor.getColumnIndex(Contract.Movement.DIVIDEND);
-            isUDIndex = cursor.getColumnIndex(Contract.Movement.IS_UD);
-            fingerprint = cursor.getColumnIndex(Contract.Movement.FINGERPRINT);
-            blockIndex = cursor.getColumnIndex(Contract.Movement.BLOCK);
-            timeIndex = cursor.getColumnIndex(Contract.Movement.TIME);
-            commentIndex = cursor.getColumnIndex(Contract.Movement.COMMENT);
-            issuersIndex = cursor.getColumnIndex(Contract.Movement.ISSUERS);
-            receiversIndex = cursor.getColumnIndex(Contract.Movement.RECEIVERS);
+            idIndex = cursor.getColumnIndex(SQLiteTable.Movement._ID);
+            walletIdIndex = cursor.getColumnIndex(SQLiteTable.Movement.WALLET_ID);
+            amountIndex = cursor.getColumnIndex(SQLiteTable.Movement.AMOUNT);
+            dividendIndex = cursor.getColumnIndex(SQLiteTable.Movement.DIVIDEND);
+            isUDIndex = cursor.getColumnIndex(SQLiteTable.Movement.IS_UD);
+            fingerprint = cursor.getColumnIndex(SQLiteTable.Movement.FINGERPRINT);
+            blockIndex = cursor.getColumnIndex(SQLiteTable.Movement.BLOCK);
+            timeIndex = cursor.getColumnIndex(SQLiteTable.Movement.TIME);
+            commentIndex = cursor.getColumnIndex(SQLiteTable.Movement.COMMENT);
+            issuersIndex = cursor.getColumnIndex(SQLiteTable.Movement.ISSUERS);
+            receiversIndex = cursor.getColumnIndex(SQLiteTable.Movement.RECEIVERS);
         }
     }
 

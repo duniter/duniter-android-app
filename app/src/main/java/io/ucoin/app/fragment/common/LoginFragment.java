@@ -277,8 +277,8 @@ public class LoginFragment extends Fragment {
 
     private interface WalletQuery {
         String[] PROJECTION = {
-                Contract.Wallet._ID,
-                Contract.Wallet.ISSUERS,
+                SQLiteTable.Wallet._ID,
+                SQLiteTable.Wallet.ISSUERS,
         };
 
         int ID = 0;

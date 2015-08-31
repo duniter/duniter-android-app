@@ -1,1 +1,2 @@
-/home/eis/android-ndks/android-ndk-r10d/ndk-build -B
+#!/bin/sh
+$ANDROID_NDK_HOME/ndk-build -B

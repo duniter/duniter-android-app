@@ -108,6 +108,7 @@
 
     <!-- Strings related to home -->
     <string name="favorites">Contacts</string>
+    <string name="menu">Menu</string>
 
     <!-- Strings related to currency -->
     <string name="add_currency">Add currency</string>

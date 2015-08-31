@@ -9,7 +9,7 @@ import android.widget.CursorAdapter;
 import android.widget.TextView;
 
 import io.ucoin.app.R;
-import io.ucoin.app.database.Contract;
+import io.ucoin.app.dao.sqlite.SQLiteTable;
 
 
 public class CurrencyCursorAdapter extends CursorAdapter{
@@ -31,11 +31,11 @@ public class CurrencyCursorAdapter extends CursorAdapter{
         // TODO could we use holder ??
 
         TextView name = (TextView) view.findViewById(R.id.currency_name);
-        int nameIndex = cursor.getColumnIndex(Contract.Currency.NAME);
+        int nameIndex = cursor.getColumnIndex(SQLiteTable.Currency.NAME);
         name.setText(cursor.getString(nameIndex));
 
         TextView memberCount = (TextView) view.findViewById(R.id.member_count);
-        int memberCountIndex = cursor.getColumnIndex(Contract.Currency.MEMBERS_COUNT);
+        int memberCountIndex = cursor.getColumnIndex(SQLiteTable.Currency.MEMBERS_COUNT);
         memberCount.setText(view.getContext().getString(
                 R.string.members_count,
                 cursor.getString(memberCountIndex)));

@@ -12,8 +12,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import io.ucoin.app.database.Contract;
-import io.ucoin.app.database.Provider;
+import io.ucoin.app.dao.sqlite.SQLiteTable;
+import io.ucoin.app.content.Provider;
 import io.ucoin.app.model.local.Peer;
 import io.ucoin.app.model.remote.Currency;
 import io.ucoin.app.service.BaseService;
@@ -87,7 +87,7 @@ public class PeerService extends BaseService {
 
 
     public Peer getPeerById(Context context, int peerId) {
-        String selection = Contract.Peer._ID + "=?";
+        String selection = SQLiteTable.Peer._ID + "=?";
         String[] selectionArgs = {
                 String.valueOf(peerId)
         };
@@ -185,7 +185,7 @@ public class PeerService extends BaseService {
      */
     private List<Peer> getPeersByCurrencyId(ContentResolver resolver, long currencyId) {
 
-        String selection = Contract.Peer.CURRENCY_ID+ "=?";
+        String selection = SQLiteTable.Peer.CURRENCY_ID+ "=?";
         String[] selectionArgs = {
                 String.valueOf(currencyId)
         };
@@ -241,9 +241,9 @@ public class PeerService extends BaseService {
         ContentValues target = new ContentValues();
 
         Long currencyId = source.getCurrencyId();
-        target.put(Contract.Peer.CURRENCY_ID, currencyId);
-        target.put(Contract.Peer.HOST, source.getHost());
-        target.put(Contract.Peer.PORT, source.getPort());
+        target.put(SQLiteTable.Peer.CURRENCY_ID, currencyId);
+        target.put(SQLiteTable.Peer.HOST, source.getHost());
+        target.put(SQLiteTable.Peer.PORT, source.getPort());
 
         return target;
     }
@@ -281,10 +281,10 @@ public class PeerService extends BaseService {
         int portIndex;
 
         private SelectCursorHolder(final Cursor cursor ) {
-            idIndex = cursor.getColumnIndex(Contract.Peer._ID);
-            currencyIdIndex = cursor.getColumnIndex(Contract.Peer.CURRENCY_ID);
-            hostIndex = cursor.getColumnIndex(Contract.Peer.HOST);
-            portIndex = cursor.getColumnIndex(Contract.Peer.PORT);
+            idIndex = cursor.getColumnIndex(SQLiteTable.Peer._ID);
+            currencyIdIndex = cursor.getColumnIndex(SQLiteTable.Peer.CURRENCY_ID);
+            hostIndex = cursor.getColumnIndex(SQLiteTable.Peer.HOST);
+            portIndex = cursor.getColumnIndex(SQLiteTable.Peer.PORT);
         }
     }
 }

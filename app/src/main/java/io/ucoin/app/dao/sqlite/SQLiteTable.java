@@ -1,8 +1,8 @@
-package io.ucoin.app.database;
+package io.ucoin.app.dao.sqlite;
 
 import android.provider.BaseColumns;
 
-public interface Contract {
+public interface SQLiteTable {
 
     public static final class Account implements BaseColumns {
         public static final String TABLE_NAME = "account";

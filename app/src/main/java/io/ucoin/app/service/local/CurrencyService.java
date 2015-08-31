@@ -20,8 +20,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import io.ucoin.app.database.Contract;
-import io.ucoin.app.database.Provider;
+import io.ucoin.app.dao.sqlite.SQLiteTable;
+import io.ucoin.app.content.Provider;
 import io.ucoin.app.model.remote.Currency;
 import io.ucoin.app.service.BaseService;
 import io.ucoin.app.service.ServiceLocator;
@@ -263,7 +263,7 @@ public class CurrencyService extends BaseService {
      */
     public Map<Integer, Long> getAllUD(ContentResolver resolver, long currencyId) {
 
-        String selection = Contract.UD.CURRENCY_ID + "=?";
+        String selection = SQLiteTable.UD.CURRENCY_ID + "=?";
         String[] selectionArgs = {
                 String.valueOf(currencyId)
         };
@@ -271,7 +271,7 @@ public class CurrencyService extends BaseService {
                 new String[]{},
                 selection,
                 selectionArgs,
-                Contract.UD.BLOCK_NUMBER + " ASC");
+                SQLiteTable.UD.BLOCK_NUMBER + " ASC");
 
         Map<Integer, Long> result = new LinkedHashMap<>();
         SelectUDCursorHolder holder = null;
@@ -294,7 +294,7 @@ public class CurrencyService extends BaseService {
     /* -- internal methods-- */
 
     private Currency getCurrencyById(ContentResolver resolver, long currencyId) {
-        String selection = Contract.Currency._ID + "=?";
+        String selection = SQLiteTable.Currency._ID + "=?";
         String[] selectionArgs = {
                 String.valueOf(currencyId)
         };
@@ -315,7 +315,7 @@ public class CurrencyService extends BaseService {
 
     private List<Currency> getCurrenciesByAccountId(ContentResolver resolver, long accountId) {
 
-        String selection = Contract.Currency.ACCOUNT_ID + "=?";
+        String selection = SQLiteTable.Currency.ACCOUNT_ID + "=?";
         String[] selectionArgs = {
                 String.valueOf(accountId)
         };
@@ -374,12 +374,12 @@ public class CurrencyService extends BaseService {
         if (accountId == null) {
             accountId = source.getAccount().getId();
         }
-        target.put(Contract.Currency.ACCOUNT_ID, accountId);
+        target.put(SQLiteTable.Currency.ACCOUNT_ID, accountId);
 
-        target.put(Contract.Currency.NAME, source.getCurrencyName());
-        target.put(Contract.Currency.MEMBERS_COUNT, source.getMembersCount());
-        target.put(Contract.Currency.FIRST_BLOCK_SIGNATURE, source.getFirstBlockSignature());
-        target.put(Contract.Currency.LAST_UD, source.getLastUD());
+        target.put(SQLiteTable.Currency.NAME, source.getCurrencyName());
+        target.put(SQLiteTable.Currency.MEMBERS_COUNT, source.getMembersCount());
+        target.put(SQLiteTable.Currency.FIRST_BLOCK_SIGNATURE, source.getFirstBlockSignature());
+        target.put(SQLiteTable.Currency.LAST_UD, source.getLastUD());
 
         return target;
     }
@@ -396,9 +396,9 @@ public class CurrencyService extends BaseService {
         ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
         for(Map.Entry<Integer,Long> entry: udByBlockNumber.entrySet()) {
             ContentValues values = new ContentValues();
-            values.put(Contract.UD.CURRENCY_ID, currencyId);
-            values.put(Contract.UD.BLOCK_NUMBER, entry.getKey());
-            values.put(Contract.UD.AMOUNT, entry.getValue());
+            values.put(SQLiteTable.UD.CURRENCY_ID, currencyId);
+            values.put(SQLiteTable.UD.BLOCK_NUMBER, entry.getKey());
+            values.put(SQLiteTable.UD.AMOUNT, entry.getValue());
 
             ops.add(ContentProviderOperation.newInsert(contentUri)
                     .withValues(values)
@@ -450,12 +450,12 @@ public class CurrencyService extends BaseService {
         int accountIdIndex;
 
         private SelectCursorHolder(final Cursor cursor ) {
-            idIndex = cursor.getColumnIndex(Contract.Currency._ID);
-            nameIndex = cursor.getColumnIndex(Contract.Currency.NAME);
-            membersCountIndex = cursor.getColumnIndex(Contract.Currency.MEMBERS_COUNT);
-            firstBlockSignatureIndex = cursor.getColumnIndex(Contract.Currency.FIRST_BLOCK_SIGNATURE);
-            lastUDIndex = cursor.getColumnIndex(Contract.Currency.LAST_UD);
-            accountIdIndex = cursor.getColumnIndex(Contract.Currency.ACCOUNT_ID);
+            idIndex = cursor.getColumnIndex(SQLiteTable.Currency._ID);
+            nameIndex = cursor.getColumnIndex(SQLiteTable.Currency.NAME);
+            membersCountIndex = cursor.getColumnIndex(SQLiteTable.Currency.MEMBERS_COUNT);
+            firstBlockSignatureIndex = cursor.getColumnIndex(SQLiteTable.Currency.FIRST_BLOCK_SIGNATURE);
+            lastUDIndex = cursor.getColumnIndex(SQLiteTable.Currency.LAST_UD);
+            accountIdIndex = cursor.getColumnIndex(SQLiteTable.Currency.ACCOUNT_ID);
         }
     }
 
@@ -467,10 +467,10 @@ public class CurrencyService extends BaseService {
         int amountIndex;
 
         private SelectUDCursorHolder(final Cursor cursor ) {
-            idIndex = cursor.getColumnIndex(Contract.UD._ID);
-            currencyIdIndex = cursor.getColumnIndex(Contract.UD.CURRENCY_ID);
-            blockNumberIndex = cursor.getColumnIndex(Contract.UD.BLOCK_NUMBER);
-            amountIndex = cursor.getColumnIndex(Contract.UD.AMOUNT);
+            idIndex = cursor.getColumnIndex(SQLiteTable.UD._ID);
+            currencyIdIndex = cursor.getColumnIndex(SQLiteTable.UD.CURRENCY_ID);
+            blockNumberIndex = cursor.getColumnIndex(SQLiteTable.UD.BLOCK_NUMBER);
+            amountIndex = cursor.getColumnIndex(SQLiteTable.UD.AMOUNT);
         }
     }
 }

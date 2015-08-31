@@ -10,34 +10,31 @@ import io.ucoin.app.technical.ObjectUtils;
 /**
  * Created by eis on 31/03/15.
  */
-public class ProgressDialogAsyncTaskListener<Result> implements AsyncTaskListener<Result> {
+public class ProgressDialogAsyncTaskListener<Result> extends AbstractAsyncTaskListener<Result> {
 
     public static final String TAG = "AsyncTaskListener";
 
     private ProgressDialog mProgressDialog;
-    private String mProgressMessage = "...";
-    private int mProgressMax;
-    private int mProgress;
     private Context mContext;
     private boolean mAutoClose = true;
-    private boolean isCancelled = false;
 
     public ProgressDialogAsyncTaskListener(Context context) {
+        super();
         ObjectUtils.checkNotNull(context);
         mProgressDialog = new ProgressDialog(context);
         mContext = context;
-        mProgressMessage = mContext.getString(R.string.loading_dots);
     }
 
     public ProgressDialogAsyncTaskListener(ProgressDialog progressDialog) {
         ObjectUtils.checkNotNull(progressDialog);
         mProgressDialog = progressDialog;
         mContext = progressDialog.getContext();
-        mProgressMessage = mContext.getString(R.string.loading_dots);
     }
 
     @Override
     public void onPreExecute() {
+        super.onPreExecute();
+        mProgressDialog.setMessage(getMessage());
         mProgressDialog.show();
     }
 
@@ -54,7 +51,7 @@ public class ProgressDialogAsyncTaskListener<Result> implements AsyncTaskListene
             mProgressDialog.dismiss();
         }
 
-        Log.d(TAG, "Error during [" + mProgressMessage + "]", error);
+        Log.d(TAG, "Listener: catch an error during task [" + getMessage() + "]", error);
         /*Toast.makeText(mProgressDialog.getContext(),
                 ExceptionUtils.getMessage(error),
                 Toast.LENGTH_LONG)
@@ -69,38 +66,12 @@ public class ProgressDialogAsyncTaskListener<Result> implements AsyncTaskListene
     }
 
     @Override
-    public final void setMax(int max) {
-        mProgressMax = max;
-    }
-
-    @Override
-    public final void setProgress(int progress) {
-        mProgress = progress;
-    }
-
-    @Override
-    public final void increment() {
-        mProgress++;
-    }
-
-    @Override
-    public final void increment(String message) {
-        mProgress++;
-        mProgressMessage = message;
-    }
-
-    @Override
-    public final void setMessage(String message) {
-        mProgressMessage = message;
-    }
-
-    @Override
     public void onProgressUpdate() {
-        mProgressDialog.setMessage(mProgressMessage);
-        if (mProgressDialog.getMax() != mProgressMax) {
-            mProgressDialog.setMax(mProgressMax);
+        mProgressDialog.setMessage(getMessage());
+        if (mProgressDialog.getMax() != getMax()) {
+            mProgressDialog.setMax(getMax());
         }
-        mProgressDialog.setProgress(mProgress);
+        mProgressDialog.setProgress(getProgress());
     }
 
     @Override
@@ -110,15 +81,5 @@ public class ProgressDialogAsyncTaskListener<Result> implements AsyncTaskListene
 
     public void setAutoClose(boolean autoCloseProgressDialog) {
         this.mAutoClose = autoCloseProgressDialog;
-    }
-
-    @Override
-    public void cancel() {
-        isCancelled = true;
-    }
-
-    @Override
-    public boolean isCancelled() {
-        return isCancelled;
     }
 }

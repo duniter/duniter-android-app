@@ -11,7 +11,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import io.ucoin.app.R;
-import io.ucoin.app.database.Contract;
+import io.ucoin.app.dao.sqlite.SQLiteTable;
 import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.service.local.ContactService;
 import io.ucoin.app.technical.ImageUtils;
@@ -87,19 +87,19 @@ public class ContactCursorAdapter extends CursorAdapter {
 
     // View lookup cache
     private static class ViewHolder {
-        int nameIndex;
-        int uidIndex;
-        int pubkeyIndex;
-        int phoneContactId;
+        final int nameIndex;
+        final int uidIndex;
+        final int pubkeyIndex;
+        final int phoneContactId;
 
-        ImageView icon;
-        TextView uid;
-        TextView name;
-        TextView pubkey;
-        TextView currency;
-        TextView viewForError;
+        final ImageView icon;
+        final TextView uid;
+        final TextView name;
+        final TextView pubkey;
+        final TextView currency;
+        final TextView viewForError;
 
-        ContactService contactService;
+        final ContactService contactService;
 
         ViewHolder(View convertView, Cursor cursor) {
             icon = (ImageView) convertView.findViewById(R.id.icon);
@@ -111,12 +111,15 @@ public class ContactCursorAdapter extends CursorAdapter {
             if (name == null && convertView instanceof TextView) {
                 viewForError = (TextView)convertView;
             }
+            else {
+                viewForError = null;
+            }
 
             // Index
-            nameIndex = cursor.getColumnIndex(Contract.ContactView.NAME);
-            uidIndex = cursor.getColumnIndex(Contract.ContactView.UID);
-            pubkeyIndex = cursor.getColumnIndex(Contract.ContactView.PUBLIC_KEY);
-            phoneContactId = cursor.getColumnIndex(Contract.ContactView.PHONE_CONTACT_ID);
+            nameIndex = cursor.getColumnIndex(SQLiteTable.ContactView.NAME);
+            uidIndex = cursor.getColumnIndex(SQLiteTable.ContactView.UID);
+            pubkeyIndex = cursor.getColumnIndex(SQLiteTable.ContactView.PUBLIC_KEY);
+            phoneContactId = cursor.getColumnIndex(SQLiteTable.ContactView.PHONE_CONTACT_ID);
 
             // Service
             contactService = ServiceLocator.instance().getContactService();

@@ -13,7 +13,7 @@ public class Movement implements LocalEntity, Serializable {
     private long amount;
     private Long time;
     private Integer blockNumber;
-    private Long dividend;
+    private long dividend;
     private boolean isUD = false;
     private String fingerprint;
     private String comment;

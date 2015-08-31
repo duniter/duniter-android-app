@@ -2,6 +2,8 @@ package io.ucoin.app.activity;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.annotation.TargetApi;
+import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.LoaderManager;
@@ -13,6 +15,7 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
@@ -27,7 +30,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -39,23 +41,30 @@ import java.util.Set;
 
 import io.ucoin.app.Application;
 import io.ucoin.app.R;
+import io.ucoin.app.adapter.DrawerCurrencyCursorAdapter;
 import io.ucoin.app.config.Configuration;
-import io.ucoin.app.database.Contract;
-import io.ucoin.app.database.Provider;
+import io.ucoin.app.dao.sqlite.SQLiteTable;
+import io.ucoin.app.content.Provider;
 import io.ucoin.app.fragment.common.HomeFragment;
+import io.ucoin.app.fragment.currency.AddCurrencyDialogFragment;
+import io.ucoin.app.fragment.currency.CurrencyFragment;
 import io.ucoin.app.fragment.currency.CurrencyListFragment;
 import io.ucoin.app.fragment.wallet.TransferFragment;
-import io.ucoin.app.fragment.web.WebFragment;
 import io.ucoin.app.fragment.wot.WotSearchFragment;
+import io.ucoin.app.model.local.Peer;
+import io.ucoin.app.model.remote.Currency;
 import io.ucoin.app.model.remote.Identity;
 import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.service.exception.PeerConnectionException;
 import io.ucoin.app.service.remote.WotRemoteService;
+import io.ucoin.app.task.AddCurrencyTask;
+import io.ucoin.app.task.TaskService;
 import io.ucoin.app.technical.CurrencyUtils;
 import io.ucoin.app.technical.DateUtils;
 import io.ucoin.app.technical.ExceptionUtils;
 import io.ucoin.app.technical.exception.UncaughtExceptionHandler;
 import io.ucoin.app.technical.task.AsyncTaskHandleException;
+import io.ucoin.app.technical.task.ProgressDialogAsyncTaskListener;
 
 
 public class MainActivity extends ActionBarActivity
@@ -68,13 +77,11 @@ public class MainActivity extends ActionBarActivity
     private ActionBarDrawerToggle mToggle;
     private DrawerLayout mDrawerLayout;
     private QueryResultListener<Identity> mQueryResultListener;
+    private ListView mDrawerListView;
+    private TextView mDrawerEmptyListView;
 
-    private TextView mUidView;
-    private TextView mPubkeyView;
     private Toolbar mToolbar;
     private boolean mUnitPreferenceChanged = false;
-
-    private ServiceLocator mServiceLocator;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,6 +101,12 @@ public class MainActivity extends ActionBarActivity
         // Init configuration
         Configuration config = new Configuration();
         Configuration.setInstance(config);
+
+        // Starting task service
+        {
+            Intent intent = new Intent(this, TaskService.class);
+            startService(intent);
+        }
 
         // Load account
         AccountManager accountManager = AccountManager.get(this);
@@ -126,33 +139,50 @@ public class MainActivity extends ActionBarActivity
         }
 
         //Navigation drawer
-        final View listHeader = getLayoutInflater().inflate(R.layout.drawer_header, null);
-        listHeader.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onItemClick(null, listHeader, 1, 0); // go to home
-            }
-        });
-        mUidView = (TextView) listHeader.findViewById(R.id.uid);
-        mPubkeyView = (TextView) listHeader.findViewById(R.id.public_key);
-
-        String[] drawerListItems = getResources().getStringArray(R.array.drawer_items);
-        ListView drawerListView = (ListView) findViewById(R.id.drawer_listview);
-
-        drawerListView.addHeaderView(listHeader);
-
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         // Set the adapter for the drawer list view
-        drawerListView.setAdapter(new ArrayAdapter<>(this,
-                R.layout.drawer_list_item, drawerListItems));
+        DrawerCurrencyCursorAdapter drawerCurrencyCursorAdapter
+                = new DrawerCurrencyCursorAdapter(this, null, 0);
+        mDrawerListView = (ListView) findViewById(R.id.drawer_listview);
+        mDrawerListView.setAdapter(drawerCurrencyCursorAdapter);
+        mDrawerListView.setOnItemClickListener(this);
+        getLoaderManager().initLoader(0, null, this);
 
-        drawerListView.setOnItemClickListener(this);
+        mDrawerEmptyListView = (TextView) findViewById(R.id.drawer_empty_list);
+
         //Navigation drawer toggle
         //Please use ActionBarDrawerToggle(Activity, DrawerLayout, int, int)
         // if you are setting the Toolbar as the ActionBar of your activity.
         mToggle = new ActionBarDrawerToggle(this, mDrawerLayout
                 , R.string.open_drawer, R.string.close_drawer);
 
+        TextView addCurrency = (TextView) findViewById(R.id.drawer_add_currency);
+
+        addCurrency.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DialogFragment fragment = AddCurrencyDialogFragment.newInstance(new AddCurrencyDialogFragment.OnClickListener() {
+                    @Override
+                    public void onPositiveClick(Bundle args) {
+                        Peer peer = (Peer) args.getSerializable(Peer.class.getSimpleName());
+                        AddCurrencyTask task = new AddCurrencyTask(getApplicationContext(), true/*with progress*/);
+                        task.execute(peer);
+                    }
+                });
+                fragment.show(getFragmentManager(),
+                        fragment.getClass().getSimpleName());
+            }
+        });
+
+        TextView settings = (TextView) findViewById(R.id.drawer_settings);
+        settings.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this,
+                        SettingsActivity.class);
+                startActivity(intent);
+            }
+        });
 
         ContentResolver.setSyncAutomatically(account, getString(R.string.AUTHORITY), true);
 
@@ -164,6 +194,15 @@ public class MainActivity extends ActionBarActivity
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
         mToggle.syncState();
+    }
+
+    @Override
+    public void onConfigurationChanged(android.content.res.Configuration newConfig) {
+        //todo handle screen orientation change
+        //for now it is just discarded by adding
+        //android:configChanges="orientation|screenSize" in the manifest
+        super.onConfigurationChanged(newConfig);
+        mToggle.onConfigurationChanged(newConfig);
     }
 
     /**
@@ -190,16 +229,6 @@ public class MainActivity extends ActionBarActivity
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         preferences.unregisterOnSharedPreferenceChangeListener(this);
         super.onDestroy();
-    }
-
-
-    @Override
-    public void onConfigurationChanged(android.content.res.Configuration newConfig) {
-        //todo handle screen orientation change
-        //for now it is just discarded by adding
-        //android:configChanges="orientation|screenSize" in the manifest
-        super.onConfigurationChanged(newConfig);
-        mToggle.onConfigurationChanged(newConfig);
     }
 
     //Called once during the whole activity lifecycle
@@ -230,7 +259,7 @@ public class MainActivity extends ActionBarActivity
     @Override
     public void onBackPressed() {
         if (mDrawerLayout.isDrawerOpen(Gravity.START)) {
-            mDrawerLayout.closeDrawer(Gravity.START);
+            closeDrawer();
             return;
         }
 
@@ -256,6 +285,8 @@ public class MainActivity extends ActionBarActivity
 
         getFragmentManager().popBackStack();
     }
+
+
 
     public boolean onQueryTextSubmit(MenuItem searchItem, String query) {
 
@@ -293,9 +324,15 @@ public class MainActivity extends ActionBarActivity
         return true;
     }
 
-    // nav drawer items
+    // nav drawer currency items click
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+        Currency currency = ServiceLocator.instance().getCurrencyService().getCurrencyById(this, id);
+        Fragment fragment = CurrencyFragment.newInstance(currency);
+        reloadFirstFragment(fragment);
+
+        /*
         Fragment fragment = null;
         switch (position) {
             case 1: //0 is home we only pop back, no need for new fragment
@@ -334,31 +371,39 @@ public class MainActivity extends ActionBarActivity
         }
 
         // close the drawer
-        mDrawerLayout.closeDrawer(findViewById(R.id.drawer_listview));
+        closeDrawer();
+        */
     }
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        // Create the data loader, using cursor
-        long accountId = ((Application) getApplication()).getAccountId();
-        Uri uri = Uri.parse(Provider.CONTENT_URI + "/account/" + accountId);
 
-        return new CursorLoader(this, uri, null,
-                null, null, null);
+        String selection = SQLiteTable.Currency.ACCOUNT_ID + "=?";
+        String[] selectionArgs = {
+                ((Application) getApplication()).getAccountIdAsString()
+        };
+
+        // Create the currencies loader, using cursor
+        return new CursorLoader(
+                this,
+                Provider.CURRENCY_URI,
+                null,
+                selection,
+                selectionArgs,
+                SQLiteTable.Currency.NAME + " ASC"
+        );
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        if (data == null) {
-            return;
+        if (data.getCount() == 0) {
+            mDrawerEmptyListView.setVisibility(View.VISIBLE);
+            mDrawerListView.setVisibility(View.GONE);
+        } else {
+            mDrawerEmptyListView.setVisibility(View.GONE);
+            mDrawerListView.setVisibility(View.VISIBLE  );
         }
-        int uidIndex = data.getColumnIndex(Contract.Account.UID);
-        int pubkeyIndex = data.getColumnIndex(Contract.Account.PUBLIC_KEY);
-
-        while (data.moveToNext()) {
-            mUidView.setText(data.getString(uidIndex));
-            mPubkeyView.setText(data.getString(pubkeyIndex));
-        }
+        ((DrawerCurrencyCursorAdapter) mDrawerListView.getAdapter()).swapCursor(data);
     }
 
     @Override
@@ -370,8 +415,13 @@ public class MainActivity extends ActionBarActivity
         mToolbar.setBackgroundColor(colorRes);
     }
 
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     public void setToolbarDrawable(Drawable drawable) {
-        mToolbar.setBackground(drawable);
+        // On Jelly Bean we have the setBackground(Drawable) APIs
+        // If available, use these APIs to change the toolbar background
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            mToolbar.setBackground(drawable);
+        }
     }
 
     /**
@@ -439,27 +489,18 @@ public class MainActivity extends ActionBarActivity
 
     protected void openHomeFragment() {
 
-        Fragment fragment = getFragmentManager().findFragmentById(R.id.frame_content);
+        /*Fragment fragment = getFragmentManager().findFragmentById(R.id.frame_content);
         if (fragment != null && fragment instanceof HomeFragment) {
             getFragmentManager().beginTransaction().remove(fragment).commit();
-            getFragmentManager().popBackStack();
-        }
+            getFragmentManager().popBackStack()
+        }*/
 
-        fragment = HomeFragment.newInstance();
-
-        getFragmentManager().beginTransaction()
-                .setCustomAnimations(
-                        R.animator.fade_in,
-                        R.animator.fade_out)
-                .add(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
-                .addToBackStack(fragment.getClass().getSimpleName())
-                .commit();
+        Fragment fragment = HomeFragment.newInstance();
+        reloadFirstFragment(fragment);
 
         // Init app (caches) in background thread
         new InitTask().execute();
     }
-
-
 
     protected void openTransfertFragment(Identity identity) {
 
@@ -500,6 +541,30 @@ public class MainActivity extends ActionBarActivity
         return null;
     }
 
+    public void reloadFirstFragment(Fragment fragment) {
+
+        //replace fragment
+        FragmentManager fragmentManager = getFragmentManager();
+
+        // Insert the fragment by replacing any existing fragment
+        fragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+        fragmentManager.beginTransaction()
+                .setCustomAnimations(
+                        R.animator.delayed_fade_in,
+                        R.animator.fade_out,
+                        R.animator.delayed_fade_in,
+                        R.animator.fade_out)
+                .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
+                .addToBackStack(fragment.getClass().getSimpleName())
+                .commit();
+
+        // close the drawer
+        closeDrawer();
+    }
+
+    public void closeDrawer() {
+        mDrawerLayout.closeDrawer(findViewById(R.id.drawer_panel));
+    }
 
     /**
      * Interface for handling OnBackPressed event in fragments     *

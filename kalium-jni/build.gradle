@@ -2,76 +2,85 @@ import org.apache.tools.ant.taskdefs.condition.Os
 
 import java.util.regex.Pattern
 
-apply plugin: 'com.android.library'
+apply plugin: 'com.android.model.library'
 
-android {
-    compileSdkVersion 21
-    buildToolsVersion "21.1.2"
+model {
+    android {
+        compileSdkVersion = 21
+        buildToolsVersion = "21.1.2"
 
-    defaultConfig {
-        minSdkVersion 14
-        targetSdkVersion 21
+        defaultConfig.with {
+            minSdkVersion.apiLevel = 14
+            targetSdkVersion.apiLevel = 21
 
-        versionCode getVersionCodeFromManifest()
-        versionName "1.0"
+            versionCode = getVersionCodeFromManifest()
+            versionName = "1.0"
+        }
 
-
-        ndk {
-            moduleName "kaliumjni"
+        tasks.withType(JavaCompile) {
+            compileTask -> compileTask.dependsOn ndkLibsToJar
         }
     }
 
-    sourceSets.main {
-        jniLibs.srcDir 'src/main/libs'
-        jni.srcDirs = [] //disable automatic ndk-build call
+
+    android.ndk {
+            moduleName = "kaliumjni"
+        }
+
+    android.buildTypes {
+        release {
+            minifyEnabled = false
+            proguardFiles += 'proguard-rules.pro'
+        }
     }
 
+    android.sources {
+        main {
+            java {
+                source {
+                    srcDir 'src/main/java'
+                }
+            }
 
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            jni {
+                source {
+                    srcDirs = [] //'src/main/jni'
+                }
+            }
+
+            jniLibs {
+                source {
+                    srcDir 'src/main/libs'
+                }
+            }
         }
     }
 
     /*
     productFlavors {
-        x86 {
-            versionCode Integer.parseInt("6" + defaultConfig.versionCode)
-            ndk {
-                abiFilter "x86"
-            }
+        create("x86") {
+            versionCode = Integer.parseInt("6" + defaultConfig.versionCode)
+            ndk.abiFilter += "x86"
         }
-        mips {
-            versionCode Integer.parseInt("4" + defaultConfig.versionCode)
-            ndk {
-                abiFilter "mips"
-            }
+        create("mips") {
+            versionCode = Integer.parseInt("4" + defaultConfig.versionCode)
+            ndk.abiFilter += "mips"
         }
-        armv7 {
-            versionCode Integer.parseInt("2" + defaultConfig.versionCode)
-            ndk {
-                abiFilter "armeabi-v7a"
-            }
+        create("armv7") {
+            versionCode = Integer.parseInt("2" + defaultConfig.versionCode)
+            ndk.abiFilter += "armeabi-v7a"
         }
-        arm {
-            versionCode Integer.parseInt("1" + defaultConfig.versionCode)
-            ndk {
-                abiFilter "armeabi"
-            }
+        create("arm") {
+            versionCode = Integer.parseInt("1" + defaultConfig.versionCode)
+            ndk.abiFilter += "armeabi"
         }
-        fat
+        create("fat")
     }*/
-
-    tasks.withType(JavaCompile) {
-        compileTask -> compileTask.dependsOn ndkLibsToJar
-    }
 }
 
 
-
 def getVersionCodeFromManifest() {
-    def manifestFile = file(android.sourceSets.main.manifest.srcFile)
+    def manifestFile = file('../app/src/main/AndroidManifest.xml')
     def pattern = Pattern.compile("versionCode=\"(\\d+)\"")
     def matcher = pattern.matcher(manifestFile.getText())
     matcher.find()
@@ -94,10 +103,10 @@ def loadProperties(String sourceFileName) {
 task ndkBuild(type: Exec) {
     //logger.lifecycle('== Building NDK builds == ')
     loadProperties file('../local.properties').absolutePath
-    if (System.getProperty('NDK_HOME') == null && project.getProperties().get('ndk.dir') == null) {
-        throw new StopExecutionException('Reason: NDK_HOME not set or ndk.dir is missing in gradle.properties...')
+    if (System.getProperty('ANDROID_NDK_HOME') == null && System.getenv('ANDROID_NDK_HOME') == null && project.getProperties().get('ndk.dir') == null) {
+        throw new StopExecutionException('Reason: NDK home not set. You should: \n\t - set ANDROID_NDK_HOME env variable\n\t-or add \'ndk.dir\' in file \'local.properties\'\n\t- or add \'-DANDROID_NDK_HOME=\' to java compiler options')
     }
-    def ndkHome = System.getProperty('NDK_HOME', project.getProperties().get('ndk.dir'))
+    def ndkHome = System.getProperty('ANDROID_NDK_HOME', project.getProperties().get('ndk.dir', System.getenv('ANDROID_NDK_HOME')))
     def ndkBuildingDir = file('src/main/jni').absolutePath
     if (Os.isFamily(Os.FAMILY_WINDOWS)) {
         workingDir "${ndkBuildingDir}/.."

@@ -1,4 +1,4 @@
-package io.ucoin.app.database;
+package io.ucoin.app.content;
 
 import android.content.ContentProvider;
 import android.content.ContentProviderOperation;
@@ -11,55 +11,109 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
+import android.provider.BaseColumns;
 import android.util.Log;
 
 import java.util.ArrayList;
 
 import io.ucoin.app.R;
+import io.ucoin.app.dao.sqlite.SQLiteHelper;
+import io.ucoin.app.dao.sqlite.SQLiteTable;
 
 /*
  * Define an implementation of ContentProvider that stubs out
  * all methods
  */
-public class Provider extends ContentProvider implements Contract {
-
-    private DatabaseHelper mDatabaseHelper;
-    private static final int ACCOUNT = 10;
-    private static final int ACCOUNT_ID = 11;
-    private static final int CURRENCY = 20;
-    private static final int PEER = 30;
-    private static final int WALLET = 40;
-    private static final int MOVEMENT = 50;
-    private static final int CONTACT = 60;
-    private static final int CONTACT2CURRENCY = 70;
-    private static final int CONTACT_VIEW = 80;
-    private static final int UD = 90;
-    public static Uri CONTENT_URI;
-
-    private volatile boolean applyingBatch=false;
-
+public class Provider extends ContentProvider implements SQLiteTable {
 
     static final UriMatcher uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 
+    private static final int ACCOUNT = 10;
+    private static final int ACCOUNT_ID = 11;
+    private static final int CURRENCY = 20;
+    private static final int CURRENCY_ID = 21;
+    private static final int PEER = 30;
+    private static final int PEER_ID = 31;
+    private static final int WALLET = 40;
+    private static final int WALLET_ID = 41;
+    private static final int MOVEMENT = 50;
+    private static final int CONTACT = 60;
+    private static final int CONTACT_ID = 61;
+    private static final int CONTACT2CURRENCY = 70;
+    private static final int CONTACT_VIEW = 80;
+    private static final int UD = 90;
+
+    /**
+     * @deprecated use specific URI instead
+     */
+    @Deprecated
+    public static Uri CONTENT_URI;
+
+    public static Uri ACCOUNT_URI;
+    public static Uri CURRENCY_URI;
+    public static Uri PEER_URI;
+    public static Uri WALLET_URI;
+    public static Uri MOVEMENT_URI;
+    public static Uri CONTACT_URI;
+    public static Uri CONTACT2CURRENCY_URI;
+    public static Uri CONTACT_VIEW_URI;
+    public static Uri UD_URI;
+
+    private SQLiteHelper mSQLiteHelper;
+
+    public static void initUris(Context context) {
+
+        String AUTHORITY = context.getString(R.string.AUTHORITY);
+
+        CONTENT_URI = new Uri.Builder().scheme("content").authority(AUTHORITY).build();
+
+        ACCOUNT_URI  = new Uri.Builder().scheme("content").authority(AUTHORITY)
+                .path(context.getString(R.string.account_uri)).build();
+        CURRENCY_URI = new Uri.Builder().scheme("content").authority(AUTHORITY)
+                .path(context.getString(R.string.currency_uri)).build();
+        WALLET_URI = new Uri.Builder().scheme("content").authority(AUTHORITY)
+                .path(context.getString(R.string.wallet_uri)).build();
+        PEER_URI = new Uri.Builder().scheme("content").authority(AUTHORITY)
+                .path(context.getString(R.string.peer_uri)).build();
+        CONTACT_URI = new Uri.Builder().scheme("content").authority(AUTHORITY)
+                .path(context.getString(R.string.contact_uri)).build();
+        UD_URI = new Uri.Builder().scheme("content").authority(AUTHORITY)
+                .path(context.getString(R.string.ud_uri)).build();
+        MOVEMENT_URI = new Uri.Builder().scheme("content").authority(AUTHORITY)
+                .path(context.getString(R.string.movement_uri)).build();
+        CONTACT2CURRENCY_URI = new Uri.Builder().scheme("content").authority(AUTHORITY)
+                .path(context.getString(R.string.contact2currency_uri)).build();
+        CONTACT_VIEW_URI = new Uri.Builder().scheme("content").authority(AUTHORITY)
+                .path(context.getString(R.string.contact_view_uri)).build();
+
+        uriMatcher.addURI(AUTHORITY, context.getString(R.string.currency_uri), CURRENCY);
+        uriMatcher.addURI(AUTHORITY, context.getString(R.string.currency_uri) + "#", CURRENCY_ID);
+
+        uriMatcher.addURI(AUTHORITY, context.getString(R.string.account_uri), ACCOUNT);
+        uriMatcher.addURI(AUTHORITY, context.getString(R.string.account_uri) + "#", ACCOUNT_ID);
+
+        uriMatcher.addURI(AUTHORITY, context.getString(R.string.wallet_uri), WALLET);
+        uriMatcher.addURI(AUTHORITY, context.getString(R.string.wallet_uri) + "#", WALLET_ID);
+
+        uriMatcher.addURI(AUTHORITY, context.getString(R.string.peer_uri), PEER);
+        uriMatcher.addURI(AUTHORITY, context.getString(R.string.peer_uri) + "#", PEER_ID);
+
+        uriMatcher.addURI(AUTHORITY, context.getString(R.string.contact_uri), CONTACT);
+        uriMatcher.addURI(AUTHORITY, context.getString(R.string.contact_uri) + "#", CONTACT_ID);
+
+        uriMatcher.addURI(AUTHORITY, context.getString(R.string.ud_uri), UD);
+        uriMatcher.addURI(AUTHORITY, context.getString(R.string.movement_uri), MOVEMENT);
+        uriMatcher.addURI(AUTHORITY, context.getString(R.string.contact2currency_uri), CONTACT2CURRENCY);
+        uriMatcher.addURI(AUTHORITY, context.getString(R.string.contact_view_uri), CONTACT_VIEW);
+    }
+
     @Override
     public boolean onCreate() {
+        Log.d("PROVIDER", "onCreate()");
         Context context = getContext();
-        mDatabaseHelper = new DatabaseHelper(getContext(), context.getString(R.string.DBNAME),
+        initUris(context);
+        mSQLiteHelper = new SQLiteHelper(getContext(), context.getString(R.string.DBNAME),
                 null, context.getResources().getInteger(R.integer.DBVERSION));
-
-        String AUTHORITY = getContext().getString(R.string.AUTHORITY);
-        CONTENT_URI = Uri.parse("content://" + AUTHORITY);
-        uriMatcher.addURI(AUTHORITY, "account/", ACCOUNT);
-        uriMatcher.addURI(AUTHORITY, "account/#", ACCOUNT_ID);
-        uriMatcher.addURI(AUTHORITY, "currency/", CURRENCY);
-        uriMatcher.addURI(AUTHORITY, "ud/", UD);
-        uriMatcher.addURI(AUTHORITY, "wallet/", WALLET);
-        uriMatcher.addURI(AUTHORITY, "peer/", PEER);
-        uriMatcher.addURI(AUTHORITY, "movement/", MOVEMENT);
-        uriMatcher.addURI(AUTHORITY, "contact/", CONTACT);
-        uriMatcher.addURI(AUTHORITY, "contact2currency/", CONTACT2CURRENCY);
-        uriMatcher.addURI(AUTHORITY, "contactView/", CONTACT_VIEW);
-
         return true;
     }
 
@@ -70,7 +124,7 @@ public class Provider extends ContentProvider implements Contract {
             String selection,
             String[] selectionArgs,
             String sortOrder) {
-        SQLiteDatabase db = mDatabaseHelper.getReadableDatabase();
+        SQLiteDatabase db = mSQLiteHelper.getReadableDatabase();
         int uriInt = uriMatcher.match(uri);
         if(uriInt == -1) {
             Log.d("PROVIDER", "NO MATCH URI");
@@ -99,8 +153,15 @@ public class Provider extends ContentProvider implements Contract {
                         selectionArgs, null, null, sortOrder);
                 cursor.setNotificationUri(getContext().getContentResolver(), uri);
                 break;
+            case CURRENCY_ID:
+                queryBuilder.setTables(Currency.TABLE_NAME);
+                cursor = queryBuilder.query(db, null,
+                        BaseColumns._ID + "=?",
+                        new String[]{uri.getLastPathSegment()},
+                        null, null, null);
+                break;
             case UD :
-                queryBuilder.setTables(Contract.UD.TABLE_NAME);
+                queryBuilder.setTables(SQLiteTable.UD.TABLE_NAME);
                 cursor = queryBuilder.query(db, projection, selection,
                         selectionArgs, null, null, sortOrder);
                 cursor.setNotificationUri(getContext().getContentResolver(), uri);
@@ -111,11 +172,25 @@ public class Provider extends ContentProvider implements Contract {
                         selectionArgs, null, null, sortOrder);
                 cursor.setNotificationUri(getContext().getContentResolver(), uri);
                 break;
+            case PEER_ID:
+                queryBuilder.setTables(Peer.TABLE_NAME);
+                cursor = queryBuilder.query(db, null,
+                        BaseColumns._ID + "=?",
+                        new String[]{uri.getLastPathSegment()},
+                        null, null, null);
+                break;
             case WALLET :
                 queryBuilder.setTables(Wallet.TABLE_NAME);
                 cursor = queryBuilder.query(db, projection, selection,
                         selectionArgs, null, null, sortOrder);
                 cursor.setNotificationUri(getContext().getContentResolver(), uri);
+                break;
+            case WALLET_ID:
+                queryBuilder.setTables(Wallet.TABLE_NAME);
+                cursor = queryBuilder.query(db, null,
+                        BaseColumns._ID + "=?",
+                        new String[]{uri.getLastPathSegment()},
+                        null, null, null);
                 break;
             case MOVEMENT :
                 queryBuilder.setTables(Movement.TABLE_NAME);
@@ -128,6 +203,13 @@ public class Provider extends ContentProvider implements Contract {
                 cursor = queryBuilder.query(db, projection, selection,
                         selectionArgs, null, null, sortOrder);
                 cursor.setNotificationUri(getContext().getContentResolver(), uri);
+                break;
+            case CONTACT_ID:
+                queryBuilder.setTables(Contact.TABLE_NAME);
+                cursor = queryBuilder.query(db, null,
+                        BaseColumns._ID + "=?",
+                        new String[]{uri.getLastPathSegment()},
+                        null, null, null);
                 break;
             case CONTACT2CURRENCY :
                 queryBuilder.setTables(Contact2Currency.TABLE_NAME);
@@ -154,7 +236,7 @@ public class Provider extends ContentProvider implements Contract {
 
     @Override
     public Uri insert(Uri uri, ContentValues values) {
-        SQLiteDatabase db = mDatabaseHelper.getWritableDatabase();
+        SQLiteDatabase db = mSQLiteHelper.getWritableDatabase();
         int uriType = uriMatcher.match(uri);
         long id;
         switch (uriType) {
@@ -167,7 +249,7 @@ public class Provider extends ContentProvider implements Contract {
                 uri = Uri.parse("currency/" + id);
                 break;
             case UD:
-                id = db.insert(Contract.UD.TABLE_NAME, null, values);
+                id = db.insert(SQLiteTable.UD.TABLE_NAME, null, values);
                 uri = Uri.parse("ud/" + id);
                 break;
             case PEER:
@@ -201,7 +283,7 @@ public class Provider extends ContentProvider implements Contract {
 
     @Override
     public int delete(Uri uri, String whereClause, String[] whereArgs) {
-        SQLiteDatabase db = mDatabaseHelper.getWritableDatabase();
+        SQLiteDatabase db = mSQLiteHelper.getWritableDatabase();
         int uriType = uriMatcher.match(uri);
         int nbRowsUpdated;
         switch (uriType) {
@@ -212,7 +294,7 @@ public class Provider extends ContentProvider implements Contract {
                 nbRowsUpdated = db.delete(Currency.TABLE_NAME, whereClause, whereArgs);
                 break;
             case UD:
-                nbRowsUpdated = db.delete(Contract.UD.TABLE_NAME, whereClause, whereArgs);
+                nbRowsUpdated = db.delete(SQLiteTable.UD.TABLE_NAME, whereClause, whereArgs);
                 break;
             case PEER:
                 nbRowsUpdated = db.delete(Peer.TABLE_NAME, whereClause, whereArgs);
@@ -242,7 +324,7 @@ public class Provider extends ContentProvider implements Contract {
             String whereClause,
             String[] whereArgs) {
 
-        SQLiteDatabase db = mDatabaseHelper.getWritableDatabase();
+        SQLiteDatabase db = mSQLiteHelper.getWritableDatabase();
         int uriType = uriMatcher.match(uri);
         int nbRowsUpdated;
         switch (uriType) {
@@ -253,7 +335,7 @@ public class Provider extends ContentProvider implements Contract {
                 nbRowsUpdated = db.update(Currency.TABLE_NAME, values, whereClause, whereArgs);
                 break;
             case UD:
-                nbRowsUpdated = db.update(Contract.UD.TABLE_NAME, values, whereClause, whereArgs);
+                nbRowsUpdated = db.update(SQLiteTable.UD.TABLE_NAME, values, whereClause, whereArgs);
                 break;
             case PEER:
                 nbRowsUpdated = db.update(Peer.TABLE_NAME, values, whereClause, whereArgs);

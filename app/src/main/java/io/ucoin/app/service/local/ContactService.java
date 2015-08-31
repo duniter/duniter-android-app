@@ -19,8 +19,8 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.ucoin.app.database.Contract;
-import io.ucoin.app.database.Provider;
+import io.ucoin.app.dao.sqlite.SQLiteTable;
+import io.ucoin.app.content.Provider;
 import io.ucoin.app.model.local.Contact;
 import io.ucoin.app.model.remote.Identity;
 import io.ucoin.app.service.BaseService;
@@ -137,11 +137,11 @@ public class ContactService extends BaseService {
 
     protected List<Contact> getContactsByAccountId(ContentResolver resolver, long accountId) {
 
-        String selection = Contract.Contact.ACCOUNT_ID + "=?";
+        String selection = SQLiteTable.Contact.ACCOUNT_ID + "=?";
         String[] selectionArgs = {
                 String.valueOf(accountId)
         };
-        String orderBy = Contract.Contact.NAME + " ASC";
+        String orderBy = SQLiteTable.Contact.NAME + " ASC";
 
         Cursor cursor = resolver.query(getContentUri(), new String[]{}, selection,
                 selectionArgs, orderBy);
@@ -158,11 +158,11 @@ public class ContactService extends BaseService {
 
     protected List<Contact> getContactsByCurrencyId(ContentResolver resolver, long currencyId) {
 
-        String selection = Contract.ContactView.CURRENCY_ID + "=?";
+        String selection = SQLiteTable.ContactView.CURRENCY_ID + "=?";
         String[] selectionArgs = {
                 String.valueOf(currencyId),
         };
-        String orderBy = Contract.ContactView.NAME + " ASC";
+        String orderBy = SQLiteTable.ContactView.NAME + " ASC";
 
         Cursor cursor = resolver.query(getViewContentUri(), new String[]{}, selection,
                 selectionArgs, orderBy);
@@ -208,9 +208,9 @@ public class ContactService extends BaseService {
     protected ContentValues toContentValues(final Contact source) {
         //Create account in database
         ContentValues target = new ContentValues();
-        target.put(Contract.Contact.ACCOUNT_ID, source.getAccountId());
-        target.put(Contract.Contact.NAME, source.getName());
-        target.put(Contract.Contact.PHONE_CONTACT_ID, source.getPhoneContactId());
+        target.put(SQLiteTable.Contact.ACCOUNT_ID, source.getAccountId());
+        target.put(SQLiteTable.Contact.NAME, source.getName());
+        target.put(SQLiteTable.Contact.PHONE_CONTACT_ID, source.getPhoneContactId());
         return target;
     }
 
@@ -309,10 +309,10 @@ public class ContactService extends BaseService {
         int phoneContactId;
 
         private SelectCursorHolder(final Cursor cursor ) {
-            idIndex = cursor.getColumnIndex(Contract.Contact._ID);
-            accountIdIndex = cursor.getColumnIndex(Contract.Contact.ACCOUNT_ID);
-            nameIdIndex = cursor.getColumnIndex(Contract.Contact.NAME);
-            phoneContactId = cursor.getColumnIndex(Contract.Contact.PHONE_CONTACT_ID);
+            idIndex = cursor.getColumnIndex(SQLiteTable.Contact._ID);
+            accountIdIndex = cursor.getColumnIndex(SQLiteTable.Contact.ACCOUNT_ID);
+            nameIdIndex = cursor.getColumnIndex(SQLiteTable.Contact.NAME);
+            phoneContactId = cursor.getColumnIndex(SQLiteTable.Contact.PHONE_CONTACT_ID);
         }
     }
 
@@ -325,10 +325,10 @@ public class ContactService extends BaseService {
 
         private SelectViewCursorHolder(final Cursor cursor ) {
             super(cursor);
-            currencyIdIndex = cursor.getColumnIndex(Contract.Contact2Currency.CURRENCY_ID);
-            uidIdIndex = cursor.getColumnIndex(Contract.Contact2Currency.UID);
-            pubkeyIdIndex = cursor.getColumnIndex(Contract.Contact2Currency.PUBLIC_KEY);
-            phoneContactId = cursor.getColumnIndex(Contract.Contact.PHONE_CONTACT_ID);
+            currencyIdIndex = cursor.getColumnIndex(SQLiteTable.Contact2Currency.CURRENCY_ID);
+            uidIdIndex = cursor.getColumnIndex(SQLiteTable.Contact2Currency.UID);
+            pubkeyIdIndex = cursor.getColumnIndex(SQLiteTable.Contact2Currency.PUBLIC_KEY);
+            phoneContactId = cursor.getColumnIndex(SQLiteTable.Contact.PHONE_CONTACT_ID);
         }
     }
 

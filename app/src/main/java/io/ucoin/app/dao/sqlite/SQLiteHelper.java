@@ -1,11 +1,11 @@
-package io.ucoin.app.database;
+package io.ucoin.app.dao.sqlite;
 
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-public class DatabaseHelper extends SQLiteOpenHelper implements Contract {
+public class SQLiteHelper extends SQLiteOpenHelper implements SQLiteTable {
 
     private static final String INTEGER = " INTEGER ";
     private static final String LONG = " LONG ";
@@ -19,7 +19,7 @@ public class DatabaseHelper extends SQLiteOpenHelper implements Contract {
     private static final String COMMA = ",";
 
 
-    public DatabaseHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
+    public SQLiteHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
         super(context, name, factory, version);
     }
 

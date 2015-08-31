@@ -1,5 +1,9 @@
 TODO - in french, sorry ;/
 
+Build
+~~~~~
+
+ - Change to the new NDK build (need gradle 2.5) : see http://tools.android.com/tech-docs/new-build-system/gradle-experimental
 
 V0.4
 ~~~~

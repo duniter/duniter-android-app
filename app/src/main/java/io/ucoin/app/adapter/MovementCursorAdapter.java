@@ -11,7 +11,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import io.ucoin.app.R;
-import io.ucoin.app.database.Contract;
+import io.ucoin.app.dao.sqlite.SQLiteTable;
 import io.ucoin.app.technical.CurrencyUtils;
 import io.ucoin.app.technical.DateUtils;
 import io.ucoin.app.technical.ImageUtils;
@@ -128,13 +128,13 @@ public class MovementCursorAdapter extends CursorAdapter{
             commentView = (TextView) view.findViewById(R.id.comment);
             issuerOrReceiverView = (TextView) view.findViewById(R.id.issuer_or_receiver);
 
-            timeIndex = cursor.getColumnIndex(Contract.Movement.TIME);
-            amountIndex = cursor.getColumnIndex(Contract.Movement.AMOUNT);
-            commentIndex = cursor.getColumnIndex(Contract.Movement.COMMENT);
-            blockNumberIndex = cursor.getColumnIndex(Contract.Movement.BLOCK);
-            isUdIndex = cursor.getColumnIndex(Contract.Movement.IS_UD);
-            issuersIndex = cursor.getColumnIndex(Contract.Movement.ISSUERS);
-            receiversIndex = cursor.getColumnIndex(Contract.Movement.RECEIVERS);
+            timeIndex = cursor.getColumnIndex(SQLiteTable.Movement.TIME);
+            amountIndex = cursor.getColumnIndex(SQLiteTable.Movement.AMOUNT);
+            commentIndex = cursor.getColumnIndex(SQLiteTable.Movement.COMMENT);
+            blockNumberIndex = cursor.getColumnIndex(SQLiteTable.Movement.BLOCK);
+            isUdIndex = cursor.getColumnIndex(SQLiteTable.Movement.IS_UD);
+            issuersIndex = cursor.getColumnIndex(SQLiteTable.Movement.ISSUERS);
+            receiversIndex = cursor.getColumnIndex(SQLiteTable.Movement.RECEIVERS);
         }
     }
 

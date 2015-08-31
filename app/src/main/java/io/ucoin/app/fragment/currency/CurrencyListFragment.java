@@ -24,8 +24,8 @@ import io.ucoin.app.R;
 import io.ucoin.app.activity.IToolbarActivity;
 import io.ucoin.app.adapter.CurrencyCursorAdapter;
 import io.ucoin.app.adapter.ProgressViewAdapter;
-import io.ucoin.app.database.Contract;
-import io.ucoin.app.database.Provider;
+import io.ucoin.app.dao.sqlite.SQLiteTable;
+import io.ucoin.app.content.Provider;
 import io.ucoin.app.model.local.Peer;
 import io.ucoin.app.model.remote.Currency;
 import io.ucoin.app.service.ServiceLocator;
@@ -69,7 +69,7 @@ public class CurrencyListFragment extends ListFragment {
         v.setVisibility(View.GONE);
 
         Uri uri = Uri.parse(Provider.CONTENT_URI + "/currency/");
-        String selection = Contract.Currency.ACCOUNT_ID + "=?";
+        String selection = SQLiteTable.Currency.ACCOUNT_ID + "=?";
         String[] selectionArgs = {
                 ((Application) getActivity().getApplication()).getAccountIdAsString()
         };

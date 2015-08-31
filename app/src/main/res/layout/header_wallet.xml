@@ -29,12 +29,12 @@
         android:layout_marginStart="10dp"/>
 
 
+    <!-- TODO BLA voir si icone ok -->
     <ImageButton android:id="@+id/toogle_detail"
         android:layout_width="50dp"
         android:layout_height="32dp"
-        android:src="@drawable/expander_open_holo_dark"
+        android:src="@drawable/ic_arrow_toogle"
         android:background="#00ffffff"
-        android:scaleType="fitXY"
         android:paddingRight="16dp"
         android:paddingLeft="2dp"
         android:layout_alignEnd="@+id/icon"
