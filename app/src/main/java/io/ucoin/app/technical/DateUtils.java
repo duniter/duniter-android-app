@@ -66,7 +66,7 @@ public class DateUtils {
                 : null;
     }
 
-    public static String formatLongFormat(long timestamp) {
+    public static String formatLong(long timestamp) {
         return timestamp > 0
                 ? DEFAULT_LONG_DATE_FORMAT.format(new Date(timestamp * 1000))
                 : null;

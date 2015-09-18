@@ -60,6 +60,7 @@ public class WalletFragment extends Fragment {
     private CertificationListAdapter mCertificationListAdapter;
     private TextView mUidView;
     private ImageButton mIcon;
+    private View mDetailLayout;
     private TextView mTimestampLabelView;
     private TextView mTimestampView;
     private TextView mPubkeyView;
@@ -137,27 +138,27 @@ public class WalletFragment extends Fragment {
         // Uid
         mUidView = (TextView) view.findViewById(R.id.uid);
 
-        // details view
-        final View detailView = view.findViewById(R.id.details);
-        detailView.setVisibility(View.GONE);
+        // Icon
+        mIcon = (ImageButton)view.findViewById(R.id.icon);
 
         // Toogle detail button
         final ImageButton toogleDetailButton = (ImageButton) view.findViewById(R.id.toogle_detail);
         toogleDetailButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (detailView.getVisibility() == View.VISIBLE) {
-                    detailView.setVisibility(View.GONE);
+                if (mDetailLayout.getVisibility() == View.VISIBLE) {
+                    mDetailLayout.setVisibility(View.GONE);
                     toogleDetailButton.setImageResource(R.drawable.expander_open_holo_dark);
                 } else {
-                    detailView.setVisibility(View.VISIBLE);
+                    mDetailLayout.setVisibility(View.VISIBLE);
                     toogleDetailButton.setImageResource(R.drawable.expander_close_holo_dark);
                 }
             }
         });
 
-        // Icon
-        mIcon = (ImageButton)view.findViewById(R.id.icon);
+        // details view
+        mDetailLayout = view.findViewById(R.id.details);
+        mDetailLayout.setVisibility(View.GONE);
 
         // Timestamp label
         mTimestampLabelView = (TextView) view.findViewById(R.id.timestamp_label);
