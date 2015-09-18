@@ -11,6 +11,7 @@ import org.apache.http.message.BasicNameValuePair;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -336,7 +337,7 @@ public class WotRemoteService extends BaseRemoteService {
         int sigValidity = bcParameter.getSigValidity();
         int sigQty = bcParameter.getSigQty();
 
-        Collection<WotCertification> result = new TreeSet<WotCertification>(ModelUtils.newWotCertificationComparator());
+        Collection<WotCertification> result = new TreeSet<WotCertification>(ModelUtils.newWotCertificationComparatorByUid());
 
         // Certifiers of
         WotIdentityCertifications certifiersOfList = getCertifiersOf(currencyId, pubkey);
@@ -398,14 +399,15 @@ public class WotRemoteService extends BaseRemoteService {
         }
 
         // Group certifications  by [uid, pubKey] and keep last timestamp
-        result = groupByUidAndPubKey(result);
+        result = groupByUidAndPubKey(result, true);
 
         return result;
     }
 
     protected Collection<WotCertification> getCertificationsByPubkeyForNonMember(long currencyId, final String uid, final String pubkey) {
         // Ordered list, by uid/pubkey/cert time
-        Collection<WotCertification> result = new TreeSet<WotCertification>(ModelUtils.newWotCertificationComparator());
+
+        Collection<WotCertification> result = new TreeSet<WotCertification>(ModelUtils.newWotCertificationComparatorByUid());
 
         Log.d(TAG, String.format("Get non member WOT, by uid [%s] and pubKey [%s]", uid, pubkey));
 
@@ -452,7 +454,7 @@ public class WotRemoteService extends BaseRemoteService {
         }
 
         // Group certifications  by [uid, pubKey] and keep last timestamp
-        result = groupByUidAndPubKey(result);
+        result = groupByUidAndPubKey(result, true);
 
         return result;
     }
@@ -686,7 +688,7 @@ public class WotRemoteService extends BaseRemoteService {
      * @param orderedCertifications a list, ordered by uid, pubkey, timestamp (DESC)
      * @return
      */
-    private Collection<WotCertification> groupByUidAndPubKey(Collection<WotCertification> orderedCertifications) {
+    private Collection<WotCertification> groupByUidAndPubKey(Collection<WotCertification> orderedCertifications, boolean orderResultByDate) {
         if (CollectionUtils.isEmpty(orderedCertifications)) {
             return orderedCertifications;
         }
@@ -747,6 +749,10 @@ public class WotRemoteService extends BaseRemoteService {
 
         if (previousCert != null) {
             result.add(previousCert);
+        }
+
+        if (orderResultByDate) {
+            Collections.sort(result, ModelUtils.newWotCertificationComparatorByDate());
         }
 
         return result;

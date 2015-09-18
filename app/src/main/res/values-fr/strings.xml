@@ -178,6 +178,7 @@
     <string name="uid">Identifiant</string>
     <string name="uid_hint">Identifiant</string>
     <string name="registration_date">Date d\'inscription</string>
+    <string name="registered_since">Inscrit depuis %s</string>
     <string name="signature">Signature</string>
     <string name="public_key">Clé publique</string>
     <string name="identity_details">Général</string>

@@ -179,6 +179,7 @@
     <string name="uid">User</string>
     <string name="uid_hint">User identifier</string>
     <string name="registration_date">Registration Date</string>
+    <string name="registered_since">Registered since %s</string>
     <string name="signature">Signature</string>
     <string name="public_key">Public key</string>
     <string name="identity_details">Details</string>

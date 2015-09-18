@@ -1,0 +1,151 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:id="@+id/header_layout"
+        style="@style/Header"
+        android:background="@drawable/shape_identity_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/uid"
+            style="@style/TextAppearance.AppCompat.Title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:textColor="@color/textPrimary"
+            android:singleLine="true"
+            android:text="User"
+            android:textSize="@dimen/abc_text_size_display_3_material" />
+
+
+        <ImageButton android:id="@+id/favorite_button"
+            android:layout_marginTop="20dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/star"
+            android:background="#00ffffff"
+            android:scaleType="fitXY"/>
+
+
+        <ImageButton android:id="@+id/toogle_detail"
+            android:layout_width="50dp"
+            android:layout_height="32dp"
+            android:src="@drawable/expander_open_holo_dark"
+            android:background="#00ffffff"
+            android:scaleType="fitXY"
+            android:layout_centerVertical="true"
+            android:layout_marginTop="-12dp"
+            android:paddingRight="16dp"
+            android:paddingLeft="2dp"
+            android:layout_below="@+id/uid"
+            android:layout_alignParentLeft="true" />
+
+        <LinearLayout
+            android:id="@+id/details"
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_below="@+id/uid"
+            android:paddingTop="20dp"
+            android:paddingLeft="2dp">
+
+            <TextView
+                android:id="@+id/timestamp_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_below="@+id/uid"
+                android:text="@string/registration_date"
+                android:textColor="@color/textPrimary"
+                android:textSize="@dimen/abc_text_size_caption_material" />
+
+            <TextView
+                android:id="@+id/timestamp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_below="@+id/timestamp_label"
+                android:maxLines="1"
+                android:singleLine="true"
+                android:text="Dec 12, 2014"
+                android:textColor="@color/textPrimary"
+                android:textSize="@dimen/abc_text_size_subhead_material" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/public_key"
+                android:textColor="@color/hideable_text_color"
+                android:textSize="@dimen/abc_text_size_caption_material"
+                android:layout_below="@+id/timestamp"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:maxLines="1"
+                android:singleLine="true"/>
+
+            <TextView
+                android:id="@+id/pubkey"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_below="@+id/uid"
+                android:text="pubkey"
+                android:textColor="@color/textPrimary"
+                android:textSize="@dimen/abc_text_size_small_material" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/hideable_text_color"
+                android:textSize="@dimen/abc_text_size_caption_material"
+                android:text="@string/signature"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_below="@+id/pubkey"
+                android:maxLines="1"
+                android:singleLine="true"/>
+
+            <TextView
+                android:id="@+id/signature"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_below="@+id/uid"
+                android:text="signature"
+                android:textColor="@color/textPrimary"
+                android:textSize="@dimen/abc_text_size_small_material" />
+        </LinearLayout>
+    </RelativeLayout>
+
+    <!-- Search progress -->
+    <ProgressBar
+        android:id="@+id/load_progress"
+        style="?android:attr/progressBarStyleInverse"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:visibility="gone" />
+
+    <ListView
+        android:id="@+id/wot_list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:scrollbarStyle="outsideOverlay"/>
+
+</LinearLayout>
