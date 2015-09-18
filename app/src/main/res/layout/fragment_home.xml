@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
+
 
 
     <io.ucoin.app.technical.view.SlidingTabLayout
@@ -60,35 +62,43 @@
         </LinearLayout>
     </TabHost-->
 
-    <LinearLayout
+    <android.support.v7.widget.CardView
         android:id="@+id/status_panel"
-        android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:minHeight="64dp"
-        android:visibility="gone">
+        android:elevation="100dp"
+        card_view:cardCornerRadius="5dp"
+        android:minHeight="30dp"
+        >
 
-        <ImageView
-            android:id="@+id/status_image"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:src="@drawable/world91"
-            android:maxWidth="64dp"
-            android:maxHeight="64dp"
-            android:layout_marginLeft="0dp"
-            android:clickable="true"
-            android:layout_gravity="center_vertical"
-            android:scaleType="fitXY" />
+            >
 
-        <TextView
-            android:id="@+id/status_text"
-            android:text="@string/not_connected"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:gravity="center_vertical"
-            android:layout_marginLeft="10dp"
-            android:layout_weight="1"
-            android:minHeight="64dp"/>
-    </LinearLayout>
+            <ImageView
+                android:id="@+id/status_image"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/world91"
+                android:maxWidth="64dp"
+                android:maxHeight="64dp"
+                android:layout_marginLeft="0dp"
+                android:clickable="true"
+                android:layout_gravity="center_vertical"
+                android:scaleType="fitXY" />
+
+            <TextView
+                android:id="@+id/status_text"
+                android:text="@string/not_connected"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:layout_marginLeft="10dp"
+                android:layout_weight="1"
+                android:minHeight="64dp"/>
+        </LinearLayout>
+    </android.support.v7.widget.CardView>
 
 </LinearLayout>
