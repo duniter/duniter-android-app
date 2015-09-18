@@ -22,6 +22,7 @@ import android.widget.Toast;
 import io.ucoin.app.Application;
 import io.ucoin.app.R;
 import io.ucoin.app.activity.IToolbarActivity;
+import io.ucoin.app.activity.MainActivity;
 import io.ucoin.app.adapter.CurrencyCursorAdapter;
 import io.ucoin.app.adapter.ProgressViewAdapter;
 import io.ucoin.app.dao.sqlite.SQLiteTable;
@@ -68,14 +69,16 @@ public class CurrencyListFragment extends ListFragment {
         TextView v = (TextView) view.findViewById(android.R.id.empty);
         v.setVisibility(View.GONE);
 
-        Uri uri = Uri.parse(Provider.CONTENT_URI + "/currency/");
         String selection = SQLiteTable.Currency.ACCOUNT_ID + "=?";
         String[] selectionArgs = {
                 ((Application) getActivity().getApplication()).getAccountIdAsString()
         };
 
-        Cursor cursor = getActivity().getContentResolver().query(uri, new String[]{}, selection,
-                selectionArgs, null);
+        Cursor cursor = getActivity().getContentResolver().query(Provider.CURRENCY_URI,
+                new String[]{},
+                selection,
+                selectionArgs,
+                null);
 
         CurrencyCursorAdapter currencyCursorAdapter =
                 new CurrencyCursorAdapter(getActivity(), cursor, 0);
@@ -84,14 +87,18 @@ public class CurrencyListFragment extends ListFragment {
     }
 
     @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        Activity activity = getActivity();
+
+        if (activity instanceof IToolbarActivity) {
+            // Disable back button
+            ((IToolbarActivity) activity).setToolbarBackButtonEnabled(false);
+        }
+    }
+
+    @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.toolbar_currency_list, menu);
-        Activity activity = getActivity();
-        activity.setTitle(R.string.currencies);
-        if (activity instanceof IToolbarActivity) {
-            ((IToolbarActivity) activity).setToolbarBackButtonEnabled(false);
-            ((IToolbarActivity) activity).setToolbarColor(getResources().getColor(R.color.primary));
-        }
     }
 
     @Override

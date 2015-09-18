@@ -271,7 +271,6 @@ public class IdentityFragment extends Fragment {
         activity.setTitle(R.string.identity);
         if (activity instanceof IToolbarActivity) {
             ((IToolbarActivity) activity).setToolbarBackButtonEnabled(true);
-            ((IToolbarActivity) activity).setToolbarDrawable(getResources().getDrawable(R.drawable.shape_identity_toolbar));
         }
     }
 

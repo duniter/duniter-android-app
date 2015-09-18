@@ -380,7 +380,6 @@ public class TransferFragment extends Fragment {
 
         if (activity instanceof IToolbarActivity) {
             ((IToolbarActivity) activity).setToolbarBackButtonEnabled(true);
-            ((IToolbarActivity) activity).setToolbarColor(getResources().getColor(R.color.primary));
         }
     }
 

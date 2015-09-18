@@ -123,7 +123,6 @@ public class SignFragment extends Fragment {
         activity.setTitle(getString(R.string.sign_to, identity.getUid()));
         if (activity instanceof IToolbarActivity) {
             ((IToolbarActivity) activity).setToolbarBackButtonEnabled(true);
-            ((IToolbarActivity) activity).setToolbarColor(getResources().getColor(R.color.primary));
         }
     }
 

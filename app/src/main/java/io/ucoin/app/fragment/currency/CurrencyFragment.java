@@ -82,7 +82,6 @@ public class CurrencyFragment extends Fragment {
 
     }
 
-
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.toolbar_currency, menu);
@@ -114,10 +113,8 @@ public class CurrencyFragment extends Fragment {
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
         Activity activity = getActivity();
-        activity.setTitle(R.string.currency);
         if (activity instanceof IToolbarActivity) {
-            ((IToolbarActivity) activity).setToolbarBackButtonEnabled(true);
-            ((IToolbarActivity) activity).setToolbarColor(getResources().getColor(R.color.primary));
+            ((IToolbarActivity) activity).setToolbarBackButtonEnabled(false);
         }
     }
 

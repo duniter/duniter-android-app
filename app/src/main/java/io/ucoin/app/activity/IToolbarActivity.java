@@ -10,6 +10,4 @@ public interface IToolbarActivity {
     void setToolbarBackButtonEnabled(boolean enable);
 
     void setToolbarDrawable(Drawable drawable);
-
-    void setToolbarColor(int colorRes);
 }

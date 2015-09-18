@@ -21,6 +21,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
@@ -137,12 +138,15 @@ public class MainActivity extends ActionBarActivity
 
         setContentView(R.layout.activity_main);
 
+        // Set toolbar as action bar
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
-
-        try {
-            setSupportActionBar(mToolbar);
-        } catch (Throwable t) {
-            Log.w("setSupportActionBar", t.getMessage());
+        if (getSupportActionBar() == null
+                && mToolbar != null) {
+            try {
+                setSupportActionBar(mToolbar);
+            } catch (Throwable t) {
+                Log.w("setSupportActionBar", t.getMessage());
+            }
         }
 
         //Navigation drawer
@@ -158,11 +162,8 @@ public class MainActivity extends ActionBarActivity
         mDrawerEmptyListView = (TextView) findViewById(R.id.drawer_empty_list);
 
         //Navigation drawer toggle
-        //Please use ActionBarDrawerToggle(Activity, DrawerLayout, int, int)
-        // if you are setting the Toolbar as the ActionBar of your activity.
         mToggle = new ActionBarDrawerToggle(this, mDrawerLayout
                 , R.string.open_drawer, R.string.close_drawer);
-
         TextView addCurrency = (TextView) findViewById(R.id.drawer_add_currency);
 
         addCurrency.setOnClickListener(new View.OnClickListener() {
@@ -181,13 +182,34 @@ public class MainActivity extends ActionBarActivity
             }
         });
 
-        TextView settings = (TextView) findViewById(R.id.drawer_settings);
-        settings.setOnClickListener(new View.OnClickListener() {
+        // Home
+        TextView drawerHome = (TextView) findViewById(R.id.drawer_home);
+        drawerHome.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openHomeFragment();
+            }
+        });
+
+        // Settings
+        TextView drawerSettings = (TextView) findViewById(R.id.drawer_settings);
+        drawerSettings.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this,
                         SettingsActivity.class);
                 startActivity(intent);
+            }
+        });
+
+        // Help (open ucoin forum)
+        TextView drawerHelp = (TextView) findViewById(R.id.drawer_help);
+        drawerHelp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Uri forumUri = Uri.parse(Configuration.instance().getForumUrl());
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, forumUri);
+                startActivity(browserIntent);
             }
         });
 
@@ -441,10 +463,6 @@ public class MainActivity extends ActionBarActivity
         Log.d("MAINACTIVITY", "onLoaderReset");
     }
 
-    public void setToolbarColor(int colorRes) {
-        mToolbar.setBackgroundColor(colorRes);
-    }
-
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     public void setToolbarDrawable(Drawable drawable) {
         // On Jelly Bean we have the setBackground(Drawable) APIs
@@ -460,12 +478,27 @@ public class MainActivity extends ActionBarActivity
      */
     @Override
     public void setToolbarBackButtonEnabled(boolean enabled) {
+        // Show back button
         if (enabled) {
-            mToggle.setDrawerIndicatorEnabled(false);
+            // Show the back button (= Home button in the action bar)
             getSupportActionBar().setHomeButtonEnabled(true);
-        } else {
-            mToggle.setDrawerIndicatorEnabled(true);
+
+            // Hide the drawer toggle button
+            mToggle.setDrawerIndicatorEnabled(false);
+
+            // Set icon
+            getSupportActionBar().setIcon(null);
+
+        }
+
+        // Hide the back button
+        else {
             getSupportActionBar().setHomeButtonEnabled(false);
+
+            // Show the drawer toggle button
+            mToggle.setDrawerIndicatorEnabled(true);
+
+            getSupportActionBar().setIcon(R.drawable.ic_ucoin);
         }
 
     }
@@ -515,6 +548,9 @@ public class MainActivity extends ActionBarActivity
 
         // Open the home screen
         openHomeFragment();
+
+        // Init app (caches) in background thread
+        new InitTask().execute();
     }
 
     protected void openHomeFragment() {
@@ -527,9 +563,6 @@ public class MainActivity extends ActionBarActivity
 
         Fragment fragment = HomeFragment.newInstance();
         reloadFirstFragment(fragment);
-
-        // Init app (caches) in background thread
-        new InitTask().execute();
     }
 
     protected void openTransfertFragment(Identity identity) {

@@ -246,7 +246,6 @@ public class WalletFragment extends Fragment {
         activity.setTitle(R.string.wallet_title);
         if (activity instanceof IToolbarActivity) {
             ((IToolbarActivity) activity).setToolbarBackButtonEnabled(true);
-            ((IToolbarActivity) activity).setToolbarDrawable(getResources().getDrawable(R.drawable.shape_wallet_toolbar));
         }
     }
 

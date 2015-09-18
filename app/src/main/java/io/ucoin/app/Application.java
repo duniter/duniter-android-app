@@ -3,17 +3,20 @@ package io.ucoin.app;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 
+import io.ucoin.app.technical.task.TaskManager;
 import io.ucoin.app.technical.StringUtils;
 
 public class Application extends android.app.Application{
 
     private Account mAccount;
     private Long accountId;
+    //private TaskManager taskManager;
 
     public Application() {
         super();
         mAccount = null;
         accountId = null;
+        //taskManager = new TaskManager(this);
     }
 
     public void setAccount(Account account) {
@@ -31,6 +34,10 @@ public class Application extends android.app.Application{
         }
         return null;
     }
+
+    /*public TaskManager getTaskManager() {
+        return taskManager;
+    }*/
 
     /* -- Internal methods -- */
 

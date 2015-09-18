@@ -114,10 +114,9 @@ public class WebFragment extends Fragment {
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
         Activity activity = getActivity();
-        activity.setTitle(getString(R.string.forum));
+        activity.setTitle(getString(R.string.help_link));
         if (activity instanceof IToolbarActivity) {
             ((IToolbarActivity) activity).setToolbarBackButtonEnabled(false);
-            ((IToolbarActivity) activity).setToolbarColor(getResources().getColor(R.color.primary));
         }
     }
 

@@ -19,15 +19,16 @@
     <application
         android:name="io.ucoin.app.Application"
         android:allowBackup="true"
-        android:icon="@drawable/ic_launcher"
+        android:icon="@drawable/ic_ucoin"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme.Base"
+        android:theme="@style/AppTheme"
         >
         <activity
             android:name=".activity.MainActivity"
             android:configChanges="orientation|screenSize"
             android:label="@string/app_name"
-            android:windowSoftInputMode="stateHidden">
+            android:windowSoftInputMode="stateHidden"
+            android:icon="@drawable/ic_ucoin">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -64,7 +65,7 @@
             android:configChanges="orientation|screenSize"
             android:label="@string/app_name"
             android:windowSoftInputMode="stateHidden"
-            android:theme="@style/DarkTheme"/>
+            android:theme="@style/AppTheme.Dark.NoActionBar"/>
 
         <activity
             android:name=".activity.SettingsActivity"

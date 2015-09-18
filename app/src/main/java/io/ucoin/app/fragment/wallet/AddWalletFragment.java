@@ -146,7 +146,6 @@ public class AddWalletFragment extends Fragment {
         activity.setTitle(getString(R.string.add_wallet));
         if (activity instanceof IToolbarActivity) {
             ((IToolbarActivity) activity).setToolbarBackButtonEnabled(true);
-            ((IToolbarActivity) activity).setToolbarColor(getResources().getColor(R.color.primary));
         }
     }
 

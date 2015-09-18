@@ -62,6 +62,8 @@ public class HomeFragment extends Fragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        // TODO BL : ajouter en haut du fragment, un texte en petit : "Dernière mise à jour le DATE et HEURE"
+
         mStatusPanel = view.findViewById(R.id.status_panel);
         mStatusPanel.setVisibility(View.GONE);
 
@@ -87,10 +89,9 @@ public class HomeFragment extends Fragment {
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
         Activity activity = getActivity();
-        activity.setTitle(getString(R.string.app_name));
+        activity.setTitle("");
         if (activity instanceof IToolbarActivity) {
             ((IToolbarActivity) activity).setToolbarBackButtonEnabled(false);
-            ((IToolbarActivity) activity).setToolbarColor(getResources().getColor(R.color.primary));
         }
     }
 

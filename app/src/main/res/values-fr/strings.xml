@@ -239,15 +239,7 @@
     <string name="yesterday">hier</string>
     <string name="search_error">Echec de la recherche (%s). Veuillez réessayer.</string>
 
-
     <!-- Strings related to extension (ext) -->
-    <string name="forum">Forum</string>
+    <string name="help_link">Besoin d\'aide ?</string>
 
-
-    <string-array name="drawer_items">
-        <item>@string/home</item>
-        <item>@string/currencies</item>
-        <item>@string/forum</item>
-        <item>@string/settings</item>
-    </string-array>
 </resources>

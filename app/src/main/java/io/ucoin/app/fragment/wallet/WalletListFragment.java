@@ -1,5 +1,6 @@
 package io.ucoin.app.fragment.wallet;
 
+import android.app.Activity;
 import android.app.DialogFragment;
 import android.app.ListFragment;
 import android.app.ProgressDialog;
@@ -22,6 +23,7 @@ import java.util.List;
 
 import io.ucoin.app.Application;
 import io.ucoin.app.R;
+import io.ucoin.app.activity.IToolbarActivity;
 import io.ucoin.app.activity.MainActivity;
 import io.ucoin.app.adapter.WalletArrayAdapter;
 import io.ucoin.app.model.local.Wallet;
