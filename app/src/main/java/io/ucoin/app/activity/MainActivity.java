@@ -8,6 +8,7 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.LoaderManager;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
@@ -48,7 +49,6 @@ import io.ucoin.app.content.Provider;
 import io.ucoin.app.fragment.common.HomeFragment;
 import io.ucoin.app.fragment.currency.AddCurrencyDialogFragment;
 import io.ucoin.app.fragment.currency.CurrencyFragment;
-import io.ucoin.app.fragment.currency.CurrencyListFragment;
 import io.ucoin.app.fragment.wallet.TransferFragment;
 import io.ucoin.app.fragment.wot.WotSearchFragment;
 import io.ucoin.app.model.local.Peer;
@@ -56,15 +56,15 @@ import io.ucoin.app.model.remote.Currency;
 import io.ucoin.app.model.remote.Identity;
 import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.service.exception.PeerConnectionException;
+import io.ucoin.app.service.remote.RemoteServiceConnection;
+import io.ucoin.app.service.remote.RemoteServiceLocator;
 import io.ucoin.app.service.remote.WotRemoteService;
 import io.ucoin.app.task.AddCurrencyTask;
-import io.ucoin.app.task.TaskService;
 import io.ucoin.app.technical.CurrencyUtils;
 import io.ucoin.app.technical.DateUtils;
 import io.ucoin.app.technical.ExceptionUtils;
 import io.ucoin.app.technical.exception.UncaughtExceptionHandler;
 import io.ucoin.app.technical.task.AsyncTaskHandleException;
-import io.ucoin.app.technical.task.ProgressDialogAsyncTaskListener;
 
 
 public class MainActivity extends ActionBarActivity
@@ -82,6 +82,10 @@ public class MainActivity extends ActionBarActivity
 
     private Toolbar mToolbar;
     private boolean mUnitPreferenceChanged = false;
+
+    //private RemoteServiceConnection mRemoteServiceConnection;
+    //private RemoteServiceLocator mRemoteServiceLocator;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,15 +106,18 @@ public class MainActivity extends ActionBarActivity
         Configuration config = new Configuration();
         Configuration.setInstance(config);
 
-        // Starting task service
-        {
-            Intent intent = new Intent(this, TaskService.class);
-            startService(intent);
-        }
-
         // Load account
         AccountManager accountManager = AccountManager.get(this);
         Account[] accounts = accountManager.getAccountsByType(getString(R.string.ACCOUNT_TYPE));
+
+
+        /* TODO : create the servcie connection
+        mRemoteServiceConnection = new RemoteServiceConnection() {
+            @Override
+            public void onServiceLoaded(RemoteServiceLocator service) {
+                mRemoteServiceLocator = service;
+            }
+        };*/
 
         // If first time: create account
         if (accounts.length == 0) {
@@ -188,6 +195,29 @@ public class MainActivity extends ActionBarActivity
 
         // Open the default fragment
         openDefaultFragment();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        // TODO : Bound remote service
+        /*
+        {
+            Intent intent = new Intent(this, RemoteServiceLocator.class);
+            bindService(intent, mRemoteServiceConnection, Context.BIND_AUTO_CREATE);
+        }*/
+
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        // TODO Unbind the remote service
+        /*if (mRemoteServiceConnection.isBound()){
+            unbindService(mRemoteServiceConnection);
+        }*/
     }
 
     @Override

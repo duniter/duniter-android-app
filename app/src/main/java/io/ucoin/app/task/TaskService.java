@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 
+import io.ucoin.app.technical.task.TaskManager;
+
 public class TaskService extends Service {
 
     // Storage for an instance of the sync adapter

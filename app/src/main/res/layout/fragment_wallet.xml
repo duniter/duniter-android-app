@@ -34,11 +34,10 @@
             android:background="#00ffffff"
             android:scaleType="fitXY"/>
 
-        <!-- TODO BLA: voir où est cette icone : android:src="@drawable/ic_arrow_toogleexpander_open_holo_dark" -->
         <ImageButton android:id="@+id/toogle_detail"
             android:layout_width="50dp"
             android:layout_height="32dp"
-            android:src="@drawable/ic_arrow_toogle"
+            android:src="@drawable/expander_open_holo_dark"
             android:background="#00ffffff"
             android:layout_centerVertical="true"
             android:layout_marginTop="-12dp"

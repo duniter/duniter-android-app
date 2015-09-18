@@ -10,12 +10,9 @@
         ucoin:iconifiedByDefault="true"
         ucoin:showAsAction="always"/>
 
-    <!-- TODO BLA :voir ou cette icone :
-        android:icon="@drawable/ic_plus_white_24dp"
-    -->
     <item
         android:id="@+id/action_add_wallet"
-        android:icon="@drawable/ic_wallet_white"
+        android:icon="@drawable/ic_plus_white_24dp"
         ucoin:iconifiedByDefault="true"
         android:title="@string/add_wallet"
         ucoin:showAsAction="always"/>

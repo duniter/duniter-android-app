@@ -20,6 +20,7 @@ public abstract class AsyncTaskHandleException<Param, Progress, Result>
 
     private Throwable error;
     private AsyncTaskListener<Result> mListener;
+    private Thread mThread;
 
 
     public AsyncTaskHandleException(ProgressBar progressBar, TextView progressText) {
@@ -78,6 +79,9 @@ public abstract class AsyncTaskHandleException<Param, Progress, Result>
 
     @Override
     protected final Result doInBackground(Param... params) {
+        // Store the thread, to be able to stop the task
+        mThread = Thread.currentThread();
+
         try {
             return (Result)doInBackgroundHandleException(params);
         } catch(Throwable t) {
@@ -166,5 +170,9 @@ public abstract class AsyncTaskHandleException<Param, Progress, Result>
 
     public final String getString(int resId, Object... formatArgs) {
         return mListener.getContext().getString(resId, formatArgs);
+    }
+
+    public final Thread getThread() {
+        return mThread;
     }
 }
