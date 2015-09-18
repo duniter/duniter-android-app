@@ -70,7 +70,7 @@ public class CurrencyService extends BaseService {
         ObjectUtils.checkNotNull(currency.getMembersCount());
         ObjectUtils.checkArgument(currency.getMembersCount().intValue() >= 0);
         ObjectUtils.checkNotNull(currency.getLastUD());
-        ObjectUtils.checkArgument(currency.getLastUD().intValue() > 0);
+        ObjectUtils.checkArgument(currency.getLastUD().longValue() > 0);
 
         ObjectUtils.checkArgument((currency.getAccount() != null && currency.getAccount().getId() != null)
             || currency.getAccountId() != null, "One of 'currency.account.id' or 'currency.accountId' is mandatory.");
