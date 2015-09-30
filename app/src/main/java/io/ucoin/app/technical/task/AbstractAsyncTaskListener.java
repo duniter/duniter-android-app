@@ -49,6 +49,11 @@ public abstract class AbstractAsyncTaskListener<Result> implements AsyncTaskList
     }
 
     @Override
+    public final void increment(int nb) {
+        mProgress += nb;
+    }
+
+    @Override
     public final void increment(String message) {
         mProgress++;
         mProgressMessage = message;

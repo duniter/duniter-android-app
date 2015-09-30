@@ -159,7 +159,7 @@ public class TransactionRemoteService extends BaseRemoteService {
 
         // get parameter
         String path = String.format(URL_TX_HISTORY, pubKey, fromBlockNumber, toBlockNumber);
-            TxHistoryResults result = executeRequest(currencyId, path, TxHistoryResults.class);
+        TxHistoryResults result = executeRequest(currencyId, path, TxHistoryResults.class);
 
         return result;
     }

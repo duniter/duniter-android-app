@@ -1,11 +1,14 @@
 package io.ucoin.app.fragment.wallet;
 
-import android.app.ListFragment;
+import android.app.Fragment;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -21,15 +24,19 @@ import io.ucoin.app.content.Provider;
 import io.ucoin.app.model.local.Movement;
 import io.ucoin.app.model.local.Wallet;
 import io.ucoin.app.service.ServiceLocator;
+import io.ucoin.app.technical.view.DividerItemDecoration;
 
 
-public class MovementListFragment extends ListFragment {
+public class MovementListFragment extends Fragment {
 
-    protected static final String BUNDLE_WALLET_ID = "WalletId";
+    public static final String BUNDLE_WALLET_ID = "WalletId";
+    public static final String BUNDLE_MOVEMENT_ID = "MovementId";
 
-    private MovementCursorAdapter mCursorAdapter;
+    private MovementCursorAdapter mRecyclerViewAdapter;
     private ProgressViewAdapter mProgressViewAdapter;
     private MovementListListener mListener;
+    private RecyclerView mRecyclerView;
+    private LinearLayoutManager mLayoutManager;
 
     public static MovementListFragment newInstance(Wallet wallet, MovementListListener listener) {
         MovementListFragment fragment = new MovementListFragment();
@@ -60,16 +67,32 @@ public class MovementListFragment extends ListFragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        mRecyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
+        mRecyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL_LIST));
+        mRecyclerView.setHasFixedSize(true);
+        mLayoutManager = new LinearLayoutManager(getActivity());
+        mRecyclerView.setLayoutManager(mLayoutManager);
+        mRecyclerView.setItemAnimator(new DefaultItemAnimator());
+
+        mRecyclerViewAdapter = new MovementCursorAdapter(getActivity().getApplicationContext(),
+                getNewCursor(),
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        if (mListener != null) {
+                            int position = mRecyclerView.getChildPosition(view);
+                            Long movementId = mRecyclerViewAdapter.getItemId(position);
+                            Bundle bundle = new Bundle();
+                            bundle.putLong(BUNDLE_MOVEMENT_ID, movementId);
+                            mListener.onPositiveClick(bundle);
+                        }
+                    }
+                });
+        mRecyclerView.setAdapter(mRecyclerViewAdapter);
+
         mProgressViewAdapter = new ProgressViewAdapter(
                 view.findViewById(R.id.progressbar),
-                getListView());
-
-
-        mCursorAdapter = new MovementCursorAdapter((Context) getActivity(), getNewCursor(), 0);
-        setListAdapter(mCursorAdapter);
-
-        //
-        //onRefreshMovements();
+                mRecyclerView);
     }
 
     @Override
@@ -77,27 +100,12 @@ public class MovementListFragment extends ListFragment {
         inflater.inflate(R.menu.toolbar_movement_list, menu);
     }
 
-
     public void notifyDataSetChanged() {
         // Update the adapter's cursor
-        mCursorAdapter.swapCursor(getNewCursor());
+        mRecyclerViewAdapter.swapCursor(getNewCursor());
 
         // Send notification to the list view
-        mCursorAdapter.notifyDataSetChanged();
-    }
-
-    @Override
-    public void onListItemClick(ListView l, View v, int position, long id) {
-        if (mListener == null) {
-            return;
-        }
-
-        Cursor cursor = (Cursor) mCursorAdapter.getItem(position);
-        Movement movement = ServiceLocator.instance().getMovementService().toMovement(cursor);
-
-        Bundle bundle = new Bundle();
-        bundle.putSerializable(Movement.class.getSimpleName(), movement);
-        mListener.onPositiveClick(bundle);
+        mRecyclerViewAdapter.notifyDataSetChanged();
     }
 
     /* -- Inner class -- */
@@ -115,14 +123,16 @@ public class MovementListFragment extends ListFragment {
     protected Cursor getNewCursor() {
         long walletId = getArguments().getLong(BUNDLE_WALLET_ID);
 
-        Uri uri = Uri.parse(Provider.CONTENT_URI + "/movement/");
-
         String selection = SQLiteTable.Movement.WALLET_ID + "=?";
         String[] selectionArgs = {String.valueOf(walletId)};
         String orderBy = SQLiteTable.Movement.TIME + " DESC";
 
-        Cursor cursor = getActivity().getContentResolver().query(uri, new String[]{}, selection,
-                selectionArgs, orderBy);
+        Cursor cursor = getActivity().getContentResolver().query(
+                Provider.MOVEMENT_URI,
+                new String[]{},
+                selection,
+                selectionArgs,
+                orderBy);
 
         return cursor;
     }

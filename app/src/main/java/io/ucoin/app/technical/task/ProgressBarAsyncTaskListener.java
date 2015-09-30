@@ -75,6 +75,11 @@ public class ProgressBarAsyncTaskListener<Result> implements AsyncTaskListener<R
     }
 
     @Override
+    public final void increment(int nb) {
+        mProgress += nb;
+    }
+
+    @Override
     public final void increment(String message) {
         mProgress++;
         mProgressMessage = message;

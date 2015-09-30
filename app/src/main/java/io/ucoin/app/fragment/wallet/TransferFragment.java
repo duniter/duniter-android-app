@@ -212,6 +212,7 @@ public class TransferFragment extends Fragment {
                 ((TextView) view.findViewById(R.id.receiver_uid)).setText(mReceiverIdentity.getUid());
 
                 // Mask unused views
+                view.findViewById(R.id.receiver_contact_label).setVisibility(View.GONE);
                 view.findViewById(R.id.receiver_contact).setVisibility(View.GONE);
                 view.findViewById(R.id.receiver_pubkey).setVisibility(View.GONE);
                 //view.findViewById(R.id.browse_button).setVisibility(View.GONE);

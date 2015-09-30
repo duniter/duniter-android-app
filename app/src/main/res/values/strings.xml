@@ -70,8 +70,7 @@
     <string name="amount_hint">Amount</string>
     <string name="universal_dividend_acronym">UD</string>
     <string name="unit_coins_label">coins</string>
-    <string name="comment_optional">Comment (optional)</string>
-    <string name="comment_hint">Comment (optional)</string>
+    <string name="comment_hint">Reference (optional)</string>
     <string name="amount_not_long">Amount must a valid integer</string>
     <string name="amount_not_decimal">Amount must a valid decimal</string>
     <string name="transactions">Transactions</string>
@@ -80,7 +79,9 @@
     <string name="sync">Refresh transactions</string>
     <string name="resync">Download all transactions</string>
     <string name="resync_confirm">Are you sure you want to download all transactions ? This operation could be long.</string>
-    <string name="resync_started">Downloading transactions...</string>
+    <string name="resync_delete_movements">Cleaning history...</string>
+    <string name="resync_get_UD">Downloading UD history...</string>
+    <string name="resync_started">Downloading transactions history...</string>
     <string name="sync_succeed">%1$s transactions downloads in %2$s</string>
     <string name="sync_no_tx">No new transactions</string>
 
@@ -175,7 +176,7 @@
 
     <!-- Strings related to identities -->
     <string name="identity">Identity</string>
-    <string name="uid_or_public_key">user or public key</string>
+    <string name="uid_or_public_key">Search</string>
     <string name="uid">User</string>
     <string name="uid_hint">User identifier</string>
     <string name="registration_date">Registration Date</string>

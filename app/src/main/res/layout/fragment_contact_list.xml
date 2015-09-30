@@ -4,31 +4,52 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+    <LinearLayout
+        android:id="@+id/contact_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="?attr/colorPrimary">
+
+        <android.support.v7.widget.SearchView
+            android:id="@+id/search_text"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:hint="@string/search"
+            android:iconifiedByDefault="false"
+            android:layout_gravity="end"
+            android:gravity="end"
+            />
+    </LinearLayout>
+
     <ProgressBar
-        android:id="@+id/progressbar"
+        android:id="@+id/contact_progressbar"
         style="?android:attr/progressBarStyleInverse"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
+        android:layout_below="@+id/contact_toolbar"
         android:layout_gravity="center_horizontal|center_vertical"
         android:visibility="gone" />
 
-    <ListView
-        android:id="@android:id/list"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_alignParentTop="true"
-        android:scrollbarStyle="outsideOverlay" />
-
     <TextView
-        android:id="@id/android:empty"
+        android:id="@+id/contact_empty"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_alignParentTop="true"
+        android:layout_below="@+id/contact_toolbar"
         android:text="@string/no_contact"
         android:textAppearance="?android:textAppearanceMedium"
         android:textColor="@color/hideable_text_color"
         android:textSize="18sp"
-        android:layout_margin="8dp"/>
+        android:layout_margin="8dp"
+        android:visibility="gone"/>
+
+    <view class="android.support.v7.widget.RecyclerView"
+        android:id="@+id/contact_recycler_view"
+        android:layout_below="@+id/contact_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerInParent="true"/>
+
+
 
 </RelativeLayout>

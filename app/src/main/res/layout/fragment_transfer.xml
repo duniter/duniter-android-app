@@ -28,11 +28,20 @@
 
         <!-- receiver -->
         <TextView
+            android:id="@+id/receiver_contact_label"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/receiver"
-            android:textColor="#372c24" />
-
+            android:textColor="#372c24"/>
+        <Spinner
+            android:id="@+id/receiver_contact"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dip"
+            android:layout_marginTop="5dip"
+            android:hint="@string/receiver_hint"
+            android:imeOptions="actionNext"
+            android:textSize="@dimen/abc_text_size_body_2_material" />
         <!-- Load contact progress-->
         <ProgressBar
             android:id="@+id/receiver_contact_progress"
@@ -43,16 +52,6 @@
             android:layout_marginTop="5dip"
             android:layout_gravity="center_horizontal|center_vertical"
             android:visibility="gone" />
-        <Spinner
-            android:id="@+id/receiver_contact"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="20dip"
-            android:layout_marginTop="5dip"
-            android:hint="@string/receiver_hint"
-            android:imeOptions="actionNext"
-            android:textSize="@dimen/abc_text_size_body_2_material" />
-
 
     <LinearLayout
         android:layout_width="match_parent"

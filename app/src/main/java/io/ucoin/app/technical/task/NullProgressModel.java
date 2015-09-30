@@ -20,6 +20,10 @@ public class NullProgressModel implements ProgressModel {
     }
 
     @Override
+    public void increment(int nb) {
+    }
+
+    @Override
     public void increment(String message) {
     }
 

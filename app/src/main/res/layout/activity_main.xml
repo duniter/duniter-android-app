@@ -32,5 +32,7 @@
     <!-- The navigation drawer -->
     <include layout="@layout/drawer" />
 
+    <!-- The contact drawer-->
+    <include layout="@layout/drawer_contact" />
 
 </android.support.v4.widget.DrawerLayout>

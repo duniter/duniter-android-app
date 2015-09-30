@@ -96,13 +96,21 @@ public class ContactService extends BaseService {
         return getContactsByCurrencyId(context.getContentResolver(), currencyId);
     }
 
+    public Contact getContactById(Context context, long contactId) {
+        return getContactById(context.getContentResolver(), contactId);
+    }
+
+    public Contact getContactViewById(Context context, long contactId) {
+        return getContactViewById(context.getContentResolver(), contactId);
+    }
+
     public void delete(final Context context, final long contactId) {
 
         ContentResolver resolver = context.getContentResolver();
 
         String whereClause = "_id=?";
         String[] whereArgs = new String[]{String.valueOf(contactId)};
-        int rowsUpdated = resolver.delete(getContentUri(), whereClause, whereArgs);
+        int rowsUpdated = resolver.delete(Provider.CONTACT_URI, whereClause, whereArgs);
         if (rowsUpdated != 1) {
             throw new UCoinTechnicalException(String.format("Error while deleting contact [id=%s]. %s rows updated.", contactId, rowsUpdated));
         }
@@ -143,7 +151,7 @@ public class ContactService extends BaseService {
         };
         String orderBy = SQLiteTable.Contact.NAME + " ASC";
 
-        Cursor cursor = resolver.query(getContentUri(), new String[]{}, selection,
+        Cursor cursor = resolver.query(Provider.CONTACT_URI, new String[]{}, selection,
                 selectionArgs, orderBy);
 
         List<Contact> result = new ArrayList<Contact>();
@@ -164,7 +172,7 @@ public class ContactService extends BaseService {
         };
         String orderBy = SQLiteTable.ContactView.NAME + " ASC";
 
-        Cursor cursor = resolver.query(getViewContentUri(), new String[]{}, selection,
+        Cursor cursor = resolver.query(Provider.CONTACT_VIEW_URI, new String[]{}, selection,
                 selectionArgs, orderBy);
 
         List<Contact> result = new ArrayList<Contact>();
@@ -177,12 +185,51 @@ public class ContactService extends BaseService {
         return result;
     }
 
+    protected Contact getContactById(ContentResolver resolver, long contactId) {
+
+        String selection = SQLiteTable.Contact._ID + "=?";
+        String[] selectionArgs = {
+                String.valueOf(contactId),
+        };
+
+        Cursor cursor = resolver.query(Provider.CONTACT_URI, new String[]{}, selection,
+                selectionArgs, null);
+
+        Contact result = null;
+        if (cursor.moveToNext()) {
+            result = toContact(cursor);
+        }
+        cursor.close();
+
+        return result;
+    }
+
+    protected Contact getContactViewById(ContentResolver resolver, long contactId) {
+
+        String selection = SQLiteTable.Contact._ID + "=?";
+        String[] selectionArgs = {
+                String.valueOf(contactId),
+        };
+
+        Cursor cursor = resolver.query(Provider.CONTACT_VIEW_URI, new String[]{}, selection,
+                selectionArgs, null);
+
+        Contact result = null;
+        if (cursor.moveToNext()) {
+            result = toContactFromView(cursor);
+        }
+        cursor.close();
+
+        return result;
+    }
+
+
 
     protected void insert(final ContentResolver resolver, final Contact source) {
 
         ContentValues target = toContentValues(source);
 
-        Uri uri = resolver.insert(getContentUri(), target);
+        Uri uri = resolver.insert(Provider.CONTACT_URI, target);
         Long contactId = ContentUris.parseId(uri);
         if (contactId < 0) {
             throw new UCoinTechnicalException("Error while inserting contact");
@@ -199,7 +246,7 @@ public class ContactService extends BaseService {
 
         String whereClause = "_id=?";
         String[] whereArgs = new String[]{String.valueOf(source.getId())};
-        int rowsUpdated = resolver.update(getContentUri(), target, whereClause, whereArgs);
+        int rowsUpdated = resolver.update(Provider.CONTACT_URI, target, whereClause, whereArgs);
         if (rowsUpdated != 1) {
             throw new UCoinTechnicalException(String.format("Error while updating contact. %s rows updated.", rowsUpdated));
         }
@@ -248,22 +295,6 @@ public class ContactService extends BaseService {
         result.addIdentity(identity);
 
         return result;
-    }
-
-    protected Uri getContentUri() {
-        if (mContentUri != null){
-            return mContentUri;
-        }
-        mContentUri = Uri.parse(Provider.CONTENT_URI + "/contact/");
-        return mContentUri;
-    }
-
-    protected Uri getViewContentUri() {
-        if (mViewContentUri != null){
-            return mViewContentUri;
-        }
-        mViewContentUri = Uri.parse(Provider.CONTENT_URI + "/contactView/");
-        return mViewContentUri;
     }
 
     protected InputStream getSmallPhoto(ContentResolver contentResolver, long phoneContactId) {

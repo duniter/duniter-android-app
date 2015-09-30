@@ -3,10 +3,10 @@ package io.ucoin.app.adapter;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Typeface;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CursorAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -15,36 +15,44 @@ import io.ucoin.app.dao.sqlite.SQLiteTable;
 import io.ucoin.app.technical.CurrencyUtils;
 import io.ucoin.app.technical.DateUtils;
 import io.ucoin.app.technical.ImageUtils;
+import io.ucoin.app.technical.ModelUtils;
+import io.ucoin.app.technical.adapter.RecyclerViewCursorAdapter;
 
 
-public class MovementCursorAdapter extends CursorAdapter{
+public class MovementCursorAdapter extends RecyclerViewCursorAdapter<MovementCursorAdapter.ViewHolder> {
 
     private final String mUdComment;
     private int textPrimaryColor;
     private int textComputedColor;
 
-    public MovementCursorAdapter(Context context, Cursor c, int flags) {
-        super(context, c, flags);
+    private final View.OnClickListener mOnClickListener;
+
+    public MovementCursorAdapter(Context context, Cursor c) {
+        this(context, c, null);
+    }
+
+    public MovementCursorAdapter(Context context, Cursor c, View.OnClickListener onClickListener) {
+        super(context, c);
         mUdComment = context.getString(R.string.movement_ud);
         textPrimaryColor = context.getResources().getColor(R.color.textPrimary);
         textComputedColor = context.getResources().getColor(R.color.textComputed);
+        this.mOnClickListener = onClickListener;
     }
 
     @Override
-    public View newView(Context context, Cursor cursor, ViewGroup parent) {
-        LayoutInflater inflater = (LayoutInflater) context
-                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
-        return inflater.inflate(R.layout.list_item_movement, parent, false);
-    }
-
-    @Override
-    public void bindView(View view, Context context, Cursor cursor) {
-        ViewHolder viewHolder = (ViewHolder)view.getTag();
-        if (viewHolder == null) {
-            viewHolder = new ViewHolder(view, cursor);
-            view.setTag(viewHolder);
+    public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
+        View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.list_item_movement, null);
+        if (mOnClickListener != null) {
+            view.setOnClickListener(mOnClickListener);
         }
+
+        ViewHolder viewHolder = new ViewHolder(view, getCursor());
+        return viewHolder;
+    }
+
+
+    @Override
+    public void onBindViewHolder(ViewHolder viewHolder, Cursor cursor) {
 
         // Icon
         {
@@ -61,7 +69,7 @@ public class MovementCursorAdapter extends CursorAdapter{
         }
 
         // Date/time
-        String dateTime = DateUtils.formatFriendlyDateTime(context, cursor.getLong(viewHolder.timeIndex));
+        String dateTime = DateUtils.formatFriendlyDateTime(getContext(), cursor.getLong(viewHolder.timeIndex));
         viewHolder.timeView.setText(dateTime);
 
         // Amount
@@ -83,7 +91,7 @@ public class MovementCursorAdapter extends CursorAdapter{
         }
         else {
             viewHolder.commentView.setText(comment);
-            viewHolder.commentView.setTextColor(textPrimaryColor);
+            //viewHolder.commentView.setTextColor(textPrimaryColor);
         }
         // issuers or receivers
         String issuersOrReceivers;
@@ -96,7 +104,7 @@ public class MovementCursorAdapter extends CursorAdapter{
         viewHolder.issuerOrReceiverView.setText(
                 issuersOrReceivers == null
                         ? ""
-                        : issuersOrReceivers);
+                        : ModelUtils.minifyPubkey(issuersOrReceivers));
         /*viewHolder.issuerOrReceiverView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -106,7 +114,7 @@ public class MovementCursorAdapter extends CursorAdapter{
     }
 
     // View lookup cache
-    private static class ViewHolder {
+    public static class ViewHolder extends RecyclerView.ViewHolder{
         TextView timeView;
         TextView amountView;
         TextView commentView;
@@ -121,12 +129,13 @@ public class MovementCursorAdapter extends CursorAdapter{
         int issuersIndex;
         int receiversIndex;
 
-        ViewHolder(View view, Cursor cursor) {
-            iconView = (ImageView) view.findViewById(R.id.icon);
-            timeView = (TextView) view.findViewById(R.id.time);
-            amountView = (TextView) view.findViewById(R.id.amount);
-            commentView = (TextView) view.findViewById(R.id.comment);
-            issuerOrReceiverView = (TextView) view.findViewById(R.id.issuer_or_receiver);
+        public ViewHolder(View itemView, Cursor cursor) {
+            super(itemView);
+            iconView = (ImageView) itemView.findViewById(R.id.icon);
+            timeView = (TextView) itemView.findViewById(R.id.time);
+            amountView = (TextView) itemView.findViewById(R.id.amount);
+            commentView = (TextView) itemView.findViewById(R.id.comment);
+            issuerOrReceiverView = (TextView) itemView.findViewById(R.id.issuer_or_receiver);
 
             timeIndex = cursor.getColumnIndex(SQLiteTable.Movement.TIME);
             amountIndex = cursor.getColumnIndex(SQLiteTable.Movement.AMOUNT);

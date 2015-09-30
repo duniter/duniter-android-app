@@ -132,12 +132,18 @@ public abstract class AsyncTaskHandleException<Param, Progress, Result>
     @Override
     public void setProgress(int progress) {
         mListener.setProgress(progress);
-        publishProgress((Progress)null);
+        publishProgress((Progress) null);
     }
 
     @Override
     public void increment() {
         mListener.increment();
+        publishProgress((Progress)null);
+    }
+
+    @Override
+    public void increment(int nb) {
+        mListener.increment(nb);
         publishProgress((Progress)null);
     }
 

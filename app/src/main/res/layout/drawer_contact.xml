@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/contact_drawer_panel"
+    android:layout_gravity="end"
+    android:background="@color/primary"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <io.ucoin.app.technical.layout.FrameLayout
+        android:id="@+id/frame_contact_list"
+        android:layout_alignParentTop="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <!--EditText android:id="@+id/search_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <ProgressBar
+        android:id="@+id/contact_progress"
+        style="?android:attr/progressBarStyleInverse"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/search_text"
+        android:layout_gravity="center_horizontal|center_vertical"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/contact_empty_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignTop="@id/search_text"
+        android:text="@string/no_contact"
+        android:textAppearance="?android:textAppearanceMedium"
+        android:textColor="@color/hideable_text_color"
+        android:textSize="18sp"
+        android:layout_margin="8dp"/-->
+
+    <!--view class="android.support.v7.widget.RecyclerView"
+        android:id="@+id/contact_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerInParent="true"/-->
+
+</RelativeLayout>

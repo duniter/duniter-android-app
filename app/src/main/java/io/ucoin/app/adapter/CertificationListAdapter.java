@@ -16,6 +16,7 @@ import io.ucoin.app.R;
 import io.ucoin.app.model.remote.WotCertification;
 import io.ucoin.app.technical.DateUtils;
 import io.ucoin.app.technical.ImageUtils;
+import io.ucoin.app.technical.ModelUtils;
 
 public class CertificationListAdapter extends ArrayAdapter<WotCertification> {
 
@@ -61,8 +62,7 @@ public class CertificationListAdapter extends ArrayAdapter<WotCertification> {
         }
 
         // PubKey
-        String pubKey = certification.getPubkey();
-        viewHolder.pubkey.setText(pubKey);
+        viewHolder.pubkey.setText(ModelUtils.minifyPubkey(certification.getPubkey()));
 
         // Timestamp (certification date)
         long certTime = certification.getTimestamp();

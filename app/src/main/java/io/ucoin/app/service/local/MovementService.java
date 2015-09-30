@@ -160,12 +160,15 @@ public class MovementService extends BaseService {
         BlockchainBlock currentBlock = blockchainRemoteService.getCurrentBlock(currencyId, true);
         long currentBlockNumber = currentBlock.getNumber();
         long syncTxBlockNumber = wallet.getTxBlockNumber();
+        long nbBlockToRead = !completeRefresh && syncTxBlockNumber != -1
+                ? currentBlockNumber - syncTxBlockNumber
+                : currentBlockNumber;
 
-        progressModel.setMax(4);
-        progressModel.setMessage(context.getString(R.string.resync_started));
+        progressModel.setMax((int)(nbBlockToRead + 5) /*delete movements + refreshAndGetUD + pendingsMovements + ud history + save wallet */);
 
         // Delete existing movement if need
         if (completeRefresh) {
+            progressModel.setMessage(context.getString(R.string.resync_delete_movements));
             deleteByWalletId(context, walletId);
             syncTxBlockNumber = -1;
         }
@@ -175,19 +178,19 @@ public class MovementService extends BaseService {
             return 0;
         }
 
-
         // Load UD
+        progressModel.increment(context.getString(R.string.resync_get_UD));
         Map<Integer, Long> udMap = currencyService.refreshAndGetUD(context, currencyId, syncTxBlockNumber);
+        progressModel.increment();
 
         // Load pending movements
-        progressModel.increment();
         List<Movement> pendingsMovements = getPendingMovementsByWalletId(context.getContentResolver(), walletId);
         Map<String, Movement> pendingMovementsByFingerprint = ModelUtils.movementsToFingerprintMap(pendingsMovements);
 
         // Read TX history, by N blocks
         long nbUpdatedMovements = 0;
         {
-            progressModel.increment();
+            progressModel.increment(context.getString(R.string.resync_started));
             TransactionRemoteService txService = ServiceLocator.instance().getTransactionRemoteService();
             long start = syncTxBlockNumber == -1 ? 0 : syncTxBlockNumber + 1;
             long end = Math.min(start + TX_BLOCK_BATCH_SIZE, currentBlockNumber);
@@ -203,6 +206,8 @@ public class MovementService extends BaseService {
                         udMap,
                         txPartialHistory);
 
+                progressModel.increment((int)(end - start));
+
                 start += TX_BLOCK_BATCH_SIZE;
                 end = Math.min(end + TX_BLOCK_BATCH_SIZE, currentBlockNumber);
             }
@@ -210,7 +215,6 @@ public class MovementService extends BaseService {
 
         // Load UD history
         {
-            progressModel.increment();
             UdRemoteService udRemoteService = ServiceLocator.instance().getUdRemoteService();
             List<UdHistoryMovement> udHistoryMovements = udRemoteService.getUdHistory(wallet.getCurrencyId(),
                 wallet.getPubKeyHash());
@@ -218,9 +222,10 @@ public class MovementService extends BaseService {
         }
 
         // Update the wallet with the new TX block number
-        progressModel.increment();
+        progressModel.increment(context.getString(R.string.saving_wallet));
         wallet.setTxBlockNumber(currentBlockNumber);
         walletService.update(context.getContentResolver(), wallet);
+        progressModel.increment();
 
         return nbUpdatedMovements;
     }

@@ -158,6 +158,11 @@
         <item name="android:textSize">18sp</item>
     </style>
 
+    <style name="ListItemHead.Small">
+        <item name="android:textAppearance">?android:textAppearanceMedium</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
     <style name="ListItemSubhead">
         <item name="android:duplicateParentState">true</item>
         <item name="android:layout_width">wrap_content</item>
@@ -167,6 +172,10 @@
         <item name="android:singleLine">true</item>
         <item name="android:layout_gravity">left|top</item>
         <item name="android:textSize">12sp</item>
+    </style>
+
+    <style name="ListItemSubhead.Small">
+        <item name="android:textSize">10sp</item>
     </style>
 
     <style name="FormSpinner">

@@ -111,4 +111,16 @@ public class ModelUtils {
 
         return result;
     }
+
+    /**
+     * Return a small string, for the given pubkey.
+     * @param pubkey
+     * @return
+     */
+    public static String minifyPubkey(String pubkey) {
+        if (pubkey == null || pubkey.length() < 6) {
+            return pubkey;
+        }
+        return pubkey.substring(0, 6);
+    }
 }

@@ -8,7 +8,6 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.LoaderManager;
 import android.content.ContentResolver;
-import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
@@ -21,7 +20,6 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
@@ -48,23 +46,24 @@ import io.ucoin.app.config.Configuration;
 import io.ucoin.app.dao.sqlite.SQLiteTable;
 import io.ucoin.app.content.Provider;
 import io.ucoin.app.fragment.common.HomeFragment;
+import io.ucoin.app.fragment.contact.ContactListFragment;
 import io.ucoin.app.fragment.currency.AddCurrencyDialogFragment;
 import io.ucoin.app.fragment.currency.CurrencyFragment;
 import io.ucoin.app.fragment.wallet.TransferFragment;
+import io.ucoin.app.fragment.wot.IdentityFragment;
 import io.ucoin.app.fragment.wot.WotSearchFragment;
+import io.ucoin.app.model.local.Contact;
 import io.ucoin.app.model.local.Peer;
 import io.ucoin.app.model.remote.Currency;
 import io.ucoin.app.model.remote.Identity;
 import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.service.exception.PeerConnectionException;
-import io.ucoin.app.service.remote.RemoteServiceConnection;
-import io.ucoin.app.service.remote.RemoteServiceLocator;
 import io.ucoin.app.service.remote.WotRemoteService;
 import io.ucoin.app.task.AddCurrencyTask;
+import io.ucoin.app.technical.CollectionUtils;
 import io.ucoin.app.technical.CurrencyUtils;
 import io.ucoin.app.technical.DateUtils;
 import io.ucoin.app.technical.ExceptionUtils;
-import io.ucoin.app.technical.exception.UncaughtExceptionHandler;
 import io.ucoin.app.technical.task.AsyncTaskHandleException;
 
 
@@ -75,7 +74,7 @@ public class MainActivity extends ActionBarActivity
         SharedPreferences.OnSharedPreferenceChangeListener {
 
     private static final int MIN_SEARCH_CHARACTERS = 2;
-    private ActionBarDrawerToggle mToggle;
+    private ActionBarDrawerToggle mDrawerToggle;
     private DrawerLayout mDrawerLayout;
     private QueryResultListener<Identity> mQueryResultListener;
     private ListView mDrawerListView;
@@ -93,7 +92,7 @@ public class MainActivity extends ActionBarActivity
         super.onCreate(savedInstanceState);
 
         // Prepare some utilities
-        Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler(this));
+        //Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler(this));
         DateUtils.setDefaultMediumDateFormat(getMediumDateFormat());
         DateUtils.setDefaultLongDateFormat(getLongDateFormat());
         DateUtils.setDefaultShortDateFormat(getShortDateFormat());
@@ -162,7 +161,7 @@ public class MainActivity extends ActionBarActivity
         mDrawerEmptyListView = (TextView) findViewById(R.id.drawer_empty_list);
 
         //Navigation drawer toggle
-        mToggle = new ActionBarDrawerToggle(this, mDrawerLayout
+        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout
                 , R.string.open_drawer, R.string.close_drawer);
         TextView addCurrency = (TextView) findViewById(R.id.drawer_add_currency);
 
@@ -213,6 +212,22 @@ public class MainActivity extends ActionBarActivity
             }
         });
 
+        // Contact drawer
+        {
+            ContactListFragment fragment = ContactListFragment.newInstance(
+                    // Manage click on contact
+                    new ContactListFragment.ContactListListener() {
+                        @Override
+                        public void onPositiveClick(Bundle args) {
+                            Long contactId = args.getLong(ContactListFragment.BUNDLE_CONTACT_ID);
+                            openContact(contactId);
+                        }
+                    });
+            getFragmentManager().beginTransaction()
+                    .replace(R.id.frame_contact_list, fragment, fragment.getClass().getSimpleName())
+                    .commit();
+        }
+
         ContentResolver.setSyncAutomatically(account, getString(R.string.AUTHORITY), true);
 
         // Open the default fragment
@@ -245,7 +260,7 @@ public class MainActivity extends ActionBarActivity
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-        mToggle.syncState();
+        mDrawerToggle.syncState();
     }
 
     @Override
@@ -254,7 +269,7 @@ public class MainActivity extends ActionBarActivity
         //for now it is just discarded by adding
         //android:configChanges="orientation|screenSize" in the manifest
         super.onConfigurationChanged(newConfig);
-        mToggle.onConfigurationChanged(newConfig);
+        mDrawerToggle.onConfigurationChanged(newConfig);
     }
 
     /**
@@ -297,12 +312,15 @@ public class MainActivity extends ActionBarActivity
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (mToggle.onOptionsItemSelected(item))
+        if (mDrawerToggle.onOptionsItemSelected(item))
             return true;
 
         switch (item.getItemId()) {
             case android.R.id.home:
                 onBackPressed();
+                return true;
+            case R.id.action_contact_list:
+                openContactDrawer();
                 return true;
         }
         return false;
@@ -337,8 +355,6 @@ public class MainActivity extends ActionBarActivity
 
         getFragmentManager().popBackStack();
     }
-
-
 
     public boolean onQueryTextSubmit(MenuItem searchItem, String query) {
 
@@ -383,48 +399,6 @@ public class MainActivity extends ActionBarActivity
         Currency currency = ServiceLocator.instance().getCurrencyService().getCurrencyById(this, id);
         Fragment fragment = CurrencyFragment.newInstance(currency);
         reloadFirstFragment(fragment);
-
-        /*
-        Fragment fragment = null;
-        switch (position) {
-            case 1: //0 is home we only pop back, no need for new fragment
-                break;
-            case 2:
-                fragment = CurrencyListFragment.newInstance();
-                break;
-            case 3:
-                fragment = WebFragment.newInstance();
-                break;
-            case 4:
-                Intent intent = new Intent(MainActivity.this,
-                        SettingsActivity.class);
-                startActivity(intent);
-                break;
-            default:
-
-        }
-
-        //replace fragment
-        FragmentManager fragmentManager = getFragmentManager();
-        if (fragment == null) {
-            fragmentManager.popBackStack(HomeFragment.class.getSimpleName(), 0);
-        } else {
-            // Insert the fragment by replacing any existing fragment
-            fragmentManager.popBackStack(HomeFragment.class.getSimpleName(), 0);
-            fragmentManager.beginTransaction()
-                    .setCustomAnimations(
-                            R.animator.delayed_fade_in,
-                            R.animator.fade_out,
-                            R.animator.delayed_fade_in,
-                            R.animator.fade_out)
-                    .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
-                    .addToBackStack(fragment.getClass().getSimpleName())
-                    .commit();
-        }
-
-        // close the drawer
-        closeDrawer();
-        */
     }
 
     @Override
@@ -484,7 +458,7 @@ public class MainActivity extends ActionBarActivity
             getSupportActionBar().setHomeButtonEnabled(true);
 
             // Hide the drawer toggle button
-            mToggle.setDrawerIndicatorEnabled(false);
+            mDrawerToggle.setDrawerIndicatorEnabled(false);
 
             // Set icon
             getSupportActionBar().setIcon(null);
@@ -496,7 +470,7 @@ public class MainActivity extends ActionBarActivity
             getSupportActionBar().setHomeButtonEnabled(false);
 
             // Show the drawer toggle button
-            mToggle.setDrawerIndicatorEnabled(true);
+            mDrawerToggle.setDrawerIndicatorEnabled(true);
 
             getSupportActionBar().setIcon(R.drawable.ic_ucoin);
         }
@@ -627,6 +601,55 @@ public class MainActivity extends ActionBarActivity
 
     public void closeDrawer() {
         mDrawerLayout.closeDrawer(findViewById(R.id.drawer_panel));
+    }
+
+    protected void openContactDrawer() {
+        mDrawerLayout.openDrawer(findViewById(R.id.contact_drawer_panel));
+    }
+
+    public void closeContactDrawer() {
+        mDrawerLayout.closeDrawer(findViewById(R.id.contact_drawer_panel));
+    }
+
+
+
+    protected void openContact(final Long contactId) {
+        if (contactId == null) {
+            return;
+        }
+
+        // Load contact
+        Contact contact = ServiceLocator.instance().getContactService().getContactViewById(getApplicationContext(), contactId);
+        if (contact == null || CollectionUtils.isEmpty(contact.getIdentities())) {
+            return;
+        }
+
+        Identity identity = null;
+        if (contact.getIdentities().size() == 1) {
+            identity = contact.getIdentities().get(0);
+        }
+        else {
+            // TODO : open a dialog with multi choice ?
+            // (contact with multi-identities/currency)
+        }
+
+        if (identity != null) {
+
+            Fragment fragment = IdentityFragment.newInstance(identity);
+            FragmentManager fragmentManager = getFragmentManager();
+            // Insert the Home at the first place in back stack
+            fragmentManager.beginTransaction()
+                    .setCustomAnimations(
+                            R.animator.delayed_slide_in_up,
+                            R.animator.fade_out,
+                            R.animator.delayed_fade_in,
+                            R.animator.slide_out_up)
+                    .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
+                    .addToBackStack(fragment.getClass().getSimpleName())
+                    .commit();
+
+            closeContactDrawer();
+        }
     }
 
     /**

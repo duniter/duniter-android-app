@@ -57,4 +57,8 @@ public class CollectionUtils {
         }
         return sb.toString();
     }
+
+    public static int size(final Collection<?> collection) {
+        return collection == null ? 0 : collection.size();
+    }
 }

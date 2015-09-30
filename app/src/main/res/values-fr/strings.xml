@@ -69,8 +69,7 @@
     <string name="amount_hint">Montant</string>
     <string name="universal_dividend_acronym">DU</string>
     <string name="unit_coins_label">unité</string>
-    <string name="comment_optional">Commentaire (optionel)</string>
-    <string name="comment_hint">Commentaire (optionel)</string>
+    <string name="comment_hint">Référence (optionel)</string>
     <string name="amount_not_long">Le montant doit etre une valeur entière</string>
     <string name="amount_not_decimal">Le montant doit être une valeur décimal</string>
     <string name="transactions">Opérations</string>
@@ -80,6 +79,8 @@
     <string name="resync">Réimporter toutes les opérations</string>
     <string name="resync_confirm">Etes-vous sûr de vouloir réimporter toutes les opérations ? Cette opération peut durer plusieurs minutes.</string>
     <string name="resync_started">Téléchargement des opérations...</string>
+    <string name="resync_get_UD">Téléchargement de l\'historique des DU...</string>
+    <string name="resync_delete_movements">Suppression de l\'historique...</string>
     <string name="sync_succeed">%1$s opération(s) téléchargée(s) en %2$s</string>
     <string name="sync_no_tx">Aucune nouvelle opération</string>
 
@@ -174,7 +175,7 @@
 
     <!-- Strings related to identities -->
     <string name="identity">Identité</string>
-    <string name="uid_or_public_key">identifiant ou clé</string>
+    <string name="uid_or_public_key">Rechercher</string>
     <string name="uid">Identifiant</string>
     <string name="uid_hint">Identifiant</string>
     <string name="registration_date">Date d\'inscription</string>

@@ -19,6 +19,7 @@ import io.ucoin.app.model.local.UnitType;
 import io.ucoin.app.model.local.Wallet;
 import io.ucoin.app.technical.CurrencyUtils;
 import io.ucoin.app.technical.ImageUtils;
+import io.ucoin.app.technical.ModelUtils;
 import io.ucoin.app.technical.ObjectUtils;
 import io.ucoin.app.technical.StringUtils;
 
@@ -128,7 +129,7 @@ public class WalletArrayAdapter extends ArrayAdapter<Wallet> {
         }
 
         // pubKey
-        viewHolder.pubkey.setText(wallet.getPubKeyHash());
+        viewHolder.pubkey.setText(ModelUtils.minifyPubkey(wallet.getPubKeyHash()));
 
         // If unit is coins
         if (SettingsActivity.PREF_UNIT_COIN.equals(mUnitType)) {
