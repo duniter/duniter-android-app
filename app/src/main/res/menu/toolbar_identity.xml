@@ -18,10 +18,10 @@
         android:id="@+id/action_add_contact"
         android:title="@string/add_as_new_contact" />
 
-    <!-- TODO BLA : implement add as existing contact
+    <!-- TODO BLA : implement add as existing contact -->
     <item
         android:id="@+id/action_add_existing_contact"
-        android:title="@string/add_as_existing_contact" /-->
+        android:title="@string/add_as_existing_contact" />
 
 </menu>
 

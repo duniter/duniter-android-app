@@ -1,143 +1,151 @@
-<LinearLayout
+<io.ucoin.app.technical.view.NotifyingScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/scroll_view"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:layout_height="wrap_content">
 
-    <RelativeLayout
-        android:id="@+id/header_layout"
-        style="@style/Header"
-        android:background="@drawable/shape_identity_header"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <TextView
-            android:id="@+id/uid"
-            style="@style/TextAppearance.AppCompat.Title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentTop="true"
-            android:textColor="@color/textPrimary"
-            android:singleLine="true"
-            android:text="User"
-            android:textSize="@dimen/abc_text_size_display_3_material" />
-
-
-        <ImageButton android:id="@+id/favorite_button"
-            android:layout_marginTop="20dp"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentTop="true"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:src="@drawable/star"
-            android:background="#00ffffff"
-            android:scaleType="fitXY"/>
-
-        <TextView
-            android:id="@+id/timestamp_label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_below="@+id/uid"
-            android:text="@string/registration_date"
-            android:textColor="@color/textPrimary"
-            android:textSize="@dimen/abc_text_size_caption_material" />
-
-        <TextView
-            android:id="@+id/timestamp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_below="@+id/timestamp_label"
-            android:maxLines="1"
-            android:singleLine="true"
-            android:text="Dec 12, 2014"
-            android:textColor="@color/textPrimary"
-            android:textSize="@dimen/abc_text_size_subhead_material" />
-
-    </RelativeLayout>
-
-    <TabHost
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/tabHost">
-
-        <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
         android:orientation="vertical">
 
-            <TabWidget
-                android:id="@android:id/tabs"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content">
-            </TabWidget>
+        <LinearLayout
+            android:id="@+id/header_layout"
+            style="@style/Header"
+            android:background="@drawable/shape_identity_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
-            <FrameLayout
-                android:id="@android:id/tabcontent"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent">
+            <TextView
+                android:id="@+id/uid"
+                style="@style/TextAppearance.AppCompat.Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:textColor="@color/textPrimary"
+                android:singleLine="true"
+                android:text="User"
+                android:textSize="@dimen/abc_text_size_display_2_material" />
+        </LinearLayout>
 
-                <LinearLayout
-                    android:id="@+id/tab1"
-                    android:layout_width="fill_parent"
-                    android:layout_height="fill_parent"
-                    android:orientation="vertical"
-                    android:paddingBottom="8dp"
-                    android:paddingLeft="8dp"
-                    android:paddingRight="8dp"
-                    android:paddingTop="8dp">
+        <LinearLayout
+            android:id="@+id/content_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <android.support.v7.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                card_view:cardUseCompatPadding="true"
+                card_view:cardCornerRadius="4dp"
+                card_view:cardElevation="4dp"
+                card_view:contentPadding="10dp">
+
+                <GridLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:columnCount="2"
+                    android:touchscreenBlocksFocus="false"
+                    android:useDefaultMargins="true">
+
+                    <ImageView
+                        android:src="@drawable/ic_calendar_grey"
+                        android:layout_columnWeight="0.1"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:adjustViewBounds="false"
+                        android:cropToPadding="false" />
 
                     <TextView
-                        style="@style/headline"
-                        android:text="@string/public_key"/>
+                        android:id="@+id/timestamp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:maxLines="1"
+                        android:singleLine="true"
+                        android:layout_columnWeight="0.9"
+                        android:text="Registered since Dec 12, 2014"
+                        android:layout_gravity="center_vertical"
+                        android:textColor="@color/hideable_text_color"
+                        android:textSize="@dimen/abc_text_size_small_material" />
+
+                    <ImageView
+                        android:src="@drawable/ic_key_grey"
+                        android:layout_columnWeight="0.1"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp" />
 
                     <TextView
                         android:id="@+id/pubkey"
-                        style="@style/subhead"/>
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="pubkey"
+                        android:layout_columnWeight="0.9"
+                        android:textColor="@color/hideable_text_color"
+                        android:textSize="@dimen/abc_text_size_small_material" />
 
-                    <TextView
-                        style="@style/headline"
-                        android:text="@string/signature"/>
+                    <ImageView
+                        android:id="@+id/signature_icon"
+                        android:src="@drawable/ic_signature_grey"
+                        android:layout_columnWeight="0.1"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:visibility="gone"/>
 
                     <TextView
                         android:id="@+id/signature"
-                        style="@style/subhead"/>
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/tab2"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical">
-
-                    <!-- Search progress -->
-                    <ProgressBar
-                        android:id="@+id/load_progress"
-                        style="?android:attr/progressBarStyleInverse"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_horizontal"
-                        android:visibility="gone" />
-
-                    <ListView
-                        android:id="@+id/wot_list"
+                        android:layout_columnWeight="0.9"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_alignParentLeft="true"
-                        android:scrollbarStyle="outsideOverlay"
-                        />
+                        android:text="signature"
+                        android:textColor="@color/hideable_text_color"
+                        android:textSize="@dimen/abc_text_size_small_material"
+                        android:visibility="gone"/>
 
-                </LinearLayout>
+                    <ImageButton
+                        android:id="@+id/more_button"
+                        android:src="@drawable/ic_more_holo_light"
+                        android:layout_width="match_parent"
+                        android:layout_height="25dp"
+                        android:layout_columnSpan="2"
+                        style="@style/ButtonListItem"/>
 
-            </FrameLayout>
+                </GridLayout>
+
+
+            </android.support.v7.widget.CardView>
+
+
+            <!-- Search progress -->
+            <ProgressBar
+                android:id="@+id/load_progress"
+                style="?android:attr/progressBarStyleInverse"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:visibility="gone" />
+
+            <ListView
+                android:id="@+id/wot_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:scrollbarStyle="outsideOverlay"/>
+
+            <!--android.support.v7.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                card_view:cardUseCompatPadding="true"
+                card_view:cardCornerRadius="4dp"
+                card_view:cardElevation="4dp"
+                card_view:contentPadding="10dp">
+
+            </android.support.v7.widget.CardView-->
         </LinearLayout>
+   </LinearLayout>
 
-    </TabHost>
-
-</LinearLayout>
+</io.ucoin.app.technical.view.NotifyingScrollView>

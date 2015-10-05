@@ -1,15 +1,9 @@
-<LinearLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/Header"
+    android:background="@drawable/shape_identity_header"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical">
-
-    <RelativeLayout
-        android:id="@+id/header_layout"
-        style="@style/Header"
-        android:background="@drawable/shape_identity_header"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+    android:layout_height="wrap_content">
 
         <TextView
             android:id="@+id/uid"
@@ -68,7 +62,7 @@
                 android:layout_alignParentStart="true"
                 android:layout_below="@+id/uid"
                 android:text="@string/registration_date"
-                android:textColor="@color/textPrimary"
+                android:textColor="@color/hideable_text_color"
                 android:textSize="@dimen/abc_text_size_caption_material" />
 
             <TextView
@@ -128,24 +122,6 @@
                 android:layout_below="@+id/uid"
                 android:text="signature"
                 android:textColor="@color/textPrimary"
-                android:textSize="@dimen/abc_text_size_small_material" />
+                android:textSize="10dp" />
         </LinearLayout>
     </RelativeLayout>
-
-    <!-- Search progress -->
-    <ProgressBar
-        android:id="@+id/load_progress"
-        style="?android:attr/progressBarStyleInverse"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:visibility="gone" />
-
-    <ListView
-        android:id="@+id/wot_list"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:scrollbarStyle="outsideOverlay"/>
-
-</LinearLayout>
