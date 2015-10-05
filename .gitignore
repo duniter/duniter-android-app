@@ -25,3 +25,5 @@ scrypt/src/main/obj/**/*.*
 kalium-jni/src/main/libs/**/*.so
 kalium-jni/src/main/obj/**/*.*
 .project
+
+app/src/main/res/drawable-xxhdpi/.directory
