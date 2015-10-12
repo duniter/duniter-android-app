@@ -111,8 +111,7 @@
                         android:src="@drawable/ic_more_holo_light"
                         android:layout_width="match_parent"
                         android:layout_height="25dp"
-                        android:layout_columnSpan="2"
-                        style="@style/ButtonListItem"/>
+                        android:layout_columnSpan="2"/>
 
                 </GridLayout>
 
