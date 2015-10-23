@@ -88,6 +88,8 @@ public class TransactionRemoteService extends BaseRemoteService {
 	public TxSourceResults getSourcesAndCredit(long currencyId, String pubKey) {
 		Log.d(TAG, String.format("Get sources by pubKey [%s]", pubKey));
 
+		Log.i("TAG","lol");
+
 		// get parameter
 		String path = String.format(URL_TX_SOURCES, pubKey);
 		TxSourceResults result = executeRequest(currencyId, path, TxSourceResults.class);

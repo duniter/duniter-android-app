@@ -43,7 +43,9 @@
         android:id="@+id/recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_centerInParent="true"/>
+          android:layout_alignParentTop="true"
+          android:layout_alignLeft="@id/android:empty"
+          android:layout_alignStart="@id/android:empty"/>
 
 
     <LinearLayout

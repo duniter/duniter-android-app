@@ -1,70 +1,86 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:minHeight="?android:listPreferredItemHeightSmall"
-    android:gravity="center_vertical"
     android:duplicateParentState="true"
+    android:orientation="vertical"
     android:paddingLeft="16dp"
-    android:paddingRight="6dp">
+    android:paddingRight="16dp">
 
+    <LinearLayout
+        android:id="@+id/first"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
-    <TextView
-        android:id="@+id/time"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:duplicateParentState="true"
-        android:layout_width="wrap_content"
+        <TextView
+            android:id="@+id/time"
+            android:duplicateParentState="true"
+            android:layout_width="0dp"
+            android:layout_weight="0.3"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:textAppearanceMedium"
+            android:textColor="@color/hideable_text_color"
+            android:textSize="@dimen/abc_text_size_small_material"
+            android:gravity="start"
+            android:text="01/01/2015"/>
+        <TextView
+            android:id="@+id/amount"
+            android:layout_width="0dp"
+            android:layout_weight="0.7"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/abc_text_size_body_2_material"
+            android:textColor="@color/wallet_link_text_light"
+            android:gravity="end"
+            android:text="100"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/issuer_and_receiver"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:textAppearanceMedium"
-        android:textColor="@color/hideable_text_color"
-        android:textSize="@dimen/abc_text_size_small_material"
-        android:text="01/01/2015"
-        />
+        android:layout_below="@+id/first">
+        <TextView
+            android:id="@+id/user_wallet"
+            android:layout_width="0dp"
+            android:layout_weight="0.4"
+            android:layout_height="wrap_content"
+            android:text="User"
+            android:singleLine="true"
+            android:gravity="end"
+            style="@style/ListItemSubhead"/>
 
-    <TextView
-        android:id="@+id/amount"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="@dimen/abc_text_size_body_2_material"
-        android:textColor="@color/wallet_link_text_light"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentRight="true"
-        android:layout_marginRight="30dp"
-        android:text="100"/>
+        <ImageView
+            android:id="@+id/arrow"
+            android:layout_width="0dp"
+            android:layout_weight="0.2"
+            android:layout_height="15dp"
+            android:duplicateParentState="true"
+            android:src="@drawable/ic_operation_give"/>
 
-    <ImageView
-        android:id="@+id/icon"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:duplicateParentState="true"
-        android:scaleType="fitCenter"
-        android:layout_centerVertical="true"
-        android:src="@drawable/ic_check_24dp"/>
+        <TextView
+            android:id="@+id/issuer_or_receiver"
+            android:layout_width="0dp"
+            android:layout_weight="0.4"
+            android:layout_height="wrap_content"
+            android:text="pubkey"
+            android:singleLine="true"
+            android:gravity="start"
+            style="@style/ListItemSubhead"/>
 
-    <TextView
-        android:id="@+id/issuer_or_receiver"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/amount"
-        android:layout_alignParentLeft="true"
-        android:text="5ocqzyDMMWf1V8bsoNhWb1iNwax1e9M7VTUN6navs8of"
-        android:singleLine="true"
-        android:maxWidth="@dimen/list_item_max_width_pubkey"
-        style="@style/ListItemSubhead"/>
+
+    </LinearLayout>
 
     <TextView
         android:id="@+id/comment"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/amount"
-        android:layout_toRightOf="@+id/issuer_or_receiver"
-        android:layout_marginStart="50dp"
-        android:layout_marginLeft="10dp"
         style="@style/ListItemSubhead"
         android:textStyle="italic"
+        android:layout_below="@+id/issuer_and_receiver"
         android:singleLine="false"
-        android:text="this is a very long long long long long long long long long long long long comment"/>
+        android:text="this is a very long long long long
+         long long long long long long long long comment"/>
 
 </RelativeLayout>

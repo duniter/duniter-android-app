@@ -178,7 +178,7 @@ public class WalletFragment extends Fragment {
         // Tab 1: transfer list
         mMovementListFragment = MovementListFragment.newInstance(wallet, new MovementListFragment.MovementListListener() {
             @Override
-            public void onPositiveClick(Bundle args) {
+            public void onPositiveClick(Bundle args,int i) {
                 onMovementClick(args);
             }
         });
@@ -220,6 +220,9 @@ public class WalletFragment extends Fragment {
 
     }
 
+    public interface WalletClickListener {
+        void onPositiveClick(Bundle args, View view, String action);
+    }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {

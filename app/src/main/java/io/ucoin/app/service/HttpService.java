@@ -18,6 +18,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.ConnectException;
+import java.net.SocketTimeoutException;
 
 import io.ucoin.app.config.Configuration;
 import io.ucoin.app.model.local.Peer;
@@ -158,6 +159,9 @@ public class HttpService extends BaseService implements Closeable{
         }
         catch (ConnectException e) {
             throw new UCoinTechnicalException("ucoin.client.core.connect", e);
+        }
+        catch (SocketTimeoutException e) {
+            throw new UCoinTechnicalException("ucoin.client.core.timeout", e);
         }
         catch (IOException e) {
             throw new UCoinTechnicalException(e.getMessage(), e);

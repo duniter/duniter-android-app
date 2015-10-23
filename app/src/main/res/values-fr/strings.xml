@@ -112,7 +112,7 @@
     <string name="menu">Menu</string>
 
     <!-- Strings related to currency -->
-    <string name="add_currency">Add currency</string>
+    <string name="add_currency">Ajouter une monnaie</string>
     <string name="preselected_peers">Sélectionnez une monnaie prédefinie :</string>
     <string name="peer_hint">Ou remplissez les paramètres de connexion:</string>
     <string name="node_address">Hôte</string>
@@ -166,6 +166,7 @@
     <string name="join_sended">Inscription envoyée.\nEn attente de traitement par le réseau.</string>
     <string name="join_error">Echec de l\'envoi de l\'inscription (erreur technique)</string>
     <string name="duplicate_currency_name">La monnaie [%s] existe déjà.</string>
+    <string name="timeout_error">La connexion au serveur est trop longue</string>
 
     <!-- Strings related to currency/rule -->
 
@@ -242,5 +243,8 @@
 
     <!-- Strings related to extension (ext) -->
     <string name="help_link">Besoin d\'aide ?</string>
+
+    <!--Strings related to identity -->
+    <string name="identity_error">Impossible d\'accédes à l\'utilisateur</string>
 
 </resources>

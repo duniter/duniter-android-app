@@ -29,6 +29,7 @@ import io.ucoin.app.activity.IToolbarActivity;
 import io.ucoin.app.activity.MainActivity;
 import io.ucoin.app.adapter.WalletRecyclerAdapter;
 import io.ucoin.app.fragment.wallet.WalletFragment;
+import io.ucoin.app.fragment.wallet.WalletMouvementFragment;
 import io.ucoin.app.model.local.Wallet;
 import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.service.exception.PeerConnectionException;
@@ -39,12 +40,18 @@ import io.ucoin.app.technical.task.ProgressDialogAsyncTaskListener;
 
 public class HomeFragment extends Fragment {
 
+    public static final String CLICK_MOUVEMENT  = "mouvements";
+    public static final String CLICK_CERTIFY    = "certifications";
+    public static final String CLICK_PAY        = "pay";
+    public static final String CLICK_WALLET     = "wallet";
+
     private TextView mUpdateDateLabel;
     private View mStatusPanel;
     private TextView mStatusText;
     private ImageView mStatusImage;
     private WalletRecyclerAdapter mWalletRecyclerAdapter;
     private RecyclerView mRecyclerView;
+    private Wallet wal;
 
     public static HomeFragment newInstance() {
         return new HomeFragment();
@@ -55,14 +62,68 @@ public class HomeFragment extends Fragment {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
-        mWalletRecyclerAdapter = new WalletRecyclerAdapter(getActivity(), null, new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                int position = mRecyclerView.getChildPosition(view);
-                onWalletClick(mWalletRecyclerAdapter.getItem(position));
-            }
-        });
+       WalletFragment.WalletClickListener wcl = new WalletFragment.WalletClickListener(){
+
+           @Override
+           public void onPositiveClick(Bundle args, View view,String action) {
+               int position = 0;
+               switch (action){
+                   case CLICK_MOUVEMENT:
+                       View linear = (View)view.getParent();
+                       View card = (View)linear.getParent();
+                       View l2 = (View)card.getParent();
+                       View l3 = (View)l2.getParent();
+                       View child = (View)l3.getParent();
+                       position = mRecyclerView.getChildPosition(child);
+                       onWalletClickOperation(mWalletRecyclerAdapter.getItem(position));
+                       break;
+                   case CLICK_CERTIFY:
+                       break;
+                   case CLICK_PAY:
+                       break;
+                   case CLICK_WALLET:
+                       position = mRecyclerView.getChildPosition(view);
+                       wal= mWalletRecyclerAdapter.getItem(position);
+                       onWalletClick(wal);
+                       break;
+               }
+           }
+       };
+
+        mWalletRecyclerAdapter = new WalletRecyclerAdapter(getActivity(), null,
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+
+                        View linear = (View)view.getParent();
+                        View card = (View)linear.getParent();
+                        View l2 = (View)card.getParent();
+                        View l3 = (View)l2.getParent();
+                        View child = (View)l3.getParent();
+                        int position = mRecyclerView.getChildPosition(child);
+                        onWalletClickOperation(mWalletRecyclerAdapter.getItem(position));
+                    }
+                },
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        int position = mRecyclerView.getChildPosition(view);
+                        wal= mWalletRecyclerAdapter.getItem(position);
+                        onWalletClick(wal);
+                    }
+                },
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        int position = mRecyclerView.getChildPosition(view);
+                        wal= mWalletRecyclerAdapter.getItem(position);
+                        onWalletClick(wal);
+                    }
+                }
+        );
     }
+
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -90,6 +151,7 @@ public class HomeFragment extends Fragment {
             // Image
             mStatusImage = (ImageView) view.findViewById(R.id.status_image);
         }
+
 
         // Recycler view
         mRecyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
@@ -156,7 +218,25 @@ public class HomeFragment extends Fragment {
     }
 
     protected void onWalletClick(final Wallet wallet) {
-        Fragment fragment = WalletFragment.newInstance(wallet);
+//        Fragment fragment = WalletFragment.newInstance(wallet);
+//        FragmentManager fragmentManager = getFragmentManager();
+//        // Insert the Home at the first place in back stack
+//        fragmentManager.popBackStack(HomeFragment.class.getSimpleName(), 0);
+//        fragmentManager.beginTransaction()
+//                .setCustomAnimations(
+//                        R.animator.delayed_slide_in_up,
+//                        R.animator.fade_out,
+//                        R.animator.delayed_fade_in,
+//                        R.animator.slide_out_up)
+//                .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
+//                .addToBackStack(fragment.getClass().getSimpleName())
+//                .commit();
+    }
+
+    public void onWalletClickOperation(final Wallet wallet){
+
+
+        Fragment fragment = WalletMouvementFragment.newInstance(wallet);
         FragmentManager fragmentManager = getFragmentManager();
         // Insert the Home at the first place in back stack
         fragmentManager.popBackStack(HomeFragment.class.getSimpleName(), 0);

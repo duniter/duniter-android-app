@@ -47,6 +47,8 @@ public class WotRemoteService extends BaseRemoteService {
 
     public static final String URL_LOOKUP = URL_BASE + "/lookup/%s";
 
+    public static final String URL_REQUIREMENT = URL_BASE+"/requirements/%s";
+
     public static final String URL_CERTIFIED_BY = URL_BASE + "/certified-by/%s";
 
     public static final String URL_CERTIFIERS_OF = URL_BASE + "/certifiers-of/%s";
@@ -86,14 +88,21 @@ public class WotRemoteService extends BaseRemoteService {
         return result;
     }
 
-    public WotLookupResults find(long currencyId, String uidOrPubKey) {
+    public WotLookupUId find(long currencyId, String uidOrPubKey) {
         Log.d(TAG, String.format("Try to find user by looking up on [%s]", uidOrPubKey));
-
         // get parameter
         String path = String.format(URL_LOOKUP, uidOrPubKey);
-        WotLookupResults lookupResult = executeRequest(currencyId, path, WotLookupResults.class);
+        String pathrequirement = String.format(URL_REQUIREMENT, uidOrPubKey);
+        WotLookupResults lookupResults = executeRequest(currencyId, path, WotLookupResults.class);
 
-        return lookupResult;
+        for (WotLookupResult result : lookupResults.getResults()) {
+            if (result.getUids() != null && result.getUids().size() > 0) {
+                for (WotLookupUId uid : result.getUids()) {
+                    return uid;
+                }
+            }
+        }
+        return null;
 
     }
 
@@ -153,6 +162,19 @@ public class WotRemoteService extends BaseRemoteService {
             return null;
         }
         return toIdentity(lookupUid);
+    }
+
+    public Identity getIdentity(long currencyId, String pubKey) {
+//        Log.d(TAG, String.format("Get identity by uid [%s] and pubKey [%s]", uid, pubKey));
+
+        WotLookupUId lookupUid = find(currencyId, pubKey);
+        if (lookupUid == null) {
+            return null;
+        }
+        Identity result = toIdentity(lookupUid);
+        result.setPubkey(pubKey);
+        result.setCurrencyId(currencyId);
+        return result;
     }
 
     public Identity getIdentity(Peer peer, String uid, String pubKey) {

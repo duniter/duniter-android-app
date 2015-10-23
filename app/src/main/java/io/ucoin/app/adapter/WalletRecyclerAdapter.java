@@ -8,6 +8,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -18,6 +20,7 @@ import io.ucoin.app.activity.SettingsActivity;
 import io.ucoin.app.model.local.UnitType;
 import io.ucoin.app.model.local.Wallet;
 import io.ucoin.app.technical.CurrencyUtils;
+import io.ucoin.app.technical.DateUtils;
 import io.ucoin.app.technical.ImageUtils;
 import io.ucoin.app.technical.ModelUtils;
 import io.ucoin.app.technical.ObjectUtils;
@@ -31,7 +34,9 @@ public class WalletRecyclerAdapter extends RecyclerView.Adapter<WalletRecyclerAd
     private List<Wallet> mWallets;
     private Context mContext;
     private String mUnitType;
-    private View.OnClickListener mOnClickListener;
+    private View.OnClickListener mOnClickListenerOperation;
+    private View.OnClickListener mOnClickListenerCertification;
+    private View.OnClickListener mOnClickListenerPayment;
 
     public WalletRecyclerAdapter(Context context, List<Wallet> wallets) {
         this.mWallets = wallets;
@@ -42,21 +47,50 @@ public class WalletRecyclerAdapter extends RecyclerView.Adapter<WalletRecyclerAd
         mUnitType = preferences.getString(SettingsActivity.PREF_UNIT, UnitType.COIN);
     }
 
-    public WalletRecyclerAdapter(Context context, List<Wallet> wallets, View.OnClickListener onClickListener) {
+    public WalletRecyclerAdapter(Context context,
+                                 List<Wallet> wallets,
+                                 View.OnClickListener onClickListenerOperation,
+                                 View.OnClickListener onClickListener,
+                                 View.OnClickListener onClickListener2) {
         this(context, wallets);
-        this.mOnClickListener = onClickListener;
+        this.mOnClickListenerOperation = onClickListenerOperation;
+        this.mOnClickListenerCertification = onClickListener;
+        this.mOnClickListenerPayment = onClickListener2;
     }
+
+//    public WalletRecyclerAdapter(Context context,List<Wallet> wallets,WalletClickListener listener) {
+//        this(context, wallets);
+//        this.mOnClickListenerOperation = onClickListenerOperation;
+//        this.mOnClickListenerCertification = onClickListener;
+//        this.mOnClickListenerPayment = onClickListener2;
+//    }new MovementListFragment.MovementListListener() {
+//        @Override
+//        public void onPositiveClick(Bundle args,int i) {
+//            onMovementClick(args);
+//        }
+//    });
+
+
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
-        View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.card_wallet, null);
-        if (mOnClickListener != null) {
-            view.setOnClickListener(mOnClickListener);
-        }
+        View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.card_wallet2, null);
 
-        ViewHolder viewHolder = new ViewHolder(view);
+
+        ViewHolder viewHolder = new ViewHolder(view,this);
         return viewHolder;
     }
+
+//    @Override
+//    public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
+//        View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.card_wallet, null);
+//        if (mOnClickListener != null) {
+//            view.setOnClickListener(mOnClickListener);
+//        }
+//
+//        ViewHolder viewHolder = new ViewHolder(view);
+//        return viewHolder;
+//    }
 
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, int i) {
@@ -108,6 +142,15 @@ public class WalletRecyclerAdapter extends RecyclerView.Adapter<WalletRecyclerAd
             viewHolder.credit.setVisibility(View.GONE);
             viewHolder.currency.setVisibility(View.GONE);
         }
+
+        if(viewHolder.txt_inscription!=null) {
+
+            viewHolder.txt_inscription.setText("Vous avez été inscrit le: " + DateUtils.formatLong((wallet.getIdentity()).getTimestamp()));
+
+//            mTimestampLabelView.setText(R.string.registration_date);
+//            mTimestampView.setText(DateUtils.format(wallet.getCertTimestamp()));
+
+        }
     }
 
     public void addAll(List<Wallet> wallets) {
@@ -143,9 +186,11 @@ public class WalletRecyclerAdapter extends RecyclerView.Adapter<WalletRecyclerAd
         TextView name;
         TextView credit;
         TextView pubkey;
-        TextView currency;
+        TextView currency, txt_inscription;
 
-        public ViewHolder(View itemView) {
+        LinearLayout mMoreInformation,button_operation;
+
+        public ViewHolder(final View itemView,final WalletRecyclerAdapter wra) {
             super(itemView);
             icon = (ImageView) itemView.findViewById(R.id.icon);
             uid = (TextView) itemView.findViewById(R.id.uid);
@@ -153,6 +198,28 @@ public class WalletRecyclerAdapter extends RecyclerView.Adapter<WalletRecyclerAd
             pubkey = (TextView) itemView.findViewById(R.id.pubkey);
             credit = (TextView) itemView.findViewById(R.id.credit);
             currency = (TextView) itemView.findViewById(R.id.currency);
+            txt_inscription= (TextView) itemView.findViewById(R.id.txt_inscription);
+
+            button_operation = (LinearLayout) itemView.findViewById(R.id.button_operation);
+            mMoreInformation = (LinearLayout) itemView.findViewById(R.id.more_information);
+
+            if(mMoreInformation!=null) {
+                final RelativeLayout showMoreButton = (RelativeLayout) itemView.findViewById(R.id.more_button);
+                showMoreButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (mMoreInformation.getVisibility() == View.GONE) {
+                            mMoreInformation.setVisibility(View.VISIBLE);
+                        } else {
+                            mMoreInformation.setVisibility(View.GONE);
+                        }
+                    }
+                });
+            }
+
+            if(button_operation!=null) {
+                button_operation.setOnClickListener(wra.mOnClickListenerOperation);
+            }
         }
     }
 }

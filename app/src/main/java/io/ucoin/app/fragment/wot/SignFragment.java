@@ -182,7 +182,7 @@ public class SignFragment extends Fragment {
         private String mPopBackStackName;
 
         public SignTask(String popBackStackName) {
-            super(getActivity());
+            super(getActivity().getApplicationContext());
             this.mPopBackStackName = popBackStackName;
         }
 
@@ -214,14 +214,14 @@ public class SignFragment extends Fragment {
         protected void onSuccess(Boolean success) {
             mProgressViewAdapter.showProgress(false);
             if (success == null || !success.booleanValue()) {
-                Toast.makeText(getActivity(),
+                Toast.makeText(getContext(),
                         getString(R.string.cert_error),
                         Toast.LENGTH_SHORT).show();
             }
             else {
                 getFragmentManager().popBackStack(mPopBackStackName, 0); // return back
 
-                Toast.makeText(getActivity(),
+                Toast.makeText(getContext(),
                         getString(R.string.cert_sended),
                         Toast.LENGTH_LONG).show();
 
@@ -233,7 +233,7 @@ public class SignFragment extends Fragment {
         protected void onFailed(Throwable error) {
             super.onFailed(error);
 
-            Toast.makeText(getActivity(),
+            Toast.makeText(getContext(),
                     getString(R.string.cert_error) + "\n" + error.getMessage(),
                     Toast.LENGTH_SHORT).show();
 

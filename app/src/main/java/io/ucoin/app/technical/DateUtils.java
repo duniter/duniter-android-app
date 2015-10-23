@@ -96,7 +96,8 @@ public class DateUtils {
 
         // This year
         if (timeInMillis < YESTERDAY_CACHE) {
-            return DEFAULT_MEDIUM_DATE_FORMAT.format(date).replace(YEAR_AS_STRING_CACHE, "");
+//            return DEFAULT_MEDIUM_DATE_FORMAT.format(date).replace(YEAR_AS_STRING_CACHE, "");
+            return DEFAULT_LONG_DATE_FORMAT.format(date).replace(" " + YEAR_AS_STRING_CACHE, "");
         }
 
         // TODO : This week

@@ -167,6 +167,7 @@
     <string name="join_sended">Registration sended.\nWaiting network processing.</string>
     <string name="join_error">Could not send registration (technical error)</string>
     <string name="duplicate_currency_name">Currency [%s] already exists.</string>
+    <string name="timeout_error">The connection to the server is too long</string>  //a ecrire en anglais et en français
 
     <!-- Strings related to currency/rule -->
 
@@ -243,5 +244,8 @@
 
     <!-- Strings related to extension (ext) -->
     <string name="help_link">Need help ?</string>
+
+    <!--Strings related to identity -->
+    <string name="identity_error">Unable to access user</string>
 
 </resources>

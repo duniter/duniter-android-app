@@ -11,17 +11,17 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.RemoteException;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import io.ucoin.app.R;
-import io.ucoin.app.dao.sqlite.SQLiteTable;
 import io.ucoin.app.content.Provider;
+import io.ucoin.app.dao.sqlite.SQLiteTable;
 import io.ucoin.app.model.local.Movement;
 import io.ucoin.app.model.local.Wallet;
 import io.ucoin.app.model.remote.BlockchainBlock;
@@ -217,7 +217,7 @@ public class MovementService extends BaseService {
         {
             UdRemoteService udRemoteService = ServiceLocator.instance().getUdRemoteService();
             List<UdHistoryMovement> udHistoryMovements = udRemoteService.getUdHistory(wallet.getCurrencyId(),
-                wallet.getPubKeyHash());
+                    wallet.getPubKeyHash());
             nbUpdatedMovements += updateMovementsFromUdHistory(context, walletId, syncTxBlockNumber, udHistoryMovements);
         }
 
@@ -241,10 +241,10 @@ public class MovementService extends BaseService {
      * @param historyResults
      */
     protected long updateMovementsFromTxHistory(final Context context,
-                                             final long walletId,
-                                             final Map<String, Movement> pendingMovementsByFingerprint,
-                                             final Map<Integer, Long> udMap,
-                                             final TxHistoryResults historyResults) {
+                                                final long walletId,
+                                                final Map<String, Movement> pendingMovementsByFingerprint,
+                                                final Map<Integer, Long> udMap,
+                                                final TxHistoryResults historyResults) {
 
         List<Movement> movementsToUpdate = new ArrayList<Movement>();
         List<Movement> movementsToInsert = new ArrayList<Movement>();
@@ -254,8 +254,6 @@ public class MovementService extends BaseService {
         // Workaround for ucoin issue #71
         // TODO remove this map when fixed in ucoin
         Set<String> processedFringerprints = new HashSet<String>();
-
-        Iterator<Map.Entry<Integer, Long>> iteUD = udMap.entrySet().iterator();
 
         // Transfer Received
         if (historyResults.getHistory() != null && CollectionUtils.isNotEmpty(historyResults.getHistory().getReceived())) {
@@ -279,7 +277,6 @@ public class MovementService extends BaseService {
                     // Movement was not exists, so insert it
                     else {
                         Movement newMovement = toMovement(txHistoryMovement, walletId, pubkey, dividend);
-
                         if (newMovement != null) {
                             movementsToInsert.add(newMovement);
                         }
@@ -376,18 +373,18 @@ public class MovementService extends BaseService {
 
 
     private Movement toMovement(TxHistoryMovement source, long walletId, String pubkey, long dividend) {
-        // Read the amount
-        long amount = computeAmount(source, pubkey);
-        if (amount == 0) {
-            Log.w(TAG, String.format("Invalid TX (amount=0) with fingerprint [%s].", source.getFingerprint()));
-            return null;
-        }
-
         // Read issuers
         String issuers = computeIssuers(source, pubkey);
 
         // Read receivers
         String receivers = computeReceivers(source, pubkey);
+
+        // Read the amount
+        long amount = computeAmount(source, pubkey,receivers);
+        if (amount == 0) {
+            Log.w(TAG, String.format("Invalid TX (amount=0) with fingerprint [%s].", source.getFingerprint()));
+            return null;
+        }
 
         Movement target = new Movement();
         target.setWalletId(walletId);
@@ -404,6 +401,7 @@ public class MovementService extends BaseService {
     }
 
     private Movement toMovement(UdHistoryMovement source, long walletId) {
+
         // Check the amount
         if (source.getAmount() <= 0) {
             Log.w(TAG, String.format("Invalid UD (amount<=0) from block %s", source.getBlockNumber()));
@@ -440,35 +438,37 @@ public class MovementService extends BaseService {
         return inlineTxOutput.substring(0, lastIndex);
     }
 
-    private long computeAmount(TxHistoryMovement movement, String pubkey) {
+    private long computeAmount(TxHistoryMovement movement, String pubkey, String receivers) {
         long result = 0;
+        long result2 = 0;
         String txVersion = movement.getVersion();
 
-        int issuerIndex = -1;
-        int i=0;
-        for (String issuer: movement.getIssuers()) {
-            if (pubkey.equals(issuer)) {
-                issuerIndex = i;
-                break;
-            }
-            i++;
-        }
 
-        if (issuerIndex != -1) {
-            for (String input : movement.getInputs()) {
-                if (input.startsWith(issuerIndex + ":")) {
-                    result -= getAmountFromTxInput(txVersion, input);
-                }
-            }
+
+        //recuperer receiver
+
+        List<String> listIssuers = movement.getIssuers();
+//        String[] receiversString = receivers.split(", ");
+//        List<String> listReceivers = Arrays.asList(receiversString);
+
+        //aditionner les inputs
+        for (String input : movement.getInputs()) {
+            int i = input.lastIndexOf(":");
+            String value = input.substring(i+1);
+            result += Long.parseLong(value);
+            result2 += Long.parseLong(value);
         }
 
         for (String output : movement.getOutputs()) {
-            if (output.startsWith(pubkey + ":")) {
-                result += getAmountFromTxOutput(txVersion, output);
+            String key = output.substring(0,output.indexOf(":"));
+
+            if (!listIssuers.contains(key)) {
+                String value = output.substring((output.indexOf(":"))+1);
+                result2 -= Long.parseLong(value);
             }
         }
-
-        return result;
+        Long res = result-result2;
+        return res;
     }
 
     private String computeIssuers(TxHistoryMovement movement, String pubkey) {
@@ -495,14 +495,16 @@ public class MovementService extends BaseService {
 
         String txVersion = movement.getVersion();
 
+        List<String> list = movement.getIssuers();
+
         for (String output: movement.getOutputs()) {
             String receiverPubkey = getPubkeyFromTxOutput(txVersion, output);
-            if (!pubkey.equals(receiverPubkey)) {
+
+            if(!list.contains(receiverPubkey)){
                 result.append(MOVEMENT_RECEIVERS_SEPARATOR)
                         .append(receiverPubkey);
             }
-        }
-        if (result.length() == 0) {
+        } if (result.length() == 0) {
             return null;
         }
         return result.substring(MOVEMENT_ISSUER_SEPARATOR.length()); // skip the first separator
@@ -523,8 +525,7 @@ public class MovementService extends BaseService {
                 SQLiteTable.Movement.WALLET_ID,
                 SQLiteTable.Movement.BLOCK
         );
-        String[] selectionArgs = {
-                String.valueOf(walletId)
+        String[] selectionArgs = {String.valueOf(walletId)
         };
         return getMovements(resolver, selection, selectionArgs);
     }
@@ -616,6 +617,20 @@ public class MovementService extends BaseService {
         try {
             // Execute the batch
             ContentProviderResult[] opResults = resolver.applyBatch(contentUri.getAuthority(), ops);
+
+
+//                  E/SQLiteDatabase: Error inserting
+//                                  amount=230335351276
+//                                  fingerprint=4FEE5820DA9A76F9650BD0751BC9AA476F8E3B09
+//                                  time=1444918589
+//                                  dividend=100
+//                                  block=35497
+//                                  wallet_id=1
+//                                  is_ud=0
+//                                  receivers=5ocqzyDMMWf1V8bsoNhWb1iNwax1e9M7VTUN6navs8of
+            //
+            //          columns wallet_id, fingerprint are not unique (code 19)
+
 
             // Set movement's ids
             if (mustSetId) {
@@ -752,6 +767,15 @@ public class MovementService extends BaseService {
             long nbUpdates = refreshMovements(getContext(),
                     walletId, doCompleteRefresh, RefreshMovementTask.this);
             return nbUpdates;
+        }
+
+        @Override
+        protected void onFailed(Throwable error) {
+            super.onFailed(error);
+
+
+            Toast.makeText(getContext(), getString(R.string.timeout_error) + "\n" + error.getMessage(), Toast.LENGTH_SHORT).show();
+
         }
     }
 

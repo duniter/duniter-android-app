@@ -9,6 +9,11 @@
         android:negativeButtonText="@null"
         android:positiveButtonText="@null" />
 
+    <SwitchPreference
+        android:key="forget"
+        android:title="@string/pref_unit_forget"
+        android:defaultValue="false"/>
+
     <ListPreference
         android:key="add_receiver_as_contact"
         android:title="@string/pref_title_add_receiver_as_contact"

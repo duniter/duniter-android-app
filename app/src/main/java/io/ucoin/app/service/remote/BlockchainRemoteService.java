@@ -434,28 +434,48 @@ public class BlockchainRemoteService extends BaseRemoteService {
         Log.d(TAG, String.format("Getting block's UD from block [%s]", startOffset));
 
         int[] blockNumbersWithUD = getBlocksWithUD(currencyId);
-        if (blockNumbersWithUD == null || blockNumbersWithUD.length == 0) {
-            return null;
-        }
 
         Map<Integer, Long> result = new LinkedHashMap<Integer,Long>();
 
-        // Insert the UD0 (if need)
-        if (startOffset <= 0) {
-            BlockchainParameter parameters = getParameters(currencyId, true/*with cache*/);
-            result.put(0, parameters.getUd0());
-        }
+//         Insert the UD0 (if need)
+//        if (startOffset <= 0) {
+//            BlockchainParameter parameters = getParameters(currencyId, true/*with cache*/);
+//            result.put(0, parameters.getUd0());
+//        }
 
-        for(Integer blockNumber: blockNumbersWithUD) {
-            if (blockNumber >= startOffset) {
-                Long ud = getBlockDividend(currencyId, blockNumber);
-                // Check not null (should never append)
-                if (ud == null) {
-                    throw new UCoinTechnicalException(String.format("Unable to get UD from server block [%s]", blockNumber));
+        boolean previousBlockInsert = false;
+        if (blockNumbersWithUD != null && blockNumbersWithUD.length != 0) {
+            Integer previousBlockNumberWithUd = null;
+            for (Integer blockNumber : blockNumbersWithUD) {
+                if (blockNumber >= startOffset) {
+                    if(!previousBlockInsert){
+                        Long previousUd = getParameters(currencyId, true/*with cache*/).getUd0();
+                        Integer previousBlockNumber = 0;
+                        if(previousBlockNumberWithUd!=null){
+                            previousUd = getBlockDividend(currencyId, previousBlockNumberWithUd);
+                            if (previousUd == null) {
+                                throw new UCoinTechnicalException(
+                                        String.format("Unable to get UD from server block [%s]",
+                                                previousBlockNumberWithUd)
+                                );
+                            }
+                            previousBlockNumber = previousBlockNumberWithUd;
+                        }
+                        result.put(previousBlockNumber, previousUd);
+                        previousBlockInsert = true;
+                    }
+                    Long ud = getBlockDividend(currencyId, blockNumber);
+                    // Check not null (should never append)
+                    if (ud == null) {
+                        throw new UCoinTechnicalException(String.format("Unable to get UD from server block [%s]", blockNumber));
+                    }
+                    result.put(blockNumber, ud);
+                }else{
+                    previousBlockNumberWithUd = blockNumber;
                 }
-
-                result.put(blockNumber, ud);
             }
+        }else{
+            result.put(0, getParameters(currencyId, true/*with cache*/).getUd0());
         }
 
         return result;
@@ -536,18 +556,26 @@ public class BlockchainRemoteService extends BaseRemoteService {
 
         String json = executeRequest(currencyId, URL_BLOCK_WITH_UD, String.class);
 
+
+
         int startIndex = json.indexOf("[");
         int endIndex = json.lastIndexOf(']');
+
         if (startIndex == -1 || endIndex == -1) {
             return null;
         }
 
 
+
+
+
         String blockNumbersStr = json.substring(startIndex + 1, endIndex).trim();
+
 
         if (StringUtils.isBlank(blockNumbersStr)) {
             return null;
         }
+
 
         String[] blockNumbers = blockNumbersStr.split(",");
         int[] result = new int[blockNumbers.length];

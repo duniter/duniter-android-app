@@ -1,9 +1,7 @@
 package io.ucoin.app.fragment.wallet;
 
 import android.app.Fragment;
-import android.content.Context;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -14,16 +12,13 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListView;
 
 import io.ucoin.app.R;
 import io.ucoin.app.adapter.MovementCursorAdapter;
 import io.ucoin.app.adapter.ProgressViewAdapter;
-import io.ucoin.app.dao.sqlite.SQLiteTable;
 import io.ucoin.app.content.Provider;
-import io.ucoin.app.model.local.Movement;
+import io.ucoin.app.dao.sqlite.SQLiteTable;
 import io.ucoin.app.model.local.Wallet;
-import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.technical.view.DividerItemDecoration;
 
 
@@ -31,12 +26,17 @@ public class MovementListFragment extends Fragment {
 
     public static final String BUNDLE_WALLET_ID = "WalletId";
     public static final String BUNDLE_MOVEMENT_ID = "MovementId";
+    public static final String BUNDLE_MOVEMENT_PUBKEY = "pubkey";
+    public static final String BUNDLE_MOVEMENT_CURRENCY_ID = "currencyId";
+    public static final int LISTENER_MOUVEMENT_CLICK = 1;
+    public static final int LISTENER_PUBKEY_CLICK = 2;
 
     private MovementCursorAdapter mRecyclerViewAdapter;
     private ProgressViewAdapter mProgressViewAdapter;
     private MovementListListener mListener;
     private RecyclerView mRecyclerView;
     private LinearLayoutManager mLayoutManager;
+    private static Wallet _wallet;
 
     public static MovementListFragment newInstance(Wallet wallet, MovementListListener listener) {
         MovementListFragment fragment = new MovementListFragment();
@@ -45,6 +45,9 @@ public class MovementListFragment extends Fragment {
         fragment.setArguments(args);
 
         fragment.setOnClickListener(listener);
+
+        _wallet = wallet;
+
 
         return fragment;
     }
@@ -74,9 +77,9 @@ public class MovementListFragment extends Fragment {
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
 
-        mRecyclerViewAdapter = new MovementCursorAdapter(getActivity().getApplicationContext(),
+        mRecyclerViewAdapter = new MovementCursorAdapter(getActivity().getApplicationContext(),_wallet,
                 getNewCursor(),
-                new View.OnClickListener() {
+                new MovementCursorAdapter.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         if (mListener != null) {
@@ -84,7 +87,14 @@ public class MovementListFragment extends Fragment {
                             Long movementId = mRecyclerViewAdapter.getItemId(position);
                             Bundle bundle = new Bundle();
                             bundle.putLong(BUNDLE_MOVEMENT_ID, movementId);
-                            mListener.onPositiveClick(bundle);
+                            mListener.onPositiveClick(bundle,LISTENER_MOUVEMENT_CLICK);
+                        }
+                    }
+
+                    @Override
+                    public void onClick(Bundle args) {
+                        if (mListener != null) {
+                            mListener.onPositiveClick(args,LISTENER_PUBKEY_CLICK);
                         }
                     }
                 });
@@ -111,7 +121,7 @@ public class MovementListFragment extends Fragment {
     /* -- Inner class -- */
 
     public interface MovementListListener {
-        public void onPositiveClick(Bundle args);
+        public void onPositiveClick(Bundle args,int i);
     }
 
     /* -- Internal methods -- */

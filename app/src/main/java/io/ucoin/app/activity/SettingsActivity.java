@@ -8,13 +8,16 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+import android.preference.PreferenceScreen;
 import android.preference.RingtonePreference;
+import android.preference.SwitchPreference;
 import android.text.TextUtils;
 
 import java.util.List;
@@ -45,6 +48,13 @@ public class SettingsActivity extends PreferenceActivity {
     public static final String PREF_UNIT_COIN = "coin";
     public static final String PREF_UNIT_UD = "ud";
     public static final String PREF_UNIT_TIME = "time";
+    public static final String PREF_UNIT_FORGET = "forget";
+
+    public static PreferenceScreen preferenceScreen;
+
+    public static SwitchPreference switchForget;
+    public static RingtonePreference ringtonePreference;
+    public static CheckBoxPreference checkBoxPreference;
 
 
     @Override
@@ -55,6 +65,8 @@ public class SettingsActivity extends PreferenceActivity {
         //getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
 
     }
+
+
 
     @Override
     protected void onStop() {
@@ -93,6 +105,12 @@ public class SettingsActivity extends PreferenceActivity {
         // Bind the summaries of EditText/List/Dialog/Ringtone preferences to
         // their values. When their values change, their summaries are updated
         // to reflect the new value, per the Android Design guidelines.
+        preferenceScreen = getPreferenceScreen();
+
+        switchForget =          (SwitchPreference)  findPreference(PREF_UNIT_FORGET);
+        ringtonePreference =    (RingtonePreference)findPreference("notifications_ringtone");
+        checkBoxPreference =    (CheckBoxPreference)findPreference("notifications_vibrate");
+
         bindPreferenceSummaryToValue(findPreference(PREF_UNIT));
         bindPreferenceSummaryToValue(findPreference("add_receiver_as_contact"));
         bindPreferenceSummaryToBooleanValue(findPreference("notifications_new_payment"), false);
@@ -155,6 +173,17 @@ public class SettingsActivity extends PreferenceActivity {
                 ListPreference listPreference = (ListPreference) preference;
                 int index = listPreference.findIndexOfValue(stringValue);
 
+
+                if(preference.getKey().equals(SettingsActivity.PREF_UNIT)){
+                    if(index>=1) {
+                        preferenceScreen.addPreference(switchForget);
+                        switchForget.setEnabled(true);
+                    }else {
+                        switchForget.setEnabled(false);
+                        preferenceScreen.removePreference(switchForget);
+                    }
+                }
+
                 // Set the summary to reflect the new value.
                 preference.setSummary(
                         index >= 0
@@ -169,8 +198,7 @@ public class SettingsActivity extends PreferenceActivity {
                     preference.setSummary(R.string.pref_ringtone_silent);
 
                 } else {
-                    Ringtone ringtone = RingtoneManager.getRingtone(
-                            preference.getContext(), Uri.parse(stringValue));
+                    Ringtone ringtone = RingtoneManager.getRingtone(preference.getContext(), Uri.parse(stringValue));
 
                     if (ringtone == null) {
                         // Clear the summary if there was a lookup error.
@@ -182,6 +210,22 @@ public class SettingsActivity extends PreferenceActivity {
                         preference.setSummary(name);
                     }
                 }
+            }else if(preference instanceof CheckBoxPreference){
+                if(preference.getKey().equals("notifications_new_payment")){
+
+                    if((Boolean)value) {
+                        preferenceScreen.addPreference(ringtonePreference);
+                        preferenceScreen.addPreference(checkBoxPreference);
+                        ringtonePreference.setEnabled(true);
+                        checkBoxPreference.setEnabled(true);
+                    }else {
+                        ringtonePreference.setEnabled(false);
+                        checkBoxPreference.setEnabled(false);
+                        preferenceScreen.removePreference(ringtonePreference);
+                        preferenceScreen.removePreference(checkBoxPreference);
+                    }
+                }
+
 
             } else {
                 // For all other preferences, set the summary to the value's
@@ -241,6 +285,7 @@ public class SettingsActivity extends PreferenceActivity {
             // updated to reflect the new value, per the Android Design
             // guidelines.
             bindPreferenceSummaryToValue(findPreference(PREF_UNIT));
+            bindPreferenceSummaryToBooleanValue(findPreference(PREF_UNIT_FORGET), false);
             bindPreferenceSummaryToValue(findPreference("add_receiver_as_contact"));
         }
     }
