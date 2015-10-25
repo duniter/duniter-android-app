@@ -18,6 +18,16 @@
     </string-array>
     <string name="pref_unit_forget">Utiliser l\'oublie</string>
 
+    <string name="pref_title_save_contact">Enregistrer les contacts dans</string>
+    <string-array name="pref_save_contact_titles">
+        <item>l\'application</item>
+        <item>l\'application et le téléphone</item>
+    </string-array>
+    <string-array name="pref_save_contact_values">
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+
 
     <string name="pref_title_add_receiver_as_contact">Ajouter comme contact automatiquement</string>
     <string-array name="pref_add_receiver_as_contact_titles">

@@ -19,6 +19,16 @@
     </string-array>
     <string name="pref_unit_forget">Use the forgotten</string>
 
+    <string name="pref_title_save_contact">Save new contacts in</string>
+    <string-array name="pref_save_contact_titles">
+        <item>the app</item>
+        <item>the app and the phone</item>
+    </string-array>
+    <string-array name="pref_save_contact_values">
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+
 
     <string name="pref_title_add_receiver_as_contact">Add as contact automatically</string>
     <string-array name="pref_add_receiver_as_contact_titles">

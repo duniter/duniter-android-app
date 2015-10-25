@@ -1,13 +1,14 @@
 package io.ucoin.app.fragment.wot;
 
 import android.app.Activity;
-import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.content.ContentValues;
 import android.content.Intent;
-import android.content.res.Resources;
+import android.content.SharedPreferences;
 import android.graphics.RectF;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -19,7 +20,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
-import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.ListView;
@@ -27,13 +27,14 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import io.ucoin.app.R;
 import io.ucoin.app.activity.IToolbarActivity;
+import io.ucoin.app.activity.SettingsActivity;
 import io.ucoin.app.adapter.CertificationListAdapter;
 import io.ucoin.app.adapter.ProgressViewAdapter;
-import io.ucoin.app.fragment.contact.AddContactDialogFragment;
 import io.ucoin.app.fragment.wallet.TransferFragment;
 import io.ucoin.app.model.remote.Identity;
 import io.ucoin.app.model.remote.WotCertification;
@@ -81,6 +82,8 @@ public class IdentityFragment extends Fragment {
     private AccelerateDecelerateInterpolator mSmoothInterpolator;
     private TypedValue mTypedValue = new TypedValue();
 
+    private String mSaveContactsPref;
+
     public static IdentityFragment newInstance(Identity identity) {
         IdentityFragment fragment = new IdentityFragment();
         Bundle newInstanceArgs = new Bundle();
@@ -105,6 +108,9 @@ public class IdentityFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        mSaveContactsPref = sharedPref.getString(SettingsActivity.PREF_CONTACT_SAVE_KEY, String.valueOf(SettingsActivity.PREF_CONTACT_SAVE_IN_APP));
     }
 
     private View mPlaceHolderView;
@@ -411,32 +417,28 @@ public class IdentityFragment extends Fragment {
         Identity identity = (Identity)
                 newInstanceArgs.getSerializable(Identity.class.getSimpleName());
 
-        /*Intent intent = new Intent(Intent.ACTION_INSERT_OR_EDIT);
-        intent.setType(ContactsContract.Contacts.CONTENT_ITEM_TYPE);
-        //intent.putExtra(ContactsContract.CommonDataKinds.Im.DISPLAY_NAME, "test");
-        intent.putExtra(ContactsContract.CommonDataKinds.Im.DATA, "ucoin");
-        intent.putExtra(ContactsContract.CommonDataKinds.Im.TYPE, ContactsContract.CommonDataKinds.Im.TYPE_WORK);
-        intent.putExtra(ContactsContract.CommonDataKinds.Im.PROTOCOL, ContactsContract.CommonDataKinds.Im.CUSTOM_PROTOCOL);
-        intent.putExtra(ContactsContract.CommonDataKinds.Im.CUSTOM_PROTOCOL, "ucoin");
 
-        startActivity(intent);
-        */
+//        DialogFragment fragment = AddContactDialogFragment.newInstance(identity);
+//        fragment.show(getFragmentManager(),
+//                fragment.getClass().getSimpleName());
 
-        DialogFragment fragment = AddContactDialogFragment.newInstance(identity);
-        fragment.show(getFragmentManager(),
-                fragment.getClass().getSimpleName());
+        if(mSaveContactsPref.equals(String.valueOf(SettingsActivity.PREF_CONTACT_SAVE_IN_PHONE))) {
+            //------------------------------- Insert the contact in the phone :
+            Intent intent = new Intent(Intent.ACTION_INSERT);
+            intent.setType(ContactsContract.Contacts.CONTENT_TYPE);
 
-        /*
-        Fragment fragment = AddContactDialogFragment.newInstance(identity);
-        getFragmentManager().beginTransaction()
-                .setCustomAnimations(R.animator.slide_in_down,
-                        R.animator.slide_out_up,
-                        R.animator.slide_in_up,
-                        R.animator.slide_out_down)
-                .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
-                .addToBackStack(fragment.getClass().getSimpleName())
-                .commit();
-                */
+            ArrayList<ContentValues> data = new ArrayList<ContentValues>();
+            ContentValues row1 = new ContentValues();
+            row1.put(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Website.CONTENT_ITEM_TYPE);
+            row1.put(ContactsContract.CommonDataKinds.Website.URL, "ucoin://" + identity.getUid() + ":" + identity.getPubkey() + "@" + identity.getCurrency());
+            //row1.put(ContactsContract.CommonDataKinds.Website.LABEL, "abc");
+            row1.put(ContactsContract.CommonDataKinds.Website.TYPE, ContactsContract.CommonDataKinds.Website.TYPE_HOME);
+            data.add(row1);
+            intent.putExtra(ContactsContract.Intents.Insert.DATA, data);
+//              Uri dataUri = getActivity().getContentResolver().insert(ContactsContract.Data.CONTENT_URI, row1);
+            startActivity(intent);
+            //------------------------------- end of inserting contact in the phone
+        }
     }
 
     public int getActionBarHeight() {
@@ -449,8 +451,29 @@ public class IdentityFragment extends Fragment {
     }
 
     protected void onAddAsExistingContact() {
-        Intent i = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
-        startActivityForResult(i, 1);
+//        Intent i = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
+//        startActivityForResult(i, 1);
+        Bundle newInstanceArgs = getArguments();
+        Identity identity = (Identity) newInstanceArgs.getSerializable(Identity.class.getSimpleName());
+
+        if(mSaveContactsPref.equals(String.valueOf(SettingsActivity.PREF_CONTACT_SAVE_IN_PHONE))) {
+            //------------------------------- Edit the existing contact in the phone :
+            Intent intent = new Intent(Intent.ACTION_INSERT_OR_EDIT);
+            intent.setType(ContactsContract.Contacts.CONTENT_ITEM_TYPE);
+
+            ArrayList<ContentValues> data = new ArrayList<ContentValues>();
+            ContentValues row1 = new ContentValues();
+            row1.put(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Website.CONTENT_ITEM_TYPE);
+            row1.put(ContactsContract.CommonDataKinds.Website.URL, "ucoin://" + identity.getUid() + ":" + identity.getPubkey() + "@" + identity.getCurrency());
+            //row1.put(ContactsContract.CommonDataKinds.Website.LABEL, "abc");
+            row1.put(ContactsContract.CommonDataKinds.Website.TYPE, ContactsContract.CommonDataKinds.Website.TYPE_HOME);
+            data.add(row1);
+
+            intent.putExtra(ContactsContract.Intents.Insert.DATA, data);
+
+            startActivity(intent);
+            //------------------------------- end of editing contact in the phone
+        }
     }
 
     @Override

@@ -15,6 +15,15 @@
         android:defaultValue="false"/>
 
     <ListPreference
+        android:key="save_contact"
+        android:title="@string/pref_title_save_contact"
+        android:defaultValue="1"
+        android:entries="@array/pref_save_contact_titles"
+        android:entryValues="@array/pref_save_contact_values"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null" />
+
+    <ListPreference
         android:key="add_receiver_as_contact"
         android:title="@string/pref_title_add_receiver_as_contact"
         android:defaultValue="0"

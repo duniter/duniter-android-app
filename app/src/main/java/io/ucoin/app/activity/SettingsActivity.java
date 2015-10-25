@@ -56,6 +56,10 @@ public class SettingsActivity extends PreferenceActivity {
     public static RingtonePreference ringtonePreference;
     public static CheckBoxPreference checkBoxPreference;
 
+    public static final String PREF_CONTACT_SAVE_KEY = "save_contact";
+    public static final int PREF_CONTACT_SAVE_IN_APP = 1;
+    public static final int PREF_CONTACT_SAVE_IN_PHONE = 2;
+
 
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
@@ -110,6 +114,8 @@ public class SettingsActivity extends PreferenceActivity {
         switchForget =          (SwitchPreference)  findPreference(PREF_UNIT_FORGET);
         ringtonePreference =    (RingtonePreference)findPreference("notifications_ringtone");
         checkBoxPreference =    (CheckBoxPreference)findPreference("notifications_vibrate");
+
+        bindPreferenceSummaryToValue(findPreference(PREF_CONTACT_SAVE_KEY));
 
         bindPreferenceSummaryToValue(findPreference(PREF_UNIT));
         bindPreferenceSummaryToValue(findPreference("add_receiver_as_contact"));
@@ -286,6 +292,7 @@ public class SettingsActivity extends PreferenceActivity {
             // guidelines.
             bindPreferenceSummaryToValue(findPreference(PREF_UNIT));
             bindPreferenceSummaryToBooleanValue(findPreference(PREF_UNIT_FORGET), false);
+            bindPreferenceSummaryToValue(findPreference(PREF_CONTACT_SAVE_KEY));
             bindPreferenceSummaryToValue(findPreference("add_receiver_as_contact"));
         }
     }
