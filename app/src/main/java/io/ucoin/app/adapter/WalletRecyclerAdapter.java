@@ -160,7 +160,7 @@ public class WalletRecyclerAdapter extends RecyclerView.Adapter<WalletRecyclerAd
         TextView pubkey;
         TextView currency, txt_inscription;
 
-        LinearLayout mMoreInformation,button_operation;
+        LinearLayout mMoreInformation,button_operation, button_certify, button_pay;
 
         public ViewHolder(final View itemView,final WalletRecyclerAdapter wra) {
             super(itemView);
@@ -173,6 +173,8 @@ public class WalletRecyclerAdapter extends RecyclerView.Adapter<WalletRecyclerAd
             txt_inscription= (TextView) itemView.findViewById(R.id.txt_inscription);
 
             button_operation = (LinearLayout) itemView.findViewById(R.id.button_operation);
+            button_certify = (LinearLayout) itemView.findViewById(R.id.button_certify);
+            button_pay = (LinearLayout) itemView.findViewById(R.id.button_pay);
             mMoreInformation = (LinearLayout) itemView.findViewById(R.id.more_information);
 
             if(mMoreInformation!=null) {
@@ -196,6 +198,30 @@ public class WalletRecyclerAdapter extends RecyclerView.Adapter<WalletRecyclerAd
                         public void onClick(View v) {
                             Bundle args = new Bundle();
                             wra.walletListener.onPositiveClick(args, v, HomeFragment.CLICK_MOUVEMENT);
+                        }
+                    });
+                }
+            }
+
+            if(button_certify!=null) {
+                if(wra.walletListener!=null){
+                    button_certify.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            Bundle args = new Bundle();
+                            wra.walletListener.onPositiveClick(args, v, HomeFragment.CLICK_CERTIFY);
+                        }
+                    });
+                }
+            }
+
+            if(button_pay!=null) {
+                if(wra.walletListener!=null){
+                    button_pay.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            Bundle args = new Bundle();
+                            wra.walletListener.onPositiveClick(args, v, HomeFragment.CLICK_PAY);
                         }
                     });
                 }

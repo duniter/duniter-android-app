@@ -28,6 +28,8 @@ import io.ucoin.app.R;
 import io.ucoin.app.activity.IToolbarActivity;
 import io.ucoin.app.activity.MainActivity;
 import io.ucoin.app.adapter.WalletRecyclerAdapter;
+import io.ucoin.app.fragment.wallet.TransferFragment;
+import io.ucoin.app.fragment.wallet.WalletCertificationFragment;
 import io.ucoin.app.fragment.wallet.WalletMouvementFragment;
 import io.ucoin.app.model.local.Wallet;
 import io.ucoin.app.service.ServiceLocator;
@@ -72,23 +74,18 @@ public class HomeFragment extends Fragment {
 
            @Override
            public void onPositiveClick(Bundle args, View view,String action) {
-               int position = 0;
+               int position = mRecyclerView.getChildPosition(getViewWallet(view));
                switch (action){
                    case CLICK_MOUVEMENT:
-                       View linear = (View)view.getParent();
-                       View card = (View)linear.getParent();
-                       View l2 = (View)card.getParent();
-                       View l3 = (View)l2.getParent();
-                       View child = (View)l3.getParent();
-                       position = mRecyclerView.getChildPosition(child);
                        onWalletClickOperation(mWalletRecyclerAdapter.getItem(position));
                        break;
                    case CLICK_CERTIFY:
+                       onWalletClickCertification(mWalletRecyclerAdapter.getItem(position));
                        break;
                    case CLICK_PAY:
+                       onWalletClickPay(mWalletRecyclerAdapter.getItem(position));
                        break;
                    case CLICK_WALLET:
-                       position = mRecyclerView.getChildPosition(view);
                        wal= mWalletRecyclerAdapter.getItem(position);
                        onWalletClick(wal);
                        break;
@@ -96,6 +93,10 @@ public class HomeFragment extends Fragment {
            }
        };
         mWalletRecyclerAdapter = new WalletRecyclerAdapter(getActivity(), null,wcl);
+    }
+
+    public View getViewWallet(View v){
+        return (View) v.getParent().getParent().getParent().getParent().getParent();
     }
 
 
@@ -111,6 +112,7 @@ public class HomeFragment extends Fragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
 
         // TODO update this label
         mUpdateDateLabel = (TextView)view.findViewById(R.id.update_date_label);
@@ -140,6 +142,8 @@ public class HomeFragment extends Fragment {
         // Load wallets
         LoadWalletsTask loadWalletsTask = new LoadWalletsTask();
         loadWalletsTask.execute();
+
+        ViewUtils.hideKeyboard(getActivity());
 
     }
 
@@ -221,6 +225,36 @@ public class HomeFragment extends Fragment {
                         R.animator.fade_out,
                         R.animator.delayed_fade_in,
                         R.animator.slide_out_up)
+                .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
+                .addToBackStack(fragment.getClass().getSimpleName())
+                .commit();
+    }
+
+    public void onWalletClickCertification(final Wallet wallet){
+
+
+        Fragment fragment = WalletCertificationFragment.newInstance(wallet);
+        FragmentManager fragmentManager = getFragmentManager();
+        // Insert the Home at the first place in back stack
+        fragmentManager.popBackStack(HomeFragment.class.getSimpleName(), 0);
+        fragmentManager.beginTransaction()
+                .setCustomAnimations(
+                        R.animator.delayed_slide_in_up,
+                        R.animator.fade_out,
+                        R.animator.delayed_fade_in,
+                        R.animator.slide_out_up)
+                .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
+                .addToBackStack(fragment.getClass().getSimpleName())
+                .commit();
+    }
+
+    public void onWalletClickPay(final Wallet wallet){
+        Fragment fragment = TransferFragment.newInstance(wallet);
+        getFragmentManager().beginTransaction()
+                .setCustomAnimations(R.animator.slide_in_down,
+                        R.animator.slide_out_up,
+                        R.animator.slide_in_up,
+                        R.animator.slide_out_down)
                 .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
                 .addToBackStack(fragment.getClass().getSimpleName())
                 .commit();

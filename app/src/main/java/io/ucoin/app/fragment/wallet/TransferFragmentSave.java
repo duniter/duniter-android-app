@@ -1,20 +1,16 @@
 package io.ucoin.app.fragment.wallet;
 
 import android.app.Activity;
-import android.app.Dialog;
 import android.app.Fragment;
-import android.app.SearchManager;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.text.method.DigitsKeyListener;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -24,24 +20,24 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import io.ucoin.app.R;
 import io.ucoin.app.activity.IToolbarActivity;
-import io.ucoin.app.activity.SettingsActivity;
+import io.ucoin.app.adapter.ContactArrayAdapter;
 import io.ucoin.app.adapter.ProgressViewAdapter;
+import io.ucoin.app.adapter.WalletArrayAdapter;
 import io.ucoin.app.fragment.common.LoginFragment;
-import io.ucoin.app.fragment.dialog.ListWalletDialog;
 import io.ucoin.app.model.local.Contact;
 import io.ucoin.app.model.local.Movement;
-import io.ucoin.app.model.local.UnitType;
 import io.ucoin.app.model.local.Wallet;
 import io.ucoin.app.model.remote.Identity;
 import io.ucoin.app.service.ServiceLocator;
@@ -60,7 +56,7 @@ import io.ucoin.app.technical.ViewUtils;
 import io.ucoin.app.technical.task.AsyncTaskHandleException;
 import io.ucoin.app.technical.task.NullAsyncTaskListener;
 
-public class TransferFragment extends Fragment {
+public class TransferFragmentSave extends Fragment {
 
     public static final String TAG = "TransferFragment";
 
@@ -70,9 +66,10 @@ public class TransferFragment extends Fragment {
     protected static final int PICK_CONTACT_REQUEST = 1;
 
     private TextView mReceiverUidView;
-    private Button  mWalletButton;
-    private Button  mContactButton;
-    private Button  mCurrencyButton;
+    private Spinner  mWalletSpinner;
+    private Spinner  mContactSpinner;
+    private WalletArrayAdapter mWalletAdapter;
+    private ContactArrayAdapter mContactAdapter;
     private EditText mReceiverPubkeyText;
     private EditText mAmountText;
     private TextView mConvertedText;
@@ -87,25 +84,13 @@ public class TransferFragment extends Fragment {
     private Long mUniversalDividend = null;
     private boolean mIsRunningConvertion = false;
     private boolean mInitializing = false;
-    private Dialog dialogWallet;
 
     private Identity mReceiverIdentity;
 
-    private ArrayList<Wallet> walletList;
-    private ArrayList<Contact> contactList;
-    private ArrayList<String> currencyList;
-
-    private String mUnitType;
-    private String mUnitUse;
-
-    private Wallet walletSelected;
-    private String currencySelected;
-    private Contact contactSelected;
-
     private TransferTask mTransferTask = null;
 
-    public static TransferFragment newInstance(Identity identity) {
-        TransferFragment fragment = new TransferFragment();
+    public static TransferFragmentSave newInstance(Identity identity) {
+        TransferFragmentSave fragment = new TransferFragmentSave();
         Bundle args = new Bundle();
         args.putSerializable(BUNDLE_RECEIVER_ITENTITY, identity);
         fragment.setArguments(args);
@@ -113,8 +98,8 @@ public class TransferFragment extends Fragment {
         return fragment;
     }
 
-    public static TransferFragment newInstance(Wallet wallet) {
-        TransferFragment fragment = new TransferFragment();
+    public static TransferFragmentSave newInstance(Wallet wallet) {
+        TransferFragmentSave fragment = new TransferFragmentSave();
         Bundle args = new Bundle();
         args.putSerializable(BUNDLE_WALLET, wallet);
         fragment.setArguments(args);
@@ -135,100 +120,46 @@ public class TransferFragment extends Fragment {
                 .getSerializable(BUNDLE_WALLET);
         final long accountId = ((io.ucoin.app.Application)getActivity().getApplication()).getAccountId();
 
-        walletList      = new ArrayList<>();
-        contactList     = new ArrayList<>();
-        currencyList    = new ArrayList<>();
+        // Init wallet list
+        mWalletAdapter = new WalletArrayAdapter(
+                getActivity(),
+                android.R.layout.simple_spinner_item
+        );
+        mWalletAdapter.setDropDownViewResource(WalletArrayAdapter.DEFAULT_LAYOUT_RES);
+
+        // Init contact list
+        mContactAdapter = new ContactArrayAdapter(
+                getActivity(),
+                android.R.layout.simple_spinner_item
+        );
+        mContactAdapter.setDropDownViewResource(ContactArrayAdapter.DEFAULT_LAYOUT_RES);
 
         // Load wallets
-        ServiceLocator.instance().getWalletService().getWalletsByAccountId(accountId, false, new NullAsyncTaskListener<List<Wallet>>(getActivity()) {
-            @Override
-            public void onSuccess(List<Wallet> wallets) {
-                if (CollectionUtils.isNotEmpty(wallets)) {
-                    walletList.addAll(wallets);
-                }
-            }
-        });
-        String[] s = getResources().getStringArray(R.array.pref_unit_list_titles);
-        currencyList.addAll(Arrays.asList(s));
-    }
+        ServiceLocator.instance().getWalletService().getWalletsByAccountId(
+                accountId,
+                false,
+                new NullAsyncTaskListener<List<Wallet>>(getActivity()) {
+                    @Override
+                    public void onSuccess(List<Wallet> wallets) {
+                        mWalletAdapter.clear();
 
-    public void showDialog(ArrayList list){
-        DialogItemClickListener dialogWallet = new DialogItemClickListener() {
-            @Override
-            public void onClick(int position) {
-                walletSelected = walletList.get(position);
-                mWalletButton.setText(walletSelected.getUid());
-                mUniversalDividend = ServiceLocator.instance().getCurrencyService()
-                        .getCurrencyById(getActivity(),walletSelected.getCurrencyId()).getLastUD();
-                List<Contact> l = ServiceLocator.instance().getContactService()
-                        .getContactsByCurrencyId(getActivity(), walletSelected.getCurrencyId());
-                contactList.addAll(l);
-                mContactButton.setEnabled(true);
-            }
-        };
-        DialogItemClickListener dialogContact = new DialogItemClickListener() {
-            @Override
-            public void onClick(int position) {
-                contactSelected = contactList.get(position);
-                mContactButton.setText(contactSelected.getName());
-            }
-        };
-        DialogItemClickListener dialogCurrency = new DialogItemClickListener() {
-            @Override
-            public void onClick(int position) {
-                currencySelected = currencyList.get(position);
-                mCurrencyButton.setText(currencySelected);
-                int pos = currencyList.indexOf(mCurrencyButton.getText());
-                switch (mUnitType){
-                    case UnitType.COIN:
-                        if(pos != 0){
-                            mConvertedText.setVisibility(View.VISIBLE);
-                            mUnitUse = UnitType.COIN;
-                        }else{
-                            mConvertedText.setVisibility(View.GONE);
-                            mUnitUse = null;
-                        }
-                        break;
-                    case UnitType.UD:
-                        if(pos != 1){
-                            mConvertedText.setVisibility(View.VISIBLE);
-                            mUnitUse = UnitType.UD;
-                        }else{
-                            mConvertedText.setVisibility(View.GONE);
-                            mUnitUse = null;
-                        }
-                        break;
-                    case UnitType.TIME:
-                        if(pos != 2){
-                            mConvertedText.setVisibility(View.VISIBLE);
-                            mUnitUse = UnitType.TIME;
-                        }else{
-                            mConvertedText.setVisibility(View.GONE);
-                            mUnitUse = null;
-                        }
-                        break;
-                }
-                updateComvertedAmountView();
-            }
-        };
-        ListWalletDialog dialog= null;
+                        if (CollectionUtils.isNotEmpty(wallets)) {
 
-        if(list != null && list.size()>0) {
-            if (list.get(0) instanceof Wallet) {
-                dialog = new ListWalletDialog<Wallet>(walletList,dialogWallet);
-            }
-            else if (list.get(0) instanceof Contact) {
-                dialog = new ListWalletDialog<Contact>(contactList,dialogContact);
-            }
-            else if (list.get(0) instanceof String) {
-                dialog = new ListWalletDialog<String>(currencyList,dialogCurrency);
-            }
-        }
-        dialog.show(getFragmentManager(), "dialog");
-    }
+                            mWalletAdapter.addAll(wallets);
+                            loadCurrencyData(wallets.get(0));
 
-    public interface DialogItemClickListener{
-        void onClick(int position);
+                            // replace the given wallet with a wallet from list
+                            if (wallet != null) {
+                                for (Wallet aWallet : wallets) {
+                                    if (ObjectUtils.equals(aWallet.getId(), wallet.getId())) {
+                                        newInstanceArgs.putSerializable(BUNDLE_WALLET, wallet);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
     }
 
     @Override
@@ -244,22 +175,6 @@ public class TransferFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         mInitializing = true;
 
-
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        mUnitType = preferences.getString(SettingsActivity.PREF_UNIT, UnitType.COIN);
-        switch (mUnitType){
-            case UnitType.COIN:
-                currencySelected = currencyList.get(0);
-                break;
-            case UnitType.UD:
-                currencySelected = currencyList.get(1);
-                break;
-            case UnitType.TIME:
-                currencySelected = currencyList.get(2);
-                break;
-        }
-        mConvertedText = (TextView) view.findViewById(R.id.amount_default_unit);
-
         // Read fragment arguments
         Bundle newInstanceArgs = getArguments();
         mReceiverIdentity = (Identity) newInstanceArgs
@@ -269,73 +184,140 @@ public class TransferFragment extends Fragment {
         View focusView = null;
 
 
-        // Source list button
-        mWalletButton   = (Button) view.findViewById(R.id.wallet_button);
-        mWalletButton.setOnClickListener(new View.OnClickListener() {
+        // Source wallet
+        mWalletSpinner = ((Spinner) view.findViewById(R.id.wallet));
+        mWalletSpinner.setAdapter(mWalletAdapter);
+        mWalletSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
-            public void onClick(View v) {
-                showDialog(walletList);
+            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+                if (!mInitializing) {
+                    Wallet selectedWallet = (Wallet) parentView.getSelectedItem();
+                    loadCurrencyData(selectedWallet);
+                }
             }
-        });
-        mContactButton  = (Button) view.findViewById(R.id.contact_button);
-        mContactButton.setOnClickListener(new View.OnClickListener() {
+
             @Override
-            public void onClick(View v) {showDialog(contactList);
-            }
-        });
-        mCurrencyButton = (Button) view.findViewById(R.id.currency_button);
-        mCurrencyButton.setText(currencySelected);
-        mCurrencyButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showDialog(currencyList);
+            public void onNothingSelected(AdapterView<?> parentView) {
+                resetCurrencyData();
             }
         });
 
         // Receiver
-        SearchManager searchManager = (SearchManager) getActivity()
-                .getSystemService(Context.SEARCH_SERVICE);
-        mReceiverPubkeyText = (EditText) view.findViewById(R.id.receiver_pubkey);
-        mReceiverPubkeyText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        {
+            // If receiver identity is fixed, with a uid (and pubkey) : display only the UID
+            if (mReceiverIdentity != null
+                    && mReceiverIdentity.getUid() != null
+                    && mReceiverIdentity.getPubkey() != null) {
+                ((TextView) view.findViewById(R.id.receiver_uid)).setText(mReceiverIdentity.getUid());
+
+                // Mask unused views
+                view.findViewById(R.id.receiver_contact_label).setVisibility(View.GONE);
+//                view.findViewById(R.id.receiver_contact).setVisibility(View.GONE);
+                view.findViewById(R.id.receiver_pubkey).setVisibility(View.GONE);
+                //view.findViewById(R.id.browse_button).setVisibility(View.GONE);
             }
 
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                searchIdentityWith();
+            // If receiver identity is fixed, display only pubkey
+            if (mReceiverIdentity != null && mReceiverIdentity.getPubkey() != null) {
+                ((TextView) view.findViewById(R.id.receiver_pubkey)).setText(mReceiverIdentity.getPubkey());
+                focusView = mAmountText;
+
+                // Mask unused views
+//                view.findViewById(R.id.receiver_contact).setVisibility(View.GONE);
+                view.findViewById(R.id.receiver_uid).setVisibility(View.GONE);
             }
 
-            @Override
-            public void afterTextChanged(Editable s) {
+            // If user can choose the receiver: display contact list and a text field for pubkey
+            else {
+                // pubkey
+                mReceiverPubkeyText = (EditText) view.findViewById(R.id.receiver_pubkey);
+                focusView = mReceiverPubkeyText;
+
+                // Contact list (disable if no contact in list)
+//                mContactSpinner = ((Spinner) view.findViewById(R.id.receiver_contact));
+                mContactSpinner.setAdapter(mContactAdapter);
+                mContactSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+                        if (mInitializing) {
+                            return;
+                        }
+                        // Copy the selected contact to pubkey field
+                        Contact selectContact = (Contact) parentView.getSelectedItem();
+                        if (selectContact != null && selectContact.getIdentities().size() == 1) {
+                            Identity identity = selectContact.getIdentities().get(0);
+                            if (StringUtils.isNotBlank(identity.getPubkey())) {
+                                mReceiverPubkeyText.setText(identity.getPubkey());
+                                mAmountText.requestFocus();
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parentView) {
+                        resetCurrencyData();
+                    }
+                });
+                mContactSpinner.setVisibility(View.GONE);
+
+
+                /*Button browseButton = (Button)view.findViewById(R.id.browse_button);
+                browseButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        pickContact();
+                    }
+                });*/
+
+                // Mask unused views
+                view.findViewById(R.id.receiver_uid).setVisibility(View.GONE);
             }
-        });
+        }
 
         // Amount
         mAmountText = (EditText)view.findViewById(R.id.amount);
         mAmountText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+           @Override
+           public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+           }
 
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                updateComvertedAmountView();
-            }
+           @Override
+           public void onTextChanged(CharSequence s, int start, int before, int count) {
+               updateComvertedAmountView(mIsCoinUnit);
+           }
 
-            @Override
-            public void afterTextChanged(Editable s) {}
+           @Override
+           public void afterTextChanged(Editable s) {
+           }
         });
-
-
         if (focusView == null) {
             focusView = mAmountText;
         }
+
+        // Unit
+//        mAmountUnitText = (TextView)view.findViewById(R.id.amount_unit_text);
+//
+//        // Converted amount
+//        mConvertedText = (TextView)view.findViewById(R.id.converted_amount);
+//
+//        // Converted unit
+//        mConvertedUnitText = (TextView)view.findViewById(R.id.converted_amount_unit_text);
+//
+//        // Toggle unit image
+//        ImageView toggleImage = (ImageView)view.findViewById(R.id.toggle_unit_button);
+//        toggleImage.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                toggleUnits();
+//            }
+//        });
 
         // Comment
         mCommentText = (EditText)view.findViewById(R.id.comment);
         mCommentText.setOnEditorActionListener(new EditText.OnEditorActionListener() {
             @Override
-            public boolean onEditorAction(TextView v, int actionId,KeyEvent event) {
+            public boolean onEditorAction(TextView v, int actionId,
+                                          KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_SEND) {
                     return attemptTransfer();
                 }
@@ -352,15 +334,32 @@ public class TransferFragment extends Fragment {
             }
         });
 
+        // progress view
+//        mProgressViewAdapter = new ProgressViewAdapter(
+//                view.findViewById(R.id.transfer_progress),
+//                mSendButton);
 
         // Set the focus and open keyboard
         if (focusView != null) {
             focusView.requestFocus();
+            ViewUtils.showKeyboard(getActivity());
+        }
+
+        // Load data on currency (need for transfer and unit conversion)
+        loadCurrencyData((Wallet)mWalletSpinner.getSelectedItem());
+
+
+        // select the wallet given in argument
+        if (wallet != null) {
+            int walletPosition = mWalletAdapter.getPosition(wallet);
+            if (walletPosition != -1) {
+                mWalletSpinner.setSelection(walletPosition);
+            }
         }
 
         mInitializing = false;
-        updateComvertedAmountView();
     }
+
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -391,6 +390,30 @@ public class TransferFragment extends Fragment {
 
     /* -- Internal methods -- */
 
+    protected void loadCurrencyData(final Wallet wallet) {
+        if (wallet != null) {
+            LoadCurrencyDataTask loadCurrencyDataTask = new LoadCurrencyDataTask();
+            loadCurrencyDataTask.execute(wallet);
+        }
+    }
+
+    protected void resetCurrencyData() {
+        mUniversalDividend = null;
+        mCurrencyId = null;
+    }
+
+    protected void pickContact() {
+        Intent intent = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
+        //intent.setType(ContactsContract.Contacts.CONTENT_ITEM_TYPE);
+        //intent.setType(ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE);
+        startActivityForResult(intent, PICK_CONTACT_REQUEST);
+
+        /*
+        Intent pickContactIntent = new Intent(Intent.ACTION_PICK, ContactsContract.CommonDataKinds.Phone.CONTENT_URI);
+        pickContactIntent.setType(ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE);
+        startActivityForResult(pickContactIntent, PICK_CONTACT_REQUEST);*/
+    }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -415,7 +438,7 @@ public class TransferFragment extends Fragment {
     protected boolean attemptTransfer() {
 
         // Reset errors.
-//        mWalletAdapter.setError(mWalletButton.getSelectedView(), null);
+        mWalletAdapter.setError(mWalletSpinner.getSelectedView(), null);
         mAmountText.setError(null);
         mCommentText.setError(null);
 
@@ -425,14 +448,14 @@ public class TransferFragment extends Fragment {
 
         boolean cancel = false;
         View focusView = null;
-//        Wallet wallet = (Wallet)mWalletButton.getSelectedItem();
+        Wallet wallet = (Wallet)mWalletSpinner.getSelectedItem();
 
         // Check wallet selected
-//        if (wallet == null) {
-////            mWalletAdapter.setError(mWalletButton.getSelectedView(), getString(R.string.field_required));
-//            focusView = mWalletButton;
-//            cancel = true;
-//        }
+        if (wallet == null) {
+            mWalletAdapter.setError(mWalletSpinner.getSelectedView(), getString(R.string.field_required));
+            focusView = mWalletSpinner;
+            cancel = true;
+        }
 
         // Check public key (if no given receiver identity)
         if ((mReceiverIdentity == null || mReceiverIdentity.getUid() == null)
@@ -463,11 +486,11 @@ public class TransferFragment extends Fragment {
             else {
                 value = CurrencyUtils.parse(mAmountText.getText().toString());
             }
-//            if (wallet.getCredit() < value) {
-//                mWalletAdapter.setError(mWalletButton.getSelectedView(), getString(R.string.insufficient_credit));
-//                focusView = mWalletButton;
-//                cancel = true;
-//            }
+            if (wallet.getCredit() < value) {
+                mWalletAdapter.setError(mWalletSpinner.getSelectedView(), getString(R.string.insufficient_credit));
+                focusView = mWalletSpinner;
+                cancel = true;
+            }
         }
 
         if (cancel) {
@@ -476,7 +499,7 @@ public class TransferFragment extends Fragment {
             focusView.requestFocus();
             return false;
         } else {
-//            doTransfert(wallet);
+            doTransfert(wallet);
             return true;
         }
     }
@@ -514,98 +537,61 @@ public class TransferFragment extends Fragment {
         }
     }
 
-    public void searchIdentityWith(){
-        //recherche de la publick key
+    protected void toggleUnits() {
+        mIsCoinUnit = !mIsCoinUnit;
+        CharSequence amountUnitText = mAmountUnitText.getText();
+        mAmountUnitText.setText(mConvertedUnitText.getText());
+        mConvertedUnitText.setText(amountUnitText);
+        if (mIsCoinUnit) {
+            // Convert into amount integer
+            String amountStr = mAmountText.getText().toString();
+            amountStr = String.valueOf(Math.round(Double.parseDouble(amountStr)));
+            mAmountText.setText(amountStr);
+            // Change the editor type to number (no decimal)
+            mAmountText.setInputType(EditorInfo.TYPE_CLASS_NUMBER);
+            mAmountText.setKeyListener(DigitsKeyListener.getInstance("0123456789"));
+        }
+        else {
+            // Change the editor type to number with decimal
+            mAmountText.setInputType(EditorInfo.TYPE_CLASS_NUMBER|EditorInfo.TYPE_NUMBER_FLAG_DECIMAL);
+            mAmountText.setKeyListener(DigitsKeyListener.getInstance("0123456789."));
+        }
+        updateComvertedAmountView(mIsCoinUnit);
     }
 
-    protected void updateComvertedAmountView() {
+    protected void updateComvertedAmountView(boolean isCoinUnit) {
         // If data not loaded: do nothing
-
-        if(walletSelected == null){
-            return ;
+        if (mUniversalDividend == null || mIsRunningConvertion) {
+            return;
         }
+        mIsRunningConvertion = true;
 
-        Double origin = null;
-
-        if(mAmountText.getText().toString().equals("")){
-            origin = Double.parseDouble(""+0);
-        }else {
-            origin = Double.parseDouble(mAmountText.getText().toString());
+        String amountStr = mAmountText.getText().toString();
+        if (TextUtils.isEmpty(amountStr)) {
+            mConvertedText.setText("");
         }
+        else {
 
-        mUniversalDividend = ServiceLocator.instance().getCurrencyService()
-                .getCurrencyById(getActivity(),walletSelected.getCurrencyId()).getLastUD();
-
-//        int temp = ServiceLocator.instance().getCurrencyService()
-//                .getCurrencyById(getActivity(),walletSelected.getCurrencyId()).getCurrencyName()
-
-        int positionActual = currencyList.indexOf(mCurrencyButton.getText());
-        Double res = null;
-
-        if(mUnitUse != null) {
-            switch (mUnitUse) {
-                case UnitType.COIN:
-                    if(positionActual == 1){
-                        //conversion DU -> Coin
-                        res = (origin * mUniversalDividend);
-                    }else if (positionActual == 2){
-                        //conversion Time -> Coin
-                    }
-                    mConvertedText.setText(res+" coin");
-                    break;
-                case UnitType.UD:
-                    if(positionActual == 0){
-                        //conversion Coin -> DU
-                        res = (origin / mUniversalDividend);
-                    }else if (positionActual == 2){
-                        //conversion Time -> DU
-                    }
-                    mConvertedText.setText(res+" UD");
-                    break;
-                case UnitType.TIME:
-                    if(positionActual == 0){
-                        //conversion Coin -> Time
-                    }else if (positionActual == 1){
-                        //conversion DU -> Time
-                    }
-                    mConvertedText.setText(res+" Time");
-                    break;
+            // if amount unit = coins
+            if (isCoinUnit) {
+                double convertedAmount = CurrencyUtils.convertToUD(Long.parseLong(amountStr), mUniversalDividend.longValue());
+                mConvertedText.setText(CurrencyUtils.formatShort(convertedAmount));
             }
+
+            // if amount unit = UD
+            else {
+                long convertedAmount = CurrencyUtils.convertToCoin(Double.parseDouble(amountStr), mUniversalDividend);
+                mConvertedText.setText(CurrencyUtils.formatShort(convertedAmount));
+            }
+
         }
-
-
-//        if (mUniversalDividend == null || mIsRunningConvertion) {
-//            return;
-//        }
-//
-//        mIsRunningConvertion = true;
-//
-//        String amountStr = mAmountText.getText().toString();
-//        if (TextUtils.isEmpty(amountStr)) {
-//            mConvertedText.setText("");
-//        }
-//        else {
-//
-//            // if amount unit = coins
-//            if (isCoinUnit) {
-//                double convertedAmount = CurrencyUtils.convertToUD(Long.parseLong(amountStr), mUniversalDividend.longValue());
-//                mConvertedText.setText(CurrencyUtils.formatShort(convertedAmount));
-//            }
-//
-//            // if amount unit = UD
-//            else {
-//                long convertedAmount = CurrencyUtils.convertToCoin(Double.parseDouble(amountStr), mUniversalDividend);
-//                mConvertedText.setText(CurrencyUtils.formatShort(convertedAmount));
-//            }
-//
-//        }
-//        mIsRunningConvertion = false;
+        mIsRunningConvertion = false;
     }
 
 
     public class LoadCurrencyDataTask extends AsyncTaskHandleException<Wallet, Void, List<Contact>>{
 
-        private boolean mLoadContacts = (mContactButton != null);
+        private boolean mLoadContacts = (mContactSpinner != null);
 
         public LoadCurrencyDataTask() {
             super(getActivity());
@@ -660,10 +646,15 @@ public class TransferFragment extends Fragment {
 
             if (CollectionUtils.isNotEmpty(contacts)) {
                 mSendButton.setEnabled(true);
-                mContactButton.setVisibility(View.VISIBLE);
+                mContactAdapter.setNotifyOnChange(false);
+                mContactAdapter.clear();
+                mContactAdapter.addAll(contacts);
+                mContactAdapter.notifyDataSetChanged();
+                mContactSpinner.setVisibility(View.VISIBLE);
             }
             else {
-                mContactButton.setVisibility(View.GONE);
+                mContactSpinner.setVisibility(View.GONE);
+                mContactAdapter.clear();
             }
         }
 
@@ -688,8 +679,8 @@ public class TransferFragment extends Fragment {
         public TransferTask(String popStackTraceName) {
             super(getActivity());
             this.popStackTraceName = popStackTraceName;
-            this.mIsCoinUnit = TransferFragment.this.mIsCoinUnit;
-            this.mUniversalDividend =  TransferFragment.this.mUniversalDividend;
+            this.mIsCoinUnit = TransferFragmentSave.this.mIsCoinUnit;
+            this.mUniversalDividend =  TransferFragmentSave.this.mUniversalDividend;
         }
 
         @Override
@@ -739,7 +730,7 @@ public class TransferFragment extends Fragment {
                     mPubkey,
                     amountInCoin,
                     mComment
-            );
+                    );
 
             // Add as new movement
             Movement movement = new Movement();
@@ -785,8 +776,8 @@ public class TransferFragment extends Fragment {
                 Log.d(TAG, "Could not send transaction: " + error.getMessage(), error);
                 Toast.makeText(getContext(),
                         getString(R.string.transfer_error)
-                                + "\n"
-                                + ExceptionUtils.getMessage(error),
+                        + "\n"
+                        + ExceptionUtils.getMessage(error),
                         Toast.LENGTH_SHORT).show();
             }
 

@@ -157,6 +157,7 @@
                     android:layout_centerHorizontal="true">
 
                     <LinearLayout
+                        android:id="@+id/button_pay"
                         android:layout_width="0dp"
                         android:layout_weight="0.3"
                         android:layout_height="wrap_content"
@@ -177,6 +178,7 @@
                     </LinearLayout>
 
                     <LinearLayout
+                        android:id="@+id/button_certify"
                         android:layout_width="0dp"
                         android:layout_weight="0.3"
                         android:layout_height="wrap_content"

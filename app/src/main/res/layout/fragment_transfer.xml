@@ -1,6 +1,7 @@
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -15,16 +16,11 @@
             android:text="@string/wallet_transmitter"
             android:textColor="#372c24" />
 
-        <Spinner
-            android:id="@+id/wallet"
+        <Button
+            android:id="@+id/wallet_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="20dip"
-            android:layout_marginTop="5dip"
-            android:hint="@string/wallet_transmitter_hint"
-            android:imeOptions="actionNext"
-            android:textSize="@dimen/abc_text_size_body_2_material"
-            style="FormSpinner"/>
+            android:textSize="@dimen/abc_text_size_body_2_material"/>
 
         <!-- receiver -->
         <TextView
@@ -33,174 +29,95 @@
             android:layout_height="wrap_content"
             android:text="@string/receiver"
             android:textColor="#372c24"/>
-        <Spinner
-            android:id="@+id/receiver_contact"
+        <Button
+            android:id="@+id/contact_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="20dip"
-            android:layout_marginTop="5dip"
-            android:hint="@string/receiver_hint"
-            android:imeOptions="actionNext"
-            android:textSize="@dimen/abc_text_size_body_2_material" />
-        <!-- Load contact progress-->
-        <ProgressBar
-            android:id="@+id/receiver_contact_progress"
-            style="?android:attr/progressBarStyleInverse"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="20dip"
-            android:layout_marginTop="5dip"
-            android:layout_gravity="center_horizontal|center_vertical"
-            android:visibility="gone" />
+            android:textSize="@dimen/abc_text_size_body_2_material"
+            android:enabled="false"/>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="20dip"
-        android:layout_marginTop="5dip"
-        android:orientation="horizontal">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/or"
+            android:gravity="center_horizontal"
+            android:textColor="#372c24"/>
+
         <EditText
             android:id="@+id/receiver_pubkey"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="0.70"
             android:singleLine="true"
             android:hint="@string/public_key"
             android:textColor="#372c24"
             android:imeOptions="actionNext"/>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="10dip">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
 
-        <!--Button
-            style="?android:attr/buttonStyleSmall"
+        <!-- amount -->
+        <EditText
+            android:id="@+id/amount"
+            android:layout_width="0dp"
+            android:layout_weight="0.40"
+            android:layout_height="wrap_content"
+            android:hint="@string/amount_hint"
+            android:imeOptions="actionNext"
+            android:inputType="number"
+            android:maxLength="18"
+            android:singleLine="true"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/currency_button"
+            android:layout_width="0dp"
+            android:layout_weight="0.40"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/abc_text_size_body_2_material"/>
+
+        <ImageButton
+            android:id="@+id/calculate"
+            android:layout_width="0dp"
+            android:layout_weight="0.10"
+            android:layout_height="match_parent"
+            android:src="@drawable/ic_information_white"/>
+
+        <!-- converted amount -->
+
+    </LinearLayout>
+
+        <TextView
+            android:id="@+id/amount_default_unit"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Browse"
-            android:id="@+id/browse_button"
-            android:layout_gravity="right" /-->
-      </LinearLayout>
-
-        <TextView
-            android:id="@+id/receiver_uid"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="20dip"
-            android:layout_marginTop="5dip"
-            android:hint="@string/receiver_hint"
-            android:singleLine="true"
-            android:textSize="@dimen/abc_text_size_body_2_material" />
-
-
-        <!-- amount label
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/amount"
-            android:textColor="#372c24" />-->
-
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="20dip"
-            android:layout_marginTop="5dip"
-            android:orientation="horizontal">
-
-            <!-- amount -->
-            <EditText
-                android:id="@+id/amount"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="0.30"
-                android:hint="@string/amount_hint"
-                android:imeOptions="actionNext"
-                android:inputType="number"
-                android:maxLength="18"
-                android:singleLine="true"
-                android:textStyle="bold" />
-
-            <!-- amount unit -->
-            <TextView
-                android:id="@+id/amount_unit_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
-                android:text="@string/unit_coins_label" />
-
-            <ImageView
-                android:id="@+id/toggle_unit_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingLeft="5dp"
-                android:paddingRight="5dp"
-                android:src="@drawable/ic_arrows_opposite" />
-
-            <!-- converted amount -->
-            <TextView
-                android:id="@+id/converted_amount"
-                style="@style/FormText.Computed"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="0.20"
-                android:gravity="end"
-                android:maxLines="1"
-                android:paddingLeft="5dp"
-                android:paddingRight="5dp"
-                android:singleLine="true"
-                android:text="0"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/converted_amount_unit_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="bottom|center_horizontal"
-                android:minHeight="24dp"
-                android:text="@string/universal_dividend_acronym" />
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="0 UD"
+            android:visibility="gone"/>
 
         </LinearLayout>
 
-        <!-- comment
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/comment_optional"
-            android:textColor="#372c24" /-->
 
+    <EditText
+        android:id="@+id/comment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:singleLine="true"
+        android:hint="@string/comment_hint"
+        android:imeOptions="flagForceAscii|actionSend"
+        android:padding="10dip"/>
 
-        <EditText
-            android:id="@+id/comment"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
-            android:layout_marginBottom="20dip"
-            android:layout_marginTop="5dip"
-            android:singleLine="true"
-            android:hint="@string/comment_hint"
-            android:imeOptions="flagForceAscii|actionSend"/>
-
-        <!-- bottom toolbar -->
-        <LinearLayout
-            android:id="@+id/bottomBar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:orientation="horizontal">
-
-            <Button
-                android:id="@+id/send_button"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/send"
-                style="@style/ButtonText" />
-
-            <!-- progress -->
-            <ProgressBar
-                android:id="@+id/transfer_progress"
-                style="?android:attr/progressBarStyleInverse"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
-                android:layout_gravity="center_horizontal|center_vertical"
-                android:visibility="gone" />
-        </LinearLayout>
-    </LinearLayout>
-</ScrollView>
+    <Button
+        android:id="@+id/send_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/send"
+        style="@style/ButtonText"/>
+</LinearLayout>

@@ -247,4 +247,6 @@
     <!--Strings related to identity -->
     <string name="identity_error">Impossible d\'accédes à l\'utilisateur</string>
 
+    <string name="or">ou :</string>
+
 </resources>
