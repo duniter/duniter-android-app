@@ -19,6 +19,7 @@ public class Currency implements Serializable {
     private Account account;
     private Long accountId;
     private Long lastUD;
+    private BlockchainParameters parameters;
 
     public Currency() {
     }
@@ -26,11 +27,13 @@ public class Currency implements Serializable {
     public Currency(String currencyName,
                     String firstBlockSignature,
                     int membersCount,
-                    Peer[] peers) {
+                    Peer[] peers,
+                    BlockchainParameters parameters) {
         this.currencyName = currencyName;
         this.firstBlockSignature = firstBlockSignature;
         this.membersCount = membersCount;
         this.peers = peers;
+        this.parameters = parameters;
     }
 
     public Long getId() {
@@ -96,6 +99,14 @@ public class Currency implements Serializable {
 
     public void setLastUD(Long lastUD) {
         this.lastUD = lastUD;
+    }
+
+    public BlockchainParameters getParameters() {
+        return parameters;
+    }
+
+    public void setParameters(BlockchainParameters parameters) {
+        this.parameters = parameters;
     }
 
     public String toString() {

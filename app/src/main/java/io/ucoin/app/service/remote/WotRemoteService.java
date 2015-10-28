@@ -21,7 +21,7 @@ import java.util.TreeSet;
 import io.ucoin.app.model.local.Peer;
 import io.ucoin.app.model.local.Wallet;
 import io.ucoin.app.model.remote.BlockchainBlock;
-import io.ucoin.app.model.remote.BlockchainParameter;
+import io.ucoin.app.model.remote.BlockchainParameters;
 import io.ucoin.app.model.remote.Identity;
 import io.ucoin.app.model.remote.WotCertification;
 import io.ucoin.app.model.remote.WotIdentityCertifications;
@@ -353,7 +353,7 @@ public class WotRemoteService extends BaseRemoteService {
 
     protected Collection<WotCertification> getCertificationsByPubkeyForMember(long currencyId, String pubkey) {
 
-        BlockchainParameter bcParameter = bcService.getParameters(currencyId, true);
+        BlockchainParameters bcParameter = bcService.getParameters(currencyId, true);
         BlockchainBlock currentBlock = bcService.getCurrentBlock(currencyId, true);
         long medianTime = currentBlock.getMedianTime();
         int sigValidity = bcParameter.getSigValidity();

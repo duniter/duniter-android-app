@@ -48,6 +48,26 @@ public class SQLiteHelper extends SQLiteOpenHelper implements SQLiteTable {
                 ")";
         db.execSQL(CREATE_TABLE_CURRENCY);
 
+        String CREATE_TABLE_BLOCKCHAIN_PARAMETERS = "CREATE TABLE " + BlockchainParameters.TABLE_NAME + "(" +
+                BlockchainParameters._ID + " INTEGER PRIMARY KEY AUTOINCREMENT" + COMMA +
+                BlockchainParameters.CURRENCY + TEXT + NOTNULL + UNIQUE + COMMA +
+                BlockchainParameters.C + REAL + NOTNULL + COMMA +
+                BlockchainParameters.DT + INTEGER + NOTNULL + COMMA +
+                BlockchainParameters.UD0 + LONG + NOTNULL + COMMA +
+                BlockchainParameters.SIG_DELAY + INTEGER + NOTNULL + COMMA +
+                BlockchainParameters.SIG_VALIDITY + INTEGER + NOTNULL + COMMA +
+                BlockchainParameters.SIG_QTY + INTEGER + NOTNULL + COMMA +
+                BlockchainParameters.SIG_WOT + INTEGER + NOTNULL + COMMA +
+                BlockchainParameters.MS_VALIDITY + INTEGER + NOTNULL + COMMA +
+                BlockchainParameters.STEP_MAX + INTEGER + NOTNULL + COMMA +
+                BlockchainParameters.MEDIAN_TIME_BLOCKS + INTEGER + NOTNULL + COMMA +
+                BlockchainParameters.AVG_GEN_TIME + INTEGER + NOTNULL + COMMA +
+                BlockchainParameters.DT_DIFF_EVAL + INTEGER + NOTNULL + COMMA +
+                BlockchainParameters.BLOCKS_ROT + INTEGER + NOTNULL + COMMA +
+                BlockchainParameters.PERCENT_ROT + REAL + NOTNULL +
+                ")";
+        db.execSQL(CREATE_TABLE_BLOCKCHAIN_PARAMETERS);
+
         String CREATE_TABLE_BLOCK_WITH_UD = "CREATE TABLE " + UD.TABLE_NAME + "(" +
                 UD._ID + " INTEGER PRIMARY KEY AUTOINCREMENT" + COMMA +
                 UD.CURRENCY_ID + TEXT + NOTNULL + COMMA +
@@ -241,6 +261,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements SQLiteTable {
             db.execSQL("DROP TABLE IF EXISTS " + Peer.TABLE_NAME);
             db.execSQL("DROP TABLE IF EXISTS " + UD.TABLE_NAME);
             db.execSQL("DROP TABLE IF EXISTS " + Currency.TABLE_NAME);
+            db.execSQL("DROP TABLE IF EXISTS " + BlockchainParameters.TABLE_NAME);
             db.execSQL("DROP TABLE IF EXISTS " + Wallet.TABLE_NAME);
             db.execSQL("DROP TABLE IF EXISTS " + Account.TABLE_NAME);
             db.execSQL("DROP TABLE IF EXISTS " + Contact.TABLE_NAME);

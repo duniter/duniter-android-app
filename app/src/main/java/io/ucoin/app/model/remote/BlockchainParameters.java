@@ -8,7 +8,9 @@ import java.io.Serializable;
  * @author Benoit Lavenier <benoit.lavenier@e-is.pro>
  * @since 1.0
  */
-public class BlockchainParameter implements Serializable{
+public class BlockchainParameters implements Serializable{
+
+    private Long id;
 
     private String currency;
     
@@ -31,8 +33,7 @@ public class BlockchainParameter implements Serializable{
      * Minimum delay between 2 identical certifications (same pubkeys)
      */
     private Integer sigDelay;
-    
-    
+
     /**
      * Maximum age of a valid signature (in seconds) (e.g. 2629800)
      */
@@ -57,7 +58,6 @@ public class BlockchainParameter implements Serializable{
      * Maximum distance between each WoT member and a newcomer
      */
     private Integer stepMax;
-    
 
     /**
      * Number of blocks used for calculating median time.
@@ -94,6 +94,14 @@ public class BlockchainParameter implements Serializable{
         .append("sigDelay: ").append(sigDelay);
         // TODO : display missing fields
         return sb.toString();
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getCurrency() {

@@ -9,7 +9,7 @@ import android.widget.TextView;
 
 import io.ucoin.app.R;
 import io.ucoin.app.adapter.ProgressViewAdapter;
-import io.ucoin.app.model.remote.BlockchainParameter;
+import io.ucoin.app.model.remote.BlockchainParameters;
 import io.ucoin.app.model.remote.Currency;
 import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.service.remote.BlockchainRemoteService;
@@ -30,9 +30,9 @@ public class CurrencyRulesFragment extends Fragment {
         return fragment;
     }
 
-    public static CurrencyRulesFragment newInstance(BlockchainParameter parameter) {
+    public static CurrencyRulesFragment newInstance(BlockchainParameters parameter) {
         Bundle newInstanceArgs = new Bundle();
-        newInstanceArgs.putSerializable(BlockchainParameter.class.getSimpleName(), parameter);
+        newInstanceArgs.putSerializable(BlockchainParameters.class.getSimpleName(), parameter);
 
         CurrencyRulesFragment fragment = new CurrencyRulesFragment();
         fragment.setArguments(newInstanceArgs);
@@ -59,8 +59,8 @@ public class CurrencyRulesFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         Bundle newInstanceArgs = getArguments();
-        BlockchainParameter parameter = (BlockchainParameter) newInstanceArgs
-                .getSerializable(BlockchainParameter.class.getSimpleName());
+        BlockchainParameters parameter = (BlockchainParameters) newInstanceArgs
+                .getSerializable(BlockchainParameters.class.getSimpleName());
 
         // Load progress
         mProgressViewAdapter = new ProgressViewAdapter(view,
@@ -80,7 +80,7 @@ public class CurrencyRulesFragment extends Fragment {
         }
     }
 
-    protected void bind(View view, BlockchainParameter parameter) {
+    protected void bind(View view, BlockchainParameters parameter) {
 
         // Get views
 
@@ -146,7 +146,7 @@ public class CurrencyRulesFragment extends Fragment {
     }
 
 
-    public class LoadTask extends AsyncTaskHandleException<Long, Void, BlockchainParameter> {
+    public class LoadTask extends AsyncTaskHandleException<Long, Void, BlockchainParameters> {
 
         public LoadTask() {
             super(getActivity());
@@ -159,14 +159,14 @@ public class CurrencyRulesFragment extends Fragment {
         }
 
         @Override
-        protected BlockchainParameter  doInBackgroundHandleException(Long... currencyIds) {
+        protected BlockchainParameters doInBackgroundHandleException(Long... currencyIds) {
             // Refresh the membership data
             BlockchainRemoteService bcService = ServiceLocator.instance().getBlockchainRemoteService();
             return bcService.getParameters(currencyIds[0]);
         }
 
         @Override
-        protected void onSuccess(BlockchainParameter parameters) {
+        protected void onSuccess(BlockchainParameters parameters) {
             bind(getView(), parameters);
             mProgressViewAdapter.showProgress(false);
         }

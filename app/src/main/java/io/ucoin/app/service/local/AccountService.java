@@ -14,6 +14,7 @@ import io.ucoin.app.content.Provider;
 import io.ucoin.app.model.local.Account;
 import io.ucoin.app.model.local.Peer;
 import io.ucoin.app.model.local.Wallet;
+import io.ucoin.app.model.remote.BlockchainParameters;
 import io.ucoin.app.model.remote.Currency;
 import io.ucoin.app.service.BaseService;
 import io.ucoin.app.service.CryptoService;
@@ -100,6 +101,10 @@ public class AccountService extends BaseService {
         BlockchainRemoteService blockchainService = ServiceLocator.instance().getBlockchainRemoteService();
         Currency currency = blockchainService.getCurrencyFromPeer(peer);
 
+        // Get the blockchain parameters from peer
+        progressModel.increment(context.getString(R.string.loading_blockchain_parameters, peer.getUrl()));
+        BlockchainParameters blockchainParameters = blockchainService.getBlockchainParametersFromPeer(peer);
+
         // Get if identity is a member, and get the self cert timestamp
         progressModel.increment(context.getString(R.string.loading_membership));
         Wallet wallet = new Wallet(currency.getCurrencyName(),
@@ -162,6 +167,14 @@ public class AccountService extends BaseService {
             CurrencyService currencyService = ServiceLocator.instance().getCurrencyService();
             currency.setAccountId(account.getId());
             currency = currencyService.save(context, currency);
+        }
+
+        // Create the BlockchainParamaters in DB
+        {
+            progressModel.increment(context.getString(R.string.saving_blockchain_parameters, peer.getUrl()));
+            BlockchainParametersService blockchainParametersService = ServiceLocator.instance().getBlockchainParametersService();
+            blockchainParameters.setCurrency(currency.getCurrencyName());
+            blockchainParameters = blockchainParametersService.save(context, blockchainParameters);
         }
 
         // Create the peer in DB

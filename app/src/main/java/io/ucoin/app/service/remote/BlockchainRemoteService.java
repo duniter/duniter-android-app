@@ -19,7 +19,7 @@ import io.ucoin.app.model.local.Peer;
 import io.ucoin.app.model.local.Wallet;
 import io.ucoin.app.model.remote.BlockchainBlock;
 import io.ucoin.app.model.remote.BlockchainMembershipResults;
-import io.ucoin.app.model.remote.BlockchainParameter;
+import io.ucoin.app.model.remote.BlockchainParameters;
 import io.ucoin.app.model.remote.Currency;
 import io.ucoin.app.model.remote.Identity;
 import io.ucoin.app.service.CryptoService;
@@ -61,7 +61,7 @@ public class BlockchainRemoteService extends BaseRemoteService {
     private SimpleCache<Long, BlockchainBlock> mCurrentBlockCache;
 
     // Cache on blockchain parameters
-    private SimpleCache<Long, BlockchainParameter> mParametersCache;
+    private SimpleCache<Long, BlockchainParameters> mParametersCache;
 
     public BlockchainRemoteService() {
         super();
@@ -85,7 +85,7 @@ public class BlockchainRemoteService extends BaseRemoteService {
      * @param useCache
      * @return
      */
-    public BlockchainParameter getParameters(long currencyId, boolean useCache) {
+    public BlockchainParameters getParameters(long currencyId, boolean useCache) {
         if (!useCache) {
             return getParameters(currencyId);
         } else {
@@ -99,9 +99,9 @@ public class BlockchainRemoteService extends BaseRemoteService {
      * @param currencyId
      * @return
      */
-    public BlockchainParameter getParameters(long currencyId) {
+    public BlockchainParameters getParameters(long currencyId) {
         // get blockchain parameter
-        BlockchainParameter result = executeRequest(currencyId, URL_PARAMETERS, BlockchainParameter.class);
+        BlockchainParameters result = executeRequest(currencyId, URL_PARAMETERS, BlockchainParameters.class);
         return result;
     }
 
@@ -111,9 +111,9 @@ public class BlockchainRemoteService extends BaseRemoteService {
      * @param peer the peer to use for request
      * @return
      */
-    public BlockchainParameter getParameters(Peer peer) {
+    public BlockchainParameters getParameters(Peer peer) {
         // get blockchain parameter
-        BlockchainParameter result = executeRequest(peer, URL_PARAMETERS, BlockchainParameter.class);
+        BlockchainParameters result = executeRequest(peer, URL_PARAMETERS, BlockchainParameters.class);
         return result;
     }
 
@@ -220,7 +220,7 @@ public class BlockchainRemoteService extends BaseRemoteService {
      * @return
      */
     public Currency getCurrencyFromPeer(Peer peer) {
-        BlockchainParameter parameter = getParameters(peer);
+        BlockchainParameters parameter = getParameters(peer);
         BlockchainBlock firstBlock = getBlock(peer, 0);
         BlockchainBlock lastBlock = getCurrentBlock(peer);
 
@@ -231,6 +231,10 @@ public class BlockchainRemoteService extends BaseRemoteService {
         result.setLastUD(parameter.getUd0());
 
         return result;
+    }
+
+    public BlockchainParameters getBlockchainParametersFromPeer(Peer peer){
+        return getParameters(peer);
     }
 
     /**
@@ -247,7 +251,7 @@ public class BlockchainRemoteService extends BaseRemoteService {
         // If no result (this could happen when no UD has been send
         if (blockNumber == null) {
             // get the first UD from currency parameter
-            BlockchainParameter parameter = getParameters(currencyId);
+            BlockchainParameters parameter = getParameters(currencyId);
             return parameter.getUd0();
         }
 
@@ -439,7 +443,7 @@ public class BlockchainRemoteService extends BaseRemoteService {
 
 //         Insert the UD0 (if need)
 //        if (startOffset <= 0) {
-//            BlockchainParameter parameters = getParameters(currencyId, true/*with cache*/);
+//            BlockchainParameters parameters = getParameters(currencyId, true/*with cache*/);
 //            result.put(0, parameters.getUd0());
 //        }
 
@@ -496,9 +500,9 @@ public class BlockchainRemoteService extends BaseRemoteService {
             }
         };
 
-        mParametersCache = new SimpleCache<Long, BlockchainParameter>(/*eternal cache*/) {
+        mParametersCache = new SimpleCache<Long, BlockchainParameters>(/*eternal cache*/) {
             @Override
-            public BlockchainParameter load(Context context, Long currencyId) {
+            public BlockchainParameters load(Context context, Long currencyId) {
                 return getParameters(currencyId);
             }
         };

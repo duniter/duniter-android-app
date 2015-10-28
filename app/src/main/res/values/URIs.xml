@@ -2,6 +2,7 @@
 <resources>
     <string name="account_uri">account/</string>
     <string name="currency_uri">currency/</string>
+    <string name="blockchain_parameters_uri">blockchain/parameters/</string>
     <string name="ud_uri">ud/</string>
     <string name="wallet_uri">wallet/</string>
     <string name="peer_uri">peer/</string>

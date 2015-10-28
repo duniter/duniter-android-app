@@ -43,6 +43,8 @@ import io.ucoin.app.model.local.Contact;
 import io.ucoin.app.model.local.Movement;
 import io.ucoin.app.model.local.UnitType;
 import io.ucoin.app.model.local.Wallet;
+import io.ucoin.app.model.remote.BlockchainParameters;
+import io.ucoin.app.model.remote.Currency;
 import io.ucoin.app.model.remote.Identity;
 import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.service.exception.InsufficientCreditException;
@@ -533,11 +535,15 @@ public class TransferFragment extends Fragment {
             origin = Double.parseDouble(mAmountText.getText().toString());
         }
 
-        mUniversalDividend = ServiceLocator.instance().getCurrencyService()
-                .getCurrencyById(getActivity(),walletSelected.getCurrencyId()).getLastUD();
+        Currency currency = ServiceLocator.instance().getCurrencyService()
+                .getCurrencyById(getActivity(), walletSelected.getCurrencyId());
 
-//        int temp = ServiceLocator.instance().getCurrencyService()
-//                .getCurrencyById(getActivity(),walletSelected.getCurrencyId()).getCurrencyName()
+        mUniversalDividend = currency.getLastUD();
+
+        BlockchainParameters bcp = ServiceLocator.instance().getBlockchainParametersService()
+                .getBlockchainParametersByCurrency(getActivity(),currency.getCurrencyName());
+
+        int delay = bcp.getDt();
 
         int positionActual = currencyList.indexOf(mCurrencyButton.getText());
         Double res = null;
@@ -550,6 +556,7 @@ public class TransferFragment extends Fragment {
                         res = (origin * mUniversalDividend);
                     }else if (positionActual == 2){
                         //conversion Time -> Coin
+                        res = (((origin * mUniversalDividend) * mUniversalDividend)/delay);
                     }
                     mConvertedText.setText(res+" coin");
                     break;
@@ -559,16 +566,19 @@ public class TransferFragment extends Fragment {
                         res = (origin / mUniversalDividend);
                     }else if (positionActual == 2){
                         //conversion Time -> DU
+                        res = ((origin * mUniversalDividend)/delay);
                     }
                     mConvertedText.setText(res+" UD");
                     break;
                 case UnitType.TIME:
                     if(positionActual == 0){
                         //conversion Coin -> Time
+                        res = (((origin / mUniversalDividend) * delay)/mUniversalDividend);
                     }else if (positionActual == 1){
                         //conversion DU -> Time
+                        res = ((origin * delay)/mUniversalDividend);
                     }
-                    mConvertedText.setText(res+" Time");
+                    mConvertedText.setText(res+" ms");
                     break;
             }
         }

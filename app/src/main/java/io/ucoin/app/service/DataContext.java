@@ -3,7 +3,7 @@ package io.ucoin.app.service;
 import java.util.List;
 
 import io.ucoin.app.model.local.Wallet;
-import io.ucoin.app.model.remote.BlockchainParameter;
+import io.ucoin.app.model.remote.BlockchainParameters;
 
 /**
  * Created by eis on 14/01/15.
@@ -15,7 +15,7 @@ public class DataContext extends BaseService {
 
     private List<Wallet> wallets = null;
 
-    private BlockchainParameter blockchainParameter = null;
+    private BlockchainParameters blockchainParameters = null;
 
     public DataContext() {
         super();
@@ -25,12 +25,12 @@ public class DataContext extends BaseService {
         return wallets;
     }
 
-    public BlockchainParameter getBlockchainParameter() {
-        return blockchainParameter;
+    public BlockchainParameters getBlockchainParameters() {
+        return blockchainParameters;
     }
 
-    public void setBlockchainParameter(BlockchainParameter blockchainParameter) {
-        this.blockchainParameter = blockchainParameter;
+    public void setBlockchainParameters(BlockchainParameters blockchainParameters) {
+        this.blockchainParameters = blockchainParameters;
     }
 
     public void setWallets(List<Wallet> wallets) {

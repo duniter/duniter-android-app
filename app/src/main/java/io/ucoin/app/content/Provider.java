@@ -32,6 +32,8 @@ public class Provider extends ContentProvider implements SQLiteTable {
     private static final int ACCOUNT_ID = 11;
     private static final int CURRENCY = 20;
     private static final int CURRENCY_ID = 21;
+    private static final int BLOCKCHAIN_PARAMETERS = 100;
+    private static final int BLOCKCHAIN_PARAMETERS_ID = 101;
     private static final int PEER = 30;
     private static final int PEER_ID = 31;
     private static final int WALLET = 40;
@@ -51,6 +53,7 @@ public class Provider extends ContentProvider implements SQLiteTable {
 
     public static Uri ACCOUNT_URI;
     public static Uri CURRENCY_URI;
+    public static Uri BLOCKCHAIN_PARAMETERS_URI;
     public static Uri PEER_URI;
     public static Uri WALLET_URI;
     public static Uri MOVEMENT_URI;
@@ -71,6 +74,8 @@ public class Provider extends ContentProvider implements SQLiteTable {
                 .path(context.getString(R.string.account_uri)).build();
         CURRENCY_URI = new Uri.Builder().scheme("content").authority(AUTHORITY)
                 .path(context.getString(R.string.currency_uri)).build();
+        BLOCKCHAIN_PARAMETERS_URI = new Uri.Builder().scheme("content").authority(AUTHORITY)
+                .path(context.getString(R.string.blockchain_parameters_uri)).build();
         WALLET_URI = new Uri.Builder().scheme("content").authority(AUTHORITY)
                 .path(context.getString(R.string.wallet_uri)).build();
         PEER_URI = new Uri.Builder().scheme("content").authority(AUTHORITY)
@@ -88,6 +93,9 @@ public class Provider extends ContentProvider implements SQLiteTable {
 
         uriMatcher.addURI(AUTHORITY, context.getString(R.string.currency_uri), CURRENCY);
         uriMatcher.addURI(AUTHORITY, context.getString(R.string.currency_uri) + "#", CURRENCY_ID);
+
+        uriMatcher.addURI(AUTHORITY, context.getString(R.string.blockchain_parameters_uri), BLOCKCHAIN_PARAMETERS);
+        uriMatcher.addURI(AUTHORITY, context.getString(R.string.blockchain_parameters_uri) + "#", BLOCKCHAIN_PARAMETERS_ID);
 
         uriMatcher.addURI(AUTHORITY, context.getString(R.string.account_uri), ACCOUNT);
         uriMatcher.addURI(AUTHORITY, context.getString(R.string.account_uri) + "#", ACCOUNT_ID);
@@ -155,6 +163,19 @@ public class Provider extends ContentProvider implements SQLiteTable {
                 break;
             case CURRENCY_ID:
                 queryBuilder.setTables(Currency.TABLE_NAME);
+                cursor = queryBuilder.query(db, null,
+                        BaseColumns._ID + "=?",
+                        new String[]{uri.getLastPathSegment()},
+                        null, null, null);
+                break;
+            case BLOCKCHAIN_PARAMETERS:
+                queryBuilder.setTables(BlockchainParameters.TABLE_NAME);
+                cursor = queryBuilder.query(db, projection, selection,
+                        selectionArgs, null, null, sortOrder);
+                cursor.setNotificationUri(getContext().getContentResolver(), uri);
+                break;
+            case BLOCKCHAIN_PARAMETERS_ID:
+                queryBuilder.setTables(BlockchainParameters.TABLE_NAME);
                 cursor = queryBuilder.query(db, null,
                         BaseColumns._ID + "=?",
                         new String[]{uri.getLastPathSegment()},
@@ -248,6 +269,10 @@ public class Provider extends ContentProvider implements SQLiteTable {
                 id = db.insert(Currency.TABLE_NAME, null, values);
                 uri = Uri.parse("currency/" + id);
                 break;
+            case BLOCKCHAIN_PARAMETERS:
+                id = db.insert(BlockchainParameters.TABLE_NAME, null, values);
+                uri = Uri.parse("blockchain/parameters/");
+                break;
             case UD:
                 id = db.insert(SQLiteTable.UD.TABLE_NAME, null, values);
                 uri = Uri.parse("ud/" + id);
@@ -293,6 +318,9 @@ public class Provider extends ContentProvider implements SQLiteTable {
             case CURRENCY:
                 nbRowsUpdated = db.delete(Currency.TABLE_NAME, whereClause, whereArgs);
                 break;
+            case BLOCKCHAIN_PARAMETERS:
+                nbRowsUpdated = db.delete(BlockchainParameters.TABLE_NAME, whereClause, whereArgs);
+                break;
             case UD:
                 nbRowsUpdated = db.delete(SQLiteTable.UD.TABLE_NAME, whereClause, whereArgs);
                 break;
@@ -333,6 +361,9 @@ public class Provider extends ContentProvider implements SQLiteTable {
                 break;
             case CURRENCY:
                 nbRowsUpdated = db.update(Currency.TABLE_NAME, values, whereClause, whereArgs);
+                break;
+            case BLOCKCHAIN_PARAMETERS:
+                nbRowsUpdated = db.update(BlockchainParameters.TABLE_NAME, values, whereClause, whereArgs);
                 break;
             case UD:
                 nbRowsUpdated = db.update(SQLiteTable.UD.TABLE_NAME, values, whereClause, whereArgs);

@@ -19,7 +19,9 @@
     <string name="saving_account">Saving account locally...</string>
     <string name="connecting_peer">Connecting to node\n%s...</string>
     <string name="loading_currency">Loading currency from\n%s...</string>
+    <string name="loading_blockchain_parameters">Loading blockchain parameters from\n%s...</string>
     <string name="saving_currency">Saving currency locally...</string>
+    <string name="saving_blockchain_parameters">Saving blockchain parameters locally...</string>
     <string name="loading_membership">Getting membership...</string>
     <string name="loading_wallet_credit">Getting wallet credit...</string>
     <string name="saving_wallet">Saving wallet locally...</string>

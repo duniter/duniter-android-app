@@ -19,6 +19,26 @@ public interface SQLiteTable {
         public static final String MEMBERS_COUNT = "members_count";
         public static final String FIRST_BLOCK_SIGNATURE = "first_block_signature";
         public static final String LAST_UD = "last_ud";
+        public static final String BLOCKCAHINE_ID = "blockchain_parameters_id";
+    }
+
+    public static final class BlockchainParameters implements BaseColumns {
+        public static final String TABLE_NAME = "blockchain_parameters";
+        public static final String CURRENCY = "currency";
+        public static final String C = "c";
+        public static final String DT = "dt";
+        public static final String UD0 = "ud0";
+        public static final String SIG_DELAY = "sig_delay";
+        public static final String SIG_VALIDITY = "sig_validity";
+        public static final String SIG_QTY = "sig_qty";
+        public static final String SIG_WOT = "sig_wot";
+        public static final String MS_VALIDITY = "ms_validity";
+        public static final String STEP_MAX = "step_max";
+        public static final String MEDIAN_TIME_BLOCKS = "median_time_blocks";
+        public static final String AVG_GEN_TIME = "avg_gen_time";
+        public static final String DT_DIFF_EVAL = "dt_diff_eval";
+        public static final String BLOCKS_ROT = "blocks_rot";
+        public static final String PERCENT_ROT = "percent_rot";
     }
 
     public static final class UD implements BaseColumns {

@@ -19,7 +19,9 @@
     <string name="saving_account">Sauvegarde du compte...</string>
     <string name="connecting_peer">Connexion au noeud\n%s...</string>
     <string name="loading_currency">Chargement de la monnaie depuis\n%s...</string>
+    <string name="loading_blockchain_parameters">Chargement des parametres des monnaies depuis\n%s...</string>
     <string name="saving_currency">Sauvegarde de la monnaie...</string>
+    <string name="saving_blockchain_parameters">Sauvegarde des parametres des monnaies</string>
     <string name="loading_membership">Récupération des autorisations...</string>
     <string name="loading_wallet_credit">Récupération du solde...</string>
     <string name="saving_wallet">Sauvegarde du portefeuille...</string>

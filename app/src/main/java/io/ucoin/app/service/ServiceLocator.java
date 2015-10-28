@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import io.ucoin.app.service.local.AccountService;
+import io.ucoin.app.service.local.BlockchainParametersService;
 import io.ucoin.app.service.local.Contact2CurrencyService;
 import io.ucoin.app.service.local.ContactService;
 import io.ucoin.app.service.local.CurrencyService;
@@ -120,6 +121,9 @@ public class ServiceLocator extends Service implements Closeable {
     public CurrencyService getCurrencyService() {
         return getService(CurrencyService.class);
     }
+    public BlockchainParametersService getBlockchainParametersService(){
+        return getService(BlockchainParametersService.class);
+    }
     public WalletService getWalletService() {
         return getService(WalletService.class);
     }
@@ -148,6 +152,9 @@ public class ServiceLocator extends Service implements Closeable {
             if (!mIsCacheLoaded) {
                 // Load currencies cache
                 getCurrencyService().loadCache(context, accountId);
+
+                // Load blockchain Parameters cache
+                getBlockchainParametersService().loadCache(context);
 
                 // Load peers cache
                 getPeerService().loadCache(context, accountId);
