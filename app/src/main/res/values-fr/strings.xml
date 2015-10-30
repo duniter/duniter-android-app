@@ -8,6 +8,10 @@
     -->
     <string name="title_activity_account">Compte</string>
 
+    <string name="unit_coins">Classique</string>
+    <string name="unit_ud">Dividende Universel</string>
+    <string name="unit_time">Credit mutuel (temps)</string>
+
     <!-- Strings related to account creation -->
     <string name="creating_account_title">Bonjour.</string>
     <string name="creating_account_welcome"><![CDATA[Bienvenue dans <b>uCoin</b>.<br/><small>Un système décentralisé pour monnaies libres.</small>]]></string>
@@ -59,6 +63,7 @@
     <string name="delete_wallet_confirm">Etes-vous sûr de vouloir ce portefeuille ?</string>
     <string name="wallet_deleted">Portefeuille supprimé</string>
     <string name="universal_dividend_value">%s DU</string>
+    <string name="mutual_credit_value">%s ms</string>
     <string name="loading_wallets">Chargement des portefeuilles...</string>
     <string name="updating_balances">Récupération du solde...</string>
 
@@ -182,7 +187,7 @@
     <string name="uid">Identifiant</string>
     <string name="uid_hint">Identifiant</string>
     <string name="registration_date">Date d\'inscription</string>
-    <string name="registered_since">Inscrit depuis %s</string>
+    <string name="registered_since">Inscrit depuis le %s</string>
     <string name="signature">Signature</string>
     <string name="public_key">Clé publique</string>
     <string name="identity_details">Général</string>
@@ -250,5 +255,13 @@
     <string name="identity_error">Impossible d\'accédes à l\'utilisateur</string>
 
     <string name="or">ou :</string>
+
+    <string name="year">a</string>
+    <string name="day">j</string>
+
+    <string name="choice_contact">Choisissez un contact</string>
+    <string name="choice_wallet">Choisissez un portefeuille</string>
+
+    <string name="converter">Convertisseur de monnaie</string>
 
 </resources>

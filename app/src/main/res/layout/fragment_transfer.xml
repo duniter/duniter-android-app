@@ -20,7 +20,8 @@
             android:id="@+id/wallet_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="@dimen/abc_text_size_body_2_material"/>
+            android:textSize="@dimen/abc_text_size_body_2_material"
+            android:text="@string/choice_wallet"/>
 
         <!-- receiver -->
         <TextView
@@ -34,6 +35,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="@dimen/abc_text_size_body_2_material"
+            android:text="@string/choice_contact"
             android:enabled="false"/>
 
         <TextView
@@ -43,55 +45,80 @@
             android:gravity="center_horizontal"
             android:textColor="#372c24"/>
 
-        <EditText
-            android:id="@+id/receiver_pubkey"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:singleLine="true"
-            android:hint="@string/public_key"
-            android:textColor="#372c24"
-            android:imeOptions="actionNext"/>
+            android:orientation="horizontal">
+
+            <!--<EditText-->
+            <!--android:id="@+id/receiver_pubkey"-->
+            <!--android:layout_width="0dp"-->
+            <!--android:layout_weight="0.80"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:singleLine="true"-->
+            <!--android:hint="@string/public_key"-->
+            <!--android:textColor="#372c24"-->
+            <!--android:imeOptions="actionNext"/>-->
+
+            <io.ucoin.app.technical.view.ClearableEditText
+                android:id="@+id/receiver_pubkey"
+                android:layout_width="0dp"
+                android:layout_weight="0.80"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:hint="@string/public_key"
+                android:textColor="#372c24"
+                android:imeOptions="actionNext" />
+
+            <ImageButton
+                android:id="@+id/searchIdentity"
+                android:layout_width="0dp"
+                android:layout_weight="0.10"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_search_white_24dp"/>
+
+        </LinearLayout>
     </LinearLayout>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="10dip">
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <!-- amount -->
-        <EditText
-            android:id="@+id/amount"
-            android:layout_width="0dp"
-            android:layout_weight="0.40"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/amount_hint"
-            android:imeOptions="actionNext"
-            android:inputType="number"
-            android:maxLength="18"
-            android:singleLine="true"
-            android:textStyle="bold" />
+            android:orientation="horizontal">
 
-        <Button
-            android:id="@+id/currency_button"
-            android:layout_width="0dp"
-            android:layout_weight="0.40"
-            android:layout_height="wrap_content"
-            android:textSize="@dimen/abc_text_size_body_2_material"/>
+            <!-- amount -->
+            <EditText
+                android:id="@+id/amount"
+                android:layout_width="0dp"
+                android:layout_weight="0.40"
+                android:layout_height="wrap_content"
+                android:hint="@string/amount_hint"
+                android:imeOptions="actionNext"
+                android:inputType="number"
+                android:maxLength="18"
+                android:singleLine="true"
+                android:textStyle="bold" />
 
-        <ImageButton
-            android:id="@+id/calculate"
-            android:layout_width="0dp"
-            android:layout_weight="0.10"
-            android:layout_height="match_parent"
-            android:src="@drawable/ic_information_white"/>
+            <Button
+                android:id="@+id/currency_button"
+                android:layout_width="0dp"
+                android:layout_weight="0.40"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/abc_text_size_body_2_material"/>
 
-        <!-- converted amount -->
+            <ImageButton
+                android:id="@+id/convert_button"
+                android:layout_width="0dp"
+                android:layout_weight="0.10"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_information_white"/>
 
-    </LinearLayout>
+            <!-- converted amount -->
+
+        </LinearLayout>
 
         <TextView
             android:id="@+id/amount_default_unit"
@@ -101,10 +128,20 @@
             android:text="0 UD"
             android:visibility="gone"/>
 
-        </LinearLayout>
+    </LinearLayout>
 
 
-    <EditText
+    <!--<EditText-->
+        <!--android:id="@+id/comment"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_gravity="bottom"-->
+        <!--android:singleLine="true"-->
+        <!--android:hint="@string/comment_hint"-->
+        <!--android:imeOptions="flagForceAscii|actionSend"-->
+        <!--android:padding="10dip"/>-->
+
+    <io.ucoin.app.technical.view.ClearableEditText
         android:id="@+id/comment"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -113,6 +150,7 @@
         android:hint="@string/comment_hint"
         android:imeOptions="flagForceAscii|actionSend"
         android:padding="10dip"/>
+
 
     <Button
         android:id="@+id/send_button"

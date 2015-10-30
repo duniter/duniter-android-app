@@ -25,6 +25,7 @@ import io.ucoin.app.activity.IToolbarActivity;
 import io.ucoin.app.activity.MainActivity;
 import io.ucoin.app.adapter.IdentityArrayAdapter;
 import io.ucoin.app.adapter.ProgressViewAdapter;
+import io.ucoin.app.fragment.wallet.TransferFragment;
 import io.ucoin.app.model.remote.Identity;
 
 
@@ -36,6 +37,18 @@ public class WotSearchFragment extends ListFragment
     private ProgressViewAdapter mProgressViewAdapter;
     private SearchView mSearchView;
     private boolean isWaitingResult = true;
+    private static boolean isTransfer = false;
+    private static Bundle valueTransfer;
+
+    static public WotSearchFragment newInstance(String query,Boolean is, Bundle vT) {
+        WotSearchFragment fragment = new WotSearchFragment();
+        Bundle newInstanceArgs = new Bundle();
+        newInstanceArgs.putString("query", query);
+        fragment.setArguments(newInstanceArgs);
+        isTransfer = is;
+        valueTransfer = vT;
+        return fragment;
+    }
 
     static public WotSearchFragment newInstance(String query) {
         WotSearchFragment fragment = new WotSearchFragment();
@@ -143,18 +156,31 @@ public class WotSearchFragment extends ListFragment
 
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
-        Identity identity = (Identity) l.getAdapter().getItem(position);
-        Fragment fragment = IdentityFragment.newInstance(identity);
-        FragmentManager fragmentManager = getFragmentManager();
-        fragmentManager.beginTransaction()
-                .setCustomAnimations(
-                        R.animator.delayed_slide_in_up,
-                        R.animator.fade_out,
-                        R.animator.delayed_fade_in,
-                        R.animator.slide_out_up)
-                .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
-                .addToBackStack(fragment.getClass().getSimpleName())
-                .commit();
+        if(isTransfer){
+            final Identity identity = (Identity) l.getAdapter().getItem(position);
+            valueTransfer.putSerializable(TransferFragment.BUNDLE_RECEIVER_ITENTITY, identity);
+//            Fragment fragment = getFragmentManager().findFragmentById(R.id.frame_content);
+
+            Fragment fragment = TransferFragment.newInstance(valueTransfer);
+            getFragmentManager().beginTransaction()
+                    .setCustomAnimations(R.animator.slide_in_down, R.animator.slide_out_up, R.animator.slide_in_up, R.animator.slide_out_down)
+                    .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
+                    .addToBackStack(fragment.getClass().getSimpleName())
+                    .commit();
+
+        } else {
+            Identity identity = (Identity) l.getAdapter().getItem(position);
+            Fragment fragment = IdentityFragment.newInstance(identity);
+            FragmentManager fragmentManager = getFragmentManager();
+            fragmentManager.beginTransaction().setCustomAnimations(
+                    R.animator.delayed_slide_in_up,
+                    R.animator.fade_out,
+                    R.animator.delayed_fade_in,
+                    R.animator.slide_out_up)
+                    .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
+                    .addToBackStack(fragment.getClass().getSimpleName())
+                    .commit();
+        }
     }
 
     @Override
@@ -182,4 +208,6 @@ public class WotSearchFragment extends ListFragment
         mProgressViewAdapter.showProgress(false);
         isWaitingResult = false;
     }
+
+
 }

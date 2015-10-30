@@ -20,6 +20,9 @@ import io.ucoin.app.dao.sqlite.SQLiteTable;
 import io.ucoin.app.fragment.wallet.MovementListFragment;
 import io.ucoin.app.model.local.UnitType;
 import io.ucoin.app.model.local.Wallet;
+import io.ucoin.app.model.remote.BlockchainParameters;
+import io.ucoin.app.model.remote.Currency;
+import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.technical.CurrencyUtils;
 import io.ucoin.app.technical.DateUtils;
 import io.ucoin.app.technical.ModelUtils;
@@ -37,6 +40,7 @@ public class MovementCursorAdapter extends RecyclerViewCursorAdapter<MovementCur
     private String mUnitType;
     private Boolean mUnitForget;
     private Wallet wallet;
+    private Context mContext;
 
     private final OnClickListener mOnClickListener;
 
@@ -47,6 +51,7 @@ public class MovementCursorAdapter extends RecyclerViewCursorAdapter<MovementCur
     public MovementCursorAdapter(Context context,Wallet w, Cursor c, OnClickListener onClickListener) {
         super(context, c);
         mUdComment = context.getString(R.string.movement_ud);
+        mContext = context;
         textPrimaryColor = context.getResources().getColor(R.color.textPrimary);
         textComputedColor = context.getResources().getColor(R.color.textComputed);
 
@@ -129,6 +134,16 @@ public class MovementCursorAdapter extends RecyclerViewCursorAdapter<MovementCur
                 viewHolder.amountView.setText(CurrencyUtils.formatUD(amountInUd) + " DU");
                 break;
             case SettingsActivity.PREF_UNIT_TIME:
+                double amountInCM =0;
+                Currency currency = ServiceLocator.instance().getCurrencyService().getCurrencyById(mContext, wallet.getCurrencyId());
+                BlockchainParameters bcp = ServiceLocator.instance().getBlockchainParametersService().getBlockchainParametersByCurrency(mContext, currency.getCurrencyName());
+                int delay = bcp.getDt();
+                if(mUnitForget) {
+                    amountInCM = CurrencyUtils.convertCoinToTime(amount, currency.getLastUD(), delay);
+                }else{
+                    amountInCM = CurrencyUtils.convertCoinToTime(amount, cursor.getLong(viewHolder.dividendeIndex), delay);
+                }
+                viewHolder.amountView.setText(CurrencyUtils.formatTime(mContext,amountInCM));
                 break;
         }
 

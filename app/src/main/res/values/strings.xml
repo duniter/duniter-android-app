@@ -8,6 +8,10 @@
     -->
     <string name="title_activity_account">Account</string>
 
+    <string name="unit_coins">Classical</string>
+    <string name="unit_ud">Universal Dividend</string>
+    <string name="unit_time">Mutual Credit (Time Bank)</string>
+
     <!-- Strings related to account creation -->
     <string name="creating_account_title">Hello.</string>
     <string name="creating_account_welcome"><![CDATA[Welcome to <b>uCoin</b>.<br/><small>A decentralized system for free currencies.</small>]]></string>
@@ -59,6 +63,7 @@
     <string name="delete_wallet_confirm">Are you sure you want to delete this wallet ?</string>
     <string name="wallet_deleted">Wallet successfully deleted</string>
     <string name="universal_dividend_value">%s UD</string>
+    <string name="mutual_credit_value">%s ms</string>
     <string name="loading_wallets">Loading wallets...</string>
     <string name="updating_balances">Updating balances...</string>
 
@@ -251,5 +256,13 @@
     <string name="identity_error">Unable to access user</string>
 
     <string name="or">or :</string>
+
+    <string name="year">y</string>
+    <string name="day">d</string>
+
+    <string name="choice_contact">Choose a contact</string>
+    <string name="choice_wallet">Choose a wallet</string>
+
+    <string name="converter">Currency converter</string>
 
 </resources>

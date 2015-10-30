@@ -2,6 +2,7 @@ package io.ucoin.app.adapter;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.widget.RecyclerView;
@@ -19,8 +20,12 @@ import java.util.List;
 import io.ucoin.app.R;
 import io.ucoin.app.activity.SettingsActivity;
 import io.ucoin.app.fragment.common.HomeFragment;
+import io.ucoin.app.model.local.Movement;
 import io.ucoin.app.model.local.UnitType;
 import io.ucoin.app.model.local.Wallet;
+import io.ucoin.app.model.remote.BlockchainParameters;
+import io.ucoin.app.model.remote.Currency;
+import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.technical.CurrencyUtils;
 import io.ucoin.app.technical.DateUtils;
 import io.ucoin.app.technical.ImageUtils;
@@ -36,6 +41,7 @@ public class WalletRecyclerAdapter extends RecyclerView.Adapter<WalletRecyclerAd
     private List<Wallet> mWallets;
     private Context mContext;
     private String mUnitType;
+    private Boolean mUnitForget;
     private HomeFragment.WalletClickListener walletListener;
 
     public WalletRecyclerAdapter(Context context, List<Wallet> wallets) {
@@ -45,6 +51,7 @@ public class WalletRecyclerAdapter extends RecyclerView.Adapter<WalletRecyclerAd
         // Read the default unit to use
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         mUnitType = preferences.getString(SettingsActivity.PREF_UNIT, UnitType.COIN);
+        mUnitForget = preferences.getBoolean(SettingsActivity.PREF_UNIT_FORGET,false);
     }
 
     public WalletRecyclerAdapter(Context context,List<Wallet> wallets,HomeFragment.WalletClickListener listener) {
@@ -93,34 +100,39 @@ public class WalletRecyclerAdapter extends RecyclerView.Adapter<WalletRecyclerAd
         if (SettingsActivity.PREF_UNIT_COIN.equals(mUnitType)) {
             // Credit as coins
             viewHolder.credit.setText(CurrencyUtils.formatCoin(wallet.getCredit()));
-            // Currency name
-            viewHolder.currency.setText(wallet.getCurrency());
         }
 
         // If unit is UD
         else if (SettingsActivity.PREF_UNIT_UD.equals(mUnitType)) {
             // Credit as UD
-            viewHolder.credit.setText(mContext.getString(
-                    R.string.universal_dividend_value,
-                    CurrencyUtils.formatUD(wallet.getCreditAsUD())));
-
-            // Currency name
-            viewHolder.currency.setText(wallet.getCurrency());
+            viewHolder.credit.setText(mContext.getString(R.string.universal_dividend_value, CurrencyUtils.formatUD(wallet.getCreditAsUD())));
         }
 
         // Other unit
-        else {
-            viewHolder.credit.setVisibility(View.GONE);
-            viewHolder.currency.setVisibility(View.GONE);
+        else if (SettingsActivity.PREF_UNIT_TIME.equals(mUnitType)){
+            // Credit as UD
+            double creditTime = 0;
+            Currency currency = ServiceLocator.instance().getCurrencyService().getCurrencyById(mContext, wallet.getCurrencyId());
+            BlockchainParameters bcp = ServiceLocator.instance().getBlockchainParametersService().getBlockchainParametersByCurrency(mContext, currency.getCurrencyName());
+            int delay = bcp.getDt();
+            if(mUnitForget) {
+                creditTime = CurrencyUtils.convertCoinToTime(wallet.getCredit(), currency.getLastUD(), delay);
+            }else {
+                List<Movement> movementList = ServiceLocator.instance()
+                        .getMovementService().getMovementsByWalletId(mContext, wallet.getId());
+                creditTime = CurrencyUtils.calculCreditTimeWithoutForget(movementList, delay);
+            }
+            viewHolder.credit.setText(CurrencyUtils.formatTime(mContext,creditTime));
+
         }
+
+        // Currency name
+        viewHolder.currency.setText(wallet.getCurrency());
 
         if(viewHolder.txt_inscription!=null) {
 
-            viewHolder.txt_inscription.setText(
-                    viewHolder.txt_inscription.getText()
-                            +" : "
-                            + DateUtils.formatLong((wallet.getIdentity()).getTimestamp()));
-
+            viewHolder.txt_inscription.setText(mContext.getResources().getString(R.string.registered_since,
+                            DateUtils.formatLong((wallet.getIdentity()).getTimestamp())));
 
         }
     }
@@ -159,6 +171,7 @@ public class WalletRecyclerAdapter extends RecyclerView.Adapter<WalletRecyclerAd
         TextView credit;
         TextView pubkey;
         TextView currency, txt_inscription;
+        Resources r;
 
         LinearLayout mMoreInformation,button_operation, button_certify, button_pay;
 

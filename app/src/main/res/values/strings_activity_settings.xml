@@ -17,6 +17,7 @@
         <item>ud</item>
         <item>time</item>
     </string-array>
+
     <string name="pref_unit_forget">Use the forgotten</string>
 
     <string name="pref_title_save_contact">Save new contacts in</string>
