@@ -4,11 +4,8 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.FragmentManager;
-import android.app.ProgressDialog;
 import android.content.DialogInterface;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -17,9 +14,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ImageButton;
 import android.widget.ListView;
-import android.widget.TabHost;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,70 +22,61 @@ import java.util.Collection;
 
 import io.ucoin.app.R;
 import io.ucoin.app.activity.IToolbarActivity;
-import io.ucoin.app.activity.SettingsActivity;
 import io.ucoin.app.adapter.CertificationListAdapter;
 import io.ucoin.app.adapter.ProgressViewAdapter;
+import io.ucoin.app.fragment.common.HomeFragment;
 import io.ucoin.app.fragment.common.LoginFragment;
 import io.ucoin.app.fragment.wot.IdentityFragment;
-import io.ucoin.app.model.local.Movement;
-import io.ucoin.app.model.local.UnitType;
 import io.ucoin.app.model.local.Wallet;
+import io.ucoin.app.model.remote.Identity;
 import io.ucoin.app.model.remote.WotCertification;
 import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.service.remote.WotRemoteService;
 import io.ucoin.app.technical.CollectionUtils;
-import io.ucoin.app.technical.CurrencyUtils;
-import io.ucoin.app.technical.DateUtils;
 import io.ucoin.app.technical.ExceptionUtils;
 import io.ucoin.app.technical.FragmentUtils;
-import io.ucoin.app.technical.ImageUtils;
 import io.ucoin.app.technical.StringUtils;
 import io.ucoin.app.technical.ViewUtils;
 import io.ucoin.app.technical.task.AsyncTaskHandleException;
-import io.ucoin.app.technical.task.ProgressDialogAsyncTaskListener;
 
 
-public class WalletCertificationFragment extends Fragment {
+public class WotFragment<T> extends Fragment {
 
-    public static final String TAG = "WalletFragment";
+    public static final String TAG = "WotFragment";
 
-    private static String ARGS_TAB_INDEX = "tabIndex";
+    public static final String TYPE = "type";
+
+    public static final int WALLET = 1;
+    public static final int IDENTITY = 2;
 
     private ProgressViewAdapter mWotProgressViewAdapter;
     private CertificationListAdapter mCertificationListAdapter;
-    private TextView mUidView;
-    private ImageButton mIcon;
-    private View mDetailLayout;
-    private TextView mTimestampLabelView;
-    private TextView mTimestampView;
-    private TextView mPubkeyView;
-    private TextView mCreditView;
-    private TextView mCurrencyView;
+
     private TextView mWotEmptyTextView;
-    private TabHost mTabs;
-    private MovementListFragment mMovementListFragment;
 
-    private String mUnitType;
+    private static Wallet wallet;
+    private static Identity identity;
+    private static int type;
+    private T valueClass;
 
-    private boolean mSignatureSingleLine = true;
-    private boolean mPubKeySingleLine = true;
-
-    public static WalletCertificationFragment newInstance(Wallet wallet) {
-        WalletCertificationFragment fragment = new WalletCertificationFragment();
+    public static WotFragment newInstance(Wallet _wallet) {
+        WotFragment fragment = new WotFragment();
         Bundle newInstanceArgs = new Bundle();
-        newInstanceArgs.putSerializable(Wallet.class.getSimpleName(), wallet);
-        newInstanceArgs.putInt(ARGS_TAB_INDEX, 0);
+        newInstanceArgs.putSerializable(Wallet.class.getSimpleName(), _wallet);
         fragment.setArguments(newInstanceArgs);
+        wallet = _wallet;
+        type = WALLET;
 
         return fragment;
     }
 
-    public static WalletCertificationFragment newInstance(Wallet wallet, int tabIndex) {
-        WalletCertificationFragment fragment = new WalletCertificationFragment();
+    public static WotFragment newInstance(Identity _identity) {
+        WotFragment fragment = new WotFragment();
         Bundle newInstanceArgs = new Bundle();
-        newInstanceArgs.putSerializable(Wallet.class.getSimpleName(), wallet);
-        newInstanceArgs.putInt(ARGS_TAB_INDEX, tabIndex);
+        newInstanceArgs.putSerializable(Identity.class.getSimpleName(), _identity);
         fragment.setArguments(newInstanceArgs);
+        identity = _identity;
+        type = IDENTITY;
 
         return fragment;
     }
@@ -105,7 +91,7 @@ public class WalletCertificationFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        return inflater.inflate(R.layout.fragment_wallet_certification,
+        return inflater.inflate(R.layout.fragment_wot,
                 container, false);
     }
 
@@ -114,59 +100,15 @@ public class WalletCertificationFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         Bundle newInstanceArgs = getArguments();
-        final Wallet wallet = (Wallet) newInstanceArgs
-                .getSerializable(Wallet.class.getSimpleName());
-
-        // Uid
-        mUidView = (TextView) view.findViewById(R.id.uid);
-
-        // Icon
-        mIcon = (ImageButton)view.findViewById(R.id.icon);
-
-        // Toogle detail button
-        final ImageButton toogleDetailButton = (ImageButton) view.findViewById(R.id.toogle_detail);
-        toogleDetailButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mDetailLayout.getVisibility() == View.VISIBLE) {
-                    mDetailLayout.setVisibility(View.GONE);
-                    toogleDetailButton.setImageResource(R.drawable.expander_open_holo_dark);
-                } else {
-                    mDetailLayout.setVisibility(View.VISIBLE);
-                    toogleDetailButton.setImageResource(R.drawable.expander_close_holo_dark);
-                }
-            }
-        });
-
-        // details view
-        mDetailLayout = view.findViewById(R.id.details);
-        mDetailLayout.setVisibility(View.GONE);
-
-        // Timestamp label
-        mTimestampLabelView = (TextView) view.findViewById(R.id.timestamp_label);
-
-        // Timestamp
-        mTimestampView = (TextView) view.findViewById(R.id.timestamp);
-
-        // Pub key
-        mPubkeyView = (TextView) view.findViewById(R.id.pubkey);
-
-        // Currency
-        mCurrencyView = (TextView) view.findViewById(R.id.currency);
-
-        // Credit
-        mCreditView = (TextView) view.findViewById(R.id.credit);
-
-//        // Tab 1: transfer list
-//        mMovementListFragment = MovementListFragment.newInstance(wallet, new MovementListFragment.MovementListListener() {
-//            @Override
-//            public void onPositiveClick(Bundle args,int i) {
-//                onMovementClick(args);
-//            }
-//        });
-//        getFragmentManager().beginTransaction()
-//                .replace(R.id.tab1, mMovementListFragment, "tab1")
-//                .commit();
+        if(type == WALLET){
+            wallet = (Wallet) newInstanceArgs
+                    .getSerializable(Wallet.class.getSimpleName());
+            valueClass = (T)wallet;
+        }else if (type == IDENTITY){
+            identity = (Identity) newInstanceArgs
+                    .getSerializable(Identity.class.getSimpleName());
+            valueClass= (T)identity;
+        }
 
         // Wot list
         ListView wotListView = (ListView) view.findViewById(R.id.wot_list);
@@ -193,12 +135,8 @@ public class WalletCertificationFragment extends Fragment {
         // Make sure to hide the keyboard
         ViewUtils.hideKeyboard(getActivity());
 
-        // Read unit type from preferences
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        mUnitType = preferences.getString(SettingsActivity.PREF_UNIT, UnitType.COIN);
-
         // update views
-        updateView(wallet);
+        updateView(valueClass);
 
     }
 
@@ -210,14 +148,17 @@ public class WalletCertificationFragment extends Fragment {
         MenuItem selfMenu = menu.findItem(R.id.action_self);
         MenuItem joinMenu = menu.findItem(R.id.action_join);
 
-        Bundle newInstanceArgs = getArguments();
-        final Wallet wallet = (Wallet) newInstanceArgs
-                .getSerializable(Wallet.class.getSimpleName());
+        if(type == WALLET) {
 
-        if (wallet.getIsMember() || wallet.getCertTimestamp() > 0) {
-            selfMenu.setVisible(false);
+            if (wallet.getIsMember() || wallet.getCertTimestamp() > 0) {
+                selfMenu.setVisible(false);
+            }
+            if (wallet.getIsMember()) {
+                joinMenu.setVisible(false);
+            }
         }
-        if (wallet.getIsMember()) {
+        else {
+            selfMenu.setVisible(false);
             joinMenu.setVisible(false);
         }
     }
@@ -234,12 +175,6 @@ public class WalletCertificationFragment extends Fragment {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.action_sync:
-                onRefreshMovements();
-                return true;
-            case R.id.action_resync:
-                onRefreshAllMovements();
-                return true;
             case R.id.action_transfer:
                 onTransferClick();
                 return true;
@@ -258,57 +193,12 @@ public class WalletCertificationFragment extends Fragment {
 
     /* -- protected methods -- */
 
-    protected void updateView(Wallet wallet) {
-        // uid
-        mUidView.setText(wallet.getUid());
-
-        // Icon
-        mIcon.setImageResource(ImageUtils.getImageWhite(wallet));
-
-        // Registration date
-        if (wallet.getCertTimestamp() > 0) {
-            mTimestampLabelView.setText(R.string.registration_date);
-            mTimestampView.setText(DateUtils.format(wallet.getCertTimestamp()));
-        }
-        else {
-            mTimestampLabelView.setText(getString(R.string.not_registred));
-            mTimestampView.setText("");
-        }
-
-        // Pub key
-        {
-            String pubkey = wallet.getPubKeyHash();
-            int offset = pubkey.length()/2;
-            pubkey = pubkey.substring(0, offset) + '\n' + pubkey.substring(offset);
-            mPubkeyView.setText(pubkey);
-        }
-
-        // Currency
-        mCurrencyView.setText(wallet.getCurrency());
-
-        // If unit is coins
-        if (SettingsActivity.PREF_UNIT_COIN.equals(mUnitType)) {
-            // Credit as coins
-            mCreditView.setText(CurrencyUtils.formatCoin(wallet.getCredit()));
-        }
-
-        // If unit is UD
-        else if (SettingsActivity.PREF_UNIT_UD.equals(mUnitType)) {
-            // Credit as UD
-            mCreditView.setText(getString(
-                    R.string.universal_dividend_value,
-                    CurrencyUtils.formatUD(wallet.getCreditAsUD())));
-        }
-
-        // Other unit
-        else {
-            mCreditView.setVisibility(View.GONE);
-        }
+    protected void updateView(T valueClass) {
 
         // Use the pre-loaded WOT data if exists
-        if (CollectionUtils.isNotEmpty(wallet.getCertifications())) {
+        if (type == WALLET && CollectionUtils.isNotEmpty(((Wallet) valueClass).getCertifications())) {
             mCertificationListAdapter.clear();
-            mCertificationListAdapter.addAll(wallet.getCertifications());
+            mCertificationListAdapter.addAll(((Wallet) valueClass).getCertifications());
             mCertificationListAdapter.notifyDataSetChanged();
             mWotProgressViewAdapter.showProgress(false);
         }
@@ -316,16 +206,18 @@ public class WalletCertificationFragment extends Fragment {
         // Load WOT data
         else {
             LoadTask task = new LoadTask();
-            task.execute(wallet);
+            task.execute(valueClass);
         }
     }
 
     protected void onTransferClick() {
         Bundle newInstanceArgs = getArguments();
-        Wallet wallet = (Wallet)
-                newInstanceArgs.getSerializable(Wallet.class.getSimpleName());
-
-        Fragment fragment = TransferFragment.newInstance(wallet);
+        Fragment fragment = null;
+        if(type == WALLET){
+            fragment = TransferFragment.newInstance(wallet);
+        }else if (type == IDENTITY){
+            fragment = TransferFragment.newInstance(identity);
+        }
         getFragmentManager().beginTransaction()
                 .setCustomAnimations(R.animator.slide_in_down,
                         R.animator.slide_out_up,
@@ -337,39 +229,34 @@ public class WalletCertificationFragment extends Fragment {
     }
 
     protected void onSelfClick() {
-        // Retrieve wallet
-        Bundle newInstanceArgs = getArguments();
-        final Wallet wallet = (Wallet) newInstanceArgs
-                .getSerializable(Wallet.class.getSimpleName());
-
         // Retrieve the fragment to pop after self certification
         final String popBackStackName = FragmentUtils.getPopBackName(getFragmentManager(), 0);
 
         // Launch the self certification
-        LoginFragment.login(getFragmentManager(), wallet, new LoginFragment.OnLoginListener() {
-            public void onSuccess(Wallet authWallet) {
-                SelfCertificationTask task = new SelfCertificationTask(popBackStackName);
-                task.execute(authWallet);
-            }
-        });
+        if(type == WALLET) {
+            LoginFragment.login(getFragmentManager(), wallet, new LoginFragment.OnLoginListener() {
+                public void onSuccess(Wallet authWallet) {
+                    SelfCertificationTask task = new SelfCertificationTask(popBackStackName);
+                    task.execute(authWallet);
+                }
+            });
+        }
     }
 
     protected void onRequestMembershipClick() {
-        // Retrieve wallet
-        Bundle newInstanceArgs = getArguments();
-        final Wallet wallet = (Wallet) newInstanceArgs
-                .getSerializable(Wallet.class.getSimpleName());
-
         // Retrieve the fragment to pop after transfer
         final String popBackStackName = FragmentUtils.getPopBackName(getFragmentManager(), 0);
 
         // Perform the join (after login)
-        LoginFragment.login(getFragmentManager(), wallet, new LoginFragment.OnLoginListener() {
-            public void onSuccess(Wallet authWallet) {
-                RequestMembershipTask task = new RequestMembershipTask(popBackStackName);
-                task.execute(authWallet);
-            }
-        });
+
+        if(type == WALLET) {
+            LoginFragment.login(getFragmentManager(), wallet, new LoginFragment.OnLoginListener() {
+                public void onSuccess(Wallet authWallet) {
+                    RequestMembershipTask task = new RequestMembershipTask(popBackStackName);
+                    task.execute(authWallet);
+                }
+            });
+        }
     }
 
     protected void onWotIdentityClick(int position) {
@@ -378,31 +265,15 @@ public class WalletCertificationFragment extends Fragment {
         WotCertification cert = mCertificationListAdapter
                 .getItem(position);
 
-        Fragment fragment = IdentityFragment.newInstance(cert);
+        Fragment fragment = IdentityFragment.newInstance(cert, HomeFragment.identityListener);
         FragmentManager fragmentManager = getFragmentManager();
 
         fragmentManager.beginTransaction()
-                .setCustomAnimations(R.animator.slide_in_right,
-                        R.animator.slide_out_left,
-                        R.animator.delayed_fade_in,
-                        R.animator.slide_out_up)
+                .setCustomAnimations(R.animator.slide_in_right, R.animator.slide_out_left, R.animator.delayed_fade_in, R.animator.slide_out_up)
                 .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
                 .addToBackStack(fragment.getClass().getSimpleName())
                 .commit();
     }
-
-    protected void onMovementClick(Bundle args) {
-
-        // Get select movement
-        Movement movement = (Movement) args.getSerializable(Movement.class.getSimpleName());
-        if (movement == null) {
-            return;
-        }
-
-        Log.d(TAG, "Click on movement with fingerprint: " + movement.getFingerprint());
-        // TODO: open the identity from pubkey
-    }
-
 
     protected void onDeleteClick() {
         // Retrieve wallet
@@ -440,74 +311,8 @@ public class WalletCertificationFragment extends Fragment {
 
     }
 
-    protected void onRefreshAllMovements() {
 
-        // Launch after user confirmation
-        new AlertDialog.Builder(getActivity())
-                .setTitle(getString(R.string.sync))
-                .setMessage(getString(R.string.resync_confirm))
-                .setIcon(android.R.drawable.ic_dialog_alert)
-                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        // Launch
-                        doOnRefreshMovements(true);
-                    }})
-                .setNegativeButton(android.R.string.no, null).show();
-
-    }
-
-    protected void onRefreshMovements() {
-        doOnRefreshMovements(false);
-    }
-
-    protected void doOnRefreshMovements(final boolean doCompleteRefresh) {
-        Wallet wallet = (Wallet)getArguments().getSerializable(Wallet.class.getSimpleName());
-        long walletId = wallet.getId();
-
-        final long time1 = System.currentTimeMillis();
-        ServiceLocator serviceLocator = ServiceLocator.instance();
-
-        ProgressDialog progressDialog = new ProgressDialog(getActivity());
-        progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-        progressDialog.setTitle("Importation des opérations");
-        ProgressDialogAsyncTaskListener<Long> listener = new ProgressDialogAsyncTaskListener<Long>(progressDialog) {
-            @Override
-            public void onSuccess(final Long nbUpdates) {
-                super.onSuccess(nbUpdates);
-                long duration = System.currentTimeMillis() - time1;
-                onFinishRefresh(nbUpdates == null ? 0 : nbUpdates.longValue(),
-                        duration);
-            }
-        };
-
-        // Refresh movements
-        serviceLocator.getMovementService().refreshMovements(
-                walletId,
-                doCompleteRefresh,
-                listener);
-
-       // Toast.makeText(getActivity(), getString(R.string.resync_started), Toast.LENGTH_SHORT).show();
-    }
-
-    protected void onFinishRefresh(long nbUpdates, long timeInMillis) {
-
-        String message;
-        if (nbUpdates > 0) {
-            mMovementListFragment.notifyDataSetChanged();
-
-            message = getString(R.string.sync_succeed,
-                    nbUpdates,
-                    DateUtils.formatFriendlyTime(getActivity(), timeInMillis));
-        }
-        else {
-            message = getString(R.string.sync_no_tx);
-        }
-        Toast.makeText(getActivity(),
-                message
-                , Toast.LENGTH_LONG).show();
-    }
-
-    public class LoadTask extends AsyncTaskHandleException<Wallet, Void, Collection<WotCertification>> {
+    public class LoadTask<T> extends AsyncTaskHandleException<T, Void, Collection<WotCertification>> {
 
         public LoadTask() {
             super(getActivity());
@@ -520,25 +325,30 @@ public class WalletCertificationFragment extends Fragment {
         }
 
         @Override
-        protected Collection<WotCertification> doInBackgroundHandleException(Wallet... wallets) {
-            Wallet wallet = wallets[0];
+        protected Collection<WotCertification> doInBackgroundHandleException(T... valuesClasses) {
+            T valueClass = valuesClasses[0];
 
             // Get certifications (if has a uid)
             Collection<WotCertification> certifications = null;
-            if (StringUtils.isNotBlank(wallet.getUid())) {
-                WotRemoteService wotService = ServiceLocator.instance().getWotRemoteService();
+            WotRemoteService wotService = ServiceLocator.instance().getWotRemoteService();
+            if (type == WALLET && StringUtils.isNotBlank(((Wallet)valueClass).getUid())){
                 certifications =  wotService.getCertifications(
-                        wallet.getCurrencyId(),
-                        wallet.getUid(),
-                        wallet.getPubKeyHash(),
-                        wallet.getIdentity().isMember());
+                        ((Wallet)valueClass).getCurrencyId(),
+                        ((Wallet)valueClass).getUid(),
+                        ((Wallet)valueClass).getPubKeyHash(),
+                        ((Wallet)valueClass).getIdentity().isMember());
+                ((Wallet)valueClass).setCertifications(certifications);
+            } else
+            if (type == IDENTITY && StringUtils.isNotBlank(((Identity)valueClass).getUid())){
+                certifications =  wotService.getCertifications(
+                        ((Identity)valueClass).getCurrencyId(),
+                        ((Identity)valueClass).getUid(),
+                        ((Identity)valueClass).getPubkey(),
+                        ((Identity)valueClass).isMember());
             }
 
-            // Update the wallet( to avoid a new load when navigate on community members)
-            wallet.setCertifications(certifications);
-
             return certifications;
-         }
+        }
 
         @Override
         protected void onSuccess(Collection<WotCertification> certifications) {
@@ -621,7 +431,7 @@ public class WalletCertificationFragment extends Fragment {
                         getString(R.string.join_sended),
                         Toast.LENGTH_LONG).show();
 
-                updateView(wallet);
+                updateView((T)wallet);
             }
         }
 
@@ -691,7 +501,7 @@ public class WalletCertificationFragment extends Fragment {
                         getString(R.string.join_sended),
                         Toast.LENGTH_LONG).show();
 
-                updateView(wallet);
+                updateView((T)wallet);
             }
         }
 
@@ -746,7 +556,7 @@ public class WalletCertificationFragment extends Fragment {
             Log.d(TAG, "Could not delete wallet: " + ExceptionUtils.getMessage(error), error);
             Toast.makeText(getContext(),
                     getString(R.string.delete_wallet_error, ExceptionUtils.getMessage(error)),
-                            Toast.LENGTH_SHORT).show();
+                    Toast.LENGTH_SHORT).show();
         }
 
     }

@@ -83,8 +83,7 @@ public class CertificationListAdapter extends ArrayAdapter<WotCertification> {
         }
         else {
             viewHolder.cert_time_label.setVisibility(View.GONE);
-
-            if (!certification.isWritten()) {
+            if ((certification.getWritten()==null) || (certification.getWritten().getNumber()<0 )){
                 viewHolder.cert_time.setText(viewHolder.cert_not_written);
             }
             else {

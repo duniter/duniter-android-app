@@ -787,9 +787,13 @@ public class MovementService extends BaseService {
      */
     protected Long getUD(Map<Integer, Long> udMap, int blockNumber) {
 
+        Integer previousBlockNumber = 0;
+
         for (Integer udBlockNumber: udMap.keySet()) {
             if (blockNumber >= udBlockNumber.intValue()) {
-                return udMap.get(udBlockNumber);
+                previousBlockNumber = udBlockNumber;
+            }else{
+                return udMap.get(previousBlockNumber);
             }
         }
 

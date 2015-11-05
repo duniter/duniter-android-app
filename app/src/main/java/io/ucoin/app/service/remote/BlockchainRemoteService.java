@@ -520,7 +520,7 @@ public class BlockchainRemoteService extends BaseRemoteService {
                 ? getMembershipByPubkeyOrUid(peer, identity.getUid())
                 : getMembershipByPubkeyOrUid(currencyId, identity.getUid());
 
-        // uid not used = not a member
+        // uid not used = not was member
         if (result == null) {
             identity.setMember(false);
 

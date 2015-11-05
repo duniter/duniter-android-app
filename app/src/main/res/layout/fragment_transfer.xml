@@ -1,7 +1,9 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:orientation="vertical">
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -66,7 +68,7 @@
                 android:layout_weight="0.80"
                 android:layout_height="wrap_content"
                 android:singleLine="true"
-                android:hint="@string/public_key"
+                custom:hint="@string/public_key"
                 android:textColor="#372c24"
                 android:imeOptions="actionNext" />
 
@@ -132,14 +134,14 @@
 
 
     <!--<EditText-->
-        <!--android:id="@+id/comment"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_gravity="bottom"-->
-        <!--android:singleLine="true"-->
-        <!--android:hint="@string/comment_hint"-->
-        <!--android:imeOptions="flagForceAscii|actionSend"-->
-        <!--android:padding="10dip"/>-->
+    <!--android:id="@+id/comment"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:layout_gravity="bottom"-->
+    <!--android:singleLine="true"-->
+    <!--android:hint="@string/comment_hint"-->
+    <!--android:imeOptions="flagForceAscii|actionSend"-->
+    <!--android:padding="10dip"/>-->
 
     <io.ucoin.app.technical.view.ClearableEditText
         android:id="@+id/comment"
@@ -147,7 +149,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:singleLine="true"
-        android:hint="@string/comment_hint"
+        custom:hint="@string/comment_hint"
         android:imeOptions="flagForceAscii|actionSend"
         android:padding="10dip"/>
 

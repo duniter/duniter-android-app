@@ -222,7 +222,7 @@ public class WalletRecyclerAdapter extends RecyclerView.Adapter<WalletRecyclerAd
                         @Override
                         public void onClick(View v) {
                             Bundle args = new Bundle();
-                            wra.walletListener.onPositiveClick(args, v, HomeFragment.CLICK_CERTIFY);
+                            wra.walletListener.onPositiveClick(args, v, HomeFragment.CLICK_CERTIFICATION);
                         }
                     });
                 }

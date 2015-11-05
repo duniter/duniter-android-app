@@ -110,6 +110,7 @@
     <string name="join">Devenir membre</string>
     <string name="delete">Supprimer</string>
     <string name="remove">Enlever</string>
+    <string name="certify">Certifier</string>
     <string name="add_as_new_contact">Ajouter comme contact</string>
     <string name="add_as_new_contact_title">Nouveau contact</string>
     <string name="add_as_existing_contact">Ajouter à un contact existant</string>
@@ -258,6 +259,8 @@
 
     <string name="year">a</string>
     <string name="day">j</string>
+
+    <string name="certify_by">Certifié par %s personne</string>
 
     <string name="choice_contact">Choisissez un contact</string>
     <string name="choice_wallet">Choisissez un portefeuille</string>

@@ -635,7 +635,7 @@ public class MainActivity extends ActionBarActivity
 
         if (identity != null) {
 
-            Fragment fragment = IdentityFragment.newInstance(identity);
+            Fragment fragment = IdentityFragment.newInstance(identity,HomeFragment.identityListener);
             FragmentManager fragmentManager = getFragmentManager();
             // Insert the Home at the first place in back stack
             fragmentManager.beginTransaction()

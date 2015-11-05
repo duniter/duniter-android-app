@@ -18,7 +18,7 @@ public class WotCertification extends Identity {
     /**
      * Indicate whether the certification is written in the blockchain or not.
      */
-    private boolean written;
+    private WotCertificationWritten written;
 
     /**
      * Give the other side certicication
@@ -59,11 +59,11 @@ public class WotCertification extends Identity {
     /**
      * Indicate whether the certification is written in the blockchain or not.
      */
-    public boolean isWritten() {
+    public WotCertificationWritten getWritten() {
         return written;
     }
 
-    public void setWritten(boolean written) {
+    public void setWritten(WotCertificationWritten written) {
         this.written = written;
     }
 

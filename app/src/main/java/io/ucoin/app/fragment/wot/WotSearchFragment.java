@@ -25,6 +25,7 @@ import io.ucoin.app.activity.IToolbarActivity;
 import io.ucoin.app.activity.MainActivity;
 import io.ucoin.app.adapter.IdentityArrayAdapter;
 import io.ucoin.app.adapter.ProgressViewAdapter;
+import io.ucoin.app.fragment.common.HomeFragment;
 import io.ucoin.app.fragment.wallet.TransferFragment;
 import io.ucoin.app.model.remote.Identity;
 
@@ -170,7 +171,7 @@ public class WotSearchFragment extends ListFragment
 
         } else {
             Identity identity = (Identity) l.getAdapter().getItem(position);
-            Fragment fragment = IdentityFragment.newInstance(identity);
+            Fragment fragment = IdentityFragment.newInstance(identity, HomeFragment.identityListener);
             FragmentManager fragmentManager = getFragmentManager();
             fragmentManager.beginTransaction().setCustomAnimations(
                     R.animator.delayed_slide_in_up,

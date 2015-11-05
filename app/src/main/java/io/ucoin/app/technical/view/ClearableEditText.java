@@ -1,6 +1,7 @@
 package io.ucoin.app.technical.view;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
@@ -15,21 +16,25 @@ import io.ucoin.app.R;
 public class ClearableEditText extends RelativeLayout
 {
     LayoutInflater inflater = null;
+    TypedArray typedArray;
     EditText edit_text;
     Button btn_clear;
     public ClearableEditText(Context context, AttributeSet attrs, int defStyle)
     {
         super(context, attrs, defStyle);
+        typedArray = context.obtainStyledAttributes(attrs,R.styleable.ClearableEditText, 0, 0);
         initViews();
     }
     public ClearableEditText(Context context, AttributeSet attrs)
     {
         super(context, attrs);
+        typedArray = context.obtainStyledAttributes(attrs,R.styleable.ClearableEditText, 0, 0);
         initViews();
     }
     public ClearableEditText(Context context)
     {
         super(context);
+        typedArray = null;
         initViews();
     }
     void initViews()
@@ -39,6 +44,10 @@ public class ClearableEditText extends RelativeLayout
         edit_text = (EditText) findViewById(R.id.clearable_edit);
         btn_clear = (Button) findViewById(R.id.clearable_button_clear);
         btn_clear.setVisibility(RelativeLayout.INVISIBLE);
+        if(typedArray!=null){
+            edit_text.setHint(typedArray.getString(R.styleable.ClearableEditText_hint));
+            typedArray.recycle();
+        }
         // voir pour le hint du edit text
         clearText();
         showHideClearButton();

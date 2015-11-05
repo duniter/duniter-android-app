@@ -2,28 +2,20 @@ package io.ucoin.app.fragment.wot;
 
 import android.app.Activity;
 import android.app.Fragment;
-import android.app.FragmentManager;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.RectF;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
-import android.text.Spannable;
-import android.text.SpannableString;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AccelerateDecelerateInterpolator;
-import android.widget.AdapterView;
-import android.widget.ImageButton;
-import android.widget.ListView;
-import android.widget.ScrollView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,73 +25,37 @@ import java.util.Collection;
 import io.ucoin.app.R;
 import io.ucoin.app.activity.IToolbarActivity;
 import io.ucoin.app.activity.SettingsActivity;
-import io.ucoin.app.adapter.CertificationListAdapter;
-import io.ucoin.app.adapter.ProgressViewAdapter;
-import io.ucoin.app.fragment.wallet.TransferFragment;
+import io.ucoin.app.fragment.common.HomeFragment;
 import io.ucoin.app.model.remote.Identity;
 import io.ucoin.app.model.remote.WotCertification;
 import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.service.remote.BlockchainRemoteService;
 import io.ucoin.app.service.remote.WotRemoteService;
-import io.ucoin.app.technical.CollectionUtils;
 import io.ucoin.app.technical.DateUtils;
+import io.ucoin.app.technical.ModelUtils;
 import io.ucoin.app.technical.ObjectUtils;
-import io.ucoin.app.technical.StringUtils;
 import io.ucoin.app.technical.ViewUtils;
 import io.ucoin.app.technical.task.AsyncTaskHandleException;
-import io.ucoin.app.technical.view.AlphaForegroundColorSpan;
-import io.ucoin.app.technical.view.NotifyingScrollView;
 
 
 public class IdentityFragment extends Fragment {
 
-    private static String TAG = "IdentityFragment";
-    private static String HEADER_INDEX = "tabIndex";
+    private TextView txt_inscription, pubkey, info_certify, uid;
 
-    private ProgressViewAdapter mProgressViewAdapter;
-    private View mHeader;
-    private View mContent;
-    private CertificationListAdapter mCertificationListAdapter;
-    private int mActionBarHeight;
-    private int mHeaderHeight;
+    LinearLayout mMoreInformation,button_operation, button_certify, button_pay, button_certification;
 
-    private int mHeaderHeight2;
-    private int mMinHeaderTranslation;
-    private TextView mUidView;
-    private ImageButton mIcon;
-    private View mDetailLayout;
-    private TextView mTimestampView;
-    private TextView mSignatureView;
-    private ListView mListView;
-    private TextView mPubkeyView;
-
-    private RectF mRect1 = new RectF();
-    private RectF mRect2 = new RectF();
-
-    private AlphaForegroundColorSpan mAlphaForegroundColorSpan;
-    private SpannableString mActionBarTitleSpannableString;
-
-    private AccelerateDecelerateInterpolator mSmoothInterpolator;
-    private TypedValue mTypedValue = new TypedValue();
+    private Identity identity;
 
     private String mSaveContactsPref;
+    private static HomeFragment.IdentityClickListener identityListener;
 
-    public static IdentityFragment newInstance(Identity identity) {
+    public static IdentityFragment newInstance(Identity identity,HomeFragment.IdentityClickListener il) {
         IdentityFragment fragment = new IdentityFragment();
         Bundle newInstanceArgs = new Bundle();
         newInstanceArgs.putSerializable(Identity.class.getSimpleName(), identity);
-        newInstanceArgs.putInt(HEADER_INDEX, 0);
         fragment.setArguments(newInstanceArgs);
 
-        return fragment;
-    }
-
-    public static IdentityFragment newInstance(Identity identity, int headerIndex) {
-        IdentityFragment fragment = new IdentityFragment();
-        Bundle newInstanceArgs = new Bundle();
-        newInstanceArgs.putSerializable(Identity.class.getSimpleName(), identity);
-        newInstanceArgs.putInt(HEADER_INDEX, headerIndex);
-        fragment.setArguments(newInstanceArgs);
+        identityListener = il;
 
         return fragment;
     }
@@ -113,21 +69,12 @@ public class IdentityFragment extends Fragment {
         mSaveContactsPref = sharedPref.getString(SettingsActivity.PREF_CONTACT_SAVE_KEY, String.valueOf(SettingsActivity.PREF_CONTACT_SAVE_IN_APP));
     }
 
-    private View mPlaceHolderView;
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        View view = inflater.inflate(R.layout.fragment_identity,
+        View view = inflater.inflate(R.layout.card_identity,
                 container, false);
-
-        // List view (WoT)
-        mListView = (ListView) view.findViewById(R.id.wot_list);
-
-        // Set the placeholder header
-        //mPlaceHolderView = inflater.inflate(R.layout.fake_header, mListView, false);
-        //mListView.addHeaderView(mPlaceHolderView);
 
         return view;
     }
@@ -137,139 +84,99 @@ public class IdentityFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         Bundle newInstanceArgs = getArguments();
-        final Identity identity = (Identity) newInstanceArgs
-                .getSerializable(Identity.class.getSimpleName());
+        identity = (Identity) newInstanceArgs.getSerializable(Identity.class.getSimpleName());
 
-        // Header
-        mHeader = (View) view.findViewById(R.id.header_layout);
+        uid = (TextView) view.findViewById(R.id.uid);
 
-        mContent = (View) view.findViewById(R.id.content_layout);
+        txt_inscription = (TextView) view.findViewById(R.id.txt_inscription);
+        pubkey = (TextView) view.findViewById(R.id.pubkey);
+        info_certify = (TextView) view.findViewById(R.id.info_certify);
 
-        mSmoothInterpolator = new AccelerateDecelerateInterpolator();
-        mHeaderHeight = getResources().getDimensionPixelSize(R.dimen.header_height);
-        mHeaderHeight2 = getResources().getDimensionPixelSize(R.dimen.header_height2);
-        mMinHeaderTranslation = -mHeaderHeight + getActionBarHeight();
+        button_operation = (LinearLayout) view.findViewById(R.id.button_operation);
+        button_certify = (LinearLayout) view.findViewById(R.id.button_certify);
+        button_certification = (LinearLayout) view.findViewById(R.id.button_certification);
+        button_pay = (LinearLayout) view.findViewById(R.id.button_pay);
+        mMoreInformation = (LinearLayout) view.findViewById(R.id.more_information);
 
-        // Action bar title
-        mActionBarTitleSpannableString = new SpannableString(identity.getUid());
-        mAlphaForegroundColorSpan = new AlphaForegroundColorSpan(getResources().getColor(R.color.textPrimary));
-
-        // Uid
-        mUidView = (TextView) view.findViewById(R.id.uid);
-
-
-        // Timestamp
-        mTimestampView = (TextView) view.findViewById(R.id.timestamp);
-
-        // Pub key
-        mPubkeyView = (TextView) view.findViewById(R.id.pubkey);
-
-        // Signature
-        final View signatureIconView = view.findViewById(R.id.signature_icon);
-        mSignatureView = (TextView) view.findViewById(R.id.signature);
-
-
-        // Toogle detail button
-        final ImageButton showMoreButton = (ImageButton) view.findViewById(R.id.more_button);
-        showMoreButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showMoreButton.setVisibility(View.GONE);
-                signatureIconView.setVisibility(View.VISIBLE);
-                mSignatureView.setVisibility(View.VISIBLE);
-            }
-        });
-
-        // Wot list
-        mListView = (ListView) view.findViewById(R.id.wot_list);
-        mListView.setVisibility(View.GONE);
-        mCertificationListAdapter = new CertificationListAdapter(getActivity());
-        mListView.setAdapter(mCertificationListAdapter);
-
-        //this listener is not called unless WotExpandableListAdapter.isChildSelectable return true
-        //and convertView.onClickListener is not set (in WotExpandableListAdapter)
-        mListView.setOnItemClickListener(new ListView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if (position <= 0) {
-                    return;
+        if(mMoreInformation!=null) {
+            final RelativeLayout showMoreButton = (RelativeLayout) view.findViewById(R.id.more_button);
+            showMoreButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (mMoreInformation.getVisibility() == View.GONE) {
+                        mMoreInformation.setVisibility(View.VISIBLE);
+                    } else {
+                        mMoreInformation.setVisibility(View.GONE);
+                    }
                 }
+            });
+        }
 
-                // Get certification, and open it
-                WotCertification cert = (WotCertification) mCertificationListAdapter
-                        .getItem(position-1);
-                onCertificationClick(cert);
+        if(button_operation!=null) {
+            if(identityListener!=null){
+                button_operation.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Bundle args = new Bundle();
+                        args.putSerializable(Identity.class.getSimpleName(),identity);
+                        identityListener.onPositiveClick(args, v, HomeFragment.CLICK_MOUVEMENT);
+                    }
+                });
             }
-        });
+        }
 
-        //PROGRESS VIEW
-        View progressView = view.findViewById(R.id.load_progress);
-        progressView.setVisibility(View.VISIBLE);
-        mProgressViewAdapter = new ProgressViewAdapter(
-                progressView,
-                mListView);
+        if(button_certify!=null) {
+            if(identityListener!=null){
+                button_certify.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Bundle args = new Bundle();
+                        args.putSerializable(Identity.class.getSimpleName(),identity);
+                        identityListener.onPositiveClick(args, v, HomeFragment.CLICK_CERTIFICATION);
+                    }
+                });
+            }
+        }
+
+        if(button_pay!=null) {
+            if(identityListener!=null){
+                button_pay.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Bundle args = new Bundle();
+                        args.putSerializable(Identity.class.getSimpleName(),identity);
+                        identityListener.onPositiveClick(args, v, HomeFragment.CLICK_PAY);
+                    }
+                });
+            }
+        }
+
+        if(button_certification!=null) {
+            if(identityListener!=null){
+                button_certification.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Bundle args = new Bundle();
+                        args.putSerializable(Identity.class.getSimpleName(),identity);
+                        identityListener.onPositiveClick(args, v, HomeFragment.CLICK_CERTIFY);
+                    }
+                });
+            }
+        }
 
         // Make sure to hide the keyboard
         ViewUtils.hideKeyboard(getActivity());
 
-        // Bind model to UI
         bindView(identity);
-
-        setupListView(view);
     }
 
-    private void setupListView(View view) {
-
-        ((NotifyingScrollView) view.findViewById(R.id.scroll_view)).setOnScrollChangedListener(new NotifyingScrollView.OnScrollChangedListener() {
-            public void onScrollChanged(ScrollView who, int l, int t, int oldl, int oldt) {
-                final int headerHeight = mHeader.getHeight() - getActionBarHeight();
-                final float ratio = (float) Math.min(Math.max(t, 0), headerHeight) / headerHeight;
-                final int newAlpha = (int) (ratio * 255);
-                setTitleAlpha(newAlpha);
-            }
-
-/*
-            @Override
-            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-                int scrollY = getScrollY();
-                //sticky actionbar
-                mHeader.setTranslationY(Math.max(-scrollY, mMinHeaderTranslation));
-                //header_logo --> actionbar icon
-                float ratio = clamp(mHeader.getTranslationY() / mMinHeaderTranslation, 0.0f, 1.0f);
-                //interpolate(mHeaderLogo, getActionBarIconView(), mSmoothInterpolator.getInterpolation(ratio));
-                //actionbar title alpha
-                if (titleView != null) {
-                    titleView.setAlpha(clamp(5.0F * ratio - 4.0F, 0.0F, 1.0F));
-                }
-                //---------------------------------
-                //better way thanks to @cyrilmottier
-                setTitleAlpha(clamp(5.0F * ratio - 4.0F, 0.0F, 1.0F));
-            }*/
-        });
-    }
     protected void bindView(Identity identity) {
 
-        mUidView.setText(identity.getUid());
-        mTimestampView.setText(getString(R.string.registered_since, DateUtils.formatLong(identity.getTimestamp())));
+        uid.setText(identity.getUid());
+        txt_inscription.setText(getString(R.string.registered_since, DateUtils.formatLong(identity.getTimestamp())));
 
-        // Pubkey
-        String pubkey = identity.getPubkey();
-        int offset = pubkey.length()/2;
-        pubkey = pubkey.substring(0, offset) + '\n' + pubkey.substring(offset);
-        mPubkeyView.setText(pubkey);
+        this.pubkey.setText(ModelUtils.minifyPubkey(identity.getPubkey()));
 
-        // Signature
-        String signature = identity.getSignature();
-        if (StringUtils.isNotBlank(signature)) {
-            offset = signature.length() / 3;
-            signature = signature.substring(0, offset)
-                    + '\n' + signature.substring(offset, offset * 2)
-                    + '\n' + signature.substring(offset * 2);
-        }
-        else {
-            signature = "";
-        }
-        mSignatureView.setText(signature);
 
         // Title
         getActivity().setTitle("");
@@ -277,49 +184,6 @@ public class IdentityFragment extends Fragment {
         // Load WOT data
         LoadTask task = new LoadTask(identity);
         task.execute((Void) null);
-    }
-
-    // Method that allows us to get the scroll Y position of the ListView
-    public int getScrollY() {
-        View c = mListView.getChildAt(0);
-        if (c == null) {
-            return 0;
-        }
-
-        int firstVisiblePosition = mListView.getFirstVisiblePosition();
-        int top = c.getTop();
-
-        int headerHeight = 0;
-        if (firstVisiblePosition >= 1) {
-            headerHeight = mHeader.getHeight();
-        }
-
-        return -top + firstVisiblePosition * c.getHeight() + headerHeight;
-    }
-
-    private void setTitleAlpha(float alpha) {
-        mAlphaForegroundColorSpan.setAlpha(alpha);
-        mActionBarTitleSpannableString.setSpan(mAlphaForegroundColorSpan, 0, mActionBarTitleSpannableString.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        getActivity().setTitle(mActionBarTitleSpannableString);
-    }
-
-
-    private void interpolate(View view1, View view2, float interpolation) {
-        getOnScreenRect(mRect1, view1);
-        getOnScreenRect(mRect2, view2);
-        float scaleX = 1.0F + interpolation * (mRect2.width() / mRect1.width() - 1.0F);
-        float scaleY = 1.0F + interpolation * (mRect2.height() / mRect1.height() - 1.0F);
-        float translationX = 0.5F * (interpolation * (mRect2.left + mRect2.right - mRect1.left - mRect1.right));
-        float translationY = 0.5F * (interpolation * (mRect2.top + mRect2.bottom - mRect1.top - mRect1.bottom));
-        view1.setTranslationX(translationX);
-        view1.setTranslationY(translationY - mHeader.getTranslationY());
-        view1.setScaleX(scaleX);
-        view1.setScaleY(scaleY);
-    }
-
-    private RectF getOnScreenRect(RectF rect, View view) {
-        rect.set(view.getLeft(), view.getTop(), view.getRight(), view.getBottom());
-        return rect;
     }
 
     @Override
@@ -339,12 +203,6 @@ public class IdentityFragment extends Fragment {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.action_transfer:
-                onTransferClick();
-                return true;
-            case R.id.action_sign:
-                onSignClick();
-                return true;
             case R.id.action_add_contact:
                 onAddAsNewContact();
                 return true;
@@ -353,63 +211,6 @@ public class IdentityFragment extends Fragment {
                 return true;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    protected void onCertificationClick(WotCertification cert) {
-        // Reset the cert time, before to reuse the identity
-        cert.setTimestamp(-1);
-
-        Fragment fragment = IdentityFragment.newInstance(cert);
-
-        FragmentManager fragmentManager = getFragmentManager();
-        fragmentManager.beginTransaction()
-                .setCustomAnimations(R.animator.slide_in_right,
-                        R.animator.slide_out_left)
-                .remove(IdentityFragment.this)
-                .commit();
-
-        fragmentManager.popBackStack();
-
-        fragmentManager.beginTransaction()
-                .setCustomAnimations(R.animator.slide_in_right,
-                        R.animator.slide_out_left,
-                        R.animator.delayed_fade_in,
-                        R.animator.slide_out_up)
-                .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
-                .addToBackStack(fragment.getClass().getSimpleName())
-                .commit();
-    }
-
-    protected void onTransferClick() {
-        Bundle newInstanceArgs = getArguments();
-        Identity identity = (Identity)
-                newInstanceArgs.getSerializable(Identity.class.getSimpleName());
-
-        Fragment fragment = TransferFragment.newInstance(identity);
-        getFragmentManager().beginTransaction()
-                .setCustomAnimations(R.animator.slide_in_down,
-                        R.animator.slide_out_up,
-                        R.animator.slide_in_up,
-                        R.animator.slide_out_down)
-                .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
-                .addToBackStack(fragment.getClass().getSimpleName())
-                .commit();
-    }
-
-    protected void onSignClick() {
-        Bundle newInstanceArgs = getArguments();
-        Identity identity = (Identity)
-                newInstanceArgs.getSerializable(Identity.class.getSimpleName());
-
-        Fragment fragment = SignFragment.newInstance(identity);
-        getFragmentManager().beginTransaction()
-                .setCustomAnimations(R.animator.slide_in_down,
-                        R.animator.slide_out_up,
-                        R.animator.slide_in_up,
-                        R.animator.slide_out_down)
-                .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
-                .addToBackStack(fragment.getClass().getSimpleName())
-                .commit();
     }
 
     protected void onAddAsNewContact() {
@@ -439,15 +240,6 @@ public class IdentityFragment extends Fragment {
             startActivity(intent);
             //------------------------------- end of inserting contact in the phone
         }
-    }
-
-    public int getActionBarHeight() {
-        if (mActionBarHeight != 0) {
-            return mActionBarHeight;
-        }
-        getActivity().getTheme().resolveAttribute(android.R.attr.actionBarSize, mTypedValue, true);
-        mActionBarHeight = TypedValue.complexToDimensionPixelSize(mTypedValue.data, getResources().getDisplayMetrics());
-        return mActionBarHeight;
     }
 
     protected void onAddAsExistingContact() {
@@ -506,7 +298,7 @@ public class IdentityFragment extends Fragment {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            mProgressViewAdapter.showProgress(true);
+//            mProgressViewAdapter.showProgress(true);
         }
 
         @Override
@@ -517,39 +309,43 @@ public class IdentityFragment extends Fragment {
 
             // Get certifications
             WotRemoteService wotService = ServiceLocator.instance().getWotRemoteService();
-            return wotService.getCertifications(
+            Collection<WotCertification> result = wotService.getCertifications(
                     mIdentity.getCurrencyId(),
                     mIdentity.getUid(),
                     mIdentity.getPubkey(),
                     mIdentity.isMember());
+
+            wotService.loadMembership(mIdentity.getCurrencyId(), mIdentity, result);
+
+            return result;
         }
 
         @Override
         protected void onSuccess(Collection<WotCertification> certifications) {
 
             // Refresh timestamp
-            mTimestampView.setText(getString(R.string.registered_since, DateUtils.formatLong(mIdentity.getTimestamp())));
+            txt_inscription.setText(getString(R.string.registered_since, DateUtils.formatLong(mIdentity.getTimestamp())));
 
             // Update certification list
-            mCertificationListAdapter.clear();
-            if (CollectionUtils.isNotEmpty(certifications)) {
-                mCertificationListAdapter.addAll(certifications);
-                mCertificationListAdapter.notifyDataSetChanged();
-            }
+//            mCertificationListAdapter.clear();
+//            if (CollectionUtils.isNotEmpty(certifications)) {
+//                mCertificationListAdapter.addAll(certifications);
+//                mCertificationListAdapter.notifyDataSetChanged();
+//            }
 
-            mProgressViewAdapter.showProgress(false);
+//            mProgressViewAdapter.showProgress(false);
         }
 
         @Override
         protected void onFailed(Throwable t) {
-            mCertificationListAdapter.clear();
-            mProgressViewAdapter.showProgress(false);
+//            mCertificationListAdapter.clear();
+//            mProgressViewAdapter.showProgress(false);
             onError(t);
         }
 
         @Override
         protected void onCancelled() {
-            mProgressViewAdapter.showProgress(false);
+//            mProgressViewAdapter.showProgress(false);
         }
     }
 

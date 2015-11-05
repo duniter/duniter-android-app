@@ -662,36 +662,28 @@ public class TransferFragment extends Fragment
 
     public void searchIdentityWith(String query){
         //recherche de la publick key
-        final FragmentManager fm = getFragmentManager();
-        Fragment fragment = fm.findFragmentById(R.id.frame_content);
-        boolean isWotFragmentExists = fragment == mQueryResultListener;
+        if(query.length()>=1) {
+            final FragmentManager fm = getFragmentManager();
+            Fragment fragment = fm.findFragmentById(R.id.frame_content);
+            boolean isWotFragmentExists = fragment == mQueryResultListener;
 
-        // If fragment already visible, just refresh the arguments (to update title)
-        if (!isWotFragmentExists) {
-            fragment = WotSearchFragment.newInstance(query, true,generateBundleTransfere());
-            mQueryResultListener = (WotSearchFragment)fragment;
-            getFragmentManager().beginTransaction()
-                    .setCustomAnimations(
-                            R.animator.delayed_fade_in,
-                            R.animator.fade_out,
-                            R.animator.delayed_fade_in,
-                            R.animator.fade_out)
-                    .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
-                    .addToBackStack(fragment.getClass().getSimpleName())
-                    .commit();
+            // If fragment already visible, just refresh the arguments (to update title)
+            if (!isWotFragmentExists) {
+                fragment = WotSearchFragment.newInstance(query, true, generateBundleTransfere());
+                mQueryResultListener = (WotSearchFragment) fragment;
+                getFragmentManager().beginTransaction().setCustomAnimations(R.animator.delayed_fade_in, R.animator.fade_out, R.animator.delayed_fade_in, R.animator.fade_out).replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName()).addToBackStack(fragment.getClass().getSimpleName()).commit();
 
 //            .addToBackStack(fragment.getClass().getSimpleName())
-        }
-        else {
-            WotSearchFragment.setArguments((WotSearchFragment) fragment, query);
-        }
+            } else {
+                WotSearchFragment.setArguments((WotSearchFragment) fragment, query);
+            }
 
-        if (query.length() >= 1) {
-            SearchTask searchTask = new SearchTask();
-            searchTask.execute(query);
-        }
-        else {
-            mQueryResultListener.onQueryFailed(getString(R.string.query_too_short, 1));
+            if (query.length() >= 1) {
+                SearchTask searchTask = new SearchTask();
+                searchTask.execute(query);
+            } else {
+                mQueryResultListener.onQueryFailed(getString(R.string.query_too_short, 1));
+            }
         }
     }
 

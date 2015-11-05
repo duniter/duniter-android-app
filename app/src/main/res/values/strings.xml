@@ -111,6 +111,7 @@
     <string name="join">Join as member</string>
     <string name="delete">Delete</string>
     <string name="remove">Remove</string>
+    <string name="certify">Certify</string>
     <string name="add_as_new_contact">Add as new contact</string>
     <string name="add_as_new_contact_title">New contact</string>
     <string name="add_as_existing_contact">Add to existing contact</string>
@@ -259,6 +260,8 @@
 
     <string name="year">y</string>
     <string name="day">d</string>
+
+    <string name="certify_by">Certify by %s people</string>
 
     <string name="choice_contact">Choose a contact</string>
     <string name="choice_wallet">Choose a wallet</string>

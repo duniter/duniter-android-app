@@ -16,15 +16,15 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
-import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.List;
 import java.util.Set;
 
 import io.ucoin.app.R;
 import io.ucoin.app.activity.IToolbarActivity;
 import io.ucoin.app.activity.SettingsActivity;
+import io.ucoin.app.fragment.common.HomeFragment;
 import io.ucoin.app.fragment.common.LoginFragment;
 import io.ucoin.app.fragment.wot.IdentityFragment;
 import io.ucoin.app.model.local.UnitType;
@@ -32,55 +32,59 @@ import io.ucoin.app.model.local.Wallet;
 import io.ucoin.app.model.remote.Identity;
 import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.service.remote.WotRemoteService;
-import io.ucoin.app.technical.CurrencyUtils;
 import io.ucoin.app.technical.DateUtils;
 import io.ucoin.app.technical.ExceptionUtils;
 import io.ucoin.app.technical.FragmentUtils;
-import io.ucoin.app.technical.ImageUtils;
 import io.ucoin.app.technical.StringUtils;
 import io.ucoin.app.technical.ViewUtils;
 import io.ucoin.app.technical.task.AsyncTaskHandleException;
 import io.ucoin.app.technical.task.ProgressDialogAsyncTaskListener;
 
 
-public class WalletMouvementFragment extends Fragment {
+public class MouvementFragment extends Fragment {
 
     public static final String TAG = "WalletFragment";
 
-    private static String ARGS_TAB_INDEX = "tabIndex";
+    public static final String TYPE = "type";
 
-    private TextView mUidView;
-    private ImageButton mIcon;
-    private View mDetailLayout;
-    private TextView mTimestampLabelView;
-    private TextView mTimestampView;
-    private TextView mPubkeyView;
-    private TextView mCreditView;
-    private TextView mCurrencyView;
+    public static final int WALLET = 1;
+    public static final int IDENTITY = 2;
+
     private MovementListFragment mMovementListFragment;
     private LoadIdentityTask identitytask;
 
     private String mUnitType;
 
+    private int type = 0;
+
+    private Wallet wallet = null;
+    private Identity identity = null;
+
+    private static List<Wallet> wallets;
+
     private boolean mSignatureSingleLine = true;
     private boolean mPubKeySingleLine = true;
 
-    public static WalletMouvementFragment newInstance(Wallet wallet) {
-        WalletMouvementFragment fragment = new WalletMouvementFragment();
+    public static MouvementFragment newInstance(Wallet wallet,List<Wallet> ws) {
+        MouvementFragment fragment = new MouvementFragment();
         Bundle newInstanceArgs = new Bundle();
+        newInstanceArgs.putSerializable(TYPE, WALLET);
         newInstanceArgs.putSerializable(Wallet.class.getSimpleName(), wallet);
-        newInstanceArgs.putInt(ARGS_TAB_INDEX, 0);
         fragment.setArguments(newInstanceArgs);
+
+        wallets = ws;
 
         return fragment;
     }
 
-    public static WalletMouvementFragment newInstance(Wallet wallet, int tabIndex) {
-        WalletMouvementFragment fragment = new WalletMouvementFragment();
+    public static MouvementFragment newInstance(Identity identity,List<Wallet> ws) {
+        MouvementFragment fragment = new MouvementFragment();
         Bundle newInstanceArgs = new Bundle();
-        newInstanceArgs.putSerializable(Wallet.class.getSimpleName(), wallet);
-        newInstanceArgs.putInt(ARGS_TAB_INDEX, tabIndex);
+        newInstanceArgs.putSerializable(TYPE, IDENTITY);
+        newInstanceArgs.putSerializable(Identity.class.getSimpleName(), identity);
         fragment.setArguments(newInstanceArgs);
+
+        wallets = ws;
 
         return fragment;
     }
@@ -95,7 +99,7 @@ public class WalletMouvementFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        return inflater.inflate(R.layout.fragment_wallet_mouvement,
+        return inflater.inflate(R.layout.fragment_movement,
                 container, false);
     }
 
@@ -104,61 +108,32 @@ public class WalletMouvementFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         Bundle newInstanceArgs = getArguments();
-        final Wallet wallet = (Wallet) newInstanceArgs
-                .getSerializable(Wallet.class.getSimpleName());
 
-        // Uid
-        mUidView = (TextView) view.findViewById(R.id.uid);
+        type = (int) newInstanceArgs.getSerializable(TYPE);
 
-        // Icon
-        mIcon = (ImageButton)view.findViewById(R.id.icon);
-
-        // Toogle detail button
-        final ImageButton toogleDetailButton = (ImageButton) view.findViewById(R.id.toogle_detail);
-        toogleDetailButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mDetailLayout.getVisibility() == View.VISIBLE) {
-                    mDetailLayout.setVisibility(View.GONE);
-                    toogleDetailButton.setImageResource(R.drawable.expander_open_holo_dark);
-                } else {
-                    mDetailLayout.setVisibility(View.VISIBLE);
-                    toogleDetailButton.setImageResource(R.drawable.expander_close_holo_dark);
-                }
-            }
-        });
-
-        // details view
-        mDetailLayout = view.findViewById(R.id.details);
-        mDetailLayout.setVisibility(View.GONE);
-
-        // Timestamp label
-        mTimestampLabelView = (TextView) view.findViewById(R.id.timestamp_label);
-
-        // Timestamp
-        mTimestampView = (TextView) view.findViewById(R.id.timestamp);
-
-        // Pub key
-        mPubkeyView = (TextView) view.findViewById(R.id.pubkey);
-
-        // Currency
-        mCurrencyView = (TextView) view.findViewById(R.id.currency);
-
-        // Credit
-        mCreditView = (TextView) view.findViewById(R.id.credit);
-
-        // Tab 1: transfer list
-        mMovementListFragment = MovementListFragment.newInstance(wallet, new MovementListFragment.MovementListListener() {
-            @Override
-            public void onPositiveClick(Bundle args,int i) {
-                onMovementClick(args,i);
-            }
-        });
+        switch (type){
+            case WALLET:
+                wallet = (Wallet) newInstanceArgs.getSerializable(Wallet.class.getSimpleName());
+                mMovementListFragment = MovementListFragment.newInstance(wallet, new MovementListFragment.MovementListListener() {
+                    @Override
+                    public void onPositiveClick(Bundle args,int i) {
+                        onMovementClick(args,i);
+                    }
+                });
+                break;
+            case IDENTITY:
+                identity = (Identity) newInstanceArgs.getSerializable(Identity.class.getSimpleName());
+                mMovementListFragment = MovementListFragment.newInstance(identity,wallets, new MovementListFragment.MovementListListener() {
+                    @Override
+                    public void onPositiveClick(Bundle args,int i) {
+                        onMovementClick(args,i);
+                    }
+                });
+                break;
+        }
         getFragmentManager().beginTransaction()
                 .replace(R.id.tab1, mMovementListFragment, "tab1")
                 .commit();
-
-
 
         // Make sure to hide the keyboard
         ViewUtils.hideKeyboard(getActivity());
@@ -167,8 +142,6 @@ public class WalletMouvementFragment extends Fragment {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
         mUnitType = preferences.getString(SettingsActivity.PREF_UNIT, UnitType.COIN);
 
-        // update views
-        updateView(wallet);
 
     }
 
@@ -180,15 +153,13 @@ public class WalletMouvementFragment extends Fragment {
         MenuItem selfMenu = menu.findItem(R.id.action_self);
         MenuItem joinMenu = menu.findItem(R.id.action_join);
 
-        Bundle newInstanceArgs = getArguments();
-        final Wallet wallet = (Wallet) newInstanceArgs
-                .getSerializable(Wallet.class.getSimpleName());
-
-        if (wallet.getIsMember() || wallet.getCertTimestamp() > 0) {
-            selfMenu.setVisible(false);
-        }
-        if (wallet.getIsMember()) {
-            joinMenu.setVisible(false);
+        if(type == WALLET) {
+            if (wallet.getIsMember() || wallet.getCertTimestamp() > 0) {
+                selfMenu.setVisible(false);
+            }
+            if (wallet.getIsMember()) {
+                joinMenu.setVisible(false);
+            }
         }
     }
 
@@ -228,53 +199,6 @@ public class WalletMouvementFragment extends Fragment {
 
     /* -- protected methods -- */
 
-    protected void updateView(Wallet wallet) {
-        // uid
-        mUidView.setText(wallet.getUid());
-
-        // Icon
-        mIcon.setImageResource(ImageUtils.getImageWhite(wallet));
-
-        // Registration date
-        if (wallet.getCertTimestamp() > 0) {
-            mTimestampLabelView.setText(R.string.registration_date);
-            mTimestampView.setText(DateUtils.format(wallet.getCertTimestamp()));
-        }
-        else {
-            mTimestampLabelView.setText(getString(R.string.not_registred));
-            mTimestampView.setText("");
-        }
-
-        // Pub key
-        {
-            String pubkey = wallet.getPubKeyHash();
-            int offset = pubkey.length()/2;
-            pubkey = pubkey.substring(0, offset) + '\n' + pubkey.substring(offset);
-            mPubkeyView.setText(pubkey);
-        }
-
-        // Currency
-        mCurrencyView.setText(wallet.getCurrency());
-
-        // If unit is coins
-        if (SettingsActivity.PREF_UNIT_COIN.equals(mUnitType)) {
-            // Credit as coins
-            mCreditView.setText(CurrencyUtils.formatCoin(wallet.getCredit()));
-        }
-
-        // If unit is UD
-        else if (SettingsActivity.PREF_UNIT_UD.equals(mUnitType)) {
-            // Credit as UD
-            mCreditView.setText(getString(
-                    R.string.universal_dividend_value,
-                    CurrencyUtils.formatUD(wallet.getCreditAsUD())));
-        }
-
-        // Other unit
-        else {
-            mCreditView.setVisibility(View.GONE);
-        }
-    }
 
     protected void onTransferClick() {
         Bundle newInstanceArgs = getArguments();
@@ -510,8 +434,6 @@ public class WalletMouvementFragment extends Fragment {
                 Toast.makeText(mActivity,
                         getString(R.string.join_sended),
                         Toast.LENGTH_LONG).show();
-
-                updateView(wallet);
             }
         }
 
@@ -604,7 +526,7 @@ public class WalletMouvementFragment extends Fragment {
         protected void onSuccess(Void args) {
             getFragmentManager().popBackStack(popStackTraceName, 0); // return back
 
-            Fragment fragment = IdentityFragment.newInstance(results);
+            Fragment fragment = IdentityFragment.newInstance(results, HomeFragment.identityListener);
             FragmentManager fragmentManager = getFragmentManager();
             fragmentManager.beginTransaction()
                     .setCustomAnimations(

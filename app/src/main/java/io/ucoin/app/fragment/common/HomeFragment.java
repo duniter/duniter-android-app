@@ -21,6 +21,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import io.ucoin.app.Application;
@@ -29,9 +30,11 @@ import io.ucoin.app.activity.IToolbarActivity;
 import io.ucoin.app.activity.MainActivity;
 import io.ucoin.app.adapter.WalletRecyclerAdapter;
 import io.ucoin.app.fragment.wallet.TransferFragment;
-import io.ucoin.app.fragment.wallet.WalletCertificationFragment;
-import io.ucoin.app.fragment.wallet.WalletMouvementFragment;
+import io.ucoin.app.fragment.wallet.WotFragment;
+import io.ucoin.app.fragment.wallet.MouvementFragment;
+import io.ucoin.app.fragment.wot.SignFragment;
 import io.ucoin.app.model.local.Wallet;
+import io.ucoin.app.model.remote.Identity;
 import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.service.exception.PeerConnectionException;
 import io.ucoin.app.technical.ViewUtils;
@@ -42,7 +45,8 @@ import io.ucoin.app.technical.task.ProgressDialogAsyncTaskListener;
 public class HomeFragment extends Fragment {
 
     public static final String CLICK_MOUVEMENT  = "mouvements";
-    public static final String CLICK_CERTIFY    = "certifications";
+    public static final String CLICK_CERTIFY    = "certifier";
+    public static final String CLICK_CERTIFICATION    = "certifications";
     public static final String CLICK_PAY        = "pay";
     public static final String CLICK_WALLET     = "wallet";
 
@@ -54,13 +58,52 @@ public class HomeFragment extends Fragment {
     private RecyclerView mRecyclerView;
     private Wallet wal;
 
+    private static List<Wallet> wallets = new ArrayList<>();
+
+    private static FragmentManager fm;
+
+
+
     public interface WalletClickListener extends View.OnClickListener{
         void onPositiveClick(Bundle args, View view, String action);
     }
 
+    public interface IdentityClickListener extends View.OnClickListener{
+        void onPositiveClick(Bundle args, View view, String action);
+    }
+
+
+
     public static HomeFragment newInstance() {
         return new HomeFragment();
     }
+
+        public static IdentityClickListener identityListener = new IdentityClickListener(){
+
+            @Override
+            public void onClick(View v) {}
+
+            @Override
+            public void onPositiveClick(Bundle args, View view,String action) {
+//                int position = mRecyclerView.getChildPosition(getViewWallet(view));
+
+                Identity identity = (Identity)args.getSerializable(Identity.class.getSimpleName());
+                switch (action){
+                    case CLICK_MOUVEMENT:
+                        onIdentityClickOperation(identity);
+                        break;
+                    case CLICK_CERTIFICATION:
+                        onIdentityClickCertification(identity);
+                        break;
+                    case CLICK_PAY:
+                        onIdentityClickPay(identity);
+                        break;
+                    case CLICK_CERTIFY:
+                        onIdentityClickCertify(identity);
+                        break;
+                }
+            }
+        };
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -79,7 +122,7 @@ public class HomeFragment extends Fragment {
                    case CLICK_MOUVEMENT:
                        onWalletClickOperation(mWalletRecyclerAdapter.getItem(position));
                        break;
-                   case CLICK_CERTIFY:
+                   case CLICK_CERTIFICATION:
                        onWalletClickCertification(mWalletRecyclerAdapter.getItem(position));
                        break;
                    case CLICK_PAY:
@@ -113,6 +156,7 @@ public class HomeFragment extends Fragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        fm = getFragmentManager();
 
         // TODO update this label
         mUpdateDateLabel = (TextView)view.findViewById(R.id.update_date_label);
@@ -212,10 +256,67 @@ public class HomeFragment extends Fragment {
 //                .commit();
     }
 
+    public static void onIdentityClickOperation(final Identity identity){
+        Fragment fragment = MouvementFragment.newInstance(identity,wallets);
+        FragmentManager fragmentManager = fm;
+        // Insert the Home at the first place in back stack
+//        fragmentManager.popBackStack(HomeFragment.class.getSimpleName(), 0);
+        fragmentManager.beginTransaction()
+                .setCustomAnimations(
+                        R.animator.delayed_slide_in_up,
+                        R.animator.fade_out,
+                        R.animator.delayed_fade_in,
+                        R.animator.slide_out_up)
+                .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
+                .addToBackStack(fragment.getClass().getSimpleName())
+                .commit();
+    }
+
+    public static void onIdentityClickCertification(final Identity identity){
+        Fragment fragment = WotFragment.newInstance(identity);
+        FragmentManager fragmentManager = fm;
+        // Insert the Home at the first place in back stack
+//        fragmentManager.popBackStack(HomeFragment.class.getSimpleName(), 0);
+        fragmentManager.beginTransaction()
+                .setCustomAnimations(
+                        R.animator.delayed_slide_in_up,
+                        R.animator.fade_out,
+                        R.animator.delayed_fade_in,
+                        R.animator.slide_out_up)
+                .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
+                .addToBackStack(fragment.getClass().getSimpleName())
+                .commit();
+    }
+
+    public static void onIdentityClickPay(final Identity identity){
+        Fragment fragment = TransferFragment.newInstance(identity);
+        fm.beginTransaction()
+                .setCustomAnimations(R.animator.slide_in_down,
+                        R.animator.slide_out_up,
+                        R.animator.slide_in_up,
+                        R.animator.slide_out_down)
+                .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
+                .addToBackStack(fragment.getClass().getSimpleName())
+                .commit();
+    }
+
+    public static void onIdentityClickCertify(final Identity identity){
+        Fragment fragment = SignFragment.newInstance(identity);
+        fm.beginTransaction()
+                .setCustomAnimations(R.animator.slide_in_down,
+                        R.animator.slide_out_up,
+                        R.animator.slide_in_up,
+                        R.animator.slide_out_down)
+                .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
+                .addToBackStack(fragment.getClass().getSimpleName())
+                .commit();
+    }
+
+
     public void onWalletClickOperation(final Wallet wallet){
 
 
-        Fragment fragment = WalletMouvementFragment.newInstance(wallet);
+        Fragment fragment = MouvementFragment.newInstance(wallet,wallets);
         FragmentManager fragmentManager = getFragmentManager();
         // Insert the Home at the first place in back stack
         fragmentManager.popBackStack(HomeFragment.class.getSimpleName(), 0);
@@ -233,7 +334,7 @@ public class HomeFragment extends Fragment {
     public void onWalletClickCertification(final Wallet wallet){
 
 
-        Fragment fragment = WalletCertificationFragment.newInstance(wallet);
+        Fragment fragment = WotFragment.newInstance(wallet);
         FragmentManager fragmentManager = getFragmentManager();
         // Insert the Home at the first place in back stack
         fragmentManager.popBackStack(HomeFragment.class.getSimpleName(), 0);
@@ -325,9 +426,11 @@ public class HomeFragment extends Fragment {
         }
 
         @Override
-        protected void onSuccess(final List<Wallet> wallets) {
+        protected void onSuccess(final List<Wallet> ws) {
             mWalletRecyclerAdapter.clear();
-            mWalletRecyclerAdapter.addAll(wallets);
+            mWalletRecyclerAdapter.addAll(ws);
+            wallets.clear();
+            wallets.addAll(ws);
             mWalletRecyclerAdapter.notifyDataSetChanged();
         }
 

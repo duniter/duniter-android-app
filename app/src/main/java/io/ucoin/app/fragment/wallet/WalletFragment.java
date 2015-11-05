@@ -31,7 +31,6 @@ import io.ucoin.app.activity.SettingsActivity;
 import io.ucoin.app.adapter.CertificationListAdapter;
 import io.ucoin.app.adapter.ProgressViewAdapter;
 import io.ucoin.app.fragment.common.LoginFragment;
-import io.ucoin.app.fragment.wot.IdentityFragment;
 import io.ucoin.app.model.local.Movement;
 import io.ucoin.app.model.local.UnitType;
 import io.ucoin.app.model.local.Wallet;
@@ -396,17 +395,7 @@ public class WalletFragment extends Fragment {
         WotCertification cert = mCertificationListAdapter
                 .getItem(position);
 
-        Fragment fragment = IdentityFragment.newInstance(cert, mTabs.getCurrentTab());
-        FragmentManager fragmentManager = getFragmentManager();
 
-        fragmentManager.beginTransaction()
-                .setCustomAnimations(R.animator.slide_in_right,
-                        R.animator.slide_out_left,
-                        R.animator.delayed_fade_in,
-                        R.animator.slide_out_up)
-                .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
-                .addToBackStack(fragment.getClass().getSimpleName())
-                .commit();
     }
 
     protected void onMovementClick(Bundle args) {

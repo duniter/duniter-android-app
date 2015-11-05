@@ -14,14 +14,18 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.util.List;
+
 import io.ucoin.app.R;
 import io.ucoin.app.activity.SettingsActivity;
 import io.ucoin.app.dao.sqlite.SQLiteTable;
+import io.ucoin.app.fragment.wallet.MouvementFragment;
 import io.ucoin.app.fragment.wallet.MovementListFragment;
 import io.ucoin.app.model.local.UnitType;
 import io.ucoin.app.model.local.Wallet;
 import io.ucoin.app.model.remote.BlockchainParameters;
 import io.ucoin.app.model.remote.Currency;
+import io.ucoin.app.model.remote.Identity;
 import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.technical.CurrencyUtils;
 import io.ucoin.app.technical.DateUtils;
@@ -29,7 +33,7 @@ import io.ucoin.app.technical.ModelUtils;
 import io.ucoin.app.technical.adapter.RecyclerViewCursorAdapter;
 
 
-public class MovementCursorAdapter extends RecyclerViewCursorAdapter<MovementCursorAdapter.ViewHolder> {
+public class MovementCursorAdapter<T> extends RecyclerViewCursorAdapter<MovementCursorAdapter.ViewHolder> {
 
     public static final String BUNDLE_PUBKEY="pubkey";
 
@@ -40,7 +44,12 @@ public class MovementCursorAdapter extends RecyclerViewCursorAdapter<MovementCur
     private String mUnitType;
     private Boolean mUnitForget;
     private Wallet wallet;
+    private Identity identity;
     private Context mContext;
+
+    private int type = 0;
+
+    private List<Wallet> wallets;
 
     private final OnClickListener mOnClickListener;
 
@@ -48,14 +57,25 @@ public class MovementCursorAdapter extends RecyclerViewCursorAdapter<MovementCur
 //        this(context, c, null);
 //    }
 
-    public MovementCursorAdapter(Context context,Wallet w, Cursor c, OnClickListener onClickListener) {
+    public MovementCursorAdapter(Context context,T valueEnter,List<Wallet> wallets, Cursor c, OnClickListener onClickListener) {
         super(context, c);
         mUdComment = context.getString(R.string.movement_ud);
         mContext = context;
         textPrimaryColor = context.getResources().getColor(R.color.textPrimary);
         textComputedColor = context.getResources().getColor(R.color.textComputed);
 
-        this.wallet = w;
+        this.wallets = wallets;
+
+
+
+        if(valueEnter instanceof Wallet){
+            type = MouvementFragment.WALLET;
+            wallet = (Wallet)valueEnter;
+        }else if (valueEnter instanceof Identity){
+            type = MouvementFragment.IDENTITY;
+            identity = (Identity)valueEnter;
+        }
+
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         mUnitType = preferences.getString(SettingsActivity.PREF_UNIT, UnitType.COIN);
@@ -80,8 +100,6 @@ public class MovementCursorAdapter extends RecyclerViewCursorAdapter<MovementCur
             viewGroup.setVisibility(View.VISIBLE);
             (((View)viewGroup.getParent()).findViewById(R.id.empty)).setVisibility(View.GONE);
         }
-
-
 
         return viewHolder;
     }
@@ -117,6 +135,19 @@ public class MovementCursorAdapter extends RecyclerViewCursorAdapter<MovementCur
             viewHolder.commentView.setText(comment);
             //viewHolder.commentView.setTextColor(textPrimaryColor);
         }
+        final Currency currency;
+
+        String name = "";
+
+        if(type == MouvementFragment.WALLET) {
+            currency = ServiceLocator.instance().getCurrencyService().getCurrencyById(mContext, wallet.getCurrencyId());
+            name = wallet.getName();
+        }else if(type == MouvementFragment.IDENTITY){
+            currency = ServiceLocator.instance().getCurrencyService().getCurrencyById(mContext, identity.getCurrencyId());
+            name = identity.getUid();
+        }else {
+            currency = null;
+        }
 
         // Amount
         long amount = cursor.getLong(viewHolder.amountIndex);
@@ -127,7 +158,7 @@ public class MovementCursorAdapter extends RecyclerViewCursorAdapter<MovementCur
             case SettingsActivity.PREF_UNIT_UD:
                 double amountInUd =0;
                 if(mUnitForget) {
-                    amountInUd = amount / (wallet.getCredit() / wallet.getCreditAsUD());
+                    amountInUd = CurrencyUtils.convertToUD(amount,currency.getLastUD());
                 }else{
                     amountInUd = CurrencyUtils.convertToUD(amount,cursor.getLong(viewHolder.dividendeIndex));
                 }
@@ -135,7 +166,6 @@ public class MovementCursorAdapter extends RecyclerViewCursorAdapter<MovementCur
                 break;
             case SettingsActivity.PREF_UNIT_TIME:
                 double amountInCM =0;
-                Currency currency = ServiceLocator.instance().getCurrencyService().getCurrencyById(mContext, wallet.getCurrencyId());
                 BlockchainParameters bcp = ServiceLocator.instance().getBlockchainParametersService().getBlockchainParametersByCurrency(mContext, currency.getCurrencyName());
                 int delay = bcp.getDt();
                 if(mUnitForget) {
@@ -143,7 +173,7 @@ public class MovementCursorAdapter extends RecyclerViewCursorAdapter<MovementCur
                 }else{
                     amountInCM = CurrencyUtils.convertCoinToTime(amount, cursor.getLong(viewHolder.dividendeIndex), delay);
                 }
-                viewHolder.amountView.setText(CurrencyUtils.formatTime(mContext,amountInCM));
+                viewHolder.amountView.setText(CurrencyUtils.formatTime(mContext, amountInCM));
                 break;
         }
 
@@ -154,35 +184,66 @@ public class MovementCursorAdapter extends RecyclerViewCursorAdapter<MovementCur
         String issuers = cursor.getString(viewHolder.issuersIndex);
         String receivers = cursor.getString(viewHolder.receiversIndex);
 
+        String pubkey = "";
         if(cursor.getInt(viewHolder.isUdIndex)==0) {
             viewHolder.issuerAndReceiver.setVisibility(View.VISIBLE);
-            if (issuers == null || issuers.equals(wallet.getPubKeyHash())) {
-                viewHolder.arrow.setImageResource(R.drawable.ic_operation_give);
-                issuersOrReceivers = cursor.getString(viewHolder.receiversIndex);
-                user = cursor.getString(viewHolder.issuersIndex);
-                viewHolder.amountView.setText("- " + viewHolder.amountView.getText());
-                viewHolder.amountView.setTypeface(Typeface.DEFAULT);
-            } else if (receivers == null || receivers.equals(wallet.getPubKeyHash())) {
-                viewHolder.arrow.setImageResource(R.drawable.ic_operation_receive);
-                issuersOrReceivers = cursor.getString(viewHolder.issuersIndex);
-                user = cursor.getString(viewHolder.receiversIndex);
-                viewHolder.amountView.setTypeface(Typeface.DEFAULT_BOLD);
+            if(type == MouvementFragment.WALLET) {
+                pubkey = wallet.getPubKeyHash();
+                if (issuers == null || issuers.equals(pubkey)) {
+                    viewHolder.arrow.setImageResource(R.drawable.ic_operation_give);
+                    issuersOrReceivers = cursor.getString(viewHolder.receiversIndex);
+                    user = cursor.getString(viewHolder.issuersIndex);
+                    viewHolder.amountView.setText("- " + viewHolder.amountView.getText());
+                    viewHolder.amountView.setTypeface(Typeface.DEFAULT);
+                } else if (receivers == null || receivers.equals(pubkey)) {
+                    viewHolder.arrow.setImageResource(R.drawable.ic_operation_receive);
+                    issuersOrReceivers = cursor.getString(viewHolder.issuersIndex);
+                    user = cursor.getString(viewHolder.receiversIndex);
+                    viewHolder.amountView.setTypeface(Typeface.DEFAULT_BOLD);
+                }
+            }else if(type == MouvementFragment.IDENTITY){
+                pubkey = identity.getPubkey();
+                if (receivers != null && receivers.equals(pubkey)) {
+                    viewHolder.arrow.setImageResource(R.drawable.ic_operation_give);
+                    issuersOrReceivers = cursor.getString(viewHolder.receiversIndex);
+                    user = cursor.getString(viewHolder.issuersIndex);
+                    viewHolder.amountView.setText("- " + viewHolder.amountView.getText());
+                    viewHolder.amountView.setTypeface(Typeface.DEFAULT);
+                } else if (issuers != null && issuers.equals(pubkey)) {
+                    viewHolder.arrow.setImageResource(R.drawable.ic_operation_receive);
+                    issuersOrReceivers = cursor.getString(viewHolder.issuersIndex);
+                    user = cursor.getString(viewHolder.receiversIndex);
+                    viewHolder.amountView.setTypeface(Typeface.DEFAULT_BOLD);
+                }
             }
         }else {viewHolder.issuerAndReceiver.setVisibility(View.GONE);}
 
 
         final String otherUser = issuersOrReceivers;
-        final String uid = wallet.getUid();
 
-        viewHolder.issuerOrReceiverView.setText(
-                issuersOrReceivers == null
-                        ? ""
-                        : ModelUtils.minifyPubkey(issuersOrReceivers));
-
-        viewHolder.user.setText(
-                (user == null) || (user.equals(wallet.getPubKeyHash()))
-                        ? wallet.getName()
-                        : ModelUtils.minifyPubkey(user));
+        if(type == MouvementFragment.WALLET){
+            viewHolder.issuerOrReceiverView.setText(
+                    issuersOrReceivers == null
+                            ? ""
+                            : ModelUtils.minifyPubkey(issuersOrReceivers));
+            viewHolder.user.setText(
+                    (user == null) || (wallet!=null && (user.equals(wallet.getPubKeyHash())))
+                            ? wallet.getName()
+                            : ModelUtils.minifyPubkey(user));
+        }else if (type == MouvementFragment.IDENTITY){
+            if(wallets!= null) {
+                for (Wallet w : wallets) {
+                    if(w.getId() == cursor.getLong(viewHolder.walletIdIndex)) {
+                        viewHolder.user.setText(w.getName());
+                        break;
+                    }
+                }
+            }
+            viewHolder.issuerOrReceiverView.setText(
+                    (issuersOrReceivers == null) || (identity!= null && (issuersOrReceivers.equals(identity.getPubkey())) )
+                            ? identity.getUid()
+                            : ModelUtils.minifyPubkey(issuersOrReceivers));
+        }
 
 
 //        Identity
@@ -191,8 +252,8 @@ public class MovementCursorAdapter extends RecyclerViewCursorAdapter<MovementCur
             public void onClick(View v) {
                 if (mOnClickListener!= null){
                     Bundle bundle =new Bundle();
-                        bundle.putSerializable(MovementListFragment.BUNDLE_MOVEMENT_PUBKEY, otherUser);
-                        bundle.putSerializable(MovementListFragment.BUNDLE_MOVEMENT_CURRENCY_ID, wallet.getCurrencyId());
+                    bundle.putSerializable(MovementListFragment.BUNDLE_MOVEMENT_PUBKEY, otherUser);
+                    bundle.putSerializable(MovementListFragment.BUNDLE_MOVEMENT_CURRENCY_ID, currency.getId());
                     mOnClickListener.onClick(bundle);
                 }
             }
@@ -222,6 +283,7 @@ public class MovementCursorAdapter extends RecyclerViewCursorAdapter<MovementCur
         int issuersIndex;
         int receiversIndex;
         int dividendeIndex;
+        int walletIdIndex;
 
         public ViewHolder(View itemView, Cursor cursor) {
             super(itemView);
@@ -237,6 +299,7 @@ public class MovementCursorAdapter extends RecyclerViewCursorAdapter<MovementCur
             dividendeIndex = cursor.getColumnIndex(SQLiteTable.Movement.DIVIDEND);
             amountIndex = cursor.getColumnIndex(SQLiteTable.Movement.AMOUNT);
             commentIndex = cursor.getColumnIndex(SQLiteTable.Movement.COMMENT);
+            walletIdIndex = cursor.getColumnIndex(SQLiteTable.Movement.WALLET_ID);
             blockNumberIndex = cursor.getColumnIndex(SQLiteTable.Movement.BLOCK);
             isUdIndex = cursor.getColumnIndex(SQLiteTable.Movement.IS_UD);
             issuersIndex = cursor.getColumnIndex(SQLiteTable.Movement.ISSUERS);

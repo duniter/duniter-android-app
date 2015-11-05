@@ -348,6 +348,10 @@ public class WotRemoteService extends BaseRemoteService {
         }
     }
 
+    public void loadMembership(long currencyId, Identity identity, Collection<WotCertification> listCertifications){
+        //TODO Analyser les certifications
+    }
+
     /* -- Internal methods -- */
 
 
@@ -377,7 +381,7 @@ public class WotRemoteService extends BaseRemoteService {
 
                 long certificationAge = medianTime - certifier.getTimestamp();
                 if(certificationAge <= sigValidity) {
-                    if (certifier.isMember() && certifier.isWritten()) {
+                    if (certifier.isMember() && certifier.getWritten()!=null && certifier.getWritten().getNumber()>=0) {
                         validWrittenCertifiersCount++;
                     }
                     certifier.setValid(true);
