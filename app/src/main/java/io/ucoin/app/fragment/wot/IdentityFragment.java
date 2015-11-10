@@ -1,13 +1,13 @@
 package io.ucoin.app.fragment.wot;
 
 import android.app.Activity;
+import android.app.DialogFragment;
 import android.app.Fragment;
-import android.content.ContentValues;
+import android.app.FragmentManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.provider.ContactsContract;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -24,13 +24,18 @@ import java.util.Collection;
 
 import io.ucoin.app.R;
 import io.ucoin.app.activity.IToolbarActivity;
+import io.ucoin.app.activity.MainActivity;
 import io.ucoin.app.activity.SettingsActivity;
 import io.ucoin.app.fragment.common.HomeFragment;
+import io.ucoin.app.fragment.contact.AddContactDialogFragment;
+import io.ucoin.app.fragment.dialog.SingleChoiceDialogFragment;
+import io.ucoin.app.model.local.Contact;
 import io.ucoin.app.model.remote.Identity;
 import io.ucoin.app.model.remote.WotCertification;
 import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.service.remote.BlockchainRemoteService;
 import io.ucoin.app.service.remote.WotRemoteService;
+import io.ucoin.app.technical.ContactUtils;
 import io.ucoin.app.technical.DateUtils;
 import io.ucoin.app.technical.ModelUtils;
 import io.ucoin.app.technical.ObjectUtils;
@@ -38,13 +43,14 @@ import io.ucoin.app.technical.ViewUtils;
 import io.ucoin.app.technical.task.AsyncTaskHandleException;
 
 
-public class IdentityFragment extends Fragment {
+public class IdentityFragment extends Fragment implements SingleChoiceDialogFragment.SelectionListener {
 
-    private TextView txt_inscription, pubkey, info_certify, uid;
+    private TextView txt_inscription, pubkey, info_certify, uid, nameContact;
 
     LinearLayout mMoreInformation,button_operation, button_certify, button_pay, button_certification;
 
     private Identity identity;
+    private Contact contact;
 
     private String mSaveContactsPref;
     private static HomeFragment.IdentityClickListener identityListener;
@@ -73,8 +79,7 @@ public class IdentityFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        View view = inflater.inflate(R.layout.card_identity,
-                container, false);
+        View view = inflater.inflate(R.layout.card_identity, container, false);
 
         return view;
     }
@@ -86,7 +91,10 @@ public class IdentityFragment extends Fragment {
         Bundle newInstanceArgs = getArguments();
         identity = (Identity) newInstanceArgs.getSerializable(Identity.class.getSimpleName());
 
+        contact = ServiceLocator.instance().getContact2CurrencyService().isContact(getActivity(),identity.getPubkey(),identity.getCurrencyId());
+
         uid = (TextView) view.findViewById(R.id.uid);
+        nameContact = (TextView) view.findViewById(R.id.name);
 
         txt_inscription = (TextView) view.findViewById(R.id.txt_inscription);
         pubkey = (TextView) view.findViewById(R.id.pubkey);
@@ -172,7 +180,15 @@ public class IdentityFragment extends Fragment {
 
     protected void bindView(Identity identity) {
 
-        uid.setText(identity.getUid());
+
+        if(contact!=null){
+            uid.setText(contact.getName());
+            nameContact.setText(identity.getUid());
+        }
+        else{
+            uid.setText(identity.getUid());
+            nameContact.setVisibility(View.GONE);
+        }
         txt_inscription.setText(getString(R.string.registered_since, DateUtils.formatLong(identity.getTimestamp())));
 
         this.pubkey.setText(ModelUtils.minifyPubkey(identity.getPubkey()));
@@ -188,7 +204,11 @@ public class IdentityFragment extends Fragment {
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.toolbar_identity, menu);
+        if(contact!=null){
+            inflater.inflate(R.menu.toolbar_contact, menu);
+        }else{
+            inflater.inflate(R.menu.toolbar_identity, menu);
+        }
     }
 
     @Override
@@ -203,68 +223,71 @@ public class IdentityFragment extends Fragment {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.action_add_contact:
-                onAddAsNewContact();
+            case R.id.action_add_favori:
+                //TODO FMA ajout/supprression des favoris
                 return true;
-            case R.id.action_add_existing_contact:
-                onAddAsExistingContact();
+            case R.id.action_add_contact:
+                onAddContact();
+                return true;
+            case R.id.action_delete_contact:
+                onDeleteContact();
                 return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    protected void onAddAsNewContact() {
-        Bundle newInstanceArgs = getArguments();
-        Identity identity = (Identity)
-                newInstanceArgs.getSerializable(Identity.class.getSimpleName());
+    protected void onAddContact(){
+        FragmentManager manager = getFragmentManager();
+        SingleChoiceDialogFragment dialog = new SingleChoiceDialogFragment(this);
 
+        Bundle bundle = new Bundle();
+        bundle.putStringArrayList(SingleChoiceDialogFragment.DATA, getItems());     // Require ArrayList
+        bundle.putInt(SingleChoiceDialogFragment.SELECTED, 0);
+        dialog.setArguments(bundle);
+        dialog.show(manager, "Dialog");
+    }
 
-//        DialogFragment fragment = AddContactDialogFragment.newInstance(identity);
-//        fragment.show(getFragmentManager(),
-//                fragment.getClass().getSimpleName());
+    private ArrayList<String> getItems()
+    {
+        ArrayList<String> ret_val = new ArrayList<String>();
 
-        if(mSaveContactsPref.equals(String.valueOf(SettingsActivity.PREF_CONTACT_SAVE_IN_PHONE))) {
-            //------------------------------- Insert the contact in the phone :
-            Intent intent = new Intent(Intent.ACTION_INSERT);
-            intent.setType(ContactsContract.Contacts.CONTENT_TYPE);
+        ret_val.add(getString(R.string.add_as_new_contact));
+        ret_val.add(getString(R.string.add_as_existing_contact));
+        return ret_val;
+    }
 
-            ArrayList<ContentValues> data = new ArrayList<ContentValues>();
-            ContentValues row1 = new ContentValues();
-            row1.put(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Website.CONTENT_ITEM_TYPE);
-            row1.put(ContactsContract.CommonDataKinds.Website.URL, "ucoin://" + identity.getUid() + ":" + identity.getPubkey() + "@" + identity.getCurrency());
-            //row1.put(ContactsContract.CommonDataKinds.Website.LABEL, "abc");
-            row1.put(ContactsContract.CommonDataKinds.Website.TYPE, ContactsContract.CommonDataKinds.Website.TYPE_HOME);
-            data.add(row1);
-            intent.putExtra(ContactsContract.Intents.Insert.DATA, data);
-//              Uri dataUri = getActivity().getContentResolver().insert(ContactsContract.Data.CONTENT_URI, row1);
-            startActivity(intent);
-            //------------------------------- end of inserting contact in the phone
+    @Override
+    public void selectItem(int position) {
+        switch (position){
+            case 0:
+                onAddAsNewContact();
+                break;
+            case 1:
+                onAddAsExistingContact();
+                break;
         }
     }
 
+    protected void onDeleteContact(){
+        ServiceLocator.instance().getContactService().delete(getActivity(),contact.getId());
+        ServiceLocator.instance().getContact2CurrencyService().delete(getActivity(),contact.getId(),identity.getCurrencyId());
+    }
+
+    protected void onAddAsNewContact() {
+        Identity identity = (Identity) getArguments().getSerializable(Identity.class.getSimpleName());
+
+        DialogFragment fragment = AddContactDialogFragment.newInstance(identity);
+        fragment.show(getFragmentManager(),
+                fragment.getClass().getSimpleName());
+
+        //TODO voir la mise a jour de l'afichage de la liste des contact
+    }
+
     protected void onAddAsExistingContact() {
-//        Intent i = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
-//        startActivityForResult(i, 1);
-        Bundle newInstanceArgs = getArguments();
-        Identity identity = (Identity) newInstanceArgs.getSerializable(Identity.class.getSimpleName());
+        Identity identity = (Identity) getArguments().getSerializable(Identity.class.getSimpleName());
 
         if(mSaveContactsPref.equals(String.valueOf(SettingsActivity.PREF_CONTACT_SAVE_IN_PHONE))) {
-            //------------------------------- Edit the existing contact in the phone :
-            Intent intent = new Intent(Intent.ACTION_INSERT_OR_EDIT);
-            intent.setType(ContactsContract.Contacts.CONTENT_ITEM_TYPE);
-
-            ArrayList<ContentValues> data = new ArrayList<ContentValues>();
-            ContentValues row1 = new ContentValues();
-            row1.put(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Website.CONTENT_ITEM_TYPE);
-            row1.put(ContactsContract.CommonDataKinds.Website.URL, "ucoin://" + identity.getUid() + ":" + identity.getPubkey() + "@" + identity.getCurrency());
-            //row1.put(ContactsContract.CommonDataKinds.Website.LABEL, "abc");
-            row1.put(ContactsContract.CommonDataKinds.Website.TYPE, ContactsContract.CommonDataKinds.Website.TYPE_HOME);
-            data.add(row1);
-
-            intent.putExtra(ContactsContract.Intents.Insert.DATA, data);
-
-            startActivity(intent);
-            //------------------------------- end of editing contact in the phone
+            ((MainActivity)getActivity()).addInContactInPhone(ContactUtils.createUri(identity));
         }
     }
 
@@ -348,5 +371,4 @@ public class IdentityFragment extends Fragment {
 //            mProgressViewAdapter.showProgress(false);
         }
     }
-
 }

@@ -13,10 +13,10 @@ import io.ucoin.app.technical.ObjectUtils;
  */
 public class Contact implements LocalEntity, Serializable {
 
-    private Long id;
-    private Long accountId;
+    private long id;
+    private long accountId;
     private String name;
-    private Long phoneContactId;
+    private long phoneContactId = 0;
     private List<Identity> identities = new ArrayList<Identity>();
 
     @Override

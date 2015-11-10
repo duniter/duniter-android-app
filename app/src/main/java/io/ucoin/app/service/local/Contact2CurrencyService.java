@@ -9,11 +9,12 @@ import android.net.Uri;
 
 import java.util.List;
 
-import io.ucoin.app.dao.sqlite.SQLiteTable;
 import io.ucoin.app.content.Provider;
+import io.ucoin.app.dao.sqlite.SQLiteTable;
+import io.ucoin.app.model.local.Contact;
 import io.ucoin.app.model.remote.Identity;
 import io.ucoin.app.service.BaseService;
-import io.ucoin.app.technical.ObjectUtils;
+import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.technical.UCoinTechnicalException;
 
 /**
@@ -45,17 +46,27 @@ public class Contact2CurrencyService extends BaseService {
 
         // TODO : load existing identities, to delete identities not present in the given list
 
-        for (Identity identity: identities) {
-            // create if not exists
-            if (identity.getId() == null) {
+        ContentResolver resolver = context.getContentResolver();
 
+        String where =
+                SQLiteTable.Contact2Currency.PUBLIC_KEY + "=? AND " +
+                SQLiteTable.Contact2Currency.CONTACT_ID + "=?";
+        String[] whereArgs = null;
+        Cursor cur = null;
+
+        for (Identity identity: identities) {
+            whereArgs = new String[]{identity.getPubkey(),""+contactId};
+            cur = resolver.query(Provider.CONTACT2CURRENCY_URI, null, where, whereArgs, null);
+            // create if not exists
+            if (!cur.moveToFirst()) {
                 insert(context.getContentResolver(), contactId, identity);
             }
-
             // or update
             else {
                 update(context.getContentResolver(), contactId, identity);
-
+            }
+            if(!cur.isClosed()){
+                cur.close();
             }
         }
 
@@ -78,14 +89,30 @@ public class Contact2CurrencyService extends BaseService {
         source.setId(contactId);
     }
 
-    public void update(final ContentResolver resolver,final long contactId, final Identity source) {
-        ObjectUtils.checkNotNull(source.getId());
+    public Contact isContact(final Context context, String pubkey, long currencyId){
+        String where =
+                SQLiteTable.Contact2Currency.PUBLIC_KEY + "=? AND "+
+                SQLiteTable.Contact2Currency.CURRENCY_ID + "=?";
+        String[] whereArgs = new String[]{pubkey,""+currencyId};
 
+        Cursor cur = context.getContentResolver().query(Provider.CONTACT2CURRENCY_URI, new String[]{SQLiteTable.Contact2Currency.CONTACT_ID}, where, whereArgs, null);
+
+        if(cur.moveToFirst()){
+            long contactId = cur.getLong(cur.getColumnIndex(SQLiteTable.Contact2Currency.CONTACT_ID));
+            cur.close();
+            return ServiceLocator.instance().getContactService().getContactById(context,contactId);
+        }
+        return null;
+    }
+
+    public void update(final ContentResolver resolver,final long contactId, final Identity source) {
         ContentValues target = toContentValues(contactId, source);
 
-        String whereClause = "_id=?";
-        String[] whereArgs = new String[]{String.valueOf(source.getId())};
-        int rowsUpdated = resolver.update(getContentUri(), target, whereClause, whereArgs);
+        String where =
+                SQLiteTable.Contact2Currency.PUBLIC_KEY + "=? AND " +
+                        SQLiteTable.Contact2Currency.CONTACT_ID + "=?";
+        String[] whereArgs = new String[]{source.getPubkey(),""+contactId};
+        int rowsUpdated = resolver.update(Provider.CONTACT2CURRENCY_URI, target, where, whereArgs);
         if (rowsUpdated != 1) {
             throw new UCoinTechnicalException(String.format("Error while updating contact2currency. %s rows updated.", rowsUpdated));
         }
@@ -122,6 +149,19 @@ public class Contact2CurrencyService extends BaseService {
         }
         mContentUri = Uri.parse(Provider.CONTENT_URI + "/contact2currency/");
         return mContentUri;
+    }
+
+    public void delete(Context context, long contactId, long currencyId) {
+        ContentResolver resolver = context.getContentResolver();
+
+        String whereClause =
+                SQLiteTable.Contact2Currency.CONTACT_ID + "=? AND "+
+                SQLiteTable.Contact2Currency.CURRENCY_ID + "=?";
+        String[] whereArgs = new String[]{String.valueOf(contactId),String.valueOf(currencyId)};
+        int rowsUpdated = resolver.delete(Provider.CONTACT2CURRENCY_URI, whereClause, whereArgs);
+        if (rowsUpdated != 1) {
+            throw new UCoinTechnicalException(String.format("Error while deleting contact [id=%s]. %s rows updated.", contactId, rowsUpdated));
+        }
     }
 
     private class SelectCursorHolder {

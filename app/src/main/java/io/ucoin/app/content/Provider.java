@@ -336,6 +336,9 @@ public class Provider extends ContentProvider implements SQLiteTable {
             case CONTACT:
                 nbRowsUpdated = db.delete(Contact.TABLE_NAME, whereClause, whereArgs);
                 break;
+            case CONTACT2CURRENCY:
+                nbRowsUpdated = db.delete(Contact2Currency.TABLE_NAME, whereClause, whereArgs);
+                break;
             default:
                 throw new IllegalArgumentException("Unknown URI: " + uri);
         }
@@ -379,6 +382,9 @@ public class Provider extends ContentProvider implements SQLiteTable {
                 break;
             case CONTACT:
                 nbRowsUpdated = db.update(Contact.TABLE_NAME, values, whereClause, whereArgs);
+                break;
+            case CONTACT2CURRENCY:
+                nbRowsUpdated = db.update(Contact2Currency.TABLE_NAME, values, whereClause, whereArgs);
                 break;
             default:
                 throw new IllegalArgumentException("Unknown URI: " + uri);

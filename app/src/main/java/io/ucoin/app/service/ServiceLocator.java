@@ -159,6 +159,8 @@ public class ServiceLocator extends Service implements Closeable {
                 // Load peers cache
                 getPeerService().loadCache(context, accountId);
 
+                getWalletService().loadCache(context, accountId);
+
                 mIsCacheLoaded = true;
             }
         }

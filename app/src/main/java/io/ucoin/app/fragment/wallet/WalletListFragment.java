@@ -1,6 +1,5 @@
 package io.ucoin.app.fragment.wallet;
 
-import android.app.Activity;
 import android.app.DialogFragment;
 import android.app.ListFragment;
 import android.app.ProgressDialog;
@@ -23,7 +22,6 @@ import java.util.List;
 
 import io.ucoin.app.Application;
 import io.ucoin.app.R;
-import io.ucoin.app.activity.IToolbarActivity;
 import io.ucoin.app.activity.MainActivity;
 import io.ucoin.app.adapter.WalletArrayAdapter;
 import io.ucoin.app.model.local.Wallet;
@@ -100,6 +98,9 @@ public class WalletListFragment extends ListFragment implements MainActivity.Que
 
         });
 
+
+
+
         // Load wallets
         LoadWalletsTask loadWalletsTask = new LoadWalletsTask();
         loadWalletsTask.execute();
@@ -113,9 +114,6 @@ public class WalletListFragment extends ListFragment implements MainActivity.Que
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.action_add_wallet:
-                onAddWalletClick();
-                return true;
             case R.id.action_refresh:
                 onRefreshClick();
                 return true;

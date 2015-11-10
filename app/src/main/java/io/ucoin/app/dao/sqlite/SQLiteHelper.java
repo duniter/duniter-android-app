@@ -144,7 +144,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements SQLiteTable {
         String CREATE_TABLE_CONTACT2CURRENCY = "CREATE TABLE " + Contact2Currency.TABLE_NAME + "(" +
                 Contact2Currency._ID + " INTEGER PRIMARY KEY AUTOINCREMENT" + COMMA +
                 Contact2Currency.CONTACT_ID + INTEGER + NOTNULL + COMMA +
-                Contact2Currency.CURRENCY_ID + TEXT + NOTNULL + COMMA +
+                Contact2Currency.CURRENCY_ID + INTEGER + NOTNULL + COMMA +
                 Contact2Currency.UID + TEXT + COMMA +
                 Contact2Currency.PUBLIC_KEY + TEXT + NOTNULL + COMMA +
                 UNIQUE + "(" + Contact2Currency.CONTACT_ID + COMMA + Contact2Currency.PUBLIC_KEY + ")" + COMMA +

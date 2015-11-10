@@ -266,5 +266,6 @@
     <string name="choice_wallet">Choisissez un portefeuille</string>
 
     <string name="converter">Convertisseur de monnaie</string>
+    <string name="delete_contact">Supprimer le contact</string>
 
 </resources>

@@ -12,6 +12,12 @@
         ucoin:showAsAction="always"
         ucoin:actionViewClass="android.support.v7.widget.SearchView" />
 
+    <item android:id="@+id/action_add_wallet"
+          android:title="@string/favorites"
+          android:icon="@drawable/ic_menu_add_wallet"
+          ucoin:iconifiedByDefault="true"
+          ucoin:showAsAction="always"/>
+
     <item android:id="@+id/action_contact_list"
         android:title="@string/favorites"
         android:icon="@drawable/ic_menu_friendslist"

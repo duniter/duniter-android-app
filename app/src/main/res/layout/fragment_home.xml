@@ -61,7 +61,7 @@
             android:id="@+id/status_image"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/world91"
+            android:src="@drawable/warning45"
             android:maxWidth="64dp"
             android:maxHeight="64dp"
             android:layout_marginLeft="0dp"

@@ -267,5 +267,6 @@
     <string name="choice_wallet">Choose a wallet</string>
 
     <string name="converter">Currency converter</string>
+    <string name="delete_contact">Delete the contact</string>
 
 </resources>

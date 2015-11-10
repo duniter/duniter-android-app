@@ -17,8 +17,8 @@ import java.util.List;
 
 import io.ucoin.app.R;
 import io.ucoin.app.activity.SettingsActivity;
-import io.ucoin.app.dao.sqlite.SQLiteTable;
 import io.ucoin.app.content.Provider;
+import io.ucoin.app.dao.sqlite.SQLiteTable;
 import io.ucoin.app.model.local.UnitType;
 import io.ucoin.app.model.local.Wallet;
 import io.ucoin.app.model.remote.BlockchainBlock;
@@ -35,6 +35,7 @@ import io.ucoin.app.technical.DateUtils;
 import io.ucoin.app.technical.ObjectUtils;
 import io.ucoin.app.technical.StringUtils;
 import io.ucoin.app.technical.UCoinTechnicalException;
+import io.ucoin.app.technical.cache.SimpleCache;
 import io.ucoin.app.technical.crypto.CryptoUtils;
 import io.ucoin.app.technical.crypto.KeyPair;
 import io.ucoin.app.technical.task.AsyncTaskHandleException;
@@ -64,6 +65,8 @@ public class WalletService extends BaseService {
     private BlockchainRemoteService blockchainRemoteService;
     private MovementService movementService;
 
+    private SimpleCache<Long, Wallet> mWalletCache;
+
     public WalletService() {
         super();
     }
@@ -88,11 +91,11 @@ public class WalletService extends BaseService {
      * @param listener
      */
     public void create(Currency currency,
-                         String alias,
-                         String uid,
-                         String salt,
-                         String password,
-                         AsyncTaskListener<Wallet> listener
+                       String alias,
+                       String uid,
+                       String salt,
+                       String password,
+                       AsyncTaskListener<Wallet> listener
     ) {
         ObjectUtils.checkNotNull(currency);
         ObjectUtils.checkNotNull(currency.getAccountId());
@@ -120,7 +123,7 @@ public class WalletService extends BaseService {
                          String uid,
                          String salt,
                          String password
-                         ) throws UidMatchAnotherPubkeyException, DuplicatePubkeyException{
+    ) throws UidMatchAnotherPubkeyException, DuplicatePubkeyException{
 
         ObjectUtils.checkNotNull(currency);
         ObjectUtils.checkNotNull(currency.getAccountId());
@@ -204,9 +207,9 @@ public class WalletService extends BaseService {
      * @param updateRemotely Should wallet must be update from remote nodes ?
      */
     public List<Wallet> getWalletsByAccountId(final Context context,
-                                      final long accountId,
-                                      final boolean updateRemotely,
-                                      ProgressModel progressModel) {
+                                              final long accountId,
+                                              final boolean updateRemotely,
+                                              ProgressModel progressModel) {
 
         // Make sure the progress model is not null
         if (progressModel == null) {
@@ -241,6 +244,9 @@ public class WalletService extends BaseService {
                     return null;
                 }
             }
+        }
+        for (Wallet wallet : result) {
+            mWalletCache.put(wallet.getId(), wallet);
         }
 
         return result;
@@ -379,7 +385,7 @@ public class WalletService extends BaseService {
      * @param walletId wallet Id
      */
     public Wallet getWalletById(final Context context,
-                                      final long walletId) {
+                                final long walletId) {
 
 
         String selection = SQLiteTable.Wallet._ID + "=?";
@@ -538,11 +544,7 @@ public class WalletService extends BaseService {
                     String.valueOf(pubkey)
             };
         }
-        Cursor cursor = resolver.query(getContentUri(),
-                projection,
-                selection,
-                selectionArgs,
-                null);
+        Cursor cursor = resolver.query(getContentUri(), projection, selection, selectionArgs, null);
         boolean exists = cursor.moveToFirst();
         cursor.close();
 
@@ -571,9 +573,36 @@ public class WalletService extends BaseService {
         String whereClause = "_id=?";
         String[] whereArgs = new String[]{String.valueOf(source.getId())};
         int rowsUpdated = resolver.update(getContentUri(), target, whereClause, whereArgs);
+        mWalletCache.put(source.getId(), source);
         if (rowsUpdated != 1) {
             throw new UCoinTechnicalException(String.format("Error while updating wallet. %s rows updated.", rowsUpdated));
         }
+    }
+
+    public void loadCache(Context context, long accountId) {
+        if (mWalletCache == null) {
+            // Create and fill the currency cache
+            List<Wallet> wallets = getUidWalletsByAccountId(context, accountId);
+            mWalletCache = new SimpleCache<Long, Wallet>() {
+                @Override
+                public Wallet load(Context context, Long currencyId) {
+                    return getWalletById(context, currencyId);
+                }
+            };
+
+            // Fill the cache
+            for (Wallet wallet : wallets) {
+                mWalletCache.put(wallet.getId(), wallet);
+            }
+        }
+    }
+
+    public List<Wallet> getAllCacheWallet(Context context){
+        List<Wallet> result = new ArrayList<>();
+        for( long key :mWalletCache.keySet()){
+            result.add(mWalletCache.get(context, key));
+        }
+        return result;
     }
 
     private ContentValues toContentValues(final Wallet source) {

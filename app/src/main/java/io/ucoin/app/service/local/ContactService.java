@@ -27,7 +27,9 @@ import io.ucoin.app.service.BaseService;
 import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.service.exception.DuplicatePubkeyException;
 import io.ucoin.app.technical.CollectionUtils;
+import io.ucoin.app.technical.ContactUtils;
 import io.ucoin.app.technical.ObjectUtils;
+import io.ucoin.app.technical.StringUtils;
 import io.ucoin.app.technical.UCoinTechnicalException;
 
 /**
@@ -59,19 +61,38 @@ public class ContactService extends BaseService {
         mContact2CurrencyService = ServiceLocator.instance().getContact2CurrencyService();
     }
 
-    public Contact save(final Context context, final Contact contact) throws DuplicatePubkeyException {
+    public boolean existe(final Context context, String name){
+        ContentResolver resolver = context.getContentResolver();
+        String selection = SQLiteTable.Contact.NAME + "=?";
+        String[] selectionArgs = {name};
+
+        Cursor cursor = resolver.query(Provider.CONTACT_URI, new String[]{}, selection,
+                selectionArgs, null);
+
+        if(cursor.moveToFirst()){
+            cursor.close();
+            return true;
+        }
+
+        return false;
+    }
+
+    public Contact save(final Context context, final Contact contact, Boolean news) throws DuplicatePubkeyException {
         ObjectUtils.checkNotNull(contact);
 
         // create if not exists
-        if (contact.getId() == null) {
+        if (news) {
 
             insert(context.getContentResolver(), contact);
         }
 
         // or update
-        else {
-            update(context.getContentResolver(), contact);
+        else if(ContactUtils.idIsNotEmpty(contact)){
+            updatebyId(context.getContentResolver(), contact);
 
+        }
+        else if(StringUtils.isNotBlank(contact.getName())){
+            updatebyContactName(context.getContentResolver(), contact);
         }
 
         // Save contact identities
@@ -113,6 +134,13 @@ public class ContactService extends BaseService {
         int rowsUpdated = resolver.delete(Provider.CONTACT_URI, whereClause, whereArgs);
         if (rowsUpdated != 1) {
             throw new UCoinTechnicalException(String.format("Error while deleting contact [id=%s]. %s rows updated.", contactId, rowsUpdated));
+        }
+    }
+
+    public void deleteAll(final Context context,long accountId){
+        ContentResolver resolver = context.getContentResolver();
+        for(Contact contact : getContactsByAccountId(resolver,accountId)){
+            delete(context,contact.getId());
         }
     }
 
@@ -239,7 +267,7 @@ public class ContactService extends BaseService {
         source.setId(contactId);
     }
 
-    protected void update(final ContentResolver resolver, final Contact source) {
+    protected void updatebyId(final ContentResolver resolver, final Contact source) {
         ObjectUtils.checkNotNull(source.getId());
 
         ContentValues target = toContentValues(source);
@@ -250,6 +278,24 @@ public class ContactService extends BaseService {
         if (rowsUpdated != 1) {
             throw new UCoinTechnicalException(String.format("Error while updating contact. %s rows updated.", rowsUpdated));
         }
+    }
+
+    protected void updatebyContactName(final ContentResolver resolver, final Contact source) {
+        ObjectUtils.checkNotNull(source.getId());
+
+        ContentValues target = toContentValues(source);
+
+        String whereClause = SQLiteTable.Contact.NAME+"=?";
+        String[] whereArgs = new String[]{String.valueOf(source.getName())};
+        int rowsUpdated = resolver.update(Provider.CONTACT_URI, target, whereClause, whereArgs);
+        if (rowsUpdated != 1) {
+            throw new UCoinTechnicalException(String.format("Error while updating contact. %s rows updated.", rowsUpdated));
+        }
+        Cursor cur = resolver.query(Provider.CONTACT_URI, null, whereClause, whereArgs, null);
+        cur.moveToFirst();
+        source.setId(cur.getLong(cur.getColumnIndex(SQLiteTable.Contact._ID)));
+        source.setPhoneContactId(cur.getLong(cur.getColumnIndex(SQLiteTable.Contact.PHONE_CONTACT_ID)));
+        cur.close();
     }
 
     protected ContentValues toContentValues(final Contact source) {
@@ -271,7 +317,7 @@ public class ContactService extends BaseService {
         result.setId(cursor.getLong(mSelectHolder.idIndex));
         result.setAccountId(cursor.getLong(mSelectHolder.accountIdIndex));
         result.setName(cursor.getString(mSelectHolder.nameIdIndex));
-        result.setPhoneContactId(cursor.getLong(mSelectViewHolder.phoneContactId));
+        result.setPhoneContactId(cursor.getLong(mSelectHolder.phoneContactId));
 
         return result;
     }

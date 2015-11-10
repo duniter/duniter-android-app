@@ -8,6 +8,7 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.LoaderManager;
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
@@ -18,6 +19,8 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.provider.ContactsContract;
+import android.provider.ContactsContract.CommonDataKinds;
 import android.provider.Settings;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
@@ -36,6 +39,7 @@ import android.widget.Toast;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -43,8 +47,8 @@ import io.ucoin.app.Application;
 import io.ucoin.app.R;
 import io.ucoin.app.adapter.DrawerCurrencyCursorAdapter;
 import io.ucoin.app.config.Configuration;
-import io.ucoin.app.dao.sqlite.SQLiteTable;
 import io.ucoin.app.content.Provider;
+import io.ucoin.app.dao.sqlite.SQLiteTable;
 import io.ucoin.app.fragment.common.HomeFragment;
 import io.ucoin.app.fragment.contact.ContactListFragment;
 import io.ucoin.app.fragment.currency.AddCurrencyDialogFragment;
@@ -611,7 +615,43 @@ public class MainActivity extends ActionBarActivity
         mDrawerLayout.closeDrawer(findViewById(R.id.contact_drawer_panel));
     }
 
+    public void addNewContactInPhone(String name, String url){
 
+        Intent intent = new Intent(Intent.ACTION_INSERT);
+        intent.setType(ContactsContract.Contacts.CONTENT_TYPE);
+
+        intent.putExtra(ContactsContract.Intents.Insert.NAME, name);
+
+        ArrayList<ContentValues> data = new ArrayList<ContentValues>();
+        ContentValues row1 = new ContentValues();
+
+        row1.put(ContactsContract.Data.MIMETYPE, CommonDataKinds.Website.CONTENT_ITEM_TYPE);
+        row1.put(CommonDataKinds.Website.URL, url);
+        //row1.put(ContactsContract.CommonDataKinds.Website.LABEL, "abc");
+        row1.put(CommonDataKinds.Website.TYPE, CommonDataKinds.Website.TYPE_HOME);
+        data.add(row1);
+        intent.putExtra(ContactsContract.Intents.Insert.DATA, data);
+//              Uri dataUri = getActivity().getContentResolver().insert(ContactsContract.Data.CONTENT_URI, row1);
+        getApplicationContext().startActivity(intent);
+        //------------------------------- end of inserting contact in the phone
+    }
+
+    public void addInContactInPhone(String url){
+        Intent intent = new Intent(Intent.ACTION_INSERT_OR_EDIT);
+        intent.setType(ContactsContract.Contacts.CONTENT_ITEM_TYPE);
+
+        ArrayList<ContentValues> data = new ArrayList<ContentValues>();
+        ContentValues row1 = new ContentValues();
+        row1.put(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Website.CONTENT_ITEM_TYPE);
+        row1.put(ContactsContract.CommonDataKinds.Website.URL, url);
+        //row1.put(ContactsContract.CommonDataKinds.Website.LABEL, "abc");
+        row1.put(ContactsContract.CommonDataKinds.Website.TYPE, ContactsContract.CommonDataKinds.Website.TYPE_HOME);
+        data.add(row1);
+
+        intent.putExtra(ContactsContract.Intents.Insert.DATA, data);
+        intent.putExtra ("finishActivityOnSaveCompleted", true);
+        startActivity(intent);
+    }
 
     protected void openContact(final Long contactId) {
         if (contactId == null) {

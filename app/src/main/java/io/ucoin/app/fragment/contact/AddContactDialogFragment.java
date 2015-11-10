@@ -3,8 +3,13 @@ package io.ucoin.app.fragment.contact;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.content.ContentValues;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.provider.ContactsContract;
 import android.text.Html;
 import android.text.TextUtils;
 import android.util.Log;
@@ -15,11 +20,15 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+
 import io.ucoin.app.R;
+import io.ucoin.app.activity.SettingsActivity;
 import io.ucoin.app.adapter.ProgressViewAdapter;
 import io.ucoin.app.model.local.Contact;
 import io.ucoin.app.model.remote.Identity;
 import io.ucoin.app.service.ServiceLocator;
+import io.ucoin.app.technical.ContactUtils;
 import io.ucoin.app.technical.ExceptionUtils;
 import io.ucoin.app.technical.ObjectUtils;
 import io.ucoin.app.technical.StringUtils;
@@ -32,6 +41,8 @@ import io.ucoin.app.technical.task.AsyncTaskHandleException;
 public class AddContactDialogFragment extends DialogFragment {
 
     public static final String TAG = "AddContactFragment";
+
+    private String mSaveContactsPref;
 
     public static AddContactDialogFragment newInstance(Identity identity) {
         AddContactDialogFragment fragment = new AddContactDialogFragment();
@@ -48,6 +59,9 @@ public class AddContactDialogFragment extends DialogFragment {
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        mSaveContactsPref = sharedPref.getString(SettingsActivity.PREF_CONTACT_SAVE_KEY, String.valueOf(SettingsActivity.PREF_CONTACT_SAVE_IN_APP));
+
         final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
         LayoutInflater inflater = getActivity().getLayoutInflater();
@@ -153,7 +167,6 @@ public class AddContactDialogFragment extends DialogFragment {
     }
 
     private boolean isNameValid(String name) {
-        // TODO : voir s'il y a une taille mininum
         return name.length() >= 2;
     }
 
@@ -183,6 +196,7 @@ public class AddContactDialogFragment extends DialogFragment {
             ObjectUtils.checkNotNull(args);
             ObjectUtils.checkArgument(args.length == 2);
 
+
             Identity identity = (Identity)args[0];
             String name = (String)args[1];
 
@@ -195,12 +209,41 @@ public class AddContactDialogFragment extends DialogFragment {
             contact.setName(name);
             contact.setAccountId(mAccountId);
             contact.addIdentity(identity);
+            contact.setPhoneContactId((long) 0);
 
             // Save the contact in DB
-            ServiceLocator.instance().getContactService().save(getContext(), contact);
+            ServiceLocator.instance().getContactService().save(getContext(), contact,true);
+
+            if(mSaveContactsPref.equals(String.valueOf(SettingsActivity.PREF_CONTACT_SAVE_IN_PHONE))) {
+                addNewContactInPhone(name, ContactUtils.createUri(identity));
+            }
 
             return contact;
         }
+
+        public void addNewContactInPhone(String name, String url){
+
+            Intent intent = new Intent(Intent.ACTION_INSERT);
+            intent.setType(ContactsContract.Contacts.CONTENT_TYPE);
+
+            intent.putExtra(ContactsContract.Intents.Insert.NAME, name);
+
+            ArrayList<ContentValues> data = new ArrayList<ContentValues>();
+            ContentValues row1 = new ContentValues();
+
+            row1.put(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Website.CONTENT_ITEM_TYPE);
+            row1.put(ContactsContract.CommonDataKinds.Website.URL, url);
+            //row1.put(ContactsContract.CommonDataKinds.Website.LABEL, "abc");
+            row1.put(ContactsContract.CommonDataKinds.Website.TYPE, ContactsContract.CommonDataKinds.Website.TYPE_HOME);
+            data.add(row1);
+            intent.putExtra(ContactsContract.Intents.Insert.DATA, data);
+            intent.putExtra ("finishActivityOnSaveCompleted", true);
+//              Uri dataUri = getActivity().getContentResolver().insert(ContactsContract.Data.CONTENT_URI, row1);
+            getContext().startActivity(intent);
+            //------------------------------- end of inserting contact in the phone
+        }
+
+
 
         @Override
         protected void onSuccess(Contact contact) {
