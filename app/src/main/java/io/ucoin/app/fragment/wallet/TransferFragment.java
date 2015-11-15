@@ -8,6 +8,7 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -29,6 +30,9 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -65,6 +69,7 @@ import io.ucoin.app.technical.ExceptionUtils;
 import io.ucoin.app.technical.FragmentUtils;
 import io.ucoin.app.technical.StringUtils;
 import io.ucoin.app.technical.ViewUtils;
+import io.ucoin.app.technical.crypto.CryptoUtils;
 import io.ucoin.app.technical.task.AsyncTaskHandleException;
 import io.ucoin.app.technical.task.NullAsyncTaskListener;
 import io.ucoin.app.technical.view.ClearableEditText;
@@ -83,6 +88,7 @@ public class TransferFragment extends Fragment
     public static final String BUNDLE_POPBACKSTACK = "popBackStackName";
 
     protected static final int PICK_CONTACT_REQUEST = 1;
+    protected static final int SCAN_QRCODE_REQUEST = 1;
 
     private TextView mReceiverUidView;
     private Button  mWalletButton;
@@ -97,6 +103,7 @@ public class TransferFragment extends Fragment
     private Button mSendButton;
     private ImageButton mConvertedButton;
     private ImageButton mSearchIdentity;
+    private ImageButton mSearchQrCode;
     private ProgressViewAdapter mProgressViewAdapter;
 
     private boolean mIsCoinUnit = true;
@@ -379,12 +386,12 @@ public class TransferFragment extends Fragment
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if(!StringUtils.isNotBlank(mReceiverPubkeyText.getText().toString())){
+                if (!StringUtils.isNotBlank(mReceiverPubkeyText.getText().toString())) {
                     mReceiverIdentity = null;
                     if (contactList.size() != 0) {
                         mContactButton.setText(getString(R.string.choice_contact));
                         mContactButton.setEnabled(true);
-                    }else{
+                    } else {
                         mContactButton.setText(getString(R.string.no_contact));
                     }
                 }
@@ -400,6 +407,14 @@ public class TransferFragment extends Fragment
             @Override
             public void onClick(View v) {
                 searchIdentityWith(mReceiverPubkeyText.getText().toString());
+            }
+        });
+
+        mSearchQrCode = (ImageButton) view.findViewById(R.id.searchQrCode);
+        mSearchQrCode.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                searchIdentityWithScan();
             }
         });
 
@@ -560,6 +575,19 @@ public class TransferFragment extends Fragment
                 Log.d(TAG, "Pick contact with number: " + number);
             }
         }
+
+        //if (requestCode == ) {
+
+            if (resultCode == Activity.RESULT_OK) {
+                IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+                String resultScan = scanResult.getContents();
+                if (CryptoUtils.matchPubKey(resultScan)) {
+                    mReceiverPubkeyText.setText(scanResult.getContents());
+                } else {
+                    mReceiverPubkeyText.setText("");
+                }
+            }
+        //}
     }
 
     private String recoveredAmount(){
@@ -685,6 +713,13 @@ public class TransferFragment extends Fragment
                 mQueryResultListener.onQueryFailed(getString(R.string.query_too_short, 1));
             }
         }
+    }
+
+    public void searchIdentityWithScan(){
+        IntentIntegrator integrator = new IntentIntegrator(getActivity());
+        integrator.setDesiredBarcodeFormats(IntentIntegrator.QR_CODE_TYPES);
+        integrator.setOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        integrator.initiateScan();
     }
 
     public void updateComvertedAmountView() {

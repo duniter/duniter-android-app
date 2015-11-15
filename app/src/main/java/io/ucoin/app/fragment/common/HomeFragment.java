@@ -1,6 +1,7 @@
 package io.ucoin.app.fragment.common;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.FragmentManager;
@@ -9,6 +10,7 @@ import android.app.SearchManager;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -26,6 +28,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -38,6 +41,8 @@ import io.ucoin.app.R;
 import io.ucoin.app.activity.IToolbarActivity;
 import io.ucoin.app.activity.MainActivity;
 import io.ucoin.app.adapter.WalletRecyclerAdapter;
+import io.ucoin.app.fragment.dialog.ManageWalletDialog;
+import io.ucoin.app.fragment.dialog.QrCodeDialogFragment;
 import io.ucoin.app.fragment.wallet.AddWalletDialogFragment;
 import io.ucoin.app.fragment.wallet.MouvementFragment;
 import io.ucoin.app.fragment.wallet.TransferFragment;
@@ -47,6 +52,7 @@ import io.ucoin.app.model.local.Contact;
 import io.ucoin.app.model.local.Wallet;
 import io.ucoin.app.model.remote.Currency;
 import io.ucoin.app.model.remote.Identity;
+import io.ucoin.app.service.CryptoService;
 import io.ucoin.app.service.ServiceLocator;
 import io.ucoin.app.service.exception.DuplicatePubkeyException;
 import io.ucoin.app.service.exception.PeerConnectionException;
@@ -54,7 +60,10 @@ import io.ucoin.app.service.exception.UidMatchAnotherPubkeyException;
 import io.ucoin.app.service.local.WalletService;
 import io.ucoin.app.technical.ContactUtils;
 import io.ucoin.app.technical.ExceptionUtils;
+import io.ucoin.app.technical.FragmentUtils;
+import io.ucoin.app.technical.StringUtils;
 import io.ucoin.app.technical.ViewUtils;
+import io.ucoin.app.technical.crypto.KeyPair;
 import io.ucoin.app.technical.task.AsyncTaskHandleException;
 import io.ucoin.app.technical.task.NullAsyncTaskListener;
 import io.ucoin.app.technical.task.ProgressDialogAsyncTaskListener;
@@ -67,6 +76,8 @@ public class HomeFragment extends Fragment {
     public static final String CLICK_CERTIFICATION    = "certifications";
     public static final String CLICK_PAY        = "pay";
     public static final String CLICK_WALLET     = "wallet";
+    public static final String CLICK_MANAGE     = "manage";
+    public static final String CLICK_QRCODE     = "qrCode";
 
     private TextView mUpdateDateLabel;
     private View mStatusPanel;
@@ -81,15 +92,6 @@ public class HomeFragment extends Fragment {
 
     private static FragmentManager fm;
 
-
-
-    public interface WalletClickListener extends View.OnClickListener{
-        void onPositiveClick(Bundle args, View view, String action);
-    }
-
-    public interface IdentityClickListener extends View.OnClickListener{
-        void onPositiveClick(Bundle args, View view, String action);
-    }
 
     public static HomeFragment newInstance() {
         return new HomeFragment();
@@ -134,7 +136,7 @@ public class HomeFragment extends Fragment {
 
             @Override
             public void onPositiveClick(Bundle args, View view,String action) {
-                int position = mRecyclerView.getChildPosition(getViewWallet(view));
+                int position = mRecyclerView.getChildPosition(getViewWallet(view,action));
                 switch (action){
                     case CLICK_MOUVEMENT:
                         onWalletClickOperation(mWalletRecyclerAdapter.getItem(position));
@@ -147,7 +149,13 @@ public class HomeFragment extends Fragment {
                         break;
                     case CLICK_WALLET:
                         wal= mWalletRecyclerAdapter.getItem(position);
-                        onWalletClick(wal);
+                        onWalletClick(view, position);
+                        break;
+                    case CLICK_MANAGE:
+                        onManageClick(mWalletRecyclerAdapter.getItem(position));
+                        break;
+                    case CLICK_QRCODE:
+                        onQrCodeClick(mWalletRecyclerAdapter.getItem(position));
                         break;
                 }
             }
@@ -155,8 +163,14 @@ public class HomeFragment extends Fragment {
         mWalletRecyclerAdapter = new WalletRecyclerAdapter(getActivity(), null,wcl);
     }
 
-    public View getViewWallet(View v){
-        return (View) v.getParent().getParent().getParent().getParent().getParent();
+    public View getViewWallet(View v,String action){
+        if(action.equals(CLICK_WALLET)){
+            return (View) v.getParent().getParent();
+        }else if( action.equals(CLICK_MANAGE) || action.equals(CLICK_QRCODE)) {
+            return (View) v.getParent().getParent().getParent();
+        }else{
+            return (View) v.getParent().getParent().getParent().getParent().getParent();
+        }
     }
 
     @Override
@@ -237,8 +251,7 @@ public class HomeFragment extends Fragment {
                 .getSystemService(Context.SEARCH_SERVICE);
         final MenuItem searchItem = menu.findItem(R.id.action_search);
         final SearchView searchView = (SearchView) searchItem.getActionView();
-        searchView.setSearchableInfo(searchManager
-                .getSearchableInfo(getActivity().getComponentName()));
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(getActivity().getComponentName()));
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
@@ -262,7 +275,6 @@ public class HomeFragment extends Fragment {
         });
     }
 
-    //Return false to allow normal menu processing to proceed, true to consume it here
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -275,7 +287,7 @@ public class HomeFragment extends Fragment {
 
     protected void onAddWalletClick() {
         Currency currency =
-        ServiceLocator.instance().getCurrencyService().getCurrencyById(getActivity(),wallets.get(0).getCurrencyId());
+        ServiceLocator.instance().getCurrencyService().getCurrencyById(getActivity(), wallets.get(0).getCurrencyId());
 
         AddWalletDialogFragment.OnClickListener listener = new AddWalletDialogFragment.OnClickListener() {
             public void onPositiveClick(Bundle args) {
@@ -327,10 +339,10 @@ public class HomeFragment extends Fragment {
                 fragment.getClass().getSimpleName());
     }
 
-    protected void onWalletClick(final Wallet wallet) {}
 
-    public static void onIdentityClickOperation(final Identity identity){
-        Fragment fragment = MouvementFragment.newInstance(identity,wallets);
+
+    protected static void onIdentityClickOperation(final Identity identity){
+        Fragment fragment = MouvementFragment.newInstance(identity, wallets);
         FragmentManager fragmentManager = fm;
         // Insert the Home at the first place in back stack
 //        fragmentManager.popBackStack(HomeFragment.class.getSimpleName(), 0);
@@ -345,7 +357,7 @@ public class HomeFragment extends Fragment {
                 .commit();
     }
 
-    public static void onIdentityClickCertification(final Identity identity){
+    protected static void onIdentityClickCertification(final Identity identity){
         Fragment fragment = WotFragment.newInstance(identity);
         FragmentManager fragmentManager = fm;
         // Insert the Home at the first place in back stack
@@ -361,7 +373,7 @@ public class HomeFragment extends Fragment {
                 .commit();
     }
 
-    public static void onIdentityClickPay(final Identity identity){
+    protected static void onIdentityClickPay(final Identity identity){
         Fragment fragment = TransferFragment.newInstance(identity);
         fm.beginTransaction()
                 .setCustomAnimations(R.animator.slide_in_down,
@@ -373,7 +385,7 @@ public class HomeFragment extends Fragment {
                 .commit();
     }
 
-    public static void onIdentityClickCertify(final Identity identity){
+    protected static void onIdentityClickCertify(final Identity identity){
         Fragment fragment = SignFragment.newInstance(identity);
         fm.beginTransaction()
                 .setCustomAnimations(R.animator.slide_in_down,
@@ -386,7 +398,8 @@ public class HomeFragment extends Fragment {
     }
 
 
-    public void onWalletClickOperation(final Wallet wallet){
+
+    protected void onWalletClickOperation(final Wallet wallet){
 
 
         Fragment fragment = MouvementFragment.newInstance(wallet,wallets);
@@ -404,7 +417,7 @@ public class HomeFragment extends Fragment {
                 .commit();
     }
 
-    public void onWalletClickCertification(final Wallet wallet){
+    protected void onWalletClickCertification(final Wallet wallet){
 
 
         Fragment fragment = WotFragment.newInstance(wallet);
@@ -422,7 +435,7 @@ public class HomeFragment extends Fragment {
                 .commit();
     }
 
-    public void onWalletClickPay(final Wallet wallet){
+    protected void onWalletClickPay(final Wallet wallet){
         Fragment fragment = TransferFragment.newInstance(wallet);
         getFragmentManager().beginTransaction()
                 .setCustomAnimations(R.animator.slide_in_down,
@@ -433,6 +446,114 @@ public class HomeFragment extends Fragment {
                 .addToBackStack(fragment.getClass().getSimpleName())
                 .commit();
     }
+
+    protected void onWalletClick(final View view,int position) {
+        View v = null;
+        LinearLayout mMoreInformation = null;
+        for(int i=0;i<mRecyclerView.getChildCount();i++){
+            v = mRecyclerView.getChildAt(i);
+            mMoreInformation = (LinearLayout) v.findViewById(R.id.more_information);
+            if(i == position){
+                if(mMoreInformation.getVisibility()==View.VISIBLE){
+                    mMoreInformation.setVisibility(View.GONE);
+                }else {
+                    mMoreInformation.setVisibility(View.VISIBLE);
+                }
+            }else{
+                mMoreInformation.setVisibility(View.GONE);
+            }
+        }
+    }
+
+    protected void onManageClick(final Wallet wallet){
+        ManageWalletDialog manager = new ManageWalletDialog(getActivity(),new DialogItemClickListener() {
+            @Override
+            public void onClick(int position) {
+                switch (position){
+                    case 0://rename
+//                        onManageRenameClick(wallet);
+                        break;
+                    case 1://join a member
+                        onManageJoinClick(wallet);
+                        break;
+                    case 2://register
+//                        onManageRegisterClick(wallet);
+                        break;
+                    case 3://delete wallet
+                        onManageDeleteClick(wallet);
+                        break;
+                }
+            }
+        });
+        manager.show(getFragmentManager(), "ManageWalletDialog");
+    }
+
+
+    protected void onManageRenameClick(final Wallet wallet){
+
+    }
+
+    protected void onManageJoinClick(final Wallet wallet){
+
+        // Retrieve the fragment to pop after transfer
+        final String popBackStackName = FragmentUtils.getPopBackName(getFragmentManager(), 0);
+
+        // Perform the join (after login)
+        LoginFragment.login(getFragmentManager(), wallet, new LoginFragment.OnLoginListener() {
+            public void onSuccess(Wallet authWallet) {
+                RequestMembershipTask task = new RequestMembershipTask(popBackStackName);
+                task.execute(authWallet);
+            }
+        });
+    }
+
+    protected void onManageRegisterClick(final Wallet wallet){
+        //TODO FMA redemander le salt et le password
+        String salt = "";
+        String password = "";
+
+        CryptoService service = ServiceLocator.instance().getCryptoService();
+        KeyPair keys = service.getKeyPair(salt, password);
+        WalletService walletService = ServiceLocator.instance().getWalletService();
+
+        // Set the secret key into the wallet (will be available for this session only)
+        // (must be done AFTER the walletService.save(), to avoid to write in DB)
+        wallet.setSecKey(keys.getSecKey());
+
+        walletService.sendSelfAndSave(getActivity(), wallet);
+
+        // Reset the secret key
+        wallet.setSecKey(null);
+    }
+
+    protected void onManageDeleteClick(final Wallet wallet){
+        FragmentManager fragmentManager = getFragmentManager();
+        FragmentManager.BackStackEntry backStackEntry = fragmentManager.getBackStackEntryAt(
+                fragmentManager.getBackStackEntryCount() - 2);
+        final String popBackStackName = backStackEntry.getName();
+
+        new AlertDialog.Builder(getActivity())
+                .setTitle(getString(R.string.delete_wallet))
+                .setMessage(getString(R.string.delete_wallet_confirm))
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+
+                    public void onClick(DialogInterface dialog, int whichButton) {
+
+                        // Run the delete task
+                        DeleteTask deleteTask = new DeleteTask(popBackStackName);
+                        deleteTask.execute(wallet);
+                    }
+                })
+                .setNegativeButton(android.R.string.no, null).show();
+    }
+
+    protected void onQrCodeClick(final Wallet wallet){
+        QrCodeDialogFragment fragment = QrCodeDialogFragment.newInstance(wallet.getId());
+        fragment.show(getFragmentManager(),
+                fragment.getClass().getSimpleName());
+    }
+
 
     protected void onWalletListLoadFailed(Throwable t) {
         List<Wallet> wallets = ServiceLocator.instance().getWalletService().getAllCacheWallet(getActivity());
@@ -633,5 +754,129 @@ public class HomeFragment extends Fragment {
         @Override
         protected void onFailed(Throwable t) {
         }
+    }
+
+    public class DeleteTask extends AsyncTaskHandleException<Wallet, Void, Void> {
+
+        private String popStackTraceName;
+
+        public DeleteTask(String popStackTraceName) {
+            super(getActivity());
+            this.popStackTraceName = popStackTraceName;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected Void doInBackgroundHandleException(Wallet... wallets) {
+            Wallet wallet = wallets[0];
+
+            // Do deletion
+            ServiceLocator.instance().getWalletService().delete(getContext(), wallet.getId());
+
+            return (Void)null;
+        }
+
+        @Override
+        protected void onSuccess(Void args) {
+            getFragmentManager().popBackStack(popStackTraceName, 0); // return back
+
+            LoadWalletsTask loadWalletsTask = new LoadWalletsTask();
+            loadWalletsTask.execute();
+
+            Toast.makeText(getContext(),
+                    getString(R.string.wallet_deleted),
+                    Toast.LENGTH_LONG).show();
+        }
+
+        @Override
+        protected void onFailed(Throwable error) {
+            super.onFailed(error);
+            Log.d(TAG, "Could not delete wallet: " + ExceptionUtils.getMessage(error), error);
+            Toast.makeText(getContext(),
+                    getString(R.string.delete_wallet_error, ExceptionUtils.getMessage(error)),
+                    Toast.LENGTH_SHORT).show();
+        }
+
+    }
+
+    public class RequestMembershipTask extends AsyncTaskHandleException<Wallet, Void, Wallet> {
+
+        private Activity mActivity = getActivity();
+        private String popStackTraceName;
+
+        public RequestMembershipTask(String popStackTraceName) {
+            super(getActivity());
+            this.popStackTraceName = popStackTraceName;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            // Hide the keyboard, in case we come from imeDone)
+            ViewUtils.hideKeyboard(mActivity);
+        }
+
+        @Override
+        protected Wallet doInBackgroundHandleException(Wallet... wallets) {
+            Wallet wallet = wallets[0];
+
+            // Get certifications (if has a uid)
+            if (StringUtils.isNotBlank(wallet.getUid())
+                    && wallet.isAuthenticate()) {
+                ServiceLocator.instance().getBlockchainRemoteService().requestMembership(wallet);
+
+                return wallet;
+            }
+            else {
+                return null;
+            }
+        }
+
+        @Override
+        protected void onSuccess(Wallet wallet) {
+            if (wallet == null || wallet.getCertTimestamp() <= 0) {
+                Toast.makeText(mActivity,
+                        getString(R.string.join_error),
+                        Toast.LENGTH_SHORT).show();
+            }
+            else {
+//                getFragmentManager().popBackStack(popStackTraceName, 0); // return back
+
+                LoadWalletsTask loadWalletsTask = new LoadWalletsTask();
+                loadWalletsTask.execute();
+
+                Toast.makeText(mActivity,
+                        getString(R.string.join_sended),
+                        Toast.LENGTH_LONG).show();
+            }
+        }
+
+        @Override
+        protected void onFailed(Throwable error) {
+            super.onFailed(error);
+            Log.d(TAG, "Could not send join: " + ExceptionUtils.getMessage(error), error);
+            Toast.makeText(mActivity,
+                    getString(R.string.join_error)
+                            + "\n"
+                            + ExceptionUtils.getMessage(error),
+                    Toast.LENGTH_SHORT).show();
+        }
+    }
+
+
+    public interface WalletClickListener extends View.OnClickListener{
+        void onPositiveClick(Bundle args, View view, String action);
+    }
+
+    public interface IdentityClickListener extends View.OnClickListener{
+        void onPositiveClick(Bundle args, View view, String action);
+    }
+
+    public interface DialogItemClickListener{
+        void onClick(int position);
     }
 }

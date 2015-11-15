@@ -210,6 +210,34 @@ public class WotRemoteService extends BaseRemoteService {
         return result;
 
     }
+
+    public int countCertification (long currencyId, String uid) {
+        Log.d(TAG, String.format("Try to count valid certifications done by uid: %s", uid));
+
+        int count =0;
+//        BlockchainParameters param = ServiceLocator.instance().getBlockchainRemoteService().getParameters(currencyId);
+//
+//        param.get
+
+        // call certified-by
+
+        WotIdentityCertifications result = null;
+        String path = String.format(URL_CERTIFIED_BY, uid);
+        try {
+            result = executeRequest(currencyId, path, WotIdentityCertifications.class);
+        }catch (Exception e){
+            return 0;
+        }
+
+        for(WotCertification wot : result.getCertifications()){
+            if(wot.isValid()){
+                count +=1;
+            }
+        }
+
+        return count;
+
+    }
     
     public WotIdentityCertifications getCertifiersOf(long currencyId, String uid) {
         Log.d(TAG, String.format("Try to get certifications done to uid: %s", uid));

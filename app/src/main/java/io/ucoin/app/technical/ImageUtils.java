@@ -12,18 +12,18 @@ import io.ucoin.app.model.remote.WotCertification;
 public class ImageUtils {
 
     // Wallet
-    private static final Integer WALLET_MEMBER = R.drawable.ic_member_32dp;
+    private static final Integer WALLET_MEMBER = R.drawable.ic_wallet;
     private static final Integer WALLET_NON_MEMBER = R.drawable.ic_wallet;
 
-    private static final Integer WALLET_WHITE_MEMBER = R.drawable.ic_member_white_32dp;
+    private static final Integer WALLET_WHITE_MEMBER = R.drawable.ic_wallet_white;
     private static final Integer WALLET_WHITE_NON_MEMBER = R.drawable.ic_wallet_white;
 
     // Identity
     private static final Integer IMAGE_MEMBER = R.drawable.ic_member_32dp;
-    private static final Integer IMAGE_NON_MEMBER = R.drawable.ic_wallet;
+    private static final Integer IMAGE_NON_MEMBER = R.drawable.ic_member_32dp;
 
     private static final Integer IMAGE_WHITE_MEMBER = R.drawable.ic_member_white_32dp;
-    private static final Integer IMAGE_WHITE_NON_MEMBER = R.drawable.ic_wallet_white;
+    private static final Integer IMAGE_WHITE_NON_MEMBER = R.drawable.ic_member_white_32dp;
 
     // Certification
     private static final Integer IMAGE_CERTIFIED_BY = R.drawable.ic_certified_by;

@@ -598,7 +598,7 @@ public class WalletService extends BaseService {
     }
 
     public List<Wallet> getAllCacheWallet(Context context){
-        List<Wallet> result = new ArrayList<>();
+                List<Wallet> result = new ArrayList<>();
         for( long key :mWalletCache.keySet()){
             result.add(mWalletCache.get(context, key));
         }

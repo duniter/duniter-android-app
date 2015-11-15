@@ -53,7 +53,7 @@
     <string name="wallet_title">Wallet</string>
     <string name="credit_message">credit: %s</string>
     <string name="credit">credit</string>
-    <string name="not_registred">not registred</string>
+    <string name="not_registred">Not registred</string>
     <string name="wallet_uid">(%s)</string>
     <string name="alias">Alias</string>
     <string name="alias_hint">Wallet alias (optional)</string>
@@ -246,6 +246,7 @@
     <string name="query_too_short">%s characters minimum</string>
     <string name="transfer_to">Transfer to %s</string>
     <string name="sign_to">Sign %s</string>
+    <string name="nb_sign">%s valid signature</string>
     <string name="yesterday">yesterday</string>
     <string name="search_error">Search error (%s). Please retry.</string>
 
@@ -268,5 +269,7 @@
 
     <string name="converter">Currency converter</string>
     <string name="delete_contact">Delete the contact</string>
+    <string name="rename">Rename</string>
+    <string name="close">Close</string>
 
 </resources>

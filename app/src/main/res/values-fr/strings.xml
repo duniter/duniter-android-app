@@ -53,7 +53,7 @@
     <string name="wallet_title">Portefeuille</string>
     <string name="credit_message">solde: %s</string>
     <string name="credit">solde</string>
-    <string name="not_registred">non inscrit</string>
+    <string name="not_registred">Non inscrit</string>
     <string name="wallet_uid">(%s)</string>
     <string name="alias">Nom</string>
     <string name="alias_hint">Nom du portefeuille (optionel)</string>
@@ -246,6 +246,7 @@
     <string name="query_too_short">%s caractères minimum</string>
     <string name="transfer_to">Payer %s</string>
     <string name="sign_to">Certifier %s</string>
+    <string name="nb_sign">%s signature valide</string>
     <string name="yesterday">hier</string>
     <string name="search_error">Echec de la recherche (%s). Veuillez réessayer.</string>
 
@@ -267,5 +268,7 @@
 
     <string name="converter">Convertisseur de monnaie</string>
     <string name="delete_contact">Supprimer le contact</string>
+    <string name="rename">Renommer</string>
+    <string name="close">Fermer</string>
 
 </resources>

@@ -73,7 +73,7 @@ public enum ConfigurationOption {
     NETWORK_TIMEOUT(
             "ucoin.network.timeout",
             "ucoin.config.option.network.timeout.description",
-            "10000", // = 10 s
+            "100000", // = 10 s
             Integer.class,
             false),
 

@@ -78,6 +78,12 @@
                 android:layout_weight="0.10"
                 android:layout_height="match_parent"
                 android:src="@drawable/ic_search_white_24dp"/>
+            <ImageButton
+                android:id="@+id/searchQrCode"
+                android:layout_width="0dp"
+                android:layout_weight="0.10"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_qrcode_white_24dp"/>
 
         </LinearLayout>
     </LinearLayout>
