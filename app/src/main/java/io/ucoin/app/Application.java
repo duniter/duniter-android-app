@@ -3,13 +3,13 @@ package io.ucoin.app;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 
-import io.ucoin.app.technical.task.TaskManager;
 import io.ucoin.app.technical.StringUtils;
 
 public class Application extends android.app.Application{
 
     private Account mAccount;
     private Long accountId;
+    private Long id;
     //private TaskManager taskManager;
 
     public Application() {
