@@ -1,3 +1,9 @@
+uCoin.iml
+ucoin-android-app.iml
+app/app.iml
+scrypt/scrypt.iml
+kalium-jni/kalium-jni.iml
+volley/volley.iml
 # Built application files
 *.apk
 *.ap_
@@ -25,5 +31,3 @@ scrypt/src/main/obj/**/*.*
 kalium-jni/src/main/libs/**/*.so
 kalium-jni/src/main/obj/**/*.*
 .project
-
-app/src/main/res/drawable-xxhdpi/.directory

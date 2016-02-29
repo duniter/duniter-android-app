@@ -1,3 +1,6 @@
 [submodule "kalium-jni/src/main/jni/libsodium"]
 	path = kalium-jni/src/main/jni/libsodium
 	url = https://github.com/jedisct1/libsodium
+[submodule "volley"]
+	path = volley
+	url = https://android.googlesource.com/platform/frameworks/volley

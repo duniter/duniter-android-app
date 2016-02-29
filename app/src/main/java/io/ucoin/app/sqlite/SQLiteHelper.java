@@ -326,67 +326,50 @@ public class SQLiteHelper extends SQLiteOpenHelper implements SQLiteTable {
         if (oldVersion >= newVersion)
             return;
 
-        String query;
-
-        query = "DROP TABLE " + Currency.TABLE_NAME;
-        db.execSQL(query);
-
-        query = "DROP TABLE IF EXISTS " + Block.TABLE_NAME;
-        db.execSQL(query);
-
-        query = "DROP TABLE IF EXISTS " + Identity.TABLE_NAME;
-        db.execSQL(query);
-
-        query = "DROP TABLE IF EXISTS " + Member.TABLE_NAME;
-        db.execSQL(query);
-
-        query = "DROP TABLE IF EXISTS " + Certification.TABLE_NAME;
-        db.execSQL(query);
-
-        query = "DROP TABLE IF EXISTS " + Wallet.TABLE_NAME;
-        db.execSQL(query);
-
-        query = "DROP TABLE IF EXISTS " + Peer.TABLE_NAME;
-        db.execSQL(query);
-
-        query = "DROP TABLE IF EXISTS " + Endpoint.TABLE_NAME;
-        db.execSQL(query);
-
-        query = "DROP TABLE IF EXISTS " + Source.TABLE_NAME;
-        db.execSQL(query);
-
-        query = "DROP TABLE IF EXISTS " + Ud.TABLE_NAME;
-        db.execSQL(query);
-
-        query = "DROP TABLE IF EXISTS " + Contact.TABLE_NAME;
-        db.execSQL(query);
-
-        query = "DROP TABLE IF EXISTS " + Tx.TABLE_NAME;
-        db.execSQL(query);
-
-        query = "DROP TABLE IF EXISTS " + TxIssuer.TABLE_NAME;
-        db.execSQL(query);
-
-        query = "DROP TABLE IF EXISTS " + TxInput.TABLE_NAME;
-        db.execSQL(query);
-
-        query = "DROP TABLE IF EXISTS " + TxOutput.TABLE_NAME;
-        db.execSQL(query);
-
-        query = "DROP TABLE IF EXISTS " + TxSignature.TABLE_NAME;
-        db.execSQL(query);
-
-        query = "DROP TABLE IF EXISTS " + Membership.TABLE_NAME;
-        db.execSQL(query);
-
-        query = "DROP TABLE IF EXISTS " + SelfCertification.TABLE_NAME;
-        db.execSQL(query);
-
-        query = "DROP TABLE IF EXISTS " + Operation.TABLE_NAME;
-        db.execSQL(query);
+        if(oldVersion<8){
+            dropOldVersion(db);
+        }
+        db.execSQL("DROP TABLE IF EXISTS " + Currency.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + Block.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + Block.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + Identity.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + Member.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + Certification.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + Wallet.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + Peer.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + Endpoint.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + Source.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + Ud.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + Contact.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + Tx.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + TxIssuer.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + TxInput.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + TxOutput.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + TxSignature.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + Membership.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + SelfCertification.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + Operation.TABLE_NAME);
 
         onCreate(db);
 
+    }
+
+    private void dropOldVersion(SQLiteDatabase db){
+        db.execSQL("DROP TABLE IF EXISTS " + "account");
+        db.execSQL("DROP TABLE IF EXISTS " + "currency");
+        db.execSQL("DROP TABLE IF EXISTS " + "blockchain_parameters");
+        db.execSQL("DROP TABLE IF EXISTS " + "ud");
+        db.execSQL("DROP TABLE IF EXISTS " + "peer");
+        db.execSQL("DROP TABLE IF EXISTS " + "wallet");
+        db.execSQL("DROP TABLE IF EXISTS " + "movement");
+        db.execSQL("DROP TABLE IF EXISTS " + "contact");
+        db.execSQL("DROP TABLE IF EXISTS " + "contact2currency");
+        db.execSQL("DROP TABLE IF EXISTS " + "contact_view");
+        db.execSQL("DROP TABLE IF EXISTS " + "source");
+        db.execSQL("DROP TABLE IF EXISTS " + "tx");
+        db.execSQL("DROP TABLE IF EXISTS " + "tx_input");
+        db.execSQL("DROP TABLE IF EXISTS " + "tx_output");
+        db.execSQL("DROP TABLE IF EXISTS " + "tx_signature");
     }
 
     @Override
