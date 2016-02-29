@@ -1,78 +1,97 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="io.ucoin.app"
-    android:versionCode="8"
-    android:versionName="0.8">
-
-    <uses-permission android:name="android.permission.INTERNET" />
+          package="io.ucoin.app"
+          android:versionCode="8"
+          android:versionName="0.8">
+    <!--
+        <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+        <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    -->
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
+    <uses-permission android:name="android.permission.READ_SYNC_SETTINGS" />
+    <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
-    <!-- To auto-complete the email text field in the login form with the user's emails  -->
     <uses-permission android:name="android.permission.READ_PROFILE" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="android.permission.WRITE_CONTACTS" />
 
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.READ_SYNC_SETTINGS" />
-    <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
-    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+
 
     <application
         android:name="io.ucoin.app.Application"
         android:allowBackup="true"
-        android:icon="@drawable/ic_ucoin"
+        android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme"
-        >
-        <activity
-            android:name=".activity.MainActivity"
-            android:configChanges="orientation|screenSize"
-            android:label="@string/app_name"
-            android:windowSoftInputMode="stateHidden"
-            android:icon="@drawable/ic_ucoin">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+        android:theme="@style/AppTheme.Base">
 
+        <activity android:name=".activity.MainActivity">
+            <intent-filter>
                 <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN" />
             </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".activity.ConnectionActivity"
+            android:label="@string/connection"
+            android:screenOrientation="portrait">
+        </activity>
+
+        <activity
+            android:name=".activity.AppPreferences"
+            android:label="@string/preference"
+            android:screenOrientation="portrait">
+        </activity>
+
+        <activity
+            android:name=".activity.CurrencyActivity"
+            android:configChanges="orientation|screenSize"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
             </intent-filter>
-
-            <!--intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data android:scheme="ucoin"/>
-            </intent-filter-->
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data
-                    android:host="data.ucoin.fr"
-                    android:scheme="http"/>
-            </intent-filter>
-
             <meta-data
                 android:name="android.app.searchable"
                 android:resource="@xml/searchable" />
         </activity>
 
         <activity
-            android:name=".activity.AddAccountActivity"
-            android:configChanges="orientation|screenSize"
-            android:label="@string/app_name"
-            android:windowSoftInputMode="stateHidden"
-            android:theme="@style/AppTheme.Dark.NoActionBar"/>
+            android:name=".activity.TransferActivity"
+            android:label="@string/transfer"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".activity.AddContactActivity"
+            android:label="@string/add_contact"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".activity.SearchIdentityActivity"
+            android:label="@string/search_identity"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".activity.LookupActivity"
+            android:label="@string/lookup"
+            android:screenOrientation="portrait" />
 
         <activity
             android:name=".activity.SettingsActivity"
-            android:label="@string/title_activity_settings"/>
+            android:label="@string/title_activity_settings"
+            android:screenOrientation="portrait"
+            android:theme="@style/DarkTheme" />
 
-        <service android:name=".service.local.AuthenticatorService">
+
+        <service android:name=".service.RequierementsService" />
+        <service android:name=".service.TxHistoryService" />
+
+        <service android:name=".service.AuthenticatorService">
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator" />
             </intent-filter>
@@ -82,9 +101,10 @@
         </service>
 
         <service
-            android:name=".service.local.SyncService"
+            android:name=".service.SyncService"
             android:exported="true"
             android:process=":sync">
+            <!---->
             <intent-filter>
                 <action android:name="android.content.SyncAdapter" />
             </intent-filter>
@@ -93,20 +113,10 @@
                 android:resource="@xml/syncadapter" />
         </service>
 
-        <service
-            android:name=".task.TaskService"
-            android:exported="true"
-            >
-            <intent-filter>
-                <action android:name="android.content.TaskService" />
-            </intent-filter>
-        </service>
-
         <provider
-            android:name=".content.Provider"
+            android:name=".content.DbProvider"
             android:authorities="@string/AUTHORITY"
             android:exported="false"
             android:syncable="true" />
     </application>
-
 </manifest>

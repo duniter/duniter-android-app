@@ -25,7 +25,7 @@ public class GenerateQRCodeTask extends AsyncTask<Bundle, Void, Bitmap> {
         try {
             int width = args[0].getInt(("width"));
             String publicKey = args[0].getString(("public_key"));
-//            int color = args[0].getInt("color");
+            int color = args[0].getInt("color");
 
             QRCodeWriter qrCodeWriter = new QRCodeWriter();
             BitMatrix bitMatrix = qrCodeWriter.encode(publicKey, BarcodeFormat.QR_CODE, width, width);
@@ -34,7 +34,7 @@ public class GenerateQRCodeTask extends AsyncTask<Bundle, Void, Bitmap> {
             for (int x = 0; x < width; x++) {
                 for (int y = 0; y < width; y++) {
                     bitmap.setPixel(x, y, bitMatrix.get(x, y)
-                            ? Color.BLACK
+                            ? color
                             : Color.WHITE);
                 }
             }

@@ -1,0 +1,13 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:ucoin="http://schemas.android.com/apk/res-auto"
+    >
+    <item android:id="@+id/action_search"
+        android:title="@string/search"
+        android:icon="@drawable/ic_search_white_24dp"
+        ucoin:iconifiedByDefault="true"
+        ucoin:showAsAction="always"
+        ucoin:actionViewClass="android.support.v7.widget.SearchView" />
+
+</menu>
+
+

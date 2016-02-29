@@ -1,0 +1,94 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/progress_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:paddingBottom="8dp"
+        android:paddingTop="8dp"
+        android:visibility="gone">
+
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="56dp"
+            android:layout_gravity="center_horizontal|center_vertical"
+            android:paddingEnd="8dp"
+            android:paddingStart="8dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="56dp"
+            android:gravity="center_horizontal|center_vertical"
+            android:paddingEnd="8dp"
+            android:paddingStart="8dp"
+            android:text="@string/loading_currency" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/form_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="20dp"
+        android:paddingEnd="24dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:text="@string/dialog_text_add_node"
+            android:textSize="@dimen/abc_text_size_body_1_material" />
+
+        <EditText
+            android:id="@+id/address"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/node_address"
+            android:imeOptions="actionNext"
+            android:inputType="textNoSuggestions"
+            android:singleLine="true" />
+
+        <EditText
+            android:id="@+id/port"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:hint="@string/node_port"
+            android:imeOptions="actionDone"
+            android:inputType="number"
+            android:singleLine="true"/>
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:layout_marginBottom="8dp">
+
+            <Button
+                android:id="@+id/cancel_button"
+                android:layout_width="96dp"
+                android:layout_height="36dp"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="8dp"
+                android:layout_toStartOf="@+id/positive_button"
+                android:background="@color/transparent"
+                android:text="@string/CANCEL"
+                android:textColor="@color/primary" />
+
+            <Button
+                android:id="@+id/positive_button"
+                android:layout_width="64dp"
+                android:layout_height="36dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="16dp"
+                android:background="@color/transparent"
+                android:text="@string/OK"
+                android:textColor="@color/primary" />
+
+        </RelativeLayout>
+    </LinearLayout>
+</LinearLayout>

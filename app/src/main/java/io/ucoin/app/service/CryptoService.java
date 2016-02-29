@@ -69,7 +69,8 @@ public class CryptoService extends BaseService {
      * @return
      */
     public KeyPair getKeyPair(String salt, String password) {
-        return getKeyPairFromSeed(getSeed(salt, password));
+        byte[] seed = getSeed(salt, password);
+        return getKeyPairFromSeed(seed);
     }
 
 

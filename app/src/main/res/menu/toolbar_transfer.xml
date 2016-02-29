@@ -1,8 +1,13 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:ucoin="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".MainActivity"
     >
+
+    <item android:id="@+id/action_transfer"
+        android:title="@string/transfer"
+        android:icon="@drawable/ic_send_white_24dp"
+        ucoin:iconifiedByDefault="true"
+        ucoin:showAsAction="always"/>
 </menu>
 
 

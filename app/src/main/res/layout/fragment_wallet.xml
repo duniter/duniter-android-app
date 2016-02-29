@@ -1,215 +1,162 @@
-<LinearLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:layout_height="match_parent">
 
-    <RelativeLayout
-        android:id="@+id/header_layout"
-        style="@style/Header"
-        android:background="@drawable/shape_wallet_header"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <TextView
-            android:id="@+id/uid"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentTop="true"
-            android:textColor="@color/textPrimary"
-            android:singleLine="true"
-            android:text="User"
-            android:textSize="@dimen/abc_text_size_display_3_material" />
-
-        <ImageButton android:id="@+id/icon"
-            android:layout_marginTop="20dp"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentTop="true"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:src="@drawable/ic_wallet_white"
-            android:background="#00ffffff"
-            android:scaleType="fitXY"/>
-
-        <ImageButton android:id="@+id/toogle_detail"
-            android:layout_width="50dp"
-            android:layout_height="32dp"
-            android:src="@drawable/expander_open_holo_dark"
-            android:background="#00ffffff"
-            android:layout_centerVertical="true"
-            android:layout_marginTop="-12dp"
-            android:paddingRight="16dp"
-            android:paddingLeft="2dp"
-            android:layout_below="@+id/uid"
-            android:layout_alignParentLeft="true" />
-
-        <LinearLayout
-            android:id="@+id/details"
-            xmlns:android="http://schemas.android.com/apk/res/android"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_below="@+id/uid"
-            android:paddingTop="20dp"
-            android:paddingLeft="2dp">
-
-            <TextView
-                android:id="@+id/timestamp_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/registration_date"
-                android:textColor="@color/hideable_text_color"
-                android:textSize="@dimen/abc_text_size_caption_material"
-                android:layout_below="@+id/pubkey"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true" />
-
-            <TextView
-                android:id="@+id/timestamp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true"
-                android:layout_below="@+id/timestamp_label"
-                android:maxLines="1"
-                android:singleLine="true"
-                android:text="Dec 12, 2014"
-                android:textColor="@color/textPrimary"
-                android:textSize="@dimen/abc_text_size_subhead_material" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/public_key"
-                android:textColor="@color/hideable_text_color"
-                android:textSize="@dimen/abc_text_size_caption_material"
-                android:layout_below="@+id/timestamp"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true"
-                android:maxLines="1"
-                android:singleLine="true"/>
-
-            <TextView
-                android:id="@+id/pubkey"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true"
-                android:layout_below="@+id/uid"
-                android:text="pubkey"
-                android:textColor="@color/textPrimary"
-                android:textSize="@dimen/abc_text_size_small_material" />
-        </LinearLayout>
-
-        <TextView
-            android:id="@+id/credit"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="credit"
-            android:maxLines="1"
-            android:singleLine="true"
-            android:textColor="@color/textPrimary"
-            android:textSize="@dimen/abc_text_size_large_material"
-            android:layout_below="@+id/uid"
-            android:layout_alignRight="@+id/currency"
-            android:layout_alignEnd="@+id/currency" />
-
-        <TextView
-            android:id="@+id/currency"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="currency"
-            android:textColor="@color/textPrimary"
-            android:textSize="@dimen/abc_text_size_caption_material"
-            android:layout_below="@+id/credit"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true" />
-
-    </RelativeLayout>
-
-    <TabHost
+    <LinearLayout
+        android:id="@+id/wallet_header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/tabHost">
+        android:background="@color/primary"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:elevation="@dimen/elevation"
+        android:orientation="vertical"
+        android:paddingBottom="@dimen/small_padding">
 
-                <LinearLayout
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:orientation="vertical">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingStart="8dp"
+            android:paddingLeft="8dp">
 
-                <TabWidget
-                    android:id="@android:id/tabs"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content">
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginLeft="50dp">
 
-                </TabWidget>
+                <TextView
+                    android:id="@+id/alias"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:gravity="bottom"
+                    android:textColor="@android:color/white"
+                    android:textSize="@dimen/abc_text_size_body_2_material" />
 
-                <FrameLayout
-                    android:id="@android:id/tabcontent"
-                    android:layout_width="fill_parent"
-                    android:layout_height="fill_parent">
-
-                    <LinearLayout
-                        android:id="@+id/tab1"
-                        android:layout_width="fill_parent"
-                        android:layout_height="fill_parent"
-                        android:orientation="vertical"
-                        android:paddingBottom="8dp"
-                        android:paddingLeft="8dp"
-                        android:paddingRight="8dp"
-                        android:paddingTop="8dp">
+                <TextView
+                    android:id="@+id/principal_amount"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="bottom"
+                    android:textColor="@android:color/white"
+                    android:textSize="@dimen/abc_text_size_display_1_material" />
 
 
-                    </LinearLayout>
+                <TextView
+                    android:id="@+id/second_amount"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:gravity="top"
+                    android:textColor="@android:color/white"
+                    android:textSize="@dimen/abc_text_size_caption_material" />
 
-                    <LinearLayout
-                        android:id="@+id/tab2"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:orientation="vertical">
-
-                        <!-- Search progress -->
-                        <ProgressBar
-                            android:id="@+id/load_progress"
-                            style="?android:attr/progressBarStyleInverse"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_horizontal"
-                            android:visibility="gone" />
-
-                        <LinearLayout
-                            android:id="@+id/wot_list_parent"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:id="@+id/wot_empty"
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:layout_alignParentTop="true"
-                                android:text="@string/no_certification"
-                                android:textAppearance="?android:textAppearanceMedium"
-                                android:textColor="@color/hideable_text_color"
-                                android:textSize="18sp"
-                                android:layout_margin="8dp"/>
-
-                            <ListView
-                                android:id="@+id/wot_list"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_alignParentLeft="true"
-                                android:scrollbarStyle="outsideOverlay"
-                                />
-                            </LinearLayout>
-                        </LinearLayout>
-
-                </FrameLayout>
             </LinearLayout>
 
-    </TabHost>
+        </LinearLayout>
 
-</LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/action_tab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="@dimen/demi_padding"
+        android:layout_below="@id/wallet_header">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:id="@+id/certification"
+                android:layout_width="0dp"
+                android:layout_weight="0.5"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/txt_certification"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_horizontal"
+                    android:layout_gravity="center_horizontal"
+                    android:text="@string/certification"
+                    android:drawableTop="@drawable/ic_certification_red"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/information"
+                android:layout_width="0dp"
+                android:layout_weight="0.5"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_horizontal"
+                    android:drawableTop="@drawable/ic_info_grey"
+                    android:layout_gravity="center_horizontal"
+                    android:text="Info"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <View android:layout_width="fill_parent"
+              android:layout_height="1dip"
+              android:background="@color/grey600"
+              android:layout_marginTop="@dimen/demi_padding"
+              android:layout_marginStart="@dimen/demi_padding"
+              android:layout_marginLeft="@dimen/demi_padding"
+              android:layout_marginEnd="@dimen/demi_padding"
+              android:layout_marginRight="@dimen/demi_padding" />
+
+    </LinearLayout>
+
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/action_tab">
+
+        <ListView
+            android:id="@android:id/list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:paddingBottom="72dp"
+            android:scrollbarStyle="outsideOverlay" />
+    </android.support.v4.widget.SwipeRefreshLayout>
+
+    <TextView
+        android:id="@id/android:empty"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/action_tab"
+        android:text="@string/no_transactions"
+        android:textColor="@color/hideable_text_color"
+        android:textSize="18sp" />
+
+    <ImageButton
+        android:id="@+id/transfer_button"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginBottom="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="16dp"
+        android:background="@drawable/shape_circle_accent"
+        android:contentDescription="@string/transfer"
+        android:elevation="4dp"
+        android:src="@drawable/ic_send_white_24dp" />
+
+</RelativeLayout>

@@ -1,0 +1,83 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingEnd="24dp"
+        android:paddingLeft="24dp"
+        android:paddingRight="24dp"
+        android:paddingStart="24dp">
+
+        <TextView
+            android:id="@+id/headline"
+            style="@style/dialog_headline"
+            android:text="@string/select_self_certification" />
+    </LinearLayout>
+
+    <ListView
+        android:id="@+id/list"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:choiceMode="singleChoice"
+        android:scrollbarStyle="outsideOverlay" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingEnd="24dp"
+        android:paddingLeft="24dp"
+        android:paddingRight="24dp"
+        android:paddingStart="24dp">
+
+        <TextView
+            android:id="@+id/empty"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="@string/no_certification"
+            android:textAppearance="?android:textAppearanceMedium"
+            android:textColor="@color/hideable_text_color"
+            android:textSize="18sp" />
+    </LinearLayout>
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:layout_marginBottom="8dp">
+
+        <Button
+            android:id="@+id/cancel_button"
+            android:layout_width="96dp"
+            android:layout_height="36dp"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_toLeftOf="@+id/positive_button"
+            android:layout_toStartOf="@+id/positive_button"
+            android:background="@color/transparent"
+            android:text="@string/CANCEL"
+            android:textColor="@color/primary" />
+
+        <Button
+            android:id="@+id/positive_button"
+            android:layout_width="64dp"
+            android:layout_height="36dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="16dp"
+            android:layout_marginRight="16dp"
+            android:background="@color/transparent"
+            android:text="@string/OK"
+            android:textColor="@color/primaryLight"
+            android:enabled="false"/>
+    </RelativeLayout>
+</LinearLayout>
+
+
+

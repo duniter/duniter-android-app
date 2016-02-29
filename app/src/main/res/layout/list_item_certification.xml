@@ -1,116 +1,33 @@
-<!--
-  Copyright 2013 The Android Open Source Project
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-  -->
-
-<!--
-    The ListView from sample_main.xml has a choiceMode set, meaning that when a user
-    selects a list item, the ListView will set the state for that item's root view
-    (this CheckableLinearLayout) to "checked". Note that this requires that the root view
-    implements the Checkable interface. Once the root view is checked, any children that
-    have the duplicateParentState attribute set will inherit this "checked" state.
--->
-<io.ucoin.app.technical.layout.CheckableLinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:paddingLeft="8dp"
-    android:paddingRight="8dp"
-    android:minHeight="?android:listPreferredItemHeight"
-    android:gravity="center_vertical">
-
-    <ImageView
-        android:src="@drawable/ic_dual_cert"
-        android:id="@+id/icon"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_marginLeft="5dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginTop="4dp"
-        android:layout_marginBottom="4dp"
-        android:duplicateParentState="true"
-        android:layout_weight="0.05" />
-
-    <!--
-        The duplicateParentState attribute on this TextView, along with the color state list
-        used in the textColor attribute causes its text color to change when its parent
-        is checked or unchecked.
-    -->
-
-    <LinearLayout
-        android:duplicateParentState="true"
-        android:layout_height="wrap_content"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp">
+    <TextView
+        android:id="@+id/member_uid"
         android:layout_width="wrap_content"
-        android:orientation="vertical"
-        android:layout_weight="0.7">
-        <TextView
-            android:id="@+id/uid"
-            android:duplicateParentState="true"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:textAppearanceMedium"
-            android:textColor="@color/hideable_text_color"
-            android:singleLine="true"
-            android:text="uid"
-            android:layout_gravity="left|top"
-            android:textSize="@dimen/abc_text_size_medium_material"/>
-
-        <TextView
-            android:id="@+id/pubkey"
-            android:duplicateParentState="true"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:textAppearanceMedium"
-            android:textColor="@color/hideable_text_color"
-            android:text="G2CBgZBPLe6FSFUgpx2Jf1Aqsgta6iib3vmDRA1yLiqU"
-            android:textSize="@dimen/abc_text_size_caption_material"
-            android:singleLine="true"/>
-    </LinearLayout>
-
-    <LinearLayout
-        android:duplicateParentState="true"
         android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:textSize="@dimen/abc_text_size_caption_material" />
+
+    <TextView
+        android:id="@+id/day"
         android:layout_width="wrap_content"
-        android:orientation="vertical"
-        android:layout_gravity="center_vertical|right"
-        android:layout_weight="0.25">
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:gravity="end"
+        android:layout_toEndOf="@id/member_uid"
+        android:textSize="@dimen/abc_text_size_caption_material" />
 
-        <TextView
-            android:id="@+id/cert_time_label"
-            android:duplicateParentState="true"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:textAppearanceMedium"
-            android:textColor="@color/hideable_text_color"
-            android:layout_gravity="top"
-            android:gravity="right"
-            android:text="@string/cert_date"
-            android:textSize="10sp"/>
+    <TextView
+        android:id="@+id/hour"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@id/day"
+        android:textSize="@dimen/abc_text_size_caption_material" />
 
-        <TextView
-            android:id="@+id/cert_time"
-            android:duplicateParentState="true"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:textAppearanceMedium"
-            android:textColor="@color/hideable_text_color"
-            android:layout_gravity="bottom"
-            android:gravity="right"
-            android:text="cert_time"
-            android:textSize="@dimen/abc_text_size_small_material"/>
-
-    </LinearLayout>
-
-</io.ucoin.app.technical.layout.CheckableLinearLayout>
+</RelativeLayout>

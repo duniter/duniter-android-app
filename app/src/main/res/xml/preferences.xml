@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <EditTextPreference android:title="Your Pin"
+                        android:key="pin"
+                        android:inputType="number"
+                        android:maxEms="4"
+                        android:minEms="4"
+                        android:maxLength="4"
+                        android:defaultValue="0000"
+                        android:selectAllOnFocus="true"
+                        android:summary="Please insert your pin"/>
+
+    <ListPreference     android:title="Currency Unit"
+                        android:summary="Select the unit of first currency"
+                        android:key="currency_unit"
+                        android:defaultValue="0"
+                        android:entries="@array/list_unit"
+                        android:entryValues="@array/list_unit_value" />
+
+    <ListPreference     android:title="Default currency unit"
+                        android:summary="Select the unit of second currency"
+                        android:key="default_currency_unit"
+                        android:defaultValue="1"
+                        android:entries="@array/list_unit"
+                        android:entryValues="@array/list_unit_value" />
+
+    <io.ucoin.app.fragment.dialog.NumberPickerPreference
+        android:key="number_decimal"
+        android:title="Number of Digit"
+        android:defaultValue="2" />
+</PreferenceScreen>

@@ -1,0 +1,150 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:ucoin="http://schemas.android.com/apk/res-auto"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:descendantFocusability="beforeDescendants"
+              android:focusableInTouchMode="true"
+              android:orientation="vertical">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorPrimary"
+        android:minHeight="?attr/actionBarSize"
+        ucoin:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+        ucoin:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <ScrollView
+        android:layout_below="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingRight="@dimen/padding"
+            android:paddingLeft="@dimen/padding"
+            android:paddingEnd="@dimen/padding"
+            android:paddingStart="@dimen/padding"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:id="@+id/layout_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="@dimen/padding"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/txt_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="@dimen/abc_text_size_subtitle_material_toolbar"
+                    android:text="@string/name_colon"/>
+
+
+                <EditText
+                    android:id="@+id/name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@null"
+                    android:singleLine="true"
+                    android:textSize="@dimen/abc_text_size_body_1_material" />
+
+            </LinearLayout>
+
+            <include layout="@layout/separator"/>
+
+            <LinearLayout
+                android:id="@+id/layout_uid"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="@dimen/padding"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/txt_uid"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/uid_colon"
+                    android:textSize="@dimen/abc_text_size_subtitle_material_toolbar"/>
+
+                <EditText
+                    android:id="@+id/uid"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@null"
+                    android:singleLine="true"
+                    android:textSize="@dimen/abc_text_size_body_1_material" />
+
+            </LinearLayout>
+
+            <include layout="@layout/separator"/>
+
+            <LinearLayout
+                android:id="@+id/layout_publickey"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="@dimen/padding"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/txt_publickey"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/publickey_colon"
+                    android:textSize="@dimen/abc_text_size_subtitle_material_toolbar"/>
+
+                <EditText
+                    android:id="@+id/public_key"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="text"
+                    android:background="@null"
+                    android:singleLine="false"
+                    android:textSize="@dimen/abc_text_size_body_1_material" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+
+
+    </ScrollView>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="@dimen/margin"
+        android:layout_marginEnd="@dimen/margin"
+        android:layout_marginRight="@dimen/margin"
+        android:orientation="vertical">
+
+
+
+        <ImageButton
+            android:id="@+id/action_scan_qrcode"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:background="@drawable/shape_circle_accent"
+            android:elevation="@dimen/elevation"
+            android:layout_marginBottom="@dimen/margin"
+            android:src="@drawable/ic_qrcode_white_24dp"
+            android:contentDescription="@string/qr_code"/>
+
+        <ImageButton
+            android:id="@+id/action_lookup"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:background="@drawable/shape_circle_accent"
+            android:elevation="@dimen/elevation"
+            android:src="@drawable/ic_search_white_24dp"
+            android:contentDescription="@string/lookup"/>
+
+    </LinearLayout>
+
+</RelativeLayout>

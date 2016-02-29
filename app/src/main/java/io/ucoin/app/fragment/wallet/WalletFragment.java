@@ -1,14 +1,15 @@
 package io.ucoin.app.fragment.wallet;
 
-import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Fragment;
 import android.app.FragmentManager;
-import android.app.ProgressDialog;
+import android.app.ListFragment;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
-import android.content.SharedPreferences;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -16,746 +17,542 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ImageButton;
-import android.widget.ListView;
-import android.widget.TabHost;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.Collection;
+import com.android.volley.NoConnectionError;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.nio.charset.Charset;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
+import io.ucoin.app.Application;
 import io.ucoin.app.R;
-import io.ucoin.app.activity.IToolbarActivity;
-import io.ucoin.app.activity.SettingsActivity;
-import io.ucoin.app.adapter.CertificationListAdapter;
-import io.ucoin.app.adapter.ProgressViewAdapter;
-import io.ucoin.app.fragment.common.LoginFragment;
-import io.ucoin.app.model.local.Movement;
-import io.ucoin.app.model.local.UnitType;
-import io.ucoin.app.model.local.Wallet;
-import io.ucoin.app.model.remote.WotCertification;
-import io.ucoin.app.service.ServiceLocator;
-import io.ucoin.app.service.remote.WotRemoteService;
-import io.ucoin.app.technical.CollectionUtils;
-import io.ucoin.app.technical.CurrencyUtils;
-import io.ucoin.app.technical.DateUtils;
-import io.ucoin.app.technical.ExceptionUtils;
-import io.ucoin.app.technical.FragmentUtils;
-import io.ucoin.app.technical.ImageUtils;
-import io.ucoin.app.technical.StringUtils;
-import io.ucoin.app.technical.ViewUtils;
-import io.ucoin.app.technical.task.AsyncTaskHandleException;
-import io.ucoin.app.technical.task.ProgressDialogAsyncTaskListener;
+import io.ucoin.app.activity.CurrencyActivity;
+import io.ucoin.app.activity.TransferActivity;
+import io.ucoin.app.adapter.OperationIdentitySectionAdapter;
+import io.ucoin.app.enumeration.MembershipType;
+import io.ucoin.app.fragment.currency.IdentityFragment;
+import io.ucoin.app.service.RequierementsService;
+import io.ucoin.app.service.TxHistoryService;
+import io.ucoin.app.fragment.dialog.QrCodeDialogFragment;
+import io.ucoin.app.model.UcoinBlock;
+import io.ucoin.app.model.UcoinCurrency;
+import io.ucoin.app.model.UcoinEndpoint;
+import io.ucoin.app.model.UcoinIdentity;
+import io.ucoin.app.model.UcoinSelfCertification;
+import io.ucoin.app.model.UcoinWallet;
+import io.ucoin.app.model.document.Membership;
+import io.ucoin.app.model.document.SelfCertification;
+import io.ucoin.app.model.http_api.TxHistory;
+import io.ucoin.app.model.http_api.WotRequirements;
+import io.ucoin.app.model.sql.sqlite.Txs;
+import io.ucoin.app.model.sql.sqlite.Wallet;
+import io.ucoin.app.Format;
+import io.ucoin.app.technical.crypto.AddressFormatException;
 
+public class WalletFragment extends ListFragment
+        implements SwipeRefreshLayout.OnRefreshListener, View.OnClickListener{
 
-public class WalletFragment extends Fragment {
+    public static final String TAG = "Wallet Fragment";
 
-    public static final String TAG = "WalletFragment";
+    public static final int WOT_REQUIEREMENTS = 0;
+    public static final int TX_HISTORY = 1;
 
-    private static String ARGS_TAB_INDEX = "tabIndex";
+    private static final String WALLET_ID = "wallet_id";
+    private static int OPERATION_LOADER_ID = 1;
 
-    private ProgressViewAdapter mWotProgressViewAdapter;
-    private CertificationListAdapter mCertificationListAdapter;
-    private TextView mUidView;
-    private ImageButton mIcon;
-    private View mDetailLayout;
-    private TextView mTimestampLabelView;
-    private TextView mTimestampView;
-    private TextView mPubkeyView;
-    private TextView mCreditView;
-    private TextView mCurrencyView;
-    private TextView mWotEmptyTextView;
-    private TabHost mTabs;
-    private MovementListFragment mMovementListFragment;
+    private SwipeRefreshLayout mSwipeLayout;
 
-    private String mUnitType;
+    private UcoinWallet mWallet;
+    private UcoinCurrency mCurrency;
+    private UcoinIdentity mIdentity;
+    private WotRequirements wotRequirements;
 
-    private boolean mSignatureSingleLine = true;
-    private boolean mPubKeySingleLine = true;
+    private TextView textCertification;
 
-    public static WalletFragment newInstance(Wallet wallet) {
-        WalletFragment fragment = new WalletFragment();
+    private TextView defaultAmount;
+    private TextView amount;
+    private LinearLayout actionTab;
+
+    private Intent intentRequierementsService;
+    private Intent intentHistoryService;
+    private OperationIdentitySectionAdapter operationSectionCursorAdapter;
+
+    public static WalletFragment newInstance(Long walletId) {
         Bundle newInstanceArgs = new Bundle();
-        newInstanceArgs.putSerializable(Wallet.class.getSimpleName(), wallet);
-        newInstanceArgs.putInt(ARGS_TAB_INDEX, 0);
-        fragment.setArguments(newInstanceArgs);
-
-        return fragment;
-    }
-
-    public static WalletFragment newInstance(Wallet wallet, int tabIndex) {
+        newInstanceArgs.putLong(WALLET_ID, walletId);
         WalletFragment fragment = new WalletFragment();
-        Bundle newInstanceArgs = new Bundle();
-        newInstanceArgs.putSerializable(Wallet.class.getSimpleName(), wallet);
-        newInstanceArgs.putInt(ARGS_TAB_INDEX, tabIndex);
         fragment.setArguments(newInstanceArgs);
-
         return fragment;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+        super.onCreateView(inflater, container, savedInstanceState);
+
+        if(savedInstanceState!=null){
+            getArguments().putLong(WALLET_ID,savedInstanceState.getLong(WALLET_ID));
+        }
+
         return inflater.inflate(R.layout.fragment_wallet,
                 container, false);
     }
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
-        Bundle newInstanceArgs = getArguments();
-        final Wallet wallet = (Wallet) newInstanceArgs
-                .getSerializable(Wallet.class.getSimpleName());
-        final int tabIndex = newInstanceArgs.getInt(ARGS_TAB_INDEX);
-
-        // Tab host
-        mTabs = (TabHost)view.findViewById(R.id.tabHost);
-        mTabs.setup();
-        {
-            TabHost.TabSpec spec = mTabs.newTabSpec("tab1");
-            spec.setContent(R.id.tab1);
-            spec.setIndicator(getString(R.string.transactions));
-            mTabs.addTab(spec);
-        }
-        {
-            TabHost.TabSpec spec = mTabs.newTabSpec("tab2");
-            spec.setContent(R.id.tab2);
-            spec.setIndicator(getString(R.string.community));
-            mTabs.addTab(spec);
-        }
-        mTabs.setCurrentTab(tabIndex);
-
-        // Uid
-        mUidView = (TextView) view.findViewById(R.id.uid);
-
-        // Icon
-        mIcon = (ImageButton)view.findViewById(R.id.icon);
-
-        // Toogle detail button
-        final ImageButton toogleDetailButton = (ImageButton) view.findViewById(R.id.toogle_detail);
-        toogleDetailButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mDetailLayout.getVisibility() == View.VISIBLE) {
-                    mDetailLayout.setVisibility(View.GONE);
-                    toogleDetailButton.setImageResource(R.drawable.expander_open_holo_dark);
-                } else {
-                    mDetailLayout.setVisibility(View.VISIBLE);
-                    toogleDetailButton.setImageResource(R.drawable.expander_close_holo_dark);
-                }
-            }
-        });
-
-        // details view
-        mDetailLayout = view.findViewById(R.id.details);
-        mDetailLayout.setVisibility(View.GONE);
-
-        // Timestamp label
-        mTimestampLabelView = (TextView) view.findViewById(R.id.timestamp_label);
-
-        // Timestamp
-        mTimestampView = (TextView) view.findViewById(R.id.timestamp);
-
-        // Pub key
-        mPubkeyView = (TextView) view.findViewById(R.id.pubkey);
-
-        // Currency
-        mCurrencyView = (TextView) view.findViewById(R.id.currency);
-
-        // Credit
-        mCreditView = (TextView) view.findViewById(R.id.credit);
-
-        // Tab 1: transfer list
-        mMovementListFragment = MovementListFragment.newInstance(wallet, new MovementListFragment.MovementListListener() {
-            @Override
-            public void onPositiveClick(Bundle args,int i) {
-                onMovementClick(args);
-            }
-        });
-        getFragmentManager().beginTransaction()
-                .replace(R.id.tab1, mMovementListFragment, "tab1")
-                .commit();
-
-        // Wot list
-        ListView wotListView = (ListView) view.findViewById(R.id.wot_list);
-        mCertificationListAdapter = new CertificationListAdapter(getActivity());
-        wotListView.setAdapter(mCertificationListAdapter);
-
-        //this listener is not called unless WotExpandableListAdapter.isChildSelectable return true
-        //and convertView.onClickListener is not set (in WotExpandableListAdapter)
-        wotListView.setOnItemClickListener(new ListView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                onWotIdentityClick(position);
-            }
-        });
-
-        mWotEmptyTextView = (TextView) view.findViewById(R.id.wot_empty);
-
-        //PROGRESS VIEW
-        mWotProgressViewAdapter = new ProgressViewAdapter(
-                view,
-                R.id.load_progress,
-                R.id.wot_list_parent);
-
-        // Make sure to hide the keyboard
-        ViewUtils.hideKeyboard(getActivity());
-
-        // Read unit type from preferences
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        mUnitType = preferences.getString(SettingsActivity.PREF_UNIT, UnitType.COIN);
-
-        // update views
-        updateView(wallet);
-
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putLong(WALLET_ID, getArguments().getLong(WALLET_ID));
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        onRefresh();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if(mIdentity!=null) {
+            getActivity().unregisterReceiver(broadcastReceiverWotRequierements);
+            getActivity().stopService(intentRequierementsService);
+        }
+        getActivity().unregisterReceiver(broadcastReceiverTxHistory);
+        getActivity().stopService(intentHistoryService);
+    }
+
+    private BroadcastReceiver broadcastReceiverWotRequierements = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            updateUI(WOT_REQUIEREMENTS,intent);
+        }
+    };
+
+    private BroadcastReceiver broadcastReceiverTxHistory = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            updateUI(TX_HISTORY,intent);
+        }
+    };
+
+    private void updateUI(int type,Intent intent) {
+        switch (type){
+            case WOT_REQUIEREMENTS:
+                Log.d(TAG, "reception requierements");
+                WotRequirements requirements = (WotRequirements) intent.getSerializableExtra(RequierementsService.WOT_REQUIEREMENTS);
+                updateRequirements(requirements);
+                break;
+            case TX_HISTORY:
+                Log.d(TAG, "reception history");
+                Object[] txHistories = (Object[]) intent.getSerializableExtra(TxHistoryService.TX_HISTORY);
+                mWallet.txs().add((TxHistory) txHistories[0]);
+                updateHistory();
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void updateRequirements(WotRequirements requirements){
+        this.wotRequirements = requirements;
+        int minimum = mCurrency.sigQty();
+        int number = wotRequirements.identities[0].certifications.length;
+        textCertification.setText(String.valueOf(number));
+        if(minimum>number){
+            textCertification.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_certification_red, 0, 0);
+            textCertification.setTextColor(getResources().getColor(R.color.red));
+            //icon.setImageResource(R.drawable.ic_no_member);
+        }else{
+            textCertification.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_certification_green, 0, 0);
+            textCertification.setTextColor(getResources().getColor(R.color.green));
+            //icon.setImageResource(R.drawable.ic_member);
+        }
+        String text = textCertification.getText().toString().concat(" ");
+        if(number<=1) {
+            textCertification.setText(text.concat(getString(R.string.certification)));
+        }else{
+
+            textCertification.setText(text.concat(getString(R.string.certifications)));
+        }
+    }
+
+    public void updateHistory() {
+        Format.Currency.changeUnit(getActivity(), mWallet.currency().name(), mWallet.quantitativeAmount(), mWallet.udValue(), mCurrency.dt(), amount, defaultAmount, "");
+        operationSectionCursorAdapter.swapCursor(new Txs(getActivity()).getByWalletId(mWallet.id()).cursor(), mWallet);
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        setHasOptionsMenu(true);
+        ((CurrencyActivity) getActivity()).setDrawerIndicatorEnabled(false);
+        getActivity().setTitle("");
+
+        intentRequierementsService = new Intent(getActivity(), RequierementsService.class);
+        intentHistoryService = new Intent(getActivity(), TxHistoryService.class);
+
+        mSwipeLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_layout);
+        mSwipeLayout.setOnRefreshListener(this);
+        view.findViewById(android.R.id.empty).setOnClickListener(this);
+        view.findViewById(R.id.transfer_button).setOnClickListener(this);
+        view.findViewById(R.id.certification).setOnClickListener(this);
+        view.findViewById(R.id.information).setOnClickListener(this);
+
+        mWallet = new Wallet(getActivity(), getArguments().getLong(WALLET_ID));
+        mCurrency = mWallet.currency();
+        mIdentity = mWallet.identity();
+
+        if(mIdentity!=null) {
+            intentRequierementsService.putExtra(RequierementsService.CURRENCY_ID, mCurrency.id());
+            intentRequierementsService.putExtra(RequierementsService.PUBLIC_KEY, mIdentity.publicKey());
+        }
+
+        intentHistoryService.putExtra(TxHistoryService.CURRENCY_ID, mCurrency.id());
+        intentHistoryService.putExtra(TxHistoryService.PUBLIC_KEY, new String[]{mWallet.publicKey()});
+
+
+        TextView alias = (TextView) view.findViewById(R.id.alias);
+        alias.setText(mWallet.alias());
+
+        defaultAmount = (TextView) view.findViewById(R.id.second_amount);
+        amount = (TextView) view.findViewById(R.id.principal_amount);
+        textCertification = (TextView) view.findViewById(R.id.txt_certification);
+
+        actionTab = (LinearLayout) view.findViewById(R.id.action_tab);
+
+//        OperationSectionCursorAdapter operationSectionCursorAdapter
+//                = new OperationSectionCursorAdapter(getActivity(), null, 0,mWallet.udValue(),mCurrency.dt());
+//        setListAdapter(operationSectionCursorAdapter);
+        operationSectionCursorAdapter
+                = new OperationIdentitySectionAdapter(getActivity(), null, null);
+        setListAdapter(operationSectionCursorAdapter);
+
+        updateHistory();
+    }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.toolbar_wallet, menu);
-
-        MenuItem selfMenu = menu.findItem(R.id.action_self);
-        MenuItem joinMenu = menu.findItem(R.id.action_join);
-
-        Bundle newInstanceArgs = getArguments();
-        final Wallet wallet = (Wallet) newInstanceArgs
-                .getSerializable(Wallet.class.getSimpleName());
-
-        if (wallet.getIsMember() || wallet.getCertTimestamp() > 0) {
-            selfMenu.setVisible(false);
-        }
-        if (wallet.getIsMember()) {
-            joinMenu.setVisible(false);
-        }
     }
 
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
-        Activity activity = getActivity();
-        activity.setTitle(R.string.wallet_title);
-        if (activity instanceof IToolbarActivity) {
-            ((IToolbarActivity) activity).setToolbarBackButtonEnabled(true);
+        MenuItem joinItem = menu.findItem(R.id.action_join);
+        MenuItem renewItem = menu.findItem(R.id.action_renew);
+        MenuItem leaveItem = menu.findItem(R.id.action_leave);
+        MenuItem signItem = menu.findItem(R.id.action_sign);
+
+        if(mIdentity == null) {
+            joinItem.setVisible(false);
+            renewItem.setVisible(false);
+            leaveItem.setVisible(false);
+            signItem.setVisible(false);
+            actionTab.setVisibility(View.GONE);
+            return;
+        }
+        actionTab.setVisibility(View.VISIBLE);
+
+        long selfCount = mIdentity.selfCount();
+        boolean isMember = mIdentity.isMember();
+
+        if(selfCount == 0) {
+            signItem.setVisible(true);
+            joinItem.setVisible(false);
+            renewItem.setVisible(false);
+            leaveItem.setVisible(false);
+        } else {
+            signItem.setVisible(false);
+            if (!isMember) {
+                joinItem.setVisible(true);
+                renewItem.setVisible(false);
+                leaveItem.setVisible(false);
+            } else {
+                joinItem.setVisible(false);
+                renewItem.setVisible(true);
+                leaveItem.setVisible(true);
+            }
         }
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        boolean result;
         switch (item.getItemId()) {
-            case R.id.action_sync:
-                onRefreshMovements();
-                return true;
-            case R.id.action_resync:
-                onRefreshAllMovements();
-                return true;
-            case R.id.action_transfer:
-                onTransferClick();
-                return true;
-            case R.id.action_self:
-                onSelfClick();
-                return true;
-            case R.id.action_join:
-                onRequestMembershipClick();
-                return true;
+            case R.id.action_show_qrcode:
+                showQrCode();
+                result = true;
+                break;
             case R.id.action_delete:
-                onDeleteClick();
-                return true;
+                //too preform deletion asynchronously
+                mWallet.delete();
+                getActivity().onBackPressed();
+                result = true;
+                break;
+            case R.id.action_sign:
+                actionSelf(getActivity(),mCurrency,mWallet,mIdentity);
+                result = true;
+                break;
+            case R.id.action_join:
+            case R.id.action_renew:
+                actionJoin(getActivity(),mCurrency, mWallet, mIdentity, getFragmentManager());
+                result = true;
+                break;
+            case R.id.action_leave:
+                actionLeave(getActivity(),mCurrency,mWallet,mIdentity);
+                result = true;
+                break;
+            default:
+                result = super.onOptionsItemSelected(item);
         }
-        return super.onOptionsItemSelected(item);
+        return result;
     }
 
-    /* -- protected methods -- */
+    private void showQrCode() {
+        QrCodeDialogFragment fragment = QrCodeDialogFragment.newInstance(mWallet.id());
+        fragment.show(getFragmentManager(),
+                fragment.getClass().getSimpleName());
 
-    protected void updateView(Wallet wallet) {
-        // uid
-        mUidView.setText(wallet.getUid());
+    }
 
-        // Icon
-        mIcon.setImageResource(ImageUtils.getImageWhite(wallet));
-
-        // Registration date
-        if (wallet.getCertTimestamp() > 0) {
-            mTimestampLabelView.setText(R.string.registration_date);
-            mTimestampView.setText(DateUtils.format(wallet.getCertTimestamp()));
+    @Override
+    public void onRefresh() {
+        if(mIdentity!=null) {
+            getActivity().startService(intentRequierementsService);
+            getActivity().registerReceiver(broadcastReceiverWotRequierements, new IntentFilter(RequierementsService.BROADCAST_ACTION));
         }
-        else {
-            mTimestampLabelView.setText(getString(R.string.not_registred));
-            mTimestampView.setText("");
-        }
+        getActivity().startService(intentHistoryService);
+        getActivity().registerReceiver(broadcastReceiverTxHistory, new IntentFilter(TxHistoryService.BROADCAST_ACTION));
+        mSwipeLayout.setRefreshing(false);
+    }
 
-        // Pub key
-        {
-            String pubkey = wallet.getPubKeyHash();
-            int offset = pubkey.length()/2;
-            pubkey = pubkey.substring(0, offset) + '\n' + pubkey.substring(offset);
-            mPubkeyView.setText(pubkey);
-        }
-
-        // Currency
-        mCurrencyView.setText(wallet.getCurrency());
-
-        // If unit is coins
-        if (SettingsActivity.PREF_UNIT_COIN.equals(mUnitType)) {
-            // Credit as coins
-            mCreditView.setText(CurrencyUtils.formatCoin(wallet.getCredit()));
-        }
-
-        // If unit is UD
-        else if (SettingsActivity.PREF_UNIT_UD.equals(mUnitType)) {
-            // Credit as UD
-            mCreditView.setText(getString(
-                    R.string.universal_dividend_value,
-                    CurrencyUtils.formatUD(wallet.getCreditAsUD())));
-        }
-
-        // Other unit
-        else {
-            mCreditView.setVisibility(View.GONE);
-        }
-
-        // Use the pre-loaded WOT data if exists
-        if (CollectionUtils.isNotEmpty(wallet.getCertifications())) {
-            mCertificationListAdapter.clear();
-            mCertificationListAdapter.addAll(wallet.getCertifications());
-            mCertificationListAdapter.notifyDataSetChanged();
-            mWotProgressViewAdapter.showProgress(false);
-        }
-
-        // Load WOT data
-        else {
-            LoadTask task = new LoadTask();
-            task.execute(wallet);
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+            case android.R.id.empty:
+                clickEmpty();
+                break;
+            case R.id.transfer_button:
+                clickTransfer();
+                break;
+            case R.id.information:
+                clickInformation();
+                break;
+            case R.id.certification:
+                clickCertification();
+                break;
+            default:
+                clickDefault();
+                break;
         }
     }
 
-    protected void onTransferClick() {
-        Bundle newInstanceArgs = getArguments();
-        Wallet wallet = (Wallet)
-                newInstanceArgs.getSerializable(Wallet.class.getSimpleName());
-
-        Fragment fragment = TransferFragment.newInstance(wallet);
-        getFragmentManager().beginTransaction()
-                .setCustomAnimations(R.animator.slide_in_down,
-                        R.animator.slide_out_up,
-                        R.animator.slide_in_up,
-                        R.animator.slide_out_down)
-                .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
-                .addToBackStack(fragment.getClass().getSimpleName())
-                .commit();
+    private void clickInformation(){
+        if(wotRequirements != null){
+            long value = wotRequirements.identities[0].meta.timestamp;
+            Date date = new Date(value * (long)1000);
+            Calendar c = Calendar.getInstance();
+            c.setTime(date);
+            String textDate = getString(R.string.registration_date)
+                    .concat(": ")
+                    .concat(new SimpleDateFormat("EEE dd MMM yyyy").format(c.getTime()));
+            Toast.makeText(getActivity(),textDate,Toast.LENGTH_LONG).show();
+        }else{
+            Toast.makeText(getActivity(),getString(R.string.hasnt_member),Toast.LENGTH_LONG).show();
+        }
     }
 
-    protected void onSelfClick() {
-        // Retrieve wallet
-        Bundle newInstanceArgs = getArguments();
-        final Wallet wallet = (Wallet) newInstanceArgs
-                .getSerializable(Wallet.class.getSimpleName());
-
-        // Retrieve the fragment to pop after self certification
-        final String popBackStackName = FragmentUtils.getPopBackName(getFragmentManager(), 0);
-
-        // Launch the self certification
-        LoginFragment.login(getFragmentManager(), wallet, new LoginFragment.OnLoginListener() {
-            public void onSuccess(Wallet authWallet) {
-                SelfCertificationTask task = new SelfCertificationTask(popBackStackName);
-                task.execute(authWallet);
-            }
-        });
+    private void clickCertification(){
+        if (getActivity() instanceof IdentityFragment.ActionIdentity) {
+            ((IdentityFragment.ActionIdentity) getActivity()).displayCertification(mWallet.publicKey(), mCurrency.id());
+        }
     }
 
-    protected void onRequestMembershipClick() {
-        // Retrieve wallet
-        Bundle newInstanceArgs = getArguments();
-        final Wallet wallet = (Wallet) newInstanceArgs
-                .getSerializable(Wallet.class.getSimpleName());
-
-        // Retrieve the fragment to pop after transfer
-        final String popBackStackName = FragmentUtils.getPopBackName(getFragmentManager(), 0);
-
-        // Perform the join (after login)
-        LoginFragment.login(getFragmentManager(), wallet, new LoginFragment.OnLoginListener() {
-            public void onSuccess(Wallet authWallet) {
-                RequestMembershipTask task = new RequestMembershipTask(popBackStackName);
-                task.execute(authWallet);
-            }
-        });
+    private void clickTransfer(){
+        Intent intent = new Intent(getActivity(), TransferActivity.class);
+        intent.putExtra(Application.EXTRA_CURRENCY_ID, mCurrency.id());
+        intent.putExtra(Application.EXTRA_WALLET_ID, mWallet.id());
+        startActivity(intent);
     }
 
-    protected void onWotIdentityClick(int position) {
-
-        // Get the selected certification
-        WotCertification cert = mCertificationListAdapter
-                .getItem(position);
-
-
+    private void clickEmpty(){
+        mSwipeLayout.setRefreshing(true);
+        onRefresh();
     }
 
-    protected void onMovementClick(Bundle args) {
+    private void clickDefault(){
+        Toast.makeText(getActivity(), "En dev", Toast.LENGTH_LONG).show();
+    }
 
-        // Get select movement
-        Movement movement = (Movement) args.getSerializable(Movement.class.getSimpleName());
-        if (movement == null) {
-            return;
+    public static void actionSelf(final Context context, UcoinCurrency mCurrency, UcoinWallet mWallet, final UcoinIdentity mIdentity) {
+        //final UcoinIdentity identity = new Identity(getActivity(), getArguments().getLong(BaseColumns._ID));
+
+        final SelfCertification selfCertification = new SelfCertification();
+        selfCertification.uid = mIdentity.uid();
+        selfCertification.timestamp = Application.getCurrentTime();
+        try {
+            selfCertification.signature = selfCertification.sign(mWallet.privateKey());
+        } catch (AddressFormatException e) {
+            e.printStackTrace();
         }
 
-        Log.d(TAG, "Click on movement with fingerprint: " + movement.getFingerprint());
-        // TODO: open the identity from pubkey
-    }
+        UcoinEndpoint endpoint = mCurrency.peers().at(0).endpoints().at(0);
+        String url = "http://" + endpoint.ipv4() + ":" + endpoint.port() + "/wot/add/";
 
-
-    protected void onDeleteClick() {
-        // Retrieve wallet
-        Bundle newInstanceArgs = getArguments();
-        final Wallet wallet = (Wallet) newInstanceArgs
-                .getSerializable(Wallet.class.getSimpleName());
-
-        // Retrieve the fragment to pop after deleteion
-        FragmentManager fragmentManager = getFragmentManager();
-        FragmentManager.BackStackEntry backStackEntry = fragmentManager.getBackStackEntryAt(
-                fragmentManager.getBackStackEntryCount() - 2);
-        final String popBackStackName = backStackEntry.getName();
-
-        // Show confirmation dialog
-        new AlertDialog.Builder(getActivity())
-                .setTitle(getString(R.string.delete_wallet))
-                .setMessage(getString(R.string.delete_wallet_confirm))
-                .setIcon(android.R.drawable.ic_dialog_alert)
-                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-
-                    public void onClick(DialogInterface dialog, int whichButton) {
-
-                        // Run the delete task
-                        DeleteTask deleteTask = new DeleteTask(popBackStackName);
-                        deleteTask.execute(wallet);
-                    }
-                })
-                .setNegativeButton(android.R.string.no, null).show();
-    }
-
-    protected void onError(Throwable error) {
-        Toast.makeText(getActivity(),
-                "Error: " + ExceptionUtils.getMessage(error),
-                Toast.LENGTH_SHORT).show();
-
-    }
-
-
-    protected void onRefreshAllMovements() {
-
-        // Launch after user confirmation
-        new AlertDialog.Builder(getActivity())
-                .setTitle(getString(R.string.sync))
-                .setMessage(getString(R.string.resync_confirm))
-                .setIcon(android.R.drawable.ic_dialog_alert)
-                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        // Launch
-                        doOnRefreshMovements(true);
-                    }})
-                .setNegativeButton(android.R.string.no, null).show();
-
-    }
-
-    protected void onRefreshMovements() {
-        doOnRefreshMovements(false);
-    }
-
-    protected void doOnRefreshMovements(final boolean doCompleteRefresh) {
-        Wallet wallet = (Wallet)getArguments().getSerializable(Wallet.class.getSimpleName());
-        long walletId = wallet.getId();
-
-        final long time1 = System.currentTimeMillis();
-        ServiceLocator serviceLocator = ServiceLocator.instance();
-
-        ProgressDialog progressDialog = new ProgressDialog(getActivity());
-        progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-        progressDialog.setTitle("Importation des opérations");
-        ProgressDialogAsyncTaskListener<Long> listener = new ProgressDialogAsyncTaskListener<Long>(progressDialog) {
+        StringRequest request = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
             @Override
-            public void onSuccess(final Long nbUpdates) {
-                super.onSuccess(nbUpdates);
-                long duration = System.currentTimeMillis() - time1;
-                onFinishRefresh(nbUpdates == null ? 0 : nbUpdates.longValue(),
-                        duration);
+            public void onResponse(String response) {
+                JSONObject object;
+                try {
+                    object = new JSONObject(response);
+                } catch (JSONException e) {
+                    return;
+                }
+
+                if (object.has("result")) {
+                    Toast.makeText(context, context.getResources().getString(R.string.revocation_sent), Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(context, context.getResources().getString(R.string.self_certification_sent), Toast.LENGTH_LONG).show();
+                }
+
+                Application.requestSync();
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                if (error instanceof NoConnectionError) {
+                    Toast.makeText(context,
+                            context.getResources().getString(R.string.no_connection),
+                            Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(context, error.toString(), Toast.LENGTH_LONG).show();
+                }
+            }
+        }) {
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("pubkey", mIdentity.publicKey());
+                params.put("self", selfCertification.toString());
+                params.put("other", "");
+                return params;
             }
         };
-
-        // Refresh movements
-        serviceLocator.getMovementService().refreshMovements(
-                walletId,
-                doCompleteRefresh,
-                listener);
-
-       // Toast.makeText(getActivity(), getString(R.string.resync_started), Toast.LENGTH_SHORT).show();
+        request.setTag("send self sign");
+        Application.getRequestQueue().add(request);
     }
 
-    protected void onFinishRefresh(long nbUpdates, long timeInMillis) {
+    public static void actionJoin(Context context, UcoinCurrency currency, UcoinWallet wallet, UcoinIdentity identity, FragmentManager manager) {
 
-        String message;
-        if (nbUpdates > 0) {
-            mMovementListFragment.notifyDataSetChanged();
+        if (identity.sigDate() == null) {
+            if (identity.selfCount() == 1) {
+                Iterator it = identity.selfCertifications().iterator();
+                UcoinSelfCertification certification = (UcoinSelfCertification) it.next();
+                identity.setSigDate(certification.timestamp());
+            } else if (identity.selfCount() > 1) {
+//                SelectSelfDialogFragment fragmentDialog = SelectSelfDialogFragment.newInstance(identity.id());
+//                fragmentDialog.setTargetFragment(fragment, 1);
+//                fragmentDialog.show(manager,
+//                        fragmentDialog.getClass().getSimpleName());
 
-            message = getString(R.string.sync_succeed,
-                    nbUpdates,
-                    DateUtils.formatFriendlyTime(getActivity(), timeInMillis));
+                return;
+            } else {
+                return;
+            }
         }
-        else {
-            message = getString(R.string.sync_no_tx);
-        }
-        Toast.makeText(getActivity(),
-                message
-                , Toast.LENGTH_LONG).show();
+
+        createMembership(MembershipType.IN, context, currency, wallet, identity);
     }
 
-    public class LoadTask extends AsyncTaskHandleException<Wallet, Void, Collection<WotCertification>> {
-
-        public LoadTask() {
-            super(getActivity());
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            mWotProgressViewAdapter.showProgress(true);
-        }
-
-        @Override
-        protected Collection<WotCertification> doInBackgroundHandleException(Wallet... wallets) {
-            Wallet wallet = wallets[0];
-
-            // Get certifications (if has a uid)
-            Collection<WotCertification> certifications = null;
-            if (StringUtils.isNotBlank(wallet.getUid())) {
-                WotRemoteService wotService = ServiceLocator.instance().getWotRemoteService();
-                certifications =  wotService.getCertifications(
-                        wallet.getCurrencyId(),
-                        wallet.getUid(),
-                        wallet.getPubKeyHash(),
-                        wallet.getIdentity().isMember());
-            }
-
-            // Update the wallet( to avoid a new load when navigate on community members)
-            wallet.setCertifications(certifications);
-
-            return certifications;
-         }
-
-        @Override
-        protected void onSuccess(Collection<WotCertification> certifications) {
-
-            // Update certification list
-            mCertificationListAdapter.clear();
-            if (CollectionUtils.isNotEmpty(certifications)) {
-                mCertificationListAdapter.addAll(certifications);
-                mWotEmptyTextView.setVisibility(View.GONE);
-            }
-            else {
-                mWotEmptyTextView.setVisibility(View.VISIBLE);
-            }
-
-            mCertificationListAdapter.notifyDataSetChanged();
-            mWotProgressViewAdapter.showProgress(false);
-        }
-
-        @Override
-        protected void onFailed(Throwable t) {
-            mCertificationListAdapter.clear();
-            mWotProgressViewAdapter.showProgress(false);
-            mWotEmptyTextView.setVisibility(View.VISIBLE);
-            onError(t);
-        }
-
-        @Override
-        protected void onCancelled() {
-            mWotEmptyTextView.setVisibility(View.VISIBLE);
-            mWotProgressViewAdapter.showProgress(false);
-        }
+    public static void actionLeave(Context context, UcoinCurrency currency, UcoinWallet wallet, UcoinIdentity identity) {
+        createMembership(MembershipType.OUT,context,currency,wallet,identity);
     }
 
-    public class SelfCertificationTask extends AsyncTaskHandleException<Wallet, Void, Wallet> {
+    public static void createMembership(MembershipType type, final Context context, final UcoinCurrency currency, final UcoinWallet wallet, final UcoinIdentity identity){
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle(R.string.membership);
+        if (type == MembershipType.IN) {
+            builder.setMessage(R.string.join_currency);
+        } else {
+            builder.setMessage(R.string.leave_currency);
+        }
+        final Membership membership = new Membership();
+        membership.currency = currency.name();
+        membership.issuer = identity.publicKey();
+        UcoinBlock lastBlock = currency.blocks().currentBlock();
+        membership.block = lastBlock.number();
+        membership.hash = lastBlock.hash();
+        membership.membershipType = type;
+        membership.UID = identity.uid();
+        membership.certificationTs = identity.sigDate();
 
-        private String popStackTraceName;
-
-        public SelfCertificationTask(String popStackTraceName) {
-            super(getActivity());
-            this.popStackTraceName = popStackTraceName;
+        //todo prompt for password
+        try {
+            membership.signature = membership.sign(wallet.privateKey());
+        } catch (AddressFormatException e) {
+            e.printStackTrace();
         }
 
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            // Hide the keyboard, in case we come from imeDone)
-            ViewUtils.hideKeyboard(getActivity());
+        builder.setPositiveButton(R.string.OK, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
 
-            // Show the progress bar
-            mWotProgressViewAdapter.showProgress(true);
-        }
+                UcoinEndpoint endpoint = currency.peers().at(0).endpoints().at(0);
+                String url = "http://" + endpoint.ipv4() + ":" + endpoint.port() + "/blockchain/membership/";
 
-        @Override
-        protected Wallet doInBackgroundHandleException(Wallet... wallets) {
-            Wallet wallet = wallets[0];
-
-            // Get certifications (if has a uid)
-            if (StringUtils.isNotBlank(wallet.getUid())) {
-                ServiceLocator.instance().getWalletService().sendSelfAndSave(getContext(), wallet);
-
-                return wallet;
+                StringRequest request = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        Toast.makeText(context, context.getResources().getString(R.string.membership_sent), Toast.LENGTH_LONG).show();
+                        Application.requestSync();
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        if (error instanceof NoConnectionError) {
+                            Toast.makeText(context, context.getResources().getString(R.string.no_connection), Toast.LENGTH_LONG).show();
+                        } else {
+                            String str = new String(error.networkResponse.data, Charset.forName("UTF-8"));
+                            Toast.makeText(context, str, Toast.LENGTH_LONG).show();
+                        }
+                    }
+                }) {
+                    @Override
+                    protected Map<String, String> getParams() {
+                        Map<String, String> params = new HashMap<String, String>();
+                        params.put("membership", membership.toString());
+                        return params;
+                    }
+                };
+                request.setTag(this);
+                Application.getRequestQueue().add(request);
             }
-            else {
-                return null;
+        });
+
+        builder.setNegativeButton(R.string.CANCEL, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User cancelled the dialog
             }
-        }
+        });
 
-        @Override
-        protected void onSuccess(Wallet wallet) {
-            mWotProgressViewAdapter.showProgress(false);
-            if (wallet == null || wallet.getCertTimestamp() <= 0) {
-                Toast.makeText(getContext(),
-                        getString(R.string.join_error),
-                        Toast.LENGTH_SHORT).show();
-            }
-            else {
-                getFragmentManager().popBackStack(popStackTraceName, 0); // return back
-
-                Toast.makeText(getContext(),
-                        getString(R.string.join_sended),
-                        Toast.LENGTH_LONG).show();
-
-                updateView(wallet);
-            }
-        }
-
-        @Override
-        protected void onFailed(Throwable error) {
-            super.onFailed(error);
-            Log.d(TAG, "Could not send join: " + ExceptionUtils.getMessage(error), error);
-            Toast.makeText(getContext(),
-                    getString(R.string.join_error)
-                            + "\n"
-                            + ExceptionUtils.getMessage(error),
-                    Toast.LENGTH_SHORT).show();
-
-            mWotProgressViewAdapter.showProgress(false);
-        }
-
-        @Override
-        protected void onCancelled() {
-            mWotProgressViewAdapter.showProgress(false);
-        }
-    }
-
-    public class RequestMembershipTask extends AsyncTaskHandleException<Wallet, Void, Wallet> {
-
-        private Activity mActivity = getActivity();
-        private String popStackTraceName;
-
-        public RequestMembershipTask(String popStackTraceName) {
-            super(getActivity());
-            this.popStackTraceName = popStackTraceName;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            // Hide the keyboard, in case we come from imeDone)
-            ViewUtils.hideKeyboard(mActivity);
-        }
-
-        @Override
-        protected Wallet doInBackgroundHandleException(Wallet... wallets) {
-            Wallet wallet = wallets[0];
-
-            // Get certifications (if has a uid)
-            if (StringUtils.isNotBlank(wallet.getUid())
-                    && wallet.isAuthenticate()) {
-                ServiceLocator.instance().getBlockchainRemoteService().requestMembership(wallet);
-
-                return wallet;
-            }
-            else {
-                return null;
-            }
-        }
-
-        @Override
-        protected void onSuccess(Wallet wallet) {
-            if (wallet == null || wallet.getCertTimestamp() <= 0) {
-                Toast.makeText(mActivity,
-                        getString(R.string.join_error),
-                        Toast.LENGTH_SHORT).show();
-            }
-            else {
-                getFragmentManager().popBackStack(popStackTraceName, 0); // return back
-
-                Toast.makeText(mActivity,
-                        getString(R.string.join_sended),
-                        Toast.LENGTH_LONG).show();
-
-                updateView(wallet);
-            }
-        }
-
-        @Override
-        protected void onFailed(Throwable error) {
-            super.onFailed(error);
-            Log.d(TAG, "Could not send join: " + ExceptionUtils.getMessage(error), error);
-            Toast.makeText(mActivity,
-                    getString(R.string.join_error)
-                            + "\n"
-                            + ExceptionUtils.getMessage(error),
-                    Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    public class DeleteTask extends AsyncTaskHandleException<Wallet, Void, Void> {
-
-        private String popStackTraceName;
-
-        public DeleteTask(String popStackTraceName) {
-            super(getActivity());
-            this.popStackTraceName = popStackTraceName;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
-
-        @Override
-        protected Void doInBackgroundHandleException(Wallet... wallets) {
-            Wallet wallet = wallets[0];
-
-            // Do deletion
-            ServiceLocator.instance().getWalletService().delete(getContext(), wallet.getId());
-
-            return (Void)null;
-        }
-
-        @Override
-        protected void onSuccess(Void args) {
-            getFragmentManager().popBackStack(popStackTraceName, 0); // return back
-
-            Toast.makeText(getContext(),
-                    getString(R.string.wallet_deleted),
-                    Toast.LENGTH_LONG).show();
-        }
-
-        @Override
-        protected void onFailed(Throwable error) {
-            super.onFailed(error);
-            Log.d(TAG, "Could not delete wallet: " + ExceptionUtils.getMessage(error), error);
-            Toast.makeText(getContext(),
-                    getString(R.string.delete_wallet_error, ExceptionUtils.getMessage(error)),
-                            Toast.LENGTH_SHORT).show();
-        }
-
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 }

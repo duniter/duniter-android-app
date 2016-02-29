@@ -1,0 +1,47 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="48dp"
+    android:layout_marginBottom="8dp">
+
+    <TextView
+        android:id="@+id/public_key"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:layout_alignParentTop="true"
+        android:textColor="@color/primary"/>
+
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_below="@id/public_key"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:visibility="visible"/>
+
+    <ImageView
+        android:id="@+id/qrcode"
+        android:layout_below="@id/public_key"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="8dp"
+        android:visibility="gone"
+        android:contentDescription="@string/qr_code"/>
+
+    <Button
+        android:id="@+id/close_button"
+        android:layout_width="64dp"
+        android:layout_height="36dp"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@id/qrcode"
+        android:layout_centerVertical="true"
+        android:layout_margin="8dp"
+        android:background="@color/transparent"
+        android:text="@string/close"
+        android:textColor="@color/primary" />
+
+</RelativeLayout>
+
+
+

@@ -1,0 +1,27 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:ucoin="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".MainActivity">
+
+    <item
+        android:id="@+id/action_join"
+        android:title="@string/join"
+        ucoin:showAsAction="ifRoom"
+        android:visible="false"/>
+
+    <item
+        android:id="@+id/action_renew"
+        android:title="@string/renew"
+        ucoin:showAsAction="ifRoom"
+        android:visible="false"/>
+
+    <item
+        android:id="@+id/action_leave"
+        android:title="@string/leave"
+        ucoin:showAsAction="ifRoom"
+        android:visible="false"/>
+
+
+</menu>
+
+

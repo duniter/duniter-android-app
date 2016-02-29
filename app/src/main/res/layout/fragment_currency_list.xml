@@ -1,34 +1,49 @@
-<?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <ProgressBar
-        android:id="@+id/progressbar"
-        style="?android:attr/progressBarStyleInverse"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_gravity="center_horizontal|center_vertical"
-        android:visibility="gone" />
+        android:layout_height="match_parent">
 
-    <ListView
-        android:id="@android:id/list"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_alignParentTop="true"
-        android:scrollbarStyle="outsideOverlay" />
+        <ListView
+            android:id="@+id/list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:divider="@null"
+            android:dividerHeight="0dp"/>
 
-    <TextView
-        android:id="@id/android:empty"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_alignParentTop="true"
-        android:text="@string/no_currency"
-        android:textAppearance="?android:textAppearanceMedium"
-        android:textColor="@color/hideable_text_color"
-        android:textSize="18sp"
-        android:layout_margin="8dp"/>
+        <TextView
+            android:id="@+id/empty"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="@string/no_currencies"
+            android:visibility="gone"/>
 
-</RelativeLayout>
+        <Button
+            android:id="@+id/all"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/select_all"
+            android:layout_below="@+id/list"
+            android:textSize="@dimen/abc_text_size_headline_material"
+            android:gravity="center"
+            android:visibility="gone"/>
+
+        <ImageButton
+            android:id="@+id/add_currency_button"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginBottom="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginRight="16dp"
+            android:background="@drawable/shape_circle_accent"
+            android:elevation="4dp"
+            android:src="@drawable/ic_plus_white_24dp"
+            android:contentDescription="@string/add_currency"/>
+    </RelativeLayout>
+</LinearLayout>

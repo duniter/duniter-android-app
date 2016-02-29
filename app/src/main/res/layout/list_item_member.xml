@@ -1,0 +1,54 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp">
+
+    <TextView
+        android:id="@+id/member_uid"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:textSize="@dimen/abc_text_size_title_material" />
+
+    <ImageView
+        android:id="@+id/cert_by_image"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_toStartOf="@+id/cert_by_date"
+        android:contentDescription="@string/certified_by"
+        android:src="@drawable/ic_arrow_left_bold_black_18dp"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/cert_by_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
+        android:textSize="@dimen/abc_text_size_caption_material"
+        android:visibility="gone" />
+
+    <ImageView
+        android:id="@+id/cert_of_image"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/cert_by_image"
+        android:layout_toStartOf="@+id/cert_of_date"
+        android:contentDescription="@string/certifiers_of"
+        android:src="@drawable/ic_arrow_right_bold_black_18dp"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/cert_of_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@id/cert_by_date"
+        android:textSize="@dimen/abc_text_size_caption_material"
+        android:visibility="gone" />
+
+
+</RelativeLayout>

@@ -1,38 +1,41 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:ucoin="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".MainActivity">
+    xmlns:ucoin="http://schemas.android.com/apk/res-auto">
 
-    <item android:id="@+id/action_sync"
-        android:title="@string/sync"
-        android:icon="@drawable/ic_menu_refresh"
-        ucoin:iconifiedByDefault="true"
-        ucoin:showAsAction="always"/>
+
+    <item android:id="@+id/action_show_qrcode"
+        android:title="@string/show_qrcode"
+        android:icon="@drawable/ic_qrcode_white_24dp"
+        ucoin:showAsAction="ifRoom" />
 
     <item
-        android:id="@+id/action_transfer"
-        android:title="@string/transfer"
-        ucoin:showAsAction="ifRoom|withText" />
+        android:id="@+id/action_delete"
+        android:title="@string/delete"
+        ucoin:showAsAction="never|withText" />
 
     <item
-        android:id="@+id/action_self"
-        android:title="@string/register"
-        ucoin:showAsAction="ifRoom|withText" />
+        android:id="@+id/action_sign"
+        android:title="@string/sign_wallet"
+        ucoin:showAsAction="never|withText"
+        android:visible="false"/>
 
     <item
         android:id="@+id/action_join"
         android:title="@string/join"
-        ucoin:showAsAction="ifRoom|withText" />
+        ucoin:showAsAction="never|withText"
+        android:visible="false"/>
 
     <item
-        android:id="@+id/action_delete"
-        android:title="@string/delete"/>
+        android:id="@+id/action_renew"
+        android:title="@string/renew"
+        ucoin:showAsAction="never|withText"
+        android:visible="false"/>
 
-    <item android:id="@+id/action_resync"
-        android:title="@string/resync"
-        android:icon="@drawable/ic_menu_refresh"
-        ucoin:iconifiedByDefault="true"
-        ucoin:showAsAction="ifRoom"/>
+    <item
+        android:id="@+id/action_leave"
+        android:title="@string/leave"
+        ucoin:showAsAction="never|withText"
+        android:visible="false"/>
+
 </menu>
 
 

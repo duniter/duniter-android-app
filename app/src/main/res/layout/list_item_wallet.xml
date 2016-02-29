@@ -1,88 +1,93 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:minHeight="?android:listPreferredItemHeight"
-    android:gravity="center_vertical"
-    android:duplicateParentState="true"
-    android:paddingLeft="0dp"
-    android:paddingRight="8dp"
-    android:layout_margin="0dp">
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:paddingLeft="16dp"
+              android:paddingRight="16dp"
+              android:orientation="vertical">
 
-    <ImageView
-        android:src="@drawable/ic_user_32dp"
-        android:id="@+id/icon"
-        android:layout_width="56dp"
-        android:layout_height="56dp"
-        android:layout_margin="8dp"
-        android:duplicateParentState="true"
-        android:background="@drawable/shape_item_wallet" />
+    <!--<RelativeLayout-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="wrap_content">-->
+
+
 
     <LinearLayout
-        android:duplicateParentState="true"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_width="match_parent"
         android:orientation="horizontal">
 
-        <LinearLayout
-            android:duplicateParentState="true"
+        <TextView
+            android:id="@+id/alias"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_weight="0.6"
-            android:layout_width="0dp">
+            android:layout_gravity="center_vertical"
+            android:textSize="@dimen/abc_text_size_headline_material"
+            />
 
-            <TextView
-                android:id="@+id/name"
-                android:layout_width="match_parent"
-                android:text="name"
-                style="@style/ListItemHead"/>
-
-            <TextView
-                android:id="@+id/uid"
-                android:layout_width="match_parent"
-                android:text="name"
-                style="@style/ListItemSubhead"/>
-
-            <TextView
-                android:id="@+id/pubkey"
-                android:text="G2CBgZBPLe6FSFUgpx2Jf1Aqsgta6iib3vmDRA1yLiqU"
-                android:layout_width="wrap_content"
-                style="@style/ListItemSubhead"
-                android:maxWidth="@dimen/list_item_max_width_pubkey"/>
-        </LinearLayout>
-
-        <LinearLayout
-            android:duplicateParentState="true"
+        <ImageView
+            android:id="@+id/is_member"
+            android:layout_marginLeft="@dimen/demi_padding"
+            android:layout_marginStart="@dimen/demi_padding"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_gravity="center_vertical|right"
-            android:layout_weight="0.4"
-            android:layout_width="0dp">
+            android:layout_gravity="center_vertical"
+            android:src="@drawable/ic_member_grey"/>
 
-            <TextView
-                android:id="@+id/credit"
-                android:duplicateParentState="true"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:textAppearanceMedium"
-                android:textColor="@color/secondary_text_default_material_light"
-                android:layout_gravity="top"
-                android:text="credit"
-                android:textSize="16sp"
-                android:elegantTextHeight="false"
-                android:gravity="end" />
-
-            <TextView
-                android:id="@+id/currency"
-                android:duplicateParentState="true"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:textAppearanceMedium"
-                android:textColor="@color/hideable_text_color"
-                android:gravity="end"
-                android:layout_gravity="bottom|right"
-                android:text="currency"
-                android:textSize="10sp"/>
-        </LinearLayout>
     </LinearLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/public_key"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:gravity="center_vertical"
+            android:textSize="@dimen/abc_text_size_caption_material"
+            android:drawablePadding="@dimen/demi_padding"
+            android:drawableStart="@drawable/ic_public_key"
+            android:drawableLeft="@drawable/ic_public_key"/>/>
+
+        <LinearLayout
+            android:id="@+id/progress_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:gravity="end"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <ProgressBar
+                style="?android:attr/progressBarStyleInverse"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal|center_vertical" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/principal_amount"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:gravity="end"
+            android:textSize="@dimen/abc_text_size_large_material"
+            />
+
+    </RelativeLayout>
+
+
+
+    <TextView
+        android:id="@+id/second_amount"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="bottom|end"
+        android:textSize="@dimen/abc_text_size_caption_material"
+        />
+
 </LinearLayout>

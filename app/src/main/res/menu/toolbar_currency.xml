@@ -3,22 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".MainActivity"
     >
-
     <item
-        android:id="@+id/action_add"
-        android:title="@string/add"
-        ucoin:showAsAction="ifRoom|withText" />
-
-    <item
-        android:id="@+id/action_join"
-        android:title="@string/join"
-        ucoin:showAsAction="never" />
-
-    <item
-        android:id="@+id/action_delete"
-        android:title="@string/delete"
-        ucoin:showAsAction="never" />
-
+        android:id="@+id/action_create_uid"
+        android:title="@string/create_uid"
+        android:icon="@drawable/ic_person_add_white_24dp"
+        ucoin:iconifiedByDefault="true"
+        ucoin:showAsAction="always" />
 </menu>
-
-

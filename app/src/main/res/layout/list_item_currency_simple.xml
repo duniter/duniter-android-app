@@ -1,0 +1,22 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="48dp"
+    android:orientation="vertical"
+    android:paddingEnd="16dp"
+    android:paddingStart="16dp">
+
+    <TextView
+        android:id="@+id/currency_name"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:background="@drawable/list_item_background_selector"
+        android:drawablePadding="48dp"
+        android:drawableStart="@drawable/ic_label_grey600_24dp"
+        android:gravity="center_vertical"
+        android:paddingEnd="16dp"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:textColor="#000"
+        android:textSize="@dimen/abc_text_size_body_2_material" />
+
+</LinearLayout>

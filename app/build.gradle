@@ -1,62 +1,26 @@
-import java.util.regex.Pattern
+apply plugin: 'com.android.application'
 
-apply plugin: 'com.android.model.application'
-
-model {
-    android {
-
-        compileSdkVersion = 21
-        buildToolsVersion = "21.1.2"
-
-        defaultConfig.with {
-            applicationId = "io.ucoin.ucoin"
-            minSdkVersion.apiLevel = 14
-            targetSdkVersion.apiLevel = 21
-
-            versionCode = getVersionCodeFromManifest()
-            versionName = '0.8'
-            //signingConfig = signingConfigs.config
+android {
+    compileSdkVersion 21
+    buildToolsVersion "21.1.2"
+    defaultConfig {
+        applicationId "io.ucoin.ucoin"
+        minSdkVersion 14
+        targetSdkVersion 21
+        versionCode 8
+        versionName "0.8"
+    }
+    sourceSets.main {
+        jniLibs.srcDir 'src/main/libs'
+        jni.srcDirs = [] //disable automatic ndk-build call
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-
-    /*android.sources {
-        main {
-            jni {
-                source {
-                    srcDirs = [] //disable automatic ndk-build call
-                }
-            }
-            jniLibs {
-                srcDir = 'src/main/libs'
-            }
-        }
-    }*/
-
-        /*project.ext.versionCodes = ['armeabi': 1, 'armeabi-v7a': 2, 'arm64-v8a': 3, 'mips': 5, 'mips64': 6, 'x86': 8, 'x86_64': 9]
-        //versionCode digit for each supported ABI, with 64bit>32bit and x86>armeabi-*
-
-        applicationVariants.all { variant ->
-            // assign different version code for each output
-            variant.outputs.each { output ->
-                output.versionCodeOverride =
-                        project.ext.versionCodes.get(output.getFilter(com.android.build.OutputFile.ABI), 0) * 1000000 + defaultConfig.versionCode
-            }
-        }
-        splits {
-            abi {
-                enable true // enable ABI split feature to create one APK per ABI
-                universalApk true //generate an additional APK that targets all the ABIs
-            }
-        }*/
-
-    android.buildTypes {
-            release {
-                minifyEnabled = true
-                proguardFiles += file('proguard-rules.pro')
-            }
-        }
-
-    android.packagingOptions {
+    packagingOptions {
         exclude 'META-INF/DEPENDENCIES.txt'
         exclude 'META-INF/LICENSE.txt'
         exclude 'META-INF/NOTICE.txt'
@@ -70,43 +34,46 @@ model {
         exclude 'THIRD-PARTY.txt'
         exclude 'LICENSE.txt'
     }
-
-
-    android.productFlavors {
+    project.ext.versionCodes = ['armeabi': 1, 'armeabi-v7a': 2, 'arm64-v8a': 3, 'mips': 5, 'mips64': 6, 'x86': 8, 'x86_64': 9]
+    //versionCode digit for each supported ABI, with 64bit>32bit and x86>armeabi-*
+    applicationVariants.all { variant ->
+        // assign different version code for each output
+        variant.outputs.each { output ->
+            output.versionCodeOverride =
+                    project.ext.versionCodes.get(output.getFilter(com.android.build.OutputFile.ABI), 0) * 1000000 + defaultConfig.versionCode
+        }
     }
-
-    android.lintOptions {
-        abortOnError false
+    splits {
+        abi {
+            enable true // enable ABI split feature to create one APK per ABI
+            universalApk true //generate an additional APK that targets all the ABIs
+        }
     }
-}
-
-def getVersionCodeFromManifest() {
-    def manifestFile = file('src/main/AndroidManifest.xml')
-    //def manifestFile = file(model.android.sources.main.manifest.srcFile)
-    def pattern = Pattern.compile("versionCode=\"(\\d+)\"")
-    def matcher = pattern.matcher(manifestFile.getText())
-    matcher.find()
-    return Integer.parseInt(matcher.group(1))
 }
 
 repositories {
     mavenCentral()
+
+    maven {
+        url "https://dl.bintray.com/journeyapps/maven"
+    }
 }
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile fileTree(dir: 'libs', include: ['*.jar'])
     compile('com.google.code.gson:gson:2.2.+') {
         //excluding a particular transitive dependency:
         //exclude( group: 'commons-beanutils')
         //exclude( group: 'commons-collections4')
     }
-    compile 'com.android.support:appcompat-v7:21.0.3'
-    compile 'com.android.support:support-v4:21.0.3'
-    compile 'com.android.support:support-v13:21.0.+'
+    compile 'com.android.support:appcompat-v7:21.0.+'
+    compile 'com.android.support:support-v4:21.0.+'
     compile 'com.android.support:cardview-v7:21.0.+'
-    compile 'com.android.support:recyclerview-v7:21.0.+'
+    compile 'com.android.support:support-v13:21.0.+'
+    compile 'com.google.android.gms:play-services:6.5.87'
     compile project(':scrypt')
     compile project(':kalium-jni')
+    compile project(':volley')
     // Supports Android 4.0.3 and later (API level 15)
     compile 'com.journeyapps:zxing-android-embedded:2.3.0@aar'
     // Supports Android 2.1 and later (API level 7), but not optimal for later Android versions.

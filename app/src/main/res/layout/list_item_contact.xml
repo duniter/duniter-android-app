@@ -1,53 +1,48 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:minHeight="?android:listPreferredItemHeightSmall"
-    android:gravity="center_vertical"
-    android:duplicateParentState="true"
-    android:paddingLeft="0dp"
-    android:paddingRight="8dp"
-    android:layout_margin="0dp">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp">
 
-    <io.ucoin.app.technical.view.RoundedImageView
-        android:id="@+id/icon"
-        android:src="@drawable/ic_contact_picture"
-        android:layout_width="56dp"
-        android:layout_height="56dp"
-        android:layout_margin="8dp"
-        android:duplicateParentState="true"
-        android:layout_gravity="center"
-        android:scaleType="fitXY"/>
-
-    <LinearLayout
-        android:duplicateParentState="true"
+    <TextView
+        android:id="@+id/name"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_width="match_parent"
-        android:orientation="horizontal">
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:textSize="@dimen/abc_text_size_subhead_material" />
 
-        <LinearLayout
-            android:duplicateParentState="true"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_weight="0.65"
-            android:layout_width="0dp">
 
-            <TextView
-                android:id="@+id/name"
-                android:text="name"
-                style="@style/ListItemHead"/>
+    <TextView
+        android:id="@+id/other_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/name"
+        android:layout_toRightOf="@+id/name"
+        android:layout_toEndOf="@+id/name"
+        android:layout_marginLeft="10dp"
+        android:layout_marginStart="10dp"
+        android:textSize="@dimen/abc_text_size_caption_material" />
 
-            <TextView
-                android:id="@+id/uid"
-                android:text="name"
-                style="@style/ListItemSubhead"/>
+    <TextView
+        android:id="@+id/public_key"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/name"
+        android:layout_alignLeft="@+id/name"
+        android:layout_alignStart="@+id/name"
+        android:textSize="@dimen/abc_text_size_caption_material" />
 
-            <TextView
-                android:id="@+id/pubkey"
-                android:text="G2CBgZBPLe6FSFUgpx2Jf1Aqsgta6iib3vmDRA1yLiqU"
-                android:maxWidth="@dimen/list_item_max_width_pubkey"
-                style="@style/ListItemSubhead"/>
-        </LinearLayout>
-    </LinearLayout>
+    <TextView
+        android:id="@+id/currency"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/public_key"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:textSize="@dimen/abc_text_size_caption_material"/>
 
-</LinearLayout>
+
+</RelativeLayout>

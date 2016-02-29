@@ -1,100 +1,24 @@
 <resources>
     <integer name="fragment_animation_time">350</integer>
-
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
-        <!-- Set AppCompat’s toolbarBarStyle -->
-        <item name="toolbarStyle">@style/AppToolBar</item>
 
-        <!-- colorPrimary is used for the default action bar background
-        <item name="colorPrimary">@color/primary</item>-->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar" />
 
-        <!-- colorPrimaryDark is used for the status bar
-        <item name="colorPrimaryDark">@color/primaryDark</item>-->
-
-        <!-- colorAccent is used as the default value for colorControlActivated,
-         which is used to tint widgets-->
-        <item name="colorAccent">@color/accent</item>
-
-        <!-- You can also set colorControlNormal, colorControlActivated
-         colorControlHighlight, and colorSwitchThumbNormal.
-
-        <item name="android:windowNoTitle">true</item>
-        <item name="android:windowActionBar">true</item>-->
-
-        <item name="listTextColorHead">@color/primary_text_default_material_light</item>
-        <item name="listTextColorSubhead">@color/secondary_text_default_material_light</item>
-    </style>
-
-    <style name="AppTheme.Dark" parent="Theme.AppCompat.NoActionBar" >
-        <item name="toolbarStyle">@style/AppToolBar.Dark</item>
-
-        <!--item name="colorPrimary">@color/primaryDark</item>
-        <item name="colorPrimaryDark">@color/primary</item-->
+    <style name="AppTheme.Base">
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryDark">@color/primaryDark</item>
         <item name="colorAccent">@color/accent</item>
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowActionBar">false</item>
-        <item name="android:windowBackground">@color/primaryDark</item>
-
-        <item name="listTextColorHead">@color/primary_text_default_material_dark</item>
-        <item name="listTextColorSubhead">@color/secondary_text_default_material_dark</item>
     </style>
 
-    <style name="AppTheme.Dark.NoActionBar" parent="Theme.AppCompat.NoActionBar" >
+    <style name="DarkTheme" parent="Theme.AppCompat.NoActionBar" >
         <item name="colorPrimary">@color/primary</item>
         <item name="colorPrimaryDark">@color/primaryDark</item>
         <item name="colorAccent">@color/accent</item>
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowActionBar">false</item>
         <item name="android:windowBackground">@color/primary</item>
-
-        <item name="listTextColorHead">@color/primary_text_default_material_dark</item>
-        <item name="listTextColorSubhead">@color/secondary_text_default_material_dark</item>
-    </style>
-
-    <style name="AppTheme.Dark.Dialog" parent="Theme.AppCompat.Dialog" >
-        <item name="colorPrimary">@color/primary</item>
-        <item name="colorPrimaryDark">@color/primaryDark</item>
-        <item name="colorAccent">@color/accent</item>
-        <item name="android:windowBackground">@color/primary</item>
-
-        <item name="listTextColorHead">@color/primary_text_default_material_dark</item>
-        <item name="listTextColorSubhead">@color/secondary_text_default_material_dark</item>
-    </style>
-
-    <attr name="listTextColorHead" format="color|reference"/>
-    <attr name="listTextColorSubhead" format="color|reference"/>
-    <attr name="spinner" format="color|reference"/>
-
-
-    <style name="AppToolBar">
-        <item name="elevation">4dp</item>
-        <item name="theme">@style/ThemeOverlay.AppCompat.ActionBar</item>
-        <item name="popupTheme">@style/ThemeOverlay.AppCompat.Light</item>
-    </style>
-
-    <style name="AppToolBar.Dark">
-        <item name="elevation">4dp</item>
-        <item name="theme">@style/ThemeOverlay.AppCompat.Dark.ActionBar</item>
-        <item name="popupTheme">@style/ThemeOverlay.AppCompat.Dark</item>
-    </style>
-
-    <style name="FormItem">
-        <item name="android:paddingLeft">8dp</item>
-        <item name="android:paddingRight">8dp</item>
-    </style>
-
-    <style name="Header">
-        <item name="android:background">@color/primary</item>
-        <item name="android:paddingLeft">16sp</item>
-        <item name="android:paddingRight">16sp</item>
-        <item name="android:paddingBottom">16sp</item>
-    </style>
-
-    <style name="HeaderTitle">
-        <item name="android:textSize">@dimen/abc_text_size_display_1_material</item>
-        <item name="android:textColor">@color/textPrimary</item>
-        <item name="android:singleLine">true</item>
     </style>
 
     <style name="headline">
@@ -105,128 +29,6 @@
         <item name="android:textSize">@dimen/abc_text_size_headline_material</item>
     </style>
 
-    <style name="subhead">
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:singleLine">false</item>
-        <item name="android:textIsSelectable">true</item>
-        <item name="android:textSize">@dimen/abc_text_size_subhead_material</item>
-    </style>
-
-    <style name="FormHeader">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:gravity">center_horizontal</item>
-        <item name="android:layout_marginBottom">8dp</item>
-        <item name="android:textSize">@dimen/abc_text_size_display_1_material</item>
-    </style>
-
-    <style name="FormLabel">
-        <item name="android:layout_marginRight">10dp</item>
-    </style>
-
-    <style name="FormLabel.Suffix">
-        <item name="android:textStyle">bold</item>
-    </style>
-
-    <style name="FormText">
-        <item name="android:textStyle">normal</item>
-        <item name="android:gravity">left|center_vertical</item>
-    </style>
-
-    <style name="FormText.Editable">
-
-    </style>
-
-    <style name="FormText.Computed">
-        <item name="android:textStyle">italic</item>
-        <item name="android:textColor">@color/textComputed</item>
-    </style>
-
-    <style name="FormButton">
-        <item name="android:gravity">center_horizontal</item>
-    </style>
-
-    <style name="ListItemHead">
-        <item name="android:duplicateParentState">true</item>
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:textAppearance">?android:textAppearanceMedium</item>
-        <item name="android:textColor">?attr/listTextColorHead</item>
-        <item name="android:singleLine">true</item>
-        <item name="android:layout_gravity">left|top</item>
-        <item name="android:textSize">18sp</item>
-    </style>
-
-    <style name="ListItemHead.Small">
-        <item name="android:textAppearance">?android:textAppearanceMedium</item>
-        <item name="android:textSize">14sp</item>
-    </style>
-
-    <style name="ListItemSubhead">
-        <item name="android:duplicateParentState">true</item>
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:textAppearance">?android:textAppearanceMedium</item>
-        <item name="android:textColor">?attr/listTextColorSubhead</item>
-        <item name="android:singleLine">true</item>
-        <item name="android:layout_gravity">left|top</item>
-        <item name="android:textSize">12sp</item>
-    </style>
-
-    <style name="ListItemSubhead.Small">
-        <item name="android:textSize">10sp</item>
-    </style>
-
-    <style name="FormSpinner">
-        <item name="android:background">@drawable/shape_spinner_background</item>
-        <!--item name="android:background">@drawable/spinner_background_material</item
--->
-        <item name="android:layout_marginLeft">10dp</item>
-        <item name="android:layout_marginRight">10dp</item>
-        <item name="android:layout_marginBottom">10dp</item>
-        <item name="android:paddingLeft">5dp</item>
-        <item name="android:paddingTop">5dp</item>
-        <item name="android:paddingBottom">5dp</item>
-    </style>
-
-    <style name="FormSpinnerTextView">
-        <!--item name="android:textSize">@dimen/abc_text_size_body_2_material</item>
-        <item name="android:textColor">?attr/colorControlNormal</item-->
-    </style>
-
-    <style name="ButtonText">
-        <item name="android:layout_width">fill_parent</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:textColor">#ffffff</item>
-        <item name="android:gravity">center</item>
-        <item name="android:layout_margin">3dp</item>
-        <item name="android:textStyle">normal</item>
-        <item name="android:textSize">20sp</item>
-        <item name="android:shadowColor">#000000</item>
-        <item name="android:shadowDx">1</item>
-        <item name="android:shadowDy">1</item>
-        <item name="android:shadowRadius">2</item>
-        <item name="android:background">@drawable/button_positive_bg</item>
-    </style>
-
-    <style name="ButtonText.Neutral">
-        <item name="android:textColor">#666666</item>
-        <item name="android:shadowColor">#eeeeee</item>
-        <item name="android:shadowDx">1</item>
-        <item name="android:shadowDy">1</item>
-        <item name="android:shadowRadius">1</item>
-        <item name="android:background">@drawable/button_neutral_bg</item>
-    </style>
-
-    <style name="ButtonText.Small">
-        <item name="android:layout_margin">3dp</item>
-        <item name="android:textStyle">normal</item>
-        <item name="android:textSize">20sp</item>
-    </style>
-
-
-    <!-- currency rules -->
     <style name="RuleLabel">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
@@ -247,18 +49,59 @@
         <item name="android:layout_marginBottom">8dp</item>
     </style>
 
-    <style name="DialogFragment">
-        <item name="android:padding">@dimen/alert_dialog_padding_material</item>
+
+    <!-- ActionBar styles
+    <style name="AppActionBar"
+        parent="@android:style/Widget.Holo.Light.ActionBar.Solid.Inverse">
+    </style>
+    -->
+
+    <style name="FormItem">
+        <item name="android:paddingLeft">8dp</item>
+        <item name="android:paddingRight">8dp</item>
     </style>
 
-    <style name="WelcomeAlertDialog">
-        <item name="android:layout_marginLeft">@dimen/floating_window_margin_left</item>
-        <item name="android:layout_marginRight">@dimen/floating_window_margin_right</item>
-        <item name="android:layout_marginTop">@dimen/floating_window_margin_top</item>
-        <item name="android:layout_marginBottom">@dimen/floating_window_margin_bottom</item>
-        <item name="android:layout_centerVertical">true</item>
-        <item name="android:layout_gravity">center_vertical|center_horizontal</item>
-        <item name="android:layout_alignParentBottom">false</item>
-        <item name="android:background">@drawable/shape_linear_layout_bg</item>
+    <style name="dialog_headline">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/primary</item>
+        <item name="android:layout_marginTop">24dp</item>
+        <item name="android:textSize">@dimen/abc_text_size_headline_material</item>
     </style>
+
+    <style name="subhead">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:singleLine">false</item>
+        <item name="android:textIsSelectable">true</item>
+        <item name="android:textSize">@dimen/abc_text_size_subhead_material</item>
+    </style>
+
+
+    <style name="FormLabel">
+        <item name="android:layout_marginRight">10dp</item>
+    </style>
+
+    <style name="FormLabel.Suffix">
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="FormText">
+        <item name="android:textStyle">normal</item>
+        <item name="android:gravity">left|center_vertical</item>
+    </style>
+
+    <style name="FormText.Editable">
+
+    </style>
+
+    <style name="FormText.Computed">
+        <item name="android:textStyle">italic</item>
+        <item name="android:textColor">#0099CC</item>
+    </style>
+
+    <style name="FormButton">
+        <item name="android:gravity">center_horizontal</item>
+    </style>
+
 </resources>

@@ -6,270 +6,396 @@
     than the words it contains.
     its name should be the snake case of its main words
     -->
+
+    <string name="welcome_to_ucoin">Welcome to uCoin app !</string>
+    <string name="welcome_description">Look at the state of yours accounts in real time.</string>
     <string name="title_activity_account">Account</string>
 
-    <string name="unit_coins">Classical</string>
-    <string name="unit_ud">Universal Dividend</string>
-    <string name="unit_time">Mutual Credit (Time Bank)</string>
-
-    <!-- Strings related to account creation -->
-    <string name="creating_account_title">Hello.</string>
-    <string name="creating_account_welcome"><![CDATA[Welcome to <b>uCoin</b>.<br/><small>A decentralized system for free currencies.</small>]]></string>
-    <string name="login">Login</string>
-    <string name="register">Register</string>
-    <string name="spinner_default_item">[Empty]</string>
-    <string name="loading_dots">Loading...</string>
-    <string name="computing_keys">Computing keys...</string>
-    <string name="saving_account">Saving account locally...</string>
-    <string name="connecting_peer">Connecting to node\n%s...</string>
-    <string name="loading_currency">Loading currency from\n%s...</string>
-    <string name="loading_blockchain_parameters">Loading blockchain parameters from\n%s...</string>
-    <string name="saving_currency">Saving currency locally...</string>
-    <string name="saving_blockchain_parameters">Saving blockchain parameters locally...</string>
-    <string name="loading_membership">Getting membership...</string>
-    <string name="loading_wallet_credit">Getting wallet credit...</string>
-    <string name="saving_wallet">Saving wallet locally...</string>
-    <string name="saving_peer">Saving node address locally...</string>
-    <string name="sending_certification">Sending registration data...</string>
-    <string name="starting_home">Initializing app...</string>
-
     <!-- Strings related to connection -->
-    <string name="connection">Connection</string>
     <string name="connecting_dots">Connecting…</string>
     <string name="not_connected">Not connected</string>
     <string name="connected_error">Unable to connect (%s)</string>
+    <string name="connected_label"><![CDATA[You are connected to free currency \'<b/>%s</b>\'.]]></string>
+    <string name="connection_details">Successfully connected to a free currency.\n\tCurrency name: %1$s\n\tInitial UD: %2$s\n\tUD interval: %3$s</string>
 
     <!-- Strings related to status -->
     <string name="cancelled">Cancelled</string>
     <string name="failed">Failed</string>
-    <string name="no_result">No result</string>
+    <string name="no_results">No results</string>
 
     <!-- Strings related to presentation -->
     <string name="open_drawer">Open the navigation drawer</string>
     <string name="close_drawer">Close the navigation drawer</string>
 
-    <!-- Strings related to wallet -->
-    <string name="wallets">Wallets</string>
-    <string name="wallet_title">Wallet</string>
-    <string name="credit_message">credit: %s</string>
-    <string name="credit">credit</string>
-    <string name="not_registred">Not registred</string>
-    <string name="wallet_uid">(%s)</string>
-    <string name="alias">Alias</string>
-    <string name="alias_hint">Wallet alias (optional)</string>
-    <string name="wallet_account_subtitle">Account parameters:</string>
-    <string name="delete_wallet">Delete wallet</string>
-    <string name="delete_wallet_error">Could not delete wallet (technical error)\n%s</string>
-    <string name="delete_wallet_confirm">Are you sure you want to delete this wallet ?</string>
-    <string name="wallet_deleted">Wallet successfully deleted</string>
-    <string name="universal_dividend_value">%s UD</string>
-    <string name="mutual_credit_value">%s ms</string>
-    <string name="loading_wallets">Loading wallets...</string>
-    <string name="updating_balances">Updating balances...</string>
-
-
     <!-- Strings related to transfer/transaction -->
-    <string name="wallet_transmitter">Wallet</string>
-    <string name="wallet_transmitter_hint">Wallet</string>
-    <string name="receiver">To</string>
-    <string name="receiver_hint">Receiver</string>
+    <string name="source_wallet">Source Wallet</string>
+    <string name="receiver_uid">Receiver uid</string>
     <string name="amount">Amount</string>
-    <string name="amount_hint">Amount</string>
-    <string name="universal_dividend_acronym">UD</string>
+    <string name="UD">UD</string>
+    <string name="universal_dividende">Universal Dividende</string>
+    <string name="mutual_credit">Mutual Credit</string>
     <string name="unit_coins_label">coins</string>
-    <string name="comment_hint">Reference (optional)</string>
-    <string name="amount_not_long">Amount must a valid integer</string>
-    <string name="amount_not_decimal">Amount must a valid decimal</string>
+    <string name="wallet">Wallet</string>
+    <string name="comment_hint">Comment</string>
     <string name="transactions">Transactions</string>
-    <string name="no_transaction">No transaction</string>
-    <string name="movement_ud">Universal Dividend</string>
-    <string name="sync">Refresh transactions</string>
-    <string name="resync">Download all transactions</string>
-    <string name="resync_confirm">Are you sure you want to download all transactions ? This operation could be long.</string>
-    <string name="resync_delete_movements">Cleaning history...</string>
-    <string name="resync_get_UD">Downloading UD history...</string>
-    <string name="resync_started">Downloading transactions history...</string>
-    <string name="sync_succeed">%1$s transactions downloads in %2$s</string>
-    <string name="sync_no_tx">No new transactions</string>
 
     <!-- Strings related to actions -->
-    <string name="send">Send</string>
     <string name="transfer">Transfer</string>
+    <string name="generate_seed">Generate seed</string>
     <string name="sign">Sign</string>
-    <string name="home">Home</string>
+    <string name="self">Self</string>
+    <string name="revoke">Revoke</string>
     <string name="search">Search</string>
     <string name="sign_in">Sign in</string>
-    <string name="dev">Test (dev)</string>
+    <string name="dev">Dev</string>
     <string name="settings">Settings</string>
     <string name="back">Back</string>
-    <string name="forward">Forward</string>
     <string name="copy">Copy</string>
     <string name="add">Add</string>
-    <string name="refresh">Refresh</string>
-    <string name="CANCEL">Cancel</string>
-    <string name="ok">OK</string>
-    <string name="join">Join as member</string>
+    <string name="CANCEL">CANCEL</string>
+    <string name="OK">OK</string>
+    <string name="join">Join</string>
     <string name="delete">Delete</string>
+    <string name="remove_contact">Remove contact</string>
     <string name="remove">Remove</string>
-    <string name="certify">Certify</string>
-    <string name="add_as_new_contact">Add as new contact</string>
-    <string name="add_as_new_contact_title">New contact</string>
-    <string name="add_as_existing_contact">Add to existing contact</string>
-
-    <!-- Strings related to home -->
-    <string name="favorites">Contacts</string>
-    <string name="menu">Menu</string>
 
     <!-- Strings related to currency -->
-    <string name="add_currency">Add currency</string>
-    <string name="preselected_peers">Select a predefine currency:</string>
-    <string name="peer_hint">Or fill parameters of a currency node:</string>
-    <string name="node_address">Host</string>
-    <string name="node_address_hint">my.domain.com</string>
-    <string name="node_port">Port</string>
-    <string name="node_port_hint">(optional)</string>
+    <string name="lookup">Lookup</string>
+    <string name="node_address">Node address</string>
+    <string name="node_port">Node port</string>
     <string name="rules">Rules</string>
-    <string name="money">Money</string>
-    <string name="wot">Web of Trust</string>
-    <string name="blockchain">Blockchain</string>
-    <string name="c_and_dt">Fundamental growth (c) / Time period (dt) between two UD</string>
-    <string name="c_and_dt_value">%1$.0f %% / %2$.0f days (%3$d seconds)</string>
-    <string name="ud0">Initial Universal Dividend UD(0) in units</string>
-    <string name="ud0_value">%d units</string>
-    <string name="value_days_and_seconds">%1$.0f days (%2$d s)</string>
-    <string name="value_minutes_and_seconds">%1$.0f min %2$d s (%3$d s)</string>
-    <string name="sig_delay">Minimum delay between 2 identical certifications (same pubkeys)</string>
-    <string name="sig_validity">Maximum age of a valid signature</string>
-    <string name="sig_qty">Minimum quantity of signatures to be part of the WoT</string>
-    <string name="sig_qty_value">%d signatures</string>
-    <string name="sig_woT">Minimum quantity of valid made certifications to be part of the WoT for distance rule</string>
-    <string name="ms_validity">Maximum age of a valid membership</string>
-    <string name="step_max">Maximum distance between each WoT member and a newcomer</string>
-    <string name="median_time_blocks">Number of blocks used for calculating median time.</string>
-    <string name="median_time_blocks_value">%d blocks</string>
-    <string name="avg_gen_time">The average time for writing 1 block (wished time)</string>
-    <string name="dt_diff_eval">The number of blocks required to evaluate again PoWMin value</string>
-    <string name="dt_diff_eval_value">%d blocks</string>
-    <string name="blocks_rot">The number of previous blocks to check for personalized difficulty</string>
-    <string name="blocks_rot_value">%d blocks</string>
-    <string name="percent_rot">The percent of previous issuers to reach for personalized difficulty</string>
-    <string name="percent_rot_value">%.0f %%</string>
-
-    <string name="peers">Peers</string>
-
+    <string name="list_rules">Rules of Currency</string>
+    <string name="growth">Growth</string>
     <string name="currency">Currency</string>
     <string name="no_currency">No currency</string>
-    <string name="no_transfer">No transaction</string>
-    <string name="no_certification">No certification</string>
-    <string name="no_contact">No contact</string>
-    <string name="no_wallet">No wallet</string>
+    <string name="no_transfer">No transfer</string>
     <string name="currencies">Currencies</string>
     <string name="members">Members</string>
-    <string name="members_count">%s members</string>
-    <string name="transfer_sended">Transfer sended.\nWaiting network processing.</string>
-    <string name="transfer_error">Could not send transfer (technical error)</string>
-    <string name="cert_error">Could not send certification (technical error)</string>
-    <string name="cert_sended">Certification sended.\nWaiting network processing.</string>
-    <string name="cert_date">signature time</string>
-    <string name="cert_not_written">not written</string>
-    <string name="join_sended">Registration sended.\nWaiting network processing.</string>
-    <string name="join_error">Could not send registration (technical error)</string>
-    <string name="duplicate_currency_name">Currency [%s] already exists.</string>
-    <string name="timeout_error">The connection to the server is too long</string>  //a ecrire en anglais et en français
+    <string name="selected_currency">Selected currency</string>
+    <string name="selected_unit">Selected unit</string>
 
-    <!-- Strings related to currency/rule -->
-
-
-    <!-- Strings related to peer/node -->
-    <string name="dialog_text_add_node">Please enter either a full qualified domain name, an IPv4, or an IPv6 address, and a port number.</string>
+    <!-- Strings related to apiPeer/node -->
+    <string name="enter_node_info">Enter node info</string>
+    <string name="enter_remote_address">Enter remote address</string>
+    <string name="add_node">Add node</string>
+    <string name="dialog_text_add_node">Please enter either a full qualified domain name, an IPv4, or an IPv6 address, and a port number</string>
 
     <!-- Strings related to identities -->
     <string name="identity">Identity</string>
-    <string name="uid_or_public_key">Search</string>
-    <string name="uid">User</string>
-    <string name="uid_hint">User identifier</string>
+    <string name="uid_or_public_key">UID or public key</string>
+    <string name="user_id">User ID</string>
+    <string name="identity_icon">Identity icon</string>
+    <string name="certified_by">Certified by</string>
+    <string name="certifiers_of">Certifiers of</string>
     <string name="registration_date">Registration Date</string>
-    <string name="registered_since">Registered since %s</string>
     <string name="signature">Signature</string>
     <string name="public_key">Public key</string>
-    <string name="identity_details">Details</string>
-    <string name="community">Community</string>
 
     <!-- Strings related to account/authentication --> -->
-    <string name="next">Next &gt;</string>
+    <string name="login">Login</string>
+    <string name="next">Next</string>
+    <string name="email_password_salt">Email (or password salt)</string>
     <string name="password">Password</string>
     <string name="confirm">Confirm</string>
     <string name="confirm_password">Confirm password</string>
-    <string name="pin_code">PIN code</string>
-    <string name="add_wallet">Add wallet</string>
-    <string name="add_wallet_title">New wallet</string>
-    <string name="salt">Salt</string>
-    <string name="salt_hint">Salt (email, phone or words)</string>
+    <string name="pin_code">PIN code :</string>
+    <string name="add_account">Add account</string>
+    <string name="salt">Sentence protection (email,...)</string>
     <string name="salt_instructions">Salt: We advice you to choose your personal e-mail as value for this
         field. But you can put any other value: it only has to carry enough entropy to avoid key
         collision. Typically, your personal e-mail is a good choice, added to the fact it is easy to
         remember.</string>
     <string name="password_instructions">Password: Choose a very strong password, so no one
-        can find it. This password can\'t be changed thereafter, so choose it carefully.</string>
+        can find it. This password can\'t be changed thereafter, so choose it carefully. The password can\'t be
+    recovered, don\'t loose it</string>
+
     <string name="test">Test</string>
 
-    <!-- Strings related to contact -->
-    <string name="contact_name_hint">Alias (optional)</string>
-    <string name="add_contact">New contact</string>
-    <string name="contact_uid">(%s)</string>
-    <string name="add_contact_confirm"><![CDATA[You are about to add <b>%s</b> as contact.\nAre you sure ?]]></string>
-    <string name="contact_added">Contact successfully added</string>
 
-
-    <!-- Validation messages -->
-    <string name="uid_already_used">This identifier is already used.</string>
-    <string name="uid_and_pubkey_not_registred">This identifier is incorrect</string>
-    <string name="pubkey_already_used">This salt and password are incorrect.</string>
-    <string name="login_too_short">This identifier is too short</string>
-    <string name="alias_or_uid_required">One of \'alias\' or \'user identifier\' is required</string>
-    <string name="name_too_short">This name is too short</string>
-    <string name="salt_too_short">This salt is too short</string>
+    <string name="login_too_short">This login is too short</string>
+    <string name="email_address_invalid">This email address is invalid</string>
     <string name="password_too_short">This password is too short</string>
-    <string name="login_incorrect">This identifier is incorrect</string>
+    <string name="login_incorrect">This login is incorrect</string>
     <string name="password_incorrect">This password is incorrect</string>
     <string name="field_required">This field is required</string>
-    <string name="duplicate_wallet_pubkey">Salt and password already used by another wallet</string>
-    <string name="uid_match_another_pubkey">This salt and password does not match to given identifier.</string>
-    <string name="uid_instructions">User identifier: If you choose an UID which is already used inside a community, you won\'t be able to join this community. So ensure not to collide with someone else\'s UID.</string>
+    <string name="uid_instructions">User ID: If you choose an UID which is already used inside a community, you won\'t be able to join this community. So ensure not to collide with someone else\'s UID.</string>
     <string name="uid_cannot_be_empty">UID cannot be empty</string>
     <string name="salt_cannot_be_empty">Salt cannot be empty</string>
+    <string name="alias_cannot_be_empty">Alias cannot be empty</string>
     <string name="password_cannot_be_empty">Password cannot be empty</string>
     <string name="confirm_password_cannot_be_empty">Confirm password cannot be empty</string>
     <string name="passwords_dont_match">Passwords don\'t match</string>
-    <string name="insufficient_credit">Insufficient credit on wallet</string>
-    <string name="duplicate_pubkey">A wallet with the same public key already exists.</string>
-    <string name="query_too_short">%s characters minimum</string>
-    <string name="transfer_to">Transfer to %s</string>
-    <string name="sign_to">Sign %s</string>
-    <string name="nb_sign">%s valid signature</string>
-    <string name="yesterday">yesterday</string>
-    <string name="search_error">Search error (%s). Please retry.</string>
+    <string name="currency_added">Currency added</string>
+    <string name="invalid_peer_address">Invalid peer address</string>
+    <string name="invalid_peer_port">Invalid peer port</string>
+    <string name="wallets">Wallets</string>
+    <string name="create_new">Create new</string>
+    <string name="add_wallet">Add wallet</string>
+    <string name="no_wallet">No wallet</string>
+    <string name="sources">Sources</string>
+    <string name="no_source">No source</string>
+    <string name="alias_hint">Wallet name</string>
+    <string name="alias">Alias</string>
+    <string name="add_currency">Add currency</string>
 
-
-    <!-- Strings related to extension (ext) -->
-    <string name="help_link">Need help ?</string>
-
-    <!--Strings related to identity -->
-    <string name="identity_error">Unable to access user</string>
-
-    <string name="or">or :</string>
-
-    <string name="year">y</string>
-    <string name="day">d</string>
-
-    <string name="certify_by">Certify by %s people</string>
-
-    <string name="choice_contact">Choose a contact</string>
-    <string name="choice_wallet">Choose a wallet</string>
-
-    <string name="converter">Currency converter</string>
-    <string name="delete_contact">Delete the contact</string>
-    <string name="rename">Rename</string>
+    <string name="ud0">ud0</string>
+    <string name="sig_delay">sig_delay</string>
+    <string name="sig_validity">sig_validity</string>
+    <string name="sig_qty">sig_qty</string>
+    <string name="sig_woT">sig_woT</string>
+    <string name="ms_validity">ms_validity</string>
+    <string name="step_max">step_max</string>
+    <string name="median_time_blocks">median_time_blocks</string>
+    <string name="avg_gen_time">avg_gen_time</string>
+    <string name="dt_diff_eval">dt_diff_eval</string>
+    <string name="blocks_rot">blocks_rot</string>
+    <string name="percent_rot">percent_rot</string>
+    <string name="dt">dt</string>
+    <string name="dividend">dividend</string>
+    <string name="transaction">transaction</string>
+    <string name="type">type</string>
+    <string name="fingerprint">fingerprint</string>
+    <string name="number">number</string>
+    <string name="seconds">seconds</string>
+    <string name="received">received</string>
+    <string name="no_peer">no peer</string>
+    <string name="add_peer">Add peer</string>
+    <string name="block">block</string>
+    <string name="peer_not_match_currency">This peer does not match the currency</string>
+    <string name="delete_wallet">delete wallet</string>
+    <string name="create_uid">create UID</string>
+    <string name="enter_identity_info">Enter identity info</string>
+    <string name="uid_hint">Pseudonym</string>
+    <string name="certifiers">certifiers</string>
+    <string name="certified">certified</string>
+    <string name="add_identity">Add identity</string>
+    <string name="no_member">No member</string>
+    <string name="no_certification">No certification</string>
+    <string name="member">Member</string>
+    <string name="median_time">Median time</string>
+    <string name="generating_keys">Generating keys...</string>
+    <string name="empty_wallet">Empty wallet</string>
+    <string name="export_db">Export DB</string>
+    <string name="wallet_already_exists">Wallet already exists</string>
+    <string name="port_cannot_be_empty">Port cannot be empty</string>
+    <string name="comment">Comment</string>
+    <string name="hash">hash</string>
+    <string name="sent">Sent</string>
+    <string name="no_transactions">No transactions</string>
+    <string name="receiver_wallet">Receiver Wallet</string>
+    <string name="from">From</string>
+    <string name="to">To</string>
+    <string name="qr_code">QR code</string>
+    <string name="contact">Contact</string>
+    <string name="write">Write</string>
+    <string name="insufficient_funds">Insufficient funds</string>
+    <string name="amount_is_empty">Amount is empty</string>
+    <string name="sync">Sync</string>
     <string name="close">Close</string>
+    <string name="show_qrcode">Show QR code</string>
+    <string name="quantitative_amount">quantitative amount</string>
+    <string name="relative_amount_then">relative amount then</string>
+    <string name="relative_amount_now">relative amount now</string>
+    <string name="date">Date</string>
+    <string name="year">Year</string>
+    <string name="month">Month</string>
+    <string name="day">Day</string>
+    <string name="hour">Hour</string>
+    <string name="minute">Minute</string>
+    <string name="second">Second</string>
+    <string name="h">h</string>
+    <string name="m">min</string>
+    <string name="s">s</string>
+    <string name="milli_second">ms</string>
+    <string name="day_of_week">Day of week</string>
+    <string name="uid_colon">UID :</string>
+    <string name="name_colon">Name :</string>
+    <string name="publickey_colon">Public key :</string>
+
+    <string name="SUN">SUN</string>
+    <string name="MON">MON</string>
+    <string name="TUE">TUE</string>
+    <string name="WED">WED</string>
+    <string name="THU">THU</string>
+    <string name="FRI">FRI</string>
+    <string name="SAT">SAT</string>
+
+    <string name="january">January</string>
+    <string name="february">February</string>
+    <string name="march">March</string>
+    <string name="april">April</string>
+    <string name="may">May</string>
+    <string name="june">June</string>
+    <string name="july">July</string>
+    <string name="august">August</string>
+    <string name="september">September</string>
+    <string name="october">October</string>
+    <string name="november">November</string>
+    <string name="december">December</string>
+    <string name="UNK">UNK</string>
+    <string name="new_wallet">New wallet</string>
+    <string name="no_membership">No membership</string>
+    <string name="membership">Membership</string>
+    <string name="expires_on">Expires on</string>
+    <string name="expired">Expired</string>
+    <string name="state">State</string>
+    <string name="renew">renew</string>
+    <string name="no_currencies">No currencies</string>
+    <string name="contacts">Contacts</string>
+    <string name="blocks">Blocks</string>
+    <string name="peers">Peers</string>
+    <string name="no_blocks">No blocks</string>
+    <string name="leave">Leave</string>
+    <string name="no_ud">No U.D.</string>
+    <string name="no_contact">No contact</string>
+    <string name="add_contact">Add contact</string>
+    <string name="search_identity">Search identity</string>
+    <string name="name">Name</string>
+    <string name="select_self_certification">Select self-certification</string>
+    <string name="currency_already_exists">Currency already exists</string>
+    <string name="loading_currency">Loading currency...</string>
+    <string name="peer_already_exists">Peer already exists</string>
+    <string name="incompatible_peer">Incompatible peer</string>
+    <string name="join_currency">Do you want to join this currency ?</string>
+    <string name="create_membership">Create membership</string>
+    <string name="certify">Certify</string>
+    <string name="confirm_certification">Confirm certification ?</string>
+    <string name="do_you_want_to_certify_this_uid">Do you want to certify this UID</string>
+    <string name="circle">circle</string>
+    <string name="monetary_mass">Monetary mass</string>
+    <string name="balance">Balance (All wallets)</string>
+    <string name="tx_direction">Tx direction</string>
+    <string name="comment_is_not_valid">The comment is not valid</string>
+    <string name="amount_not_valid">Amount is not valid</string>
+    <string name="public_key_is_not_valid">Public key is not valid</string>
+    <string name="amount_is_not_valid">Amount is not valid</string>
+    <string name="amount_must_be_positive">Amount must be a positive value</string>
+    <string name="transaction_sent">Transaction sent</string>
+    <string name="membership_sent">Membership sent</string>
+    <string name="self_certification_sent">Inscription sent</string>
+    <string name="revocation_sent">Revocation sent</string>
+    <string name="certification_sent">Certification sent</string>
+    <string name="current_block">Current block</string>
+    <string name="certification">Certification</string>
+    <string name="certifications">Certifications</string>
+    <string name="no_connection">No connection</string>
+    <string name="leave_currency">Leave currency</string>
+    <string name="force_sync">Force synchronization</string>
+    <string name="change_unit">Change Unit</string>
+    <string name="peer_prompt">Choose a peer</string>
+    <string name="select_all">Select all</string>
+    <string name="all_currency">All currency</string>
+
+    <string-array name="drawer_items">
+        <item>@string/wallets</item>
+        <item>@string/contacts</item>
+    </string-array>
+
+    <string-array name="list_unit_time">
+        <item>Year</item>
+        <item>Day</item>
+        <item>Hour</item>
+        <item>Minute</item>
+        <item>Second</item>
+        <item>Milli Second</item>
+    </string-array>
+
+    <string-array name="list_unit">
+        <item>Currency principal</item>
+        <item>Universal Dividende</item>
+        <item>Mutual Credit</item>
+    </string-array>
+
+    <string-array name="list_unit_value">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+
+    <string-array name="node">
+        <item>meta_brouzouf@metab.ucoin.io:9201</item>
+        <item>zeta_brouzouf@ucoin.twiced.fr:9101</item>
+    </string-array>
+
+    <string-array name="adress">
+        <item>metab.ucoin.io</item>
+        <item>ucoin.twiced.fr</item>
+    </string-array>
+
+    <string-array name="port">
+        <item>9201</item>
+        <item>9101</item>
+    </string-array>
+
+    <!-- Strings related to rules currency -->
+    <string name="rules_add_currency">Add currency</string>
+    <string name="rules_preselected_peers">Select a predefine currency:</string>
+    <string name="rules_peer_hint">Or fill parameters of a currency node:</string>
+    <string name="rules_node_address">Host</string>
+    <string name="rules_node_address_hint">my.domain.com</string>
+    <string name="rules_node_port">Port</string>
+    <string name="rules_node_port_hint">(optional)</string>
+    <string name="rules_rules">Rules</string>
+    <string name="rules_money">Money</string>
+    <string name="rules_wot">Web of Trust</string>
+    <string name="rules_blockchain">Blockchain</string>
+    <string name="rules_c_and_dt">Fundamental growth (c) / Time period (dt) between two UD</string>
+    <string name="rules_c_and_dt_value">%1$.0f %% / %2$.0f days (%3$d seconds)</string>
+    <string name="rules_ud0">Initial Universal Dividend UD(0) in units</string>
+    <string name="rules_ud0_value">%d units</string>
+    <string name="rules_value_days_and_seconds">%1$.0f days (%2$d s)</string>
+    <string name="rules_value_minutes_and_seconds">%1$.0f min %2$d s (%3$d s)</string>
+    <string name="rules_sig_delay">Minimum delay between 2 identical certifications (same pubkeys)</string>
+    <string name="rules_sig_validity">Maximum age of a valid signature</string>
+    <string name="rules_sig_qty">Minimum quantity of signatures to be part of the WoT</string>
+    <string name="rules_sig_qty_value">%d signatures</string>
+    <string name="rules_sig_woT">Minimum quantity of valid made certifications to be part of the WoT for distance rule</string>
+    <string name="rules_ms_validity">Maximum age of a valid membership</string>
+    <string name="rules_step_max">Maximum distance between each WoT member and a newcomer</string>
+    <string name="rules_median_time_blocks">Number of blocks used for calculating median time.</string>
+    <string name="rules_median_time_blocks_value">%d blocks</string>
+    <string name="rules_avg_gen_time">The average time for writing 1 block (wished time)</string>
+    <string name="rules_dt_diff_eval">The number of blocks required to evaluate again PoWMin value</string>
+    <string name="rules_dt_diff_eval_value">%d blocks</string>
+    <string name="rules_blocks_rot">The number of previous blocks to check for personalized difficulty</string>
+    <string name="rules_blocks_rot_value">%d blocks</string>
+    <string name="rules_percent_rot">The percent of previous issuers to reach for personalized difficulty</string>
+    <string name="rules_percent_rot_value">%.0f %%</string>
+    <string name="converter">Currency converter</string>
+
+    <string name="contact_added">Contact successfully added</string>
+    <string name="network">Network</string>
+
+    <string name="find_by">Find by :</string>
+    <string name="select_identity">Select an identity</string>
+    <string name="no_result_publickey">No certification for this pubkey</string>
+    <string name="no_wallet_selected">No wallet selected</string>
+    <string name="transfer_of">Transfer of %s</string>
+    <string name="reference">reference</string>
+    <string name="with_identity">With Identity</string>
+    <string name="without_identity">Without Identity</string>
+    <string name="all">All</string>
+    <string name="hasnt_member">This wallet isn\'t a member of the web of trust .</string>
+    <string name="change_precision">number of digits</string>
+    <string name="sign_wallet">Sign this wallet</string>
+    <string name="connection_wallet">Connection to wallet</string>
+    <string name="wallet_no_exists">This wallet no exists \\n Please create new wallet</string>
+    <string name="connection">Connection</string>
+    <string name="inscription">Inscription</string>
+    <string name="preference">Preference</string>
+    <string name="_new">New</string>
+    <string name="help">Help</string>
+    <string name="anonymous_recording">Anonymous record</string>
+    <string name="pin_description">A Pin code will protect your data.</string>
+    <string name="pin_diferent">The PIN code can not be equal to 0000 or 1234.</string>
+    <string name="pin_code_bis">Confirm PIN code :</string>
+    <string name="pin_dont_match">Pin codes don\'t match</string>
+    <string name="valid">Validate</string>
+    <string name="in_dev">Under construction</string>
+    <string name="must_be_member">You must be a registered member to certify.</string>
+    <string name="choose_wallet">Select a walet</string>
+    <string name="uid_alredy_exist">This pseudonym alredy exist</string>
+    <string name="wallet_already_registered">This wallet is already registered</string>
+    <string name="inscription_wallet">Wallet inscription</string>
 
 </resources>

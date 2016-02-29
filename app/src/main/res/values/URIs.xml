@@ -2,13 +2,25 @@
 <resources>
     <string name="account_uri">account/</string>
     <string name="currency_uri">currency/</string>
-    <string name="blockchain_parameters_uri">blockchain/parameters/</string>
-    <string name="ud_uri">ud/</string>
-    <string name="wallet_uri">wallet/</string>
+    <string name="identity_uri">identity/</string>
     <string name="peer_uri">peer/</string>
-    <string name="movement_uri">movement/</string>
+    <string name="endpoint_uri">endpoint/</string>
+    <string name="endpoint_pending_uri">endpoint/pending/</string>
+    <string name="wallet_uri">wallet/</string>
+    <string name="balance_uri">balance/</string>
+    <string name="source_uri">source/</string>
+    <string name="tx_uri">tx/</string>
+    <string name="tx_issuer_uri">tx/issuer/</string>
+    <string name="tx_input_uri">tx/input/</string>
+    <string name="tx_output_uri">tx/output/</string>
+    <string name="tx_signature_uri">tx/signature/</string>
+    <string name="member_uri">member/</string>
+    <string name="certification_uri">certification/</string>
+    <string name="block_uri">block/</string>
+    <string name="ud_uri">ud/</string>
+    <string name="membership_uri">membership/</string>
+    <string name="self_certification_uri">self_certification/</string>
     <string name="contact_uri">contact/</string>
-    <string name="contact2currency_uri">contact2currency/</string>
-    <string name="contact_view_uri">contactView/</string>
-
+    <string name="operation_uri">operation/</string>
+    <string name="lookup_uri">lookup/</string>
 </resources>

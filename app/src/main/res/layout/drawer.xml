@@ -5,126 +5,233 @@
     android:layout_height="match_parent"
     android:layout_gravity="start"
     android:background="#FFF"
+    android:clickable="true"
     android:orientation="vertical">
 
-    <LinearLayout
-        android:id="@+id/drawer_header"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/accent"
-        android:orientation="vertical"
-        android:paddingEnd="16dp"
-        android:paddingBottom="16dp"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp"
-        android:paddingStart="16dp"
-        android:paddingTop="16dp">
+        android:layout_height="140dp"
+        android:background="@drawable/background_01"
+        android:padding="16dp">
 
         <TextView
+            android:id="@+id/drawer_currency_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
-            android:text="@string/menu"
+            android:layout_toStartOf="@+id/deconnection"
+            android:clickable="false"
+            android:ellipsize="end"
+            android:paddingEnd="16dp"
+            android:singleLine="true"
             android:textColor="@color/textPrimary"
-            android:gravity="center_horizontal"
-            android:textSize="@dimen/abc_text_size_headline_material"
-            />
-    </LinearLayout>
+            android:textSize="@dimen/abc_text_size_title_material"
+            android:textStyle="bold" />
 
-    <TextView
-        android:id="@+id/drawer_home"
+        <ImageButton
+            android:id="@+id/deconnection"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentTop="true"
+            android:background="@drawable/shape_circle_accent"
+            android:contentDescription="@string/add_currency"
+            android:elevation="4dp"
+            android:src="@drawable/ic_logout_white_24dp" />
+
+
+        <TextView
+            android:id="@+id/drawer_members_count"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_below="@id/drawer_currency_name"
+            android:layout_toStartOf="@id/deconnection"
+            android:textColor="@color/textPrimary"
+            android:textSize="@dimen/abc_text_size_caption_material" />
+
+        <TextView
+            android:id="@+id/drawer_block_number"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_below="@id/drawer_members_count"
+            android:layout_toStartOf="@id/deconnection"
+            android:textColor="@color/textPrimary"
+            android:textSize="@dimen/abc_text_size_caption_material" />
+
+        <TextView
+            android:id="@+id/drawer_date"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_below="@id/drawer_block_number"
+            android:layout_toStartOf="@id/deconnection"
+            android:textColor="@color/textPrimary"
+            android:textSize="@dimen/abc_text_size_caption_material" />
+    </RelativeLayout>
+
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:background="@drawable/textview_background_selector"
-        android:drawableLeft="@drawable/ic_home_grey600_24dp"
-        android:drawablePadding="48dp"
-        android:drawableStart="@drawable/ic_home_grey600_24dp"
-        android:gravity="center_vertical"
-        android:paddingEnd="16dp"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp"
-        android:paddingStart="16dp"
-        android:text="@string/home"
-        android:textColor="#FF000000"
-        android:textSize="@dimen/abc_text_size_body_2_material" />
+        android:layout_height="match_parent">
 
-    <ListView
-        android:id="@+id/drawer_listview"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:choiceMode="singleChoice"
-        android:divider="#333"
-        android:dividerHeight="0dp"
-        android:visibility="gone"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/drawer_empty_list"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="@string/no_currency"
-        android:visibility="gone"/>
+            <TextView
+                android:id="@+id/drawer_wallets"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/list_item_background_selector"
+                android:drawablePadding="48dp"
+                android:drawableStart="@drawable/ic_home_24dp"
+                android:drawableLeft="@drawable/ic_home_24dp"
+                android:gravity="center_vertical"
+                android:paddingEnd="16dp"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:text="@string/wallets"
+                android:textColor="#000"
+                android:textSize="@dimen/abc_text_size_body_2_material" />
 
-    <View
-        android:layout_width="fill_parent"
-        android:layout_height="1dip"
-        android:layout_marginBottom="8dp"
-        android:layout_marginTop="8dp"
-        android:background="@color/grey200" />
+            <TextView
+                android:id="@+id/drawer_contacts"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@drawable/list_item_background_selector"
+                android:drawablePadding="48dp"
+                android:drawableStart="@drawable/ic_contact_24dp"
+                android:drawableLeft="@drawable/ic_contact_24dp"
+                android:gravity="center_vertical"
+                android:paddingEnd="16dp"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:text="@string/contacts"
+                android:textColor="#000"
+                android:textSize="@dimen/abc_text_size_body_2_material" />
 
-    <TextView
-        android:id="@+id/drawer_add_currency"
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:background="@drawable/textview_background_selector"
-        android:drawableLeft="@drawable/ic_plus_grey600_24dp"
-        android:drawablePadding="48dp"
-        android:drawableStart="@drawable/ic_plus_grey600_24dp"
-        android:gravity="center_vertical"
-        android:paddingEnd="16dp"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp"
-        android:paddingStart="16dp"
-        android:text="@string/add_currency"
-        android:textColor="#FF000000"
-        android:textSize="@dimen/abc_text_size_body_2_material" />
+            <include layout="@layout/drawer_separator" />
 
+            <TextView
+                android:id="@+id/drawer_currency"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/list_item_background_selector"
+                android:drawablePadding="48dp"
+                android:drawableStart="@drawable/ic_label_grey600_24dp"
+                android:drawableLeft="@drawable/ic_label_grey600_24dp"
+                android:gravity="center_vertical"
+                android:paddingEnd="16dp"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:text="@string/currencies"
+                android:textColor="#000"
+                android:textSize="@dimen/abc_text_size_body_2_material" />
 
-    <TextView
-        android:id="@+id/drawer_help"
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:background="@drawable/textview_background_selector"
-        android:drawableLeft="@drawable/ic_help_grey600_24dp"
-        android:drawablePadding="48dp"
-        android:drawableStart="@drawable/ic_help_grey600_24dp"
-        android:gravity="center_vertical"
-        android:paddingEnd="16dp"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp"
-        android:paddingStart="16dp"
-        android:text="@string/help_link"
-        android:textColor="#FF000000"
-        android:textSize="@dimen/abc_text_size_body_2_material" />
+            <TextView
+                android:id="@+id/drawer_rules"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/list_item_background_selector"
+                android:drawablePadding="48dp"
+                android:drawableStart="@drawable/ic_label_grey600_24dp"
+                android:drawableLeft="@drawable/ic_label_grey600_24dp"
+                android:gravity="center_vertical"
+                android:paddingEnd="16dp"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:text="@string/list_rules"
+                android:textColor="#000"
+                android:textSize="@dimen/abc_text_size_body_2_material" />
 
-    <TextView
-        android:id="@+id/drawer_settings"
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:background="@drawable/textview_background_selector"
-        android:drawableLeft="@drawable/ic_settings_grey600_24dp"
-        android:drawablePadding="48dp"
-        android:drawableStart="@drawable/ic_settings_grey600_24dp"
-        android:gravity="center_vertical"
-        android:paddingEnd="16dp"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp"
-        android:paddingStart="16dp"
-        android:text="@string/settings"
-        android:textColor="#FF000000"
-        android:textSize="@dimen/abc_text_size_body_2_material" />
+            <TextView
+                android:id="@+id/drawer_peers"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@drawable/list_item_background_selector"
+                android:drawablePadding="48dp"
+                android:drawableStart="@drawable/ic_label_grey600_24dp"
+                android:gravity="center_vertical"
+                android:paddingEnd="16dp"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:text="@string/peers"
+                android:textColor="#000"
+                android:textSize="@dimen/abc_text_size_body_2_material" />
 
+            <TextView
+                android:id="@+id/drawer_blocks"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@drawable/list_item_background_selector"
+                android:drawablePadding="48dp"
+                android:drawableStart="@drawable/ic_label_grey600_24dp"
+                android:gravity="center_vertical"
+                android:paddingEnd="16dp"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:text="@string/blocks"
+                android:textColor="#000"
+                android:textSize="@dimen/abc_text_size_body_2_material"
+                android:visibility="gone" />
 
+            <include layout="@layout/drawer_separator" />
 
+            <TextView
+                android:id="@+id/drawer_settings"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@drawable/textview_background_selector"
+                android:drawablePadding="48dp"
+                android:drawableStart="@drawable/ic_settings_grey600_24dp"
+                android:gravity="center_vertical"
+                android:paddingEnd="16dp"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:paddingStart="16dp"
+                android:text="@string/settings"
+                android:textColor="#FF000000"
+                android:textSize="@dimen/abc_text_size_body_2_material"/>
+
+            <TextView
+                android:id="@+id/export_db"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@drawable/textview_background_selector"
+                android:drawablePadding="48dp"
+                android:drawableStart="@drawable/ic_settings_grey600_24dp"
+                android:gravity="center_vertical"
+                android:paddingEnd="16dp"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:paddingStart="16dp"
+                android:text="@string/export_db"
+                android:textColor="#FF000000"
+                android:textSize="@dimen/abc_text_size_body_2_material"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/request_sync"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@drawable/textview_background_selector"
+                android:drawablePadding="48dp"
+                android:drawableStart="@drawable/ic_sync_grey_600_24dp"
+                android:gravity="center_vertical"
+                android:paddingEnd="16dp"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:paddingStart="16dp"
+                android:text="@string/force_sync"
+                android:textColor="#FF000000"
+                android:textSize="@dimen/abc_text_size_body_2_material" />
+
+        </LinearLayout>
+    </ScrollView>
 </LinearLayout>

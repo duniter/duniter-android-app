@@ -2,100 +2,71 @@ import org.apache.tools.ant.taskdefs.condition.Os
 
 import java.util.regex.Pattern
 
-apply plugin: 'com.android.model.library'
+apply plugin: 'com.android.library'
 
-model {
-    android {
-        compileSdkVersion = 21
-        buildToolsVersion = "21.1.2"
+android {
+    compileSdkVersion 21
+    buildToolsVersion "21.1.2"
 
-        defaultConfig.with {
-            minSdkVersion.apiLevel = 14
-            targetSdkVersion.apiLevel = 21
+    defaultConfig {
+        minSdkVersion 14
+        targetSdkVersion 21
 
-            versionCode = 1 //getVersionCodeFromManifest()
-            versionName = "1.0"
-        }
+        versionCode 1 //getVersionCodeFromManifest()
+        versionName "1.0"
 
-        tasks.withType(JavaCompile) {
-            compileTask -> compileTask.dependsOn ndkLibsToJar
+        ndk {
+            moduleName "scrypt"
+            //cFlags " -std=c99 -Wall -O2 -DHAVE_CONFIG_H"
+            //ldLibs "log"
         }
     }
 
-    android.ndk {
-        moduleName = "scrypt"
-        CFlags += " -std=c99 -Wall -O2 -DHAVE_CONFIG_H"
-        ldFlags += "-lc -shared"
-        ldLibs += "log"
+
+    sourceSets.main {
+        jniLibs.srcDir 'src/main/libs'
+        jni.srcDirs = [] //disable automatic ndk-build call
     }
 
-
-     android.buildTypes {
+    buildTypes {
         release {
-            minifyEnabled = false
-            proguardFiles += file('proguard-rules.pro')
-        }
-     }
-
-    android.sources {
-        main {
-            /*java {
-                source {
-                    srcDir 'src/main/java'
-                }
-            }*/
-            jni {
-                source {
-                    srcDirs = [] //'src/main/jni'
-                    //srcDir 'src/main/jni'
-                    //LOCAL_SRC_FILES := scrypt_jni.c crypto_scrypt-nosse.c sha256.c
-                }
-            }
-
-            jniLibs {
-                source {
-                    srcDir 'src/main/libs'
-                }
-            }
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-
-    /*
-    android.productFlavors {
-            // for detailed abiFilter descriptions, refer to "Supported ABIs" @
-            // https://developer.android.com/ndk/guides/abis.html#s
-            create("x86") {
-                //versionCode = Integer.parseInt("6" + defaultConfig.versionCode)
-                ndk.abiFilter += "x86"
+/*
+    productFlavors {
+        x86 {
+            versionCode Integer.parseInt("6" + defaultConfig.versionCode)
+            ndk {
+                abiFilter "x86"
             }
-            create("mips") {
-                //versionCode = Integer.parseInt("4" + defaultConfig.versionCode)
-                ndk.abiFilter += "mips"
-            }
-            create("armv7") {
-                //versionCode = Integer.parseInt("2" + defaultConfig.versionCode)
-                ndk.abiFilter += "armeabi-v7a"
-            }
-            create("arm") {
-                //versionCode = Integer.parseInt("1" + defaultConfig.versionCode)
-                ndk.abiFilter += "armeabi"
-            }
-            // To include all cpu architectures, leaves abiFilters empty
-            create("fat")
-    }*/
-
-
-    // CCP flags for each variant
-    /*components.android {
-        binaries.afterEach { binary ->
-            binary.mergedNdkConfig.cppFlags.add(
-                    "-DVARIANT=\"" + binary.name + "\"")
         }
-    }*/
+        mips {
+            versionCode Integer.parseInt("4" + defaultConfig.versionCode)
+            ndk {
+                abiFilter "mips"
+            }
+        }
+        armv7 {
+            versionCode Integer.parseInt("2" + defaultConfig.versionCode)
+            ndk {
+                abiFilter "armeabi-v7a"
+            }
+        }
+        arm {
+            versionCode Integer.parseInt("1" + defaultConfig.versionCode)
+            ndk {
+                abiFilter "armeabi"
+            }
+        }
+        fat
+    }
+    */
 }
 
 def getVersionCodeFromManifest() {
-    def manifestFile = file('../app/src/main/AndroidManifest.xml')
+    def manifestFile = file(android.sourceSets.main.manifest.srcFile)
     def pattern = Pattern.compile("versionCode=\"(\\d+)\"")
     def matcher = pattern.matcher(manifestFile.getText())
     matcher.find()

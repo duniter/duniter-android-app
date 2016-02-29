@@ -8,57 +8,22 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
-import android.preference.PreferenceScreen;
 import android.preference.RingtonePreference;
-import android.preference.SwitchPreference;
 import android.text.TextUtils;
 
 import java.util.List;
 
 import io.ucoin.app.R;
 
-/**
- * A {@link PreferenceActivity} that presents a set of application settings. On
- * handset devices, settings are presented as a single list. On tablets,
- * settings are split by category, with category headers shown to the left of
- * the list of settings.
- * <p/>
- * See <a href="http://developer.android.com/design/patterns/settings.html">
- * Android Design: Settings</a> for design guidelines and the <a
- * href="http://developer.android.com/guide/topics/ui/settings.html">Settings
- * API Guide</a> for more information on developing a Settings UI.
- */
 public class SettingsActivity extends PreferenceActivity {
-    /**
-     * Determines whether to always show the simplified settings UI, where
-     * settings are presented in a single list. When false, settings are shown
-     * as a master/detail two-pane view on tablets. When true, a single pane is
-     * shown on tablets.
-     */
+
     private static final boolean ALWAYS_SIMPLE_PREFS = false;
-
-    public static final String PREF_UNIT = "unit";
-    public static final String PREF_UNIT_COIN = "coin";
-    public static final String PREF_UNIT_UD = "ud";
-    public static final String PREF_UNIT_TIME = "time";
-    public static final String PREF_UNIT_FORGET = "forget";
-
-    public static PreferenceScreen preferenceScreen;
-
-    public static SwitchPreference switchForget;
-    public static RingtonePreference ringtonePreference;
-    public static CheckBoxPreference checkBoxPreference;
-
-    public static final String PREF_CONTACT_SAVE_KEY = "save_contact";
-    public static final int PREF_CONTACT_SAVE_IN_APP = 1;
-    public static final int PREF_CONTACT_SAVE_IN_PHONE = 2;
 
 
     @Override
@@ -66,16 +31,6 @@ public class SettingsActivity extends PreferenceActivity {
         super.onPostCreate(savedInstanceState);
 
         setupSimplePreferencesScreen();
-        //getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
-
-    }
-
-
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        //getPreferenceScreen().getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this);
     }
 
     /**
@@ -109,17 +64,9 @@ public class SettingsActivity extends PreferenceActivity {
         // Bind the summaries of EditText/List/Dialog/Ringtone preferences to
         // their values. When their values change, their summaries are updated
         // to reflect the new value, per the Android Design guidelines.
-        preferenceScreen = getPreferenceScreen();
-
-        switchForget =          (SwitchPreference)  findPreference(PREF_UNIT_FORGET);
-        ringtonePreference =    (RingtonePreference)findPreference("notifications_ringtone");
-        checkBoxPreference =    (CheckBoxPreference)findPreference("notifications_vibrate");
-
-        bindPreferenceSummaryToValue(findPreference(PREF_CONTACT_SAVE_KEY));
-
-        bindPreferenceSummaryToValue(findPreference(PREF_UNIT));
-        bindPreferenceSummaryToValue(findPreference("add_receiver_as_contact"));
-        bindPreferenceSummaryToBooleanValue(findPreference("notifications_new_payment"), false);
+        bindPreferenceSummaryToValue(findPreference("example_text"));
+        bindPreferenceSummaryToValue(findPreference("example_list"));
+        bindPreferenceSummaryToValue(findPreference("notifications_new_message_ringtone"));
         bindPreferenceSummaryToValue(findPreference("sync_frequency"));
     }
 
@@ -179,17 +126,6 @@ public class SettingsActivity extends PreferenceActivity {
                 ListPreference listPreference = (ListPreference) preference;
                 int index = listPreference.findIndexOfValue(stringValue);
 
-
-                if(preference.getKey().equals(SettingsActivity.PREF_UNIT)){
-                    if(index>=1) {
-                        preferenceScreen.addPreference(switchForget);
-                        switchForget.setEnabled(true);
-                    }else {
-                        switchForget.setEnabled(false);
-                        preferenceScreen.removePreference(switchForget);
-                    }
-                }
-
                 // Set the summary to reflect the new value.
                 preference.setSummary(
                         index >= 0
@@ -204,7 +140,8 @@ public class SettingsActivity extends PreferenceActivity {
                     preference.setSummary(R.string.pref_ringtone_silent);
 
                 } else {
-                    Ringtone ringtone = RingtoneManager.getRingtone(preference.getContext(), Uri.parse(stringValue));
+                    Ringtone ringtone = RingtoneManager.getRingtone(
+                            preference.getContext(), Uri.parse(stringValue));
 
                     if (ringtone == null) {
                         // Clear the summary if there was a lookup error.
@@ -216,22 +153,6 @@ public class SettingsActivity extends PreferenceActivity {
                         preference.setSummary(name);
                     }
                 }
-            }else if(preference instanceof CheckBoxPreference){
-                if(preference.getKey().equals("notifications_new_payment")){
-
-                    if((Boolean)value) {
-                        preferenceScreen.addPreference(ringtonePreference);
-                        preferenceScreen.addPreference(checkBoxPreference);
-                        ringtonePreference.setEnabled(true);
-                        checkBoxPreference.setEnabled(true);
-                    }else {
-                        ringtonePreference.setEnabled(false);
-                        checkBoxPreference.setEnabled(false);
-                        preferenceScreen.removePreference(ringtonePreference);
-                        preferenceScreen.removePreference(checkBoxPreference);
-                    }
-                }
-
 
             } else {
                 // For all other preferences, set the summary to the value's
@@ -262,18 +183,6 @@ public class SettingsActivity extends PreferenceActivity {
                         .getDefaultSharedPreferences(preference.getContext())
                         .getString(preference.getKey(), ""));
     }
-    private static void bindPreferenceSummaryToBooleanValue(Preference preference,
-                                                            boolean defaultValue) {
-        // Set the listener to watch for value changes.
-        preference.setOnPreferenceChangeListener(sBindPreferenceSummaryToValueListener);
-
-        // Trigger the listener immediately with the preference's
-        // current value.
-        sBindPreferenceSummaryToValueListener.onPreferenceChange(preference,
-                PreferenceManager
-                        .getDefaultSharedPreferences(preference.getContext())
-                        .getBoolean(preference.getKey(), defaultValue));
-    }
 
     /**
      * This fragment shows general preferences only. It is used when the
@@ -290,10 +199,8 @@ public class SettingsActivity extends PreferenceActivity {
             // to their values. When their values change, their summaries are
             // updated to reflect the new value, per the Android Design
             // guidelines.
-            bindPreferenceSummaryToValue(findPreference(PREF_UNIT));
-            bindPreferenceSummaryToBooleanValue(findPreference(PREF_UNIT_FORGET), false);
-            bindPreferenceSummaryToValue(findPreference(PREF_CONTACT_SAVE_KEY));
-            bindPreferenceSummaryToValue(findPreference("add_receiver_as_contact"));
+            bindPreferenceSummaryToValue(findPreference("example_text"));
+            bindPreferenceSummaryToValue(findPreference("example_list"));
         }
     }
 
@@ -334,5 +241,4 @@ public class SettingsActivity extends PreferenceActivity {
             bindPreferenceSummaryToValue(findPreference("sync_frequency"));
         }
     }
-
 }

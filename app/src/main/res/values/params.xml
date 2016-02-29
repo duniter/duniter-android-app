@@ -3,7 +3,7 @@
     <string name="app_name">uCoin App</string>
     <string name="ucoin">uCoin App</string>
     <string name="ACCOUNT_TYPE">io.ucoin</string>
-    <string name="AUTHORITY">io.ucoin.provider</string>
+    <string name="AUTHORITY">io.ucoin.android.wallet.provider</string>
     <string name="DBNAME">ucoin.db</string>
     <integer name="DBVERSION">8</integer>
 

@@ -1,0 +1,12 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:ucoin="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    >
+
+    <item android:id="@+id/action_add_contact"
+        android:title="@string/add"
+        android:icon="@drawable/ic_check_white_24dp"
+        ucoin:showAsAction="ifRoom"/>
+</menu>
+
+

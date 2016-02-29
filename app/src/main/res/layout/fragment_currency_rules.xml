@@ -24,12 +24,12 @@
             >
 
             <TextView
-                android:text="@string/money"
+                android:text="@string/rules_money"
                 style="@style/headline"/>
 
             <!-- growth -->
             <TextView
-                android:text="@string/c_and_dt"
+                android:text="@string/rules_c_and_dt"
                 style="@style/RuleLabel"/>
             <TextView
                 android:id="@+id/growth"
@@ -39,7 +39,7 @@
 
             <!-- ud0 -->
             <TextView
-                android:text="@string/ud0"
+                android:text="@string/rules_ud0"
                 style="@style/RuleLabel"/>
             <TextView
                 android:id="@+id/ud0"
@@ -50,13 +50,13 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/wot"
+                android:text="@string/rules_wot"
                 style="@style/headline"/>
 
 
             <!-- sig_qty -->
             <TextView
-                android:text="@string/sig_qty"
+                android:text="@string/rules_sig_qty"
                 style="@style/RuleLabel" />
             <TextView
                 android:id="@+id/sig_qty"
@@ -64,7 +64,7 @@
 
             <!-- sig_validity -->
             <TextView
-                android:text="@string/sig_validity"
+                android:text="@string/rules_sig_validity"
                 style="@style/RuleLabel"/>
             <TextView
                 android:id="@+id/sig_validity"
@@ -72,7 +72,7 @@
 
             <!-- sig_delay -->
             <TextView
-                android:text="@string/sig_delay"
+                android:text="@string/rules_sig_delay"
                 style="@style/RuleLabel"/>
             <TextView
                 android:id="@+id/sig_delay"
@@ -80,7 +80,7 @@
 
             <!-- sig_woT -->
             <TextView
-                android:text="@string/sig_woT"
+                android:text="@string/rules_sig_woT"
                 style="@style/RuleLabel"/>
             <TextView
                 android:id="@+id/sig_woT"
@@ -88,7 +88,7 @@
 
             <!-- ms_validity -->
             <TextView
-                android:text="@string/ms_validity"
+                android:text="@string/rules_ms_validity"
                 style="@style/RuleLabel"/>
             <TextView
                 android:id="@+id/ms_validity"
@@ -96,7 +96,7 @@
 
             <!-- step_max -->
             <TextView
-                android:text="@string/step_max"
+                android:text="@string/rules_step_max"
                 style="@style/RuleLabel"/>
             <TextView
                 android:id="@+id/step_max"
@@ -106,12 +106,12 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/blockchain"
+                android:text="@string/rules_blockchain"
                 style="@style/headline"/>
 
             <!-- avg_gen_time -->
             <TextView
-                android:text="@string/avg_gen_time"
+                android:text="@string/rules_avg_gen_time"
                 style="@style/RuleLabel"/>
             <TextView
                 android:id="@+id/avg_gen_time"
@@ -119,7 +119,7 @@
 
             <!-- median_time_blocks -->
             <TextView
-                android:text="@string/median_time_blocks"
+                android:text="@string/rules_median_time_blocks"
                 style="@style/RuleLabel"/>
             <TextView
                 android:id="@+id/median_time_blocks"
@@ -127,7 +127,7 @@
 
             <!-- dt_diff_eval -->
             <TextView
-                android:text="@string/dt_diff_eval"
+                android:text="@string/rules_dt_diff_eval"
                 style="@style/RuleLabel"/>
             <TextView
                 android:id="@+id/dt_diff_eval"
@@ -135,7 +135,7 @@
 
             <!-- blocks_rot -->
             <TextView
-                android:text="@string/blocks_rot"
+                android:text="@string/rules_blocks_rot"
                 style="@style/RuleLabel"/>
             <TextView
                 android:id="@+id/blocks_rot"
@@ -143,7 +143,7 @@
 
             <!-- percent_rot -->
             <TextView
-                android:text="@string/percent_rot"
+                android:text="@string/rules_percent_rot"
                 style="@style/RuleLabel"/>
             <TextView
                 android:id="@+id/percent_rot"

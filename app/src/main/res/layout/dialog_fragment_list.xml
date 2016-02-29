@@ -1,0 +1,22 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical">
+
+    <ListView
+        android:id="@+id/list_item"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <TextView android:id="@+id/empty"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:layout_marginLeft="@dimen/demi_padding"
+              android:layout_marginRight="@dimen/demi_padding"
+              android:layout_marginStart="@dimen/demi_padding"
+              android:layout_marginEnd="@dimen/demi_padding"
+              android:layout_marginTop="@dimen/demi_padding"
+              android:text="No Results"
+              android:visibility="gone"/>
+
+</LinearLayout>

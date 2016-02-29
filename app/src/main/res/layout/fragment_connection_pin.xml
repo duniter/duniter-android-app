@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+    <!--<ImageView-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:id="@+id/imageView"-->
+        <!--android:layout_centerVertical="true"-->
+        <!--android:layout_centerHorizontal="true"-->
+        <!--/>-->
+
+    <Button
+        android:id="@+id/bt_connection"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/connection"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/welcom_button"
+        android:background="@drawable/shape_raised_button_primary"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="@dimen/number_background"
+        android:layout_marginLeft="@dimen/number_background"
+        android:layout_marginRight="@dimen/number_background"
+        android:layout_marginStart="@dimen/number_background"
+        android:layout_marginEnd="@dimen/number_background"/>
+
+    <LinearLayout android:id="@+id/layout_pin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_above="@+id/bt_connection"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="@dimen/margin"
+        android:layout_marginLeft="@dimen/number_background"
+        android:layout_marginRight="@dimen/number_background"
+        android:layout_marginStart="@dimen/number_background"
+        android:layout_marginEnd="@dimen/number_background">
+
+        <EditText
+            android:id="@+id/pin1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.25"
+            android:inputType="number"
+            android:maxLength="1"
+            android:textSize="@dimen/abc_text_size_display_3_material"
+            android:gravity="center_horizontal"
+            android:background="@drawable/edit_text_white"
+            android:textColor="@android:color/white"
+            android:cursorVisible="false"
+            android:selectAllOnFocus="true"/>
+
+        <EditText
+            android:id="@+id/pin2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.25"
+            android:inputType="number"
+            android:maxLength="1"
+            android:textSize="@dimen/abc_text_size_display_3_material"
+            android:gravity="center_horizontal"
+            android:background="@drawable/edit_text_white"
+            android:textColor="@android:color/white"
+            android:cursorVisible="false"
+            android:selectAllOnFocus="true"/>
+
+        <EditText
+            android:id="@+id/pin3"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.25"
+            android:inputType="number"
+            android:maxLength="1"
+            android:textSize="@dimen/abc_text_size_display_3_material"
+            android:gravity="center_horizontal"
+            android:background="@drawable/edit_text_white"
+            android:textColor="@android:color/white"
+            android:cursorVisible="false"
+            android:selectAllOnFocus="true"/>
+
+        <EditText
+            android:id="@+id/pin4"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.25"
+            android:inputType="number"
+            android:maxLength="1"
+            android:textSize="@dimen/abc_text_size_display_3_material"
+            android:gravity="center_horizontal"
+            android:background="@drawable/edit_text_white"
+            android:textColor="@android:color/white"
+            android:cursorVisible="false"
+            android:imeActionLabel="@string/connection"
+            android:selectAllOnFocus="true"/>
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/text2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/welcome_description"
+        android:layout_above="@+id/layout_pin"
+        android:layout_centerHorizontal="true"
+        android:gravity="center"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/welcom_text"
+        android:layout_marginBottom="@dimen/number_background"
+        android:layout_marginLeft="@dimen/demi_padding"
+        android:layout_marginRight="@dimen/demi_padding"
+        android:layout_marginStart="@dimen/demi_padding"
+        android:layout_marginEnd="@dimen/demi_padding"
+        />
+
+    <TextView
+        android:id="@+id/text1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/welcome_to_ucoin"
+        android:layout_above="@+id/text2"
+        android:gravity="center"
+        android:layout_centerHorizontal="true"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/welcom_text"
+        android:layout_marginBottom="@dimen/margin"
+        android:layout_marginLeft="@dimen/demi_padding"
+        android:layout_marginRight="@dimen/demi_padding"
+        android:layout_marginStart="@dimen/demi_padding"
+        android:layout_marginEnd="@dimen/demi_padding"/>
+
+</RelativeLayout>

@@ -1,55 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:layout_height="match_parent">
 
     <LinearLayout
-        android:id="@+id/contact_toolbar"
+        android:id="@+id/search_advenced"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:background="?attr/colorPrimary">
+        android:background="?attr/colorPrimary"
+        android:visibility="gone">
 
-        <android.support.v7.widget.SearchView
-            android:id="@+id/search_text"
-            android:layout_height="wrap_content"
-            android:layout_width="match_parent"
-            android:hint="@string/search"
-            android:iconifiedByDefault="false"
-            android:layout_gravity="end"
-            android:gravity="end"
-            />
+            <Switch
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/find_by"
+                android:textOff="Name"
+                android:textOn="PublicKey"
+                android:textColor="@android:color/white"
+                android:paddingLeft="15dp"
+                android:paddingStart="15dp"
+                android:id="@+id/switch1"/>
+
     </LinearLayout>
 
     <ProgressBar
-        android:id="@+id/contact_progressbar"
-        style="?android:attr/progressBarStyleInverse"
+        android:id="@+id/progress_bar"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_below="@+id/search_advenced"
+        android:layout_marginTop="75dp"
+        android:visibility="gone"
+        android:indeterminateDrawable="@drawable/progress_inderterminate_circle"
+        android:layout_centerHorizontal="true"/>
+
+    <ListView
+        android:id="@android:id/list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/contact_toolbar"
-        android:layout_gravity="center_horizontal|center_vertical"
-        android:visibility="gone" />
+        android:layout_below="@+id/search_advenced"
+        android:scrollbarStyle="outsideOverlay"
+        android:paddingBottom="72dp"
+        android:clipToPadding="false" />
 
     <TextView
-        android:id="@+id/contact_empty"
+        android:id="@id/android:empty"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/contact_toolbar"
-        android:text="@string/no_contact"
+        android:layout_below="@+id/search_advenced"
+        android:text="@string/no_results"
         android:textAppearance="?android:textAppearanceMedium"
         android:textColor="@color/hideable_text_color"
-        android:textSize="18sp"
-        android:layout_margin="8dp"
-        android:visibility="gone"/>
+        android:textSize="18sp" />
 
-    <view class="android.support.v7.widget.RecyclerView"
-        android:id="@+id/contact_recycler_view"
-        android:layout_below="@+id/contact_toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_centerInParent="true"/>
-
-
+    <ImageButton
+        android:id="@+id/add_contact_button"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginBottom="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="16dp"
+        android:background="@drawable/shape_circle_accent"
+        android:elevation="4dp"
+        android:src="@drawable/ic_person_add_white_24dp"
+        android:contentDescription="@string/add_contact"/>
 
 </RelativeLayout>

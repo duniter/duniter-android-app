@@ -1,0 +1,41 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:id="@+id/header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:elevation="4dp"
+        android:paddingStart="80dp"
+        android:paddingLeft="80dp"
+        android:background="@color/primary"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/uid"
+            android:layout_width="wrap_content"
+            android:layout_height="80dp"
+            android:textColor="@color/textPrimary"
+            android:textSize="@dimen/abc_text_size_display_1_material" />
+    </LinearLayout>
+
+    <io.ucoin.app.widget.SlidingTabLayout
+        android:id="@+id/sliding_tabs"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/header"
+        android:background="@color/primary"
+        android:elevation="4dp"
+        android:visibility="gone" />
+
+    <android.support.v4.view.ViewPager
+
+        android:id="@+id/viewpager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/sliding_tabs"
+        android:background="@android:color/white" />
+
+</RelativeLayout>

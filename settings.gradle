@@ -1,1 +1,1 @@
-include ':app', ':scrypt', ':kalium-jni'
+include ':app', ':scrypt', ':kalium-jni', ':volley'

@@ -6,7 +6,6 @@ import com.lambdaworks.codec.Base64;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 
-import io.ucoin.app.technical.StringUtils;
 import io.ucoin.app.technical.UCoinTechnicalException;
 
 public class CryptoUtils {
@@ -14,7 +13,6 @@ public class CryptoUtils {
 
     public static final Charset CHARSET_UTF8 = Charset.forName("UTF-8");
 	public static final Charset CHARSET_ASCII = Charset.forName("US-ASCII");
-	public static final String PUBLIC_KEY_PATTERN = "[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{43,44}$";
 
     private static final int DEFAULT_SIZE = 32;
 
@@ -25,10 +23,6 @@ public class CryptoUtils {
         System.arraycopy(message, 0, result, n, message.length);
         return result;
     }
-
-	public static boolean matchPubKey(String pubkey){
-		return StringUtils.isNotBlank(pubkey) && pubkey.matches(PUBLIC_KEY_PATTERN);
-	}
 
     public static byte[] removeZeros(int n, byte[] message) {
         return Arrays.copyOfRange(message, n, message.length);

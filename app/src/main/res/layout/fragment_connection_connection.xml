@@ -1,0 +1,84 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical">
+
+    <Button
+        android:id="@+id/bt_connection"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/connection"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/welcom_button"
+        android:background="@drawable/shape_raised_button_primary"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="@dimen/number_background"
+        android:layout_marginLeft="@dimen/number_background"
+        android:layout_marginRight="@dimen/number_background"
+        android:layout_marginStart="@dimen/number_background"
+        android:layout_marginEnd="@dimen/number_background"/>
+
+    <LinearLayout
+        android:id="@+id/progress_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <ProgressBar
+            style="?android:attr/progressBarStyleInverse"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal|center_vertical" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textColor="@android:color/white"
+            android:text="@string/generating_keys" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/field_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginLeft="@dimen/demi_padding"
+        android:layout_marginRight="@dimen/demi_padding"
+        android:layout_marginStart="@dimen/demi_padding"
+        android:layout_marginEnd="@dimen/demi_padding"
+        android:layout_marginBottom="@dimen/number_background"
+        android:layout_above="@+id/bt_connection">
+
+        <include
+            android:id="@+id/selector_currency"
+            layout="@layout/selector_currency"/>
+
+        <EditText
+            android:id="@+id/salt"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/salt"
+            android:imeOptions="actionNext"
+            android:inputType="textNoSuggestions"
+            android:textColor="@android:color/white"
+            android:textColorHint="@android:color/white"
+            android:background="@drawable/edit_text_white" />
+
+        <EditText
+            android:id="@+id/password"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/password"
+            android:imeOptions="actionDone"
+            android:inputType="textPassword"
+            android:textColor="@android:color/white"
+            android:textColorHint="@android:color/white"
+            android:background="@drawable/edit_text_white" />
+
+    </LinearLayout>
+</RelativeLayout>

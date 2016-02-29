@@ -1,22 +1,8 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:ucoin="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".MainActivity"
-    >
-
-    <item android:id="@+id/action_refresh"
-        android:title="@string/refresh"
-        android:icon="@drawable/ic_menu_refresh"
-        ucoin:iconifiedByDefault="true"
-        ucoin:showAsAction="always"/>
-
-    <!--<item-->
-        <!--android:id="@+id/action_add_wallet"-->
-        <!--android:icon="@drawable/ic_plus_white_24dp"-->
-        <!--ucoin:iconifiedByDefault="true"-->
-        <!--android:title="@string/add_wallet"-->
-        <!--ucoin:showAsAction="always"/>-->
+    xmlns:ucoin="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/new_wallet"
+        android:title="@string/_new"
+        ucoin:showAsAction="never|withText"/>
 
 </menu>
-
-

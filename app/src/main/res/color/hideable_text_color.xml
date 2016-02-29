@@ -15,7 +15,7 @@
   -->
 
 <!--
-    This color state list changes from gray to blue depending on its state (checked or not checked).
+    This color sync list changes from gray to blue depending on its sync (checked or not checked).
 -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_checked="false" android:color="#6000" />

@@ -16,10 +16,10 @@
 
 <!--
     The ListView from sample_main.xml has a choiceMode set, meaning that when a user
-    selects a list item, the ListView will set the state for that item's root view
+    selects a list item, the ListView will set the sync for that item's root view
     (this CheckableLinearLayout) to "checked". Note that this requires that the root view
     implements the Checkable interface. Once the root view is checked, any children that
-    have the duplicateParentState attribute set will inherit this "checked" state.
+    have the duplicateParentState attribute set will inherit this "checked" sync.
 -->
 <CheckedTextView xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"

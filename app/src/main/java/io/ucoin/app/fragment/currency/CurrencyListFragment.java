@@ -1,53 +1,46 @@
 package io.ucoin.app.fragment.currency;
 
-import android.app.Activity;
-import android.app.DialogFragment;
 import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.ListFragment;
-import android.database.Cursor;
-import android.net.Uri;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.RotateAnimation;
+import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ListView;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import io.ucoin.app.Application;
 import io.ucoin.app.R;
-import io.ucoin.app.activity.IToolbarActivity;
-import io.ucoin.app.activity.MainActivity;
+import io.ucoin.app.activity.CurrencyActivity;
 import io.ucoin.app.adapter.CurrencyCursorAdapter;
-import io.ucoin.app.adapter.ProgressViewAdapter;
-import io.ucoin.app.dao.sqlite.SQLiteTable;
-import io.ucoin.app.content.Provider;
-import io.ucoin.app.model.local.Peer;
-import io.ucoin.app.model.remote.Currency;
-import io.ucoin.app.service.ServiceLocator;
-import io.ucoin.app.service.local.CurrencyService;
-import io.ucoin.app.technical.ExceptionUtils;
-import io.ucoin.app.technical.StringUtils;
-import io.ucoin.app.technical.UCoinTechnicalException;
-import io.ucoin.app.technical.task.AsyncTaskHandleException;
+import io.ucoin.app.fragment.dialog.AddCurrencyDialogFragment;
+import io.ucoin.app.model.UcoinCurrency;
+import io.ucoin.app.model.sql.sqlite.Currencies;
 
+public class CurrencyListFragment extends Fragment
+        implements ImageButton.OnClickListener,
+        ListView.OnItemClickListener,
+        DialogInterface.OnDismissListener {
 
-public class CurrencyListFragment extends ListFragment {
-    private ProgressViewAdapter mProgressViewAdapter;
+    private ListView mList;
+    private Button mSelectAll;
+    private ImageButton mButton;
 
     static public CurrencyListFragment newInstance() {
-        return new CurrencyListFragment();
+        CurrencyListFragment fragment = new CurrencyListFragment();
+        fragment.setArguments(new Bundle());
+        return fragment;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
     }
 
     @Override
@@ -61,141 +54,65 @@ public class CurrencyListFragment extends ListFragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        getActivity().setTitle(getString(R.string.currencies));
+        setHasOptionsMenu(true);
 
-        mProgressViewAdapter = new ProgressViewAdapter(
-                view.findViewById(R.id.progressbar),
-                getListView());
+        ((CurrencyActivity) getActivity()).setDrawerIndicatorEnabled(true);
 
-        TextView v = (TextView) view.findViewById(android.R.id.empty);
-        v.setVisibility(View.GONE);
+        mList = (ListView) view.findViewById(R.id.list);
 
-        String selection = SQLiteTable.Currency.ACCOUNT_ID + "=?";
-        String[] selectionArgs = {
-                ((Application) getActivity().getApplication()).getAccountIdAsString()
-        };
+        CurrencyCursorAdapter adapter = new CurrencyCursorAdapter(getActivity(), new Currencies(getActivity()).list());
+        mList.setAdapter(adapter);
+        mList.setEmptyView(view.findViewById(R.id.empty));
+        mList.setOnItemClickListener(this);
 
-        Cursor cursor = getActivity().getContentResolver().query(Provider.CURRENCY_URI,
-                new String[]{},
-                selection,
-                selectionArgs,
-                null);
+        mSelectAll = (Button) view.findViewById(R.id.all);
+        mSelectAll.setOnClickListener(this);
 
-        CurrencyCursorAdapter currencyCursorAdapter =
-                new CurrencyCursorAdapter(getActivity(), cursor, 0);
-
-        setListAdapter(currencyCursorAdapter);
+        mButton = (ImageButton) view.findViewById(R.id.add_currency_button);
+        mButton.setOnClickListener(this);
     }
 
     @Override
-    public void onPrepareOptionsMenu(Menu menu) {
-        Activity activity = getActivity();
+    public void onClick(View v) {
+        if(v instanceof ImageButton) {
+            //animate button
+            RotateAnimation animation = new RotateAnimation(0, 145, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+            animation.setDuration(200);
+            animation.setFillAfter(true);
+            mButton.startAnimation(animation);
 
-        if (activity instanceof IToolbarActivity) {
-            // Disable back button
-            ((IToolbarActivity) activity).setToolbarBackButtonEnabled(false);
-        }
-    }
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.toolbar_currency_list, menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_add_currency:
-                onAddCurrencyClick();
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-
-    @Override
-    public void onListItemClick(ListView l, View v, int position, long id) {
-        Cursor cursor = (Cursor) getListAdapter().getItem(position);
-        Currency currency = ServiceLocator.instance().getCurrencyService().toCurrency(cursor);
-        onOpenCurrency(currency);
-    }
-
-
-    private void onAddCurrencyClick() {
-        DialogFragment fragment = AddCurrencyDialogFragment.newInstance(new AddCurrencyDialogFragment.OnClickListener() {
-            @Override
-            public void onPositiveClick(Bundle args) {
-                Peer peer = (Peer) args.getSerializable(Peer.class.getSimpleName());
-                AddCurrencyTask task = new AddCurrencyTask();
-                task.execute(peer);
-            }
-        });
-        fragment.show(getFragmentManager(),
-                fragment.getClass().getSimpleName());
-    }
-
-    private void onOpenCurrency(final Currency currency) {
-        Fragment fragment = CurrencyFragment.newInstance(currency);
-        FragmentManager fragmentManager = getFragmentManager();
-        fragmentManager.beginTransaction()
-                .setCustomAnimations(
-                        R.animator.delayed_slide_in_up,
-                        R.animator.fade_out,
-                        R.animator.delayed_fade_in,
-                        R.animator.slide_out_up)
-                .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
-                .addToBackStack(fragment.getClass().getSimpleName())
-                .commit();
-    }
-
-    public class AddCurrencyTask extends AsyncTaskHandleException<Peer, Void, Currency> {
-
-        public AddCurrencyTask() {
-            super(getActivity());
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            mProgressViewAdapter.showProgress(true);
-        }
-
-        @Override
-        protected Currency doInBackgroundHandleException(Peer... peers) throws Exception {
-            // Load currency from node
-            Currency currency = ServiceLocator.instance().getBlockchainRemoteService()
-                    .getCurrencyFromPeer(peers[0]);
-
-            // save it
-            if (currency != null && StringUtils.isNotBlank(currency.getCurrencyName())) {
-                CurrencyService currencyService = ServiceLocator.instance().getCurrencyService();
-
-                Long existingCurrencyId = currencyService.getCurrencyIdByName(currency.getCurrencyName());
-                if (existingCurrencyId != null) {
-                    throw new UCoinTechnicalException(getString(R.string.duplicate_currency_name, currency.getCurrencyName()));
-                }
-
-                // Save currency into DB
-                currency = currencyService.save(getContext(), currency);
-            }
-
-            return currency;
-        }
-
-        @Override
-        protected void onSuccess(Currency currency) {
-            mProgressViewAdapter.showProgress(false);
-            if (currency != null) {
-                onOpenCurrency(currency);
+            //show dialog
+            AddCurrencyDialogFragment fragment = AddCurrencyDialogFragment.newInstance();
+            fragment.setOnDismissListener(this);
+            fragment.show(getFragmentManager(), fragment.getClass().getSimpleName());
+        }else if(v instanceof Button){
+            Intent intent = new Intent(getActivity(), CurrencyActivity.class);
+            intent.putExtra(Application.EXTRA_CURRENCY_ID, new Long(-1));
+            if(getActivity() instanceof FinishAction){
+                ((FinishAction) getActivity()).onFinish((long) -1);
             }
         }
+    }
 
-        @Override
-        protected void onFailed(Throwable t) {
-            mProgressViewAdapter.showProgress(false);
-            Toast.makeText(getContext(),
-                    ExceptionUtils.getMessage(t),
-                    Toast.LENGTH_LONG)
-                    .show();
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        Long currencyId = ((UcoinCurrency)mList.getItemAtPosition(position)).id();
+        if(getActivity() instanceof FinishAction){
+            ((FinishAction) getActivity()).onFinish(currencyId);
         }
+    }
+
+    @Override
+    public void onDismiss(DialogInterface dialog) {
+        //animate button
+        RotateAnimation animation = new RotateAnimation(145, 0, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+        animation.setDuration(200);
+        animation.setFillAfter(true);
+        mButton.startAnimation(animation);
+    }
+
+    public interface FinishAction{
+        public void onFinish(Long currencyId);
     }
 }

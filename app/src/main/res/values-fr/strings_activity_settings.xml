@@ -6,46 +6,28 @@
     <!-- Example General settings -->
     <string name="pref_header_general">Général</string>
 
-    <string name="pref_unit_title">Unité d\'affichage de la monnaie</string>
-    <string-array name="pref_unit_list_titles">
-        <item>Classique</item>
-        <item>Dividende Universel</item>
-        <item>Credit mutuel (temps)</item>
-    </string-array>
-    <string-array name="pref_unit_list_values">
-        <item>coin</item>
-        <item>ud</item>
-        <item>time</item>
-    </string-array>
-    <string name="pref_unit_forget">Utiliser l\'oublie</string>
+    <string name="pref_title_social_recommendations">Activer les recommandations sociaux</string>
+    <string name="pref_description_social_recommendations">Recommandations pour les personnes à contacter en fonction de votre historique des messages</string>
 
-    <string name="pref_title_save_contact">Enregistrer les contacts dans</string>
-    <string-array name="pref_save_contact_titles">
-        <item>l\'application</item>
-        <item>l\'application et le téléphone</item>
-    </string-array>
-    <string-array name="pref_save_contact_values">
-        <item>1</item>
-        <item>2</item>
-    </string-array>
+    <string name="pref_title_display_name">Afficher un nom</string>
+    <string name="pref_default_display_name">John Smith</string>
 
-
-    <string name="pref_title_add_receiver_as_contact">Ajouter comme contact automatiquement</string>
-    <string-array name="pref_add_receiver_as_contact_titles">
+    <string name="pref_title_add_friends_to_messages">Ajouter des amis à messages</string>
+    <string-array name="pref_example_list_titles">
         <item>Toujours</item>
-        <item>Demander</item>
+        <item>Quand c\'est possible</item>
         <item>Jamais</item>
     </string-array>
-    <string-array name="pref_add_receiver_as_contact_values">
+    <string-array name="pref_example_list_values">
         <item>1</item>
-        <item>-1</item>
         <item>0</item>
+        <item>-1</item>
     </string-array>
 
     <!-- Example settings for Data & Sync -->
-    <string name="pref_header_data_sync">Données &amp; synchronisation</string>
+    <string name="pref_header_data_sync">Date &amp; sync</string>
 
-    <string name="pref_title_sync_frequency">Fréquence synchronisation</string>
+    <string name="pref_title_sync_frequency">fréquence de synchronisation</string>
     <string-array name="pref_sync_frequency_titles">
         <item>15 minutes</item>
         <item>30 minutes</item>
@@ -63,15 +45,15 @@
         <item>-1</item>
     </string-array>
 
-    <string name="pref_title_system_sync_settings">Paramètre système de synchronisation</string>
+    <string name="pref_title_system_sync_settings">Paramètres de synchronisation du système</string>
 
     <!-- Example settings for Notifications -->
     <string name="pref_header_notifications">Notifications</string>
 
-    <string name="pref_title_received_payment_notifications">Réception paiement</string>
-    <string name="pref_title_received_ud_notifications">Réception Dividende Universel</string>
+    <string name="pref_title_new_message_notifications">Notifications de nouveaux messages</string>
 
     <string name="pref_title_ringtone">Sonnerie</string>
     <string name="pref_ringtone_silent">Silencieux</string>
-    <string name="pref_title_vibrate">Vibreur</string>
+
+    <string name="pref_title_vibrate">Vibration</string>
 </resources>

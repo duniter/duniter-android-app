@@ -2,33 +2,17 @@
 
 <resources>
     <!-- Default screen margins, per the Android Design guidelines. -->
-    <color name="primary">#E0E0E0</color>
-    <color name="primaryDark">#020036</color>
-    <color name="accent">#FF0057</color>
-    <color name="accentLight">#ffffd1dd</color>
+    <color name="primary">#030055</color>
+    <color name="primaryLight">#1b3d00ff</color>
+    <color name="primaryDark">#ff000020</color>
+    <color name="accent">#ff7a00</color>
+    <color name="accentLight">#36ff7a00</color>
     <color name="textPrimary">#FFF</color>
     <color name="transparent">#00000000</color>
-    <color name="grey">#AAAAAA</color>
-    <color name="textComputed">#0099CC</color>
     <color name="grey200">#FFEEEEEE</color>
+    <color name="grey400">#FFBDBDBD</color>
+    <color name="grey600">#FF757575</color>
 
-    <color name="cardview_initial_background">#71C3DE</color>
-
-    <!--
-     Wallet colors to support consistent Wallet fragment holo dark UI in client application
-     regardless of the theme and device type
--->
-    <color name="wallet_bright_foreground_holo_dark">#fff3f3f3</color>
-    <color name="wallet_dim_foreground_holo_dark">#bebebe</color>
-    <color name="wallet_dim_foreground_disabled_holo_dark">#80bebebe</color>
-    <color name="wallet_dim_foreground_inverse_holo_dark">#323232</color>
-    <color name="wallet_dim_foreground_inverse_disabled_holo_dark">#80323232</color>
-    <color name="wallet_bright_foreground_disabled_holo_light">#ffb2b2b2</color>
-    <color name="wallet_bright_foreground_holo_light">#ff000000</color>
-    <color name="wallet_hint_foreground_holo_light">#808080</color>
-    <color name="wallet_hint_foreground_holo_dark">#808080</color>
-    <color name="wallet_highlighted_text_holo_light">#6633b5e5</color>
-    <color name="wallet_highlighted_text_holo_dark">#6633b5e5</color>
-    <color name="wallet_holo_blue_light">#ff33b5e5</color>
-    <color name="wallet_link_text_light">#0000ee</color>
+    <color name="red">#EF473A</color>
+    <color name="green">#33CD5F</color>
 </resources>
