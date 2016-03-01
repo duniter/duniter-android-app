@@ -397,5 +397,9 @@
     <string name="uid_alredy_exist">This pseudonym alredy exist</string>
     <string name="wallet_already_registered">This wallet is already registered</string>
     <string name="inscription_wallet">Wallet inscription</string>
+    <string name="developed_by">Developed by</string>
+    <string name="source_code">Source Code</string>
+    <string name="licence">Licence</string>
+    <string name="credit">Credit</string>
 
 </resources>

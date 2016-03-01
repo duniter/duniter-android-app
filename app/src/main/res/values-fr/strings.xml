@@ -392,5 +392,9 @@
     <string name="uid_alredy_exist">Ce pseudonyme existe déjà</string>
     <string name="wallet_already_registered">Ce portefeuille est déjà inscrit</string>
     <string name="inscription_wallet">Inscription d\'un portefeuille</string>
+    <string name="developed_by">Développé par</string>
+    <string name="source_code">Code Source</string>
+    <string name="licence">Licence</string>
+    <string name="credit">Credit</string>
 
 </resources>

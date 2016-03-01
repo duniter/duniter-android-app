@@ -47,6 +47,9 @@ public class CurrencyListFragment extends Fragment
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
+        if(getActivity() instanceof CurrencyActivity){
+            ((CurrencyActivity) getActivity()).setDrawerIndicatorEnabled(false);
+        }
         return inflater.inflate(R.layout.fragment_currency_list,
                 container, false);
     }
@@ -56,8 +59,6 @@ public class CurrencyListFragment extends Fragment
         super.onViewCreated(view, savedInstanceState);
         getActivity().setTitle(getString(R.string.currencies));
         setHasOptionsMenu(true);
-
-        ((CurrencyActivity) getActivity()).setDrawerIndicatorEnabled(true);
 
         mList = (ListView) view.findViewById(R.id.list);
 

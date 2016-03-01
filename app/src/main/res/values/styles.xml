@@ -29,11 +29,23 @@
         <item name="android:textSize">@dimen/abc_text_size_headline_material</item>
     </style>
 
+    <style name="CreditLabel">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginLeft">8dp</item>
+        <item name="android:layout_marginStart">8dp</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:gravity">left|center_vertical</item>
+        <item name="android:layout_marginBottom">8dp</item>
+    </style>
+
     <style name="RuleLabel">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_marginLeft">8dp</item>
         <item name="android:layout_marginStart">8dp</item>
+        <item name="android:layout_marginRight">8dp</item>
+        <item name="android:layout_marginEnd">8dp</item>
         <item name="android:textStyle">normal</item>
         <item name="android:gravity">left|center_vertical</item>
     </style>

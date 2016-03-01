@@ -43,6 +43,7 @@ import io.ucoin.app.R;
 import io.ucoin.app.UcoinUris;
 import io.ucoin.app.fragment.currency.BlockListFragment;
 import io.ucoin.app.fragment.currency.ContactListFragment;
+import io.ucoin.app.fragment.currency.CreditFragment;
 import io.ucoin.app.fragment.currency.CurrencyListFragment;
 import io.ucoin.app.fragment.currency.IdentityFragment;
 import io.ucoin.app.fragment.currency.PeerListFragment;
@@ -146,6 +147,7 @@ public class CurrencyActivity extends ActionBarActivity
         TextView drawerPeersView = (TextView) mDrawerLayout.findViewById(R.id.drawer_peers);
         TextView drawerCurrencyView = (TextView) mDrawerLayout.findViewById(R.id.drawer_currency);
         TextView drawerSettingsView = (TextView) mDrawerLayout.findViewById(R.id.drawer_settings);
+        TextView drawerCreditView = (TextView) mDrawerLayout.findViewById(R.id.drawer_credits);
         drawerRulesView = (TextView) mDrawerLayout.findViewById(R.id.drawer_rules);
         drawerBlocksView = (TextView) mDrawerLayout.findViewById(R.id.drawer_blocks);
         drawerWalletsView.setActivated(true);
@@ -157,6 +159,7 @@ public class CurrencyActivity extends ActionBarActivity
         drawerPeersView.setOnClickListener(this);
         drawerCurrencyView.setOnClickListener(this);
         drawerSettingsView.setOnClickListener(this);
+        drawerCreditView.setOnClickListener(this);
 
         if (BuildConfig.DEBUG) {
             drawerBlocksView.setVisibility(View.VISIBLE);
@@ -478,6 +481,10 @@ public class CurrencyActivity extends ActionBarActivity
                 Intent i = new Intent(CurrencyActivity.this, AppPreferences.class);
                 startActivity(i);
                 break;
+            case R.id.drawer_credits:
+                removeList(false);
+                displayCreditFragment();
+                break;
         }
     }
 
@@ -543,6 +550,12 @@ public class CurrencyActivity extends ActionBarActivity
 
     private void displayListBlockFragment(){
         currentFragment = BlockListFragment.newInstance(currencyId);
+        addFragment();
+        displayFragment(currentFragment);
+    }
+
+    private void displayCreditFragment(){
+        currentFragment = CreditFragment.newInstance();
         addFragment();
         displayFragment(currentFragment);
     }

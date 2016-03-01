@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import io.ucoin.app.R;
+import io.ucoin.app.activity.CurrencyActivity;
 import io.ucoin.app.model.sql.sqlite.Currency;
 import io.ucoin.app.sqlite.SQLiteTable;
 
@@ -27,13 +28,15 @@ public class RulesFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
+        if(getActivity() instanceof CurrencyActivity) {
+            ((CurrencyActivity) getActivity()).setDrawerIndicatorEnabled(false);
+        }
 
         return inflater.inflate(R.layout.fragment_currency_rules,
                 container, false);
@@ -43,6 +46,7 @@ public class RulesFragment extends Fragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        setHasOptionsMenu(true);
         bind(view);
     }
 

@@ -1,0 +1,43 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+    <LinearLayout
+        android:id="@+id/wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        >
+
+        <TextView
+            android:text="@string/developed_by"
+            style="@style/headline"/>
+
+        <TextView
+            android:text="blavenie - github.com/blavenie"
+            style="@style/CreditLabel"/>
+        <TextView
+            android:text="mmpio - github.com/mmpio"
+            style="@style/CreditLabel"/>
+        <TextView
+            android:text="naivalf27 - github.com/naivalf27"
+            style="@style/CreditLabel"/>
+
+        <TextView
+            android:text="@string/source_code"
+            style="@style/headline"/>
+
+        <TextView
+            android:text="github.com/ucoin-io/ucoin-android-app"
+            style="@style/CreditLabel"/>
+
+        <TextView
+            android:text="@string/licence"
+            style="@style/headline"/>
+
+        <TextView
+            android:text="GNU GPL v3"
+            style="@style/CreditLabel"/>
+
+    </LinearLayout>
+</ScrollView>
