@@ -3,7 +3,7 @@ package io.ucoin.app;
 import android.net.Uri;
 
 public class UcoinUris {
-    public static final String AUTHORITY = "io.ucoin.android.wallet.provider";
+    public static final String AUTHORITY = "io.ucoin.android.provider";
 
     public final static Uri CURRENCY_URI;
     public final static Uri IDENTITY_URI;

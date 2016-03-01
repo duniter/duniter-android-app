@@ -4,7 +4,7 @@ android {
     compileSdkVersion 21
     buildToolsVersion "21.1.2"
     defaultConfig {
-        applicationId "io.ucoin.ucoin"
+        applicationId "io.ucoin.android"
         minSdkVersion 14
         targetSdkVersion 21
         versionCode 8

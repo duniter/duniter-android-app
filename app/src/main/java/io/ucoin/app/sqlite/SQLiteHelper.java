@@ -331,7 +331,6 @@ public class SQLiteHelper extends SQLiteOpenHelper implements SQLiteTable {
         }
         db.execSQL("DROP TABLE IF EXISTS " + Currency.TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + Block.TABLE_NAME);
-        db.execSQL("DROP TABLE IF EXISTS " + Block.TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + Identity.TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + Member.TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + Certification.TABLE_NAME);
