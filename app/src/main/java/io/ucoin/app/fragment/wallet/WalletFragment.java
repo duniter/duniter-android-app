@@ -196,7 +196,11 @@ public class WalletFragment extends ListFragment
     }
 
     public void updateHistory() {
-        Format.Currency.changeUnit(getActivity(), mWallet.currency().name(), mWallet.quantitativeAmount(), mWallet.udValue(), mCurrency.dt(), amount, defaultAmount, "");
+        try {
+            Format.Currency.changeUnit(getActivity(), mWallet.currency().name(), mWallet.quantitativeAmount(), mWallet.udValue(), mCurrency.dt(), amount, defaultAmount, "");
+        }catch (Exception e){
+            e.printStackTrace();
+        }
         operationSectionCursorAdapter.swapCursor(new Txs(getActivity()).getByWalletId(mWallet.id()).cursor(), mWallet);
     }
 

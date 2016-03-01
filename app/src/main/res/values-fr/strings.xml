@@ -307,19 +307,13 @@
         <item>2</item>
     </string-array>
 
+    <!--<string-array name="node">-->
+        <!--<item>meta_brouzouf@metab.ucoin.io:9201</item>-->
+        <!--<item>zeta_brouzouf@ucoin.twiced.fr:9101</item>-->
+    <!--</string-array>-->
+
     <string-array name="node">
         <item>meta_brouzouf@metab.ucoin.io:9201</item>
-        <item>zeta_brouzouf@ucoin.twiced.fr:9101</item>
-    </string-array>
-
-    <string-array name="adress">
-        <item>metab.ucoin.io</item>
-        <item>ucoin.twiced.fr</item>
-    </string-array>
-
-    <string-array name="port">
-        <item>9201</item>
-        <item>9101</item>
     </string-array>
 
     <!-- Strings related to rules currency -->

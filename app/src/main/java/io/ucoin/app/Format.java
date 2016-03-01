@@ -429,7 +429,11 @@ public class Format {
                 }
             }
         }else{
-            result = str;
+            if(str.contains(".")){
+                result = str.substring(0,str.indexOf("."));
+            }else {
+                result = str;
+            }
         }
         return result;
     }

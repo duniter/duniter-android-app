@@ -234,21 +234,23 @@
                 android:textColor="#FF000000"
                 android:textSize="@dimen/abc_text_size_body_2_material" />
 
+            <TextView
+                android:id="@+id/drawer_credits"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@drawable/textview_background_selector"
+                android:drawablePadding="48dp"
+                android:drawableStart="@drawable/ic_credit_grey_24dp"
+                android:gravity="center_vertical"
+                android:paddingEnd="16dp"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:paddingStart="16dp"
+                android:text="@string/credit"
+                android:textColor="#FF000000"
+                android:textSize="@dimen/abc_text_size_body_2_material" />
+
         </LinearLayout>
     </ScrollView>
-
-    <TextView
-        android:id="@+id/drawer_credits"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:background="@drawable/textview_background_selector"
-        android:gravity="end"
-        android:paddingEnd="16dp"
-        android:paddingRight="16dp"
-        android:paddingBottom="16dp"
-        android:text="@string/credit"
-        android:textColor="#000"
-        android:textSize="@dimen/abc_text_size_body_2_material" />
 
 </RelativeLayout>

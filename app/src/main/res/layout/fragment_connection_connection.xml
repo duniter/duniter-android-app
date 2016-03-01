@@ -81,4 +81,15 @@
             android:background="@drawable/edit_text_white" />
 
     </LinearLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/ucoin"
+        android:id="@+id/textView5"
+        android:textColor="@android:color/white"
+        android:textSize="50sp"
+        android:gravity="center"
+        android:layout_above="@+id/field_layout"
+        android:layout_centerHorizontal="true"/>
 </RelativeLayout>
