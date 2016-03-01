@@ -89,6 +89,7 @@ public class RequierementsService extends Service {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
+                        error.printStackTrace();
                     }
                 });
         request.setTag(TAG);

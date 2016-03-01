@@ -74,6 +74,7 @@ public class ServiceLocator implements Closeable {
             return service;
         }
         catch (Exception e) {
+            e.printStackTrace();
             throw new UCoinTechnicalException("Could not load service: " + clazz.getName(), e);
         }
     }

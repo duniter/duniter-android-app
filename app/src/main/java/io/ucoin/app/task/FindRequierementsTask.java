@@ -61,6 +61,7 @@ public class FindRequierementsTask extends AsyncTask<Bundle, Integer, Void>{
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
+                        error.printStackTrace();
                         cancelQueue();
                         mListener.onTaskError(error);
                     }

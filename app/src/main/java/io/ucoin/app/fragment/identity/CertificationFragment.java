@@ -260,6 +260,7 @@ public class CertificationFragment extends ListFragment
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
+                    error.printStackTrace();
                     cancelQueue();
                 }
             });

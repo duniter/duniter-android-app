@@ -74,6 +74,7 @@ public class SendCertificationTask extends AsyncTask<Void, Integer, Void> {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
+                error.printStackTrace();
                 cancelQueue();
             }
         });

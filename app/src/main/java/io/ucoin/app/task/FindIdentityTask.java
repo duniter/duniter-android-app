@@ -114,6 +114,7 @@ public class FindIdentityTask extends AsyncTask<String, Void, String> {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
+                        error.printStackTrace();
                         queue.cancelAll(new RequestQueue.RequestFilter() {
                             @Override
                             public boolean apply(Request<?> request) {

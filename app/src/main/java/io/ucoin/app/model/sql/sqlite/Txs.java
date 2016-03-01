@@ -159,6 +159,7 @@ final public class Txs extends Table
         try {
             result = applyBatch(operations);
         } catch (Exception e) {
+            e.printStackTrace();
             return null;
         }
 

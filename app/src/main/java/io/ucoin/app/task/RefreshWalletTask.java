@@ -75,6 +75,7 @@ public class RefreshWalletTask extends AsyncTask<Void, Integer, Void>{
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
+                        error.printStackTrace();
                         position++;
                         Toast.makeText(context, error.toString(), Toast.LENGTH_SHORT).show();
                         if(position>=wallets.size()){

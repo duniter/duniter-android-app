@@ -193,6 +193,7 @@ public class AddCurrencyDialogFragment extends DialogFragment
 
     @Override
     public void onErrorResponse(VolleyError error) {
+        error.printStackTrace();
         if(error instanceof NoConnectionError) {
             Toast.makeText(Application.getContext(),
                     getResources().getString(R.string.no_connection),

@@ -55,6 +55,7 @@ public class CryptoService extends BaseService {
                     SCRYPT_PARAMS_p, SEED_BYTES);
             return seed;
         } catch (GeneralSecurityException e) {
+            e.printStackTrace();
             throw new UCoinTechnicalException(
                     "Unable to salt password, using Scrypt library", e);
         }

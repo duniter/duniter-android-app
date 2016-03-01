@@ -98,6 +98,7 @@ public class WalletWrapper implements Response.ErrorListener, RequestQueue.Reque
 
     @Override
     public void onErrorResponse(VolleyError error) {
+        error.printStackTrace();
         if (BuildConfig.DEBUG) Log.d("WalletWrapper", error.toString());
     }
 

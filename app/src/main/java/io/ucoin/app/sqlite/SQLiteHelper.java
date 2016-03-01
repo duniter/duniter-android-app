@@ -391,6 +391,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements SQLiteTable {
                 db.execSQL("DROP VIEW IF EXISTS " + SQLiteView.Membership.VIEW_NAME);
                 db.execSQL("DROP VIEW IF EXISTS " + SQLiteView.Identity.VIEW_NAME);
             } catch (SQLiteException e) {
+                e.printStackTrace();
                 if (BuildConfig.DEBUG) Log.d("SQLITEHELPER", e.getMessage());
             }
 

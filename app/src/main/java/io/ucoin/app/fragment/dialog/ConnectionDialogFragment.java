@@ -150,12 +150,15 @@ public class ConnectionDialogFragment extends DialogFragment implements Response
         if(error == null){
             Toast.makeText(Application.getContext(), getResources().getString(R.string.wallet_already_exists), Toast.LENGTH_SHORT).show();
         }else if(error instanceof NoConnectionError) {
+            error.printStackTrace();
             Toast.makeText(Application.getContext(),
                     getResources().getString(R.string.no_connection),
                     Toast.LENGTH_LONG).show();
         }else if (error instanceof ServerError){
+            error.printStackTrace();
             Toast.makeText(Application.getContext(),getResources().getString(R.string.wallet_no_exists), Toast.LENGTH_LONG).show();
         }else {
+            error.printStackTrace();
             Toast.makeText(Application.getContext(), error.toString(), Toast.LENGTH_LONG).show();
         }
         mFieldLayout.setVisibility(View.VISIBLE);

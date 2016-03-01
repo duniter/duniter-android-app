@@ -182,6 +182,7 @@ public class InscriptionDialogFragment extends DialogFragment implements Respons
 
     @Override
     public void onErrorResponse(VolleyError error) {
+        error.printStackTrace();
         if(error == null){
             Toast.makeText(Application.getContext(), getResources().getString(R.string.wallet_already_exists), Toast.LENGTH_SHORT).show();
         }else if(error instanceof NoConnectionError) {

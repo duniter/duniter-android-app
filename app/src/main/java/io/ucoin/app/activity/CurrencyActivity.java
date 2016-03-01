@@ -369,6 +369,7 @@ public class CurrencyActivity extends ActionBarActivity
             destination.close();
             Toast.makeText(this, "DB Exported!", Toast.LENGTH_LONG).show();
         } catch (IOException e) {
+            e.printStackTrace();
             Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
         }
     }

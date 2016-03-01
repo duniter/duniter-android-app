@@ -122,6 +122,7 @@ public class CurrencyWrapper implements
 
     @Override
     public void onErrorResponse(VolleyError error) {
+        error.printStackTrace();
         if (BuildConfig.DEBUG) Log.d("CurrencyWrapper", error.toString());
     }
 

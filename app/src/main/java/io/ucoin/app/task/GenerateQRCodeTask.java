@@ -41,6 +41,7 @@ public class GenerateQRCodeTask extends AsyncTask<Bundle, Void, Bitmap> {
 
             return bitmap;
         } catch (Exception e) {
+            e.printStackTrace();
             if (BuildConfig.DEBUG) Log.d("GenerateQRCodeTask", e.getMessage());
         }
         return null;

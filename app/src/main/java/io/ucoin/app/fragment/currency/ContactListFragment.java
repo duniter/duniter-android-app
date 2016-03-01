@@ -509,6 +509,7 @@ public class ContactListFragment extends ListFragment
                     new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
+                            error.printStackTrace();
                             if (error instanceof NoConnectionError) {
                                 Toast.makeText(Application.getContext(), mContext.getResources().getString(R.string.no_connection), Toast.LENGTH_LONG).show();
                             } else if(error instanceof TimeoutError) {

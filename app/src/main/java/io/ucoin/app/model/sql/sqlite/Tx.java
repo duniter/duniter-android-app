@@ -87,6 +87,7 @@ public class Tx extends Row
         try {
             return DayOfWeek.fromInt(getInt(SQLiteView.Tx.DAY_OF_WEEK),false);
         } catch (Exception e) {
+            e.printStackTrace();
             return DayOfWeek.UNKNOWN;
         }
     }

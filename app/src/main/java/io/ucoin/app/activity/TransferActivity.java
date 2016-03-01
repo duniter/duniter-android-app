@@ -533,6 +533,7 @@ public class TransferActivity extends ActionBarActivity implements SendIdentity,
         try {
             transaction.addSignature(transaction.sign(wallet.privateKey()));
         } catch (AddressFormatException e) {
+            e.printStackTrace();
             Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
         }
 
@@ -557,6 +558,7 @@ public class TransferActivity extends ActionBarActivity implements SendIdentity,
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
+                        error.printStackTrace();
                         mTransferMenuItem.setEnabled(true);
                         Drawable drawable = ResourcesCompat.getDrawable(getResources(), R.drawable.ic_send_white_24dp, null);
                         mTransferMenuItem.setIcon(drawable);

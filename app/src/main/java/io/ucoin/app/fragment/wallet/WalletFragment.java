@@ -424,6 +424,7 @@ public class WalletFragment extends ListFragment
                 try {
                     object = new JSONObject(response);
                 } catch (JSONException e) {
+                    e.printStackTrace();
                     return;
                 }
 
@@ -438,6 +439,7 @@ public class WalletFragment extends ListFragment
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
+                error.printStackTrace();
                 if (error instanceof NoConnectionError) {
                     Toast.makeText(context,
                             context.getResources().getString(R.string.no_connection),
@@ -526,6 +528,7 @@ public class WalletFragment extends ListFragment
                 }, new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
+                        error.printStackTrace();
                         if (error instanceof NoConnectionError) {
                             Toast.makeText(context, context.getResources().getString(R.string.no_connection), Toast.LENGTH_LONG).show();
                         } else {

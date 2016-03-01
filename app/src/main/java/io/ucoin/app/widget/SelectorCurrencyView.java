@@ -228,6 +228,7 @@ public class SelectorCurrencyView implements Response.ErrorListener {
 
     @Override
     public void onErrorResponse(VolleyError error) {
+        error.printStackTrace();
         action.onError(error);
     }
 

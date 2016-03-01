@@ -64,6 +64,7 @@ final public class Peers extends Table
         try {
             result = applyBatch(operations);
         } catch (Exception e) {
+            e.printStackTrace();
             return null;
         }
         return new Peer(mContext, Long.parseLong(result[0].uri.getLastPathSegment()));

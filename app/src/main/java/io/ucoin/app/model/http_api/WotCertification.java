@@ -17,7 +17,7 @@ public class WotCertification implements Serializable {
 
     public static WotCertification fromJson(InputStream json) {
         Gson gson = new Gson();
-        Reader reader = new InputStreamReader(json, Charset.forName("UTF_8"));
+        Reader reader = new InputStreamReader(json, Charset.forName("UTF-8"));
         return gson.fromJson(reader, WotCertification.class);
     }
 

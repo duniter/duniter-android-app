@@ -102,6 +102,7 @@ public class InscriptionView {
 
             @Override
             public void onError(VolleyError error) {
+                error.printStackTrace();
                 action.onError(error,false,false);
             }
         });

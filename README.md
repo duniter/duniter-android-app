@@ -46,10 +46,5 @@ sudo apt-get install build-essential libpcre3 libpcre3-dev libtool automake pyth
 	```
 	git clone https://github.com/ucoin-io/ucoin-android-app.git --recursive
 	cd ucoin-android-app
-	cd kalium-jni/src/main/jni/libsodium
 	./autogen.sh
-	./dist-build/android-arm.sh
-	./dist-build/android-mips.sh
-	./dist-build/android-x86.sh
-	cd
 	```

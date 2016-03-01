@@ -156,6 +156,7 @@ public class AddIdentityDialogFragment extends DialogFragment {
                             //UcoinIdentity identity = currency.addIdentity(uid.getText().toString(), keyPair.getPubKey().toString());
                             dismiss();
                         } catch (Exception e) {
+                            e.printStackTrace();
                             Toast.makeText(mActivity, e.getMessage(), Toast.LENGTH_LONG).show();
                         }
                         Application.requestSync();

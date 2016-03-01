@@ -144,7 +144,7 @@ public class WalletCursorAdapter extends CursorAdapter {
                 holder.is_member.setVisibility(View.GONE);
             }
         }catch (NullPointerException e){
-
+            e.printStackTrace();
         }
 
 //        infoIdentity.setOnClickListener(new View.OnClickListener() {
@@ -165,6 +165,7 @@ public class WalletCursorAdapter extends CursorAdapter {
             holder.primaryAmount.setVisibility(View.VISIBLE);
             holder.secondAmount.setVisibility(View.VISIBLE);
         }catch (NullPointerException e) {
+            e.printStackTrace();
             holder.progress.setVisibility(View.VISIBLE);
             holder.primaryAmount.setVisibility(View.GONE);
             holder.secondAmount.setVisibility(View.GONE);

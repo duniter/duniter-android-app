@@ -206,6 +206,7 @@ public class IdentityWrapper implements Response.ErrorListener, RequestQueue.Req
 
     @Override
     public void onErrorResponse(VolleyError error) {
+        error.printStackTrace();
         if (BuildConfig.DEBUG) Log.d("Identity", error.toString());
     }
 

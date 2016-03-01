@@ -841,6 +841,7 @@ public class DbProvider extends ContentProvider implements SQLiteTable {
             result = super.applyBatch(operations);
             db.setTransactionSuccessful();
         } catch (Exception e) {
+            e.printStackTrace();
             db.endTransaction();
             throw e;
         }

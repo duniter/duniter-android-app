@@ -13,7 +13,7 @@ public class WotRequirements implements Serializable {
 
     public static WotRequirements fromJson(InputStream json) {
         Gson gson = new Gson();
-        Reader reader = new InputStreamReader(json, Charset.forName("UTF_8"));
+        Reader reader = new InputStreamReader(json, Charset.forName("UTF-8"));
         return gson.fromJson(reader, WotRequirements.class);
     }
 

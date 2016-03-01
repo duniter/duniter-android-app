@@ -98,6 +98,7 @@ public class ConnectionView {
 
             @Override
             public void onTaskError(VolleyError error) {
+                error.printStackTrace();
                 action.onError(error);
             }
         });
