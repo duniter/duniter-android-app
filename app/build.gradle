@@ -74,6 +74,7 @@ dependencies {
     compile project(':scrypt')
     compile project(':kalium-jni')
     compile project(':volley')
+    //compile 'com.mcxiaoke.volley:library:1.0.19'
     // Supports Android 4.0.3 and later (API level 15)
     compile 'com.journeyapps:zxing-android-embedded:2.3.0@aar'
     // Supports Android 2.1 and later (API level 7), but not optimal for later Android versions.
