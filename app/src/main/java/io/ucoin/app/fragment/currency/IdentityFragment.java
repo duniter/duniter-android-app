@@ -2,12 +2,16 @@ package io.ucoin.app.fragment.currency;
 
 import android.app.AlertDialog;
 import android.app.ListFragment;
+import android.app.LoaderManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.CursorLoader;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.Loader;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.v4.view.MenuItemCompat;
@@ -32,13 +36,13 @@ import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 
 import io.ucoin.app.Application;
+import io.ucoin.app.Format;
 import io.ucoin.app.R;
+import io.ucoin.app.UcoinUris;
 import io.ucoin.app.activity.CurrencyActivity;
 import io.ucoin.app.activity.TransferActivity;
 import io.ucoin.app.adapter.OperationIdentitySectionAdapter;
@@ -46,22 +50,18 @@ import io.ucoin.app.model.IdentityContact;
 import io.ucoin.app.model.UcoinCurrency;
 import io.ucoin.app.model.UcoinWallet;
 import io.ucoin.app.model.UcoinWallets;
-import io.ucoin.app.model.http_api.TxHistory;
 import io.ucoin.app.model.http_api.WotRequirements;
 import io.ucoin.app.model.sql.sqlite.Currency;
-import io.ucoin.app.model.sql.sqlite.Txs;
 import io.ucoin.app.model.sql.sqlite.Wallets;
-import io.ucoin.app.Format;
 import io.ucoin.app.service.RequierementsService;
-import io.ucoin.app.service.TxHistoryService;
+import io.ucoin.app.sqlite.SQLiteView;
 
 public class IdentityFragment extends ListFragment
-        implements SwipeRefreshLayout.OnRefreshListener, View.OnClickListener {
+        implements LoaderManager.LoaderCallbacks<Cursor>,SwipeRefreshLayout.OnRefreshListener, View.OnClickListener {
 
     public static final String TAG = "Identity Fragment";
 
     public static final int WOT_REQUIEREMENTS = 0;
-    public static final int TX_HISTORY = 1;
 
     private OperationIdentitySectionAdapter operationSectionCursorAdapter;
 
@@ -76,7 +76,6 @@ public class IdentityFragment extends ListFragment
     private UcoinCurrency currency;
 
     private Intent intentRequierementsService;
-    private Intent intentHistoryService;
 
     private TextView textCertification;
     private Spinner spinner;
@@ -126,9 +125,7 @@ public class IdentityFragment extends ListFragment
     public void onPause() {
         super.onPause();
         getActivity().unregisterReceiver(broadcastReceiverWotRequierements);
-        getActivity().unregisterReceiver(broadcastReceiverTxHistory);
         getActivity().stopService(intentRequierementsService);
-        getActivity().stopService(intentHistoryService);
     }
 
     private BroadcastReceiver broadcastReceiverWotRequierements = new BroadcastReceiver() {
@@ -138,30 +135,12 @@ public class IdentityFragment extends ListFragment
         }
     };
 
-    private BroadcastReceiver broadcastReceiverTxHistory = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            updateUI(TX_HISTORY,intent);
-        }
-    };
-
     private void updateUI(int type,Intent intent) {
         switch (type){
             case WOT_REQUIEREMENTS:
                 Log.d(TAG, "reception requierements");
                 WotRequirements requirements = (WotRequirements) intent.getSerializableExtra(RequierementsService.WOT_REQUIEREMENTS);
                 updateRequirements(requirements);
-                break;
-            case TX_HISTORY:
-                Log.d(TAG,"reception history");
-                Object[] txHistories = (Object[]) intent.getSerializableExtra(TxHistoryService.TX_HISTORY);
-
-                String[] publicKeys = intent.getStringArrayExtra(TxHistoryService.PUBLIC_KEY);
-                List<String> test = Arrays.asList(publicKeys);
-                for(UcoinWallet wallet:listWallet){
-                    wallet.txs().add((TxHistory) txHistories[test.indexOf(wallet.publicKey())]);
-                }
-                changeWalletSelected();
                 break;
             default:
                 break;
@@ -199,7 +178,6 @@ public class IdentityFragment extends ListFragment
         setHasOptionsMenu(true);
 
         intentRequierementsService = new Intent(getActivity(), RequierementsService.class);
-        intentHistoryService = new Intent(getActivity(), TxHistoryService.class);
 
         mSwipeLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_layout);
         mSwipeLayout.setOnRefreshListener(this);
@@ -228,9 +206,6 @@ public class IdentityFragment extends ListFragment
 
         intentRequierementsService.putExtra(RequierementsService.CURRENCY_ID, identityContact.getCurrencyId());
         intentRequierementsService.putExtra(RequierementsService.PUBLIC_KEY, identityContact.getPublicKey());
-
-        intentHistoryService.putExtra(TxHistoryService.CURRENCY_ID, identityContact.getCurrencyId());
-        intentHistoryService.putExtra(TxHistoryService.PUBLIC_KEY, listPublicKeyWallet);
 
         alias.setText(identityContact.toString());
         publicKey.setText(Format.minifyPubkey(identityContact.getPublicKey()));
@@ -288,7 +263,7 @@ public class IdentityFragment extends ListFragment
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
         operationSectionCursorAdapter
-                = new OperationIdentitySectionAdapter(getActivity(), null, null);
+                = new OperationIdentitySectionAdapter(getActivity(), null);
         setListAdapter(operationSectionCursorAdapter);
 
         if(identityContact.isContact()){
@@ -405,9 +380,7 @@ public class IdentityFragment extends ListFragment
     }
 
     private void changeWalletSelected(){
-        this.walletSelected = (UcoinWallet) spinner.getSelectedItem();
-        long value = walletSelected!=null ? walletSelected.id() : -1;
-        operationSectionCursorAdapter.swapCursor(new Txs(getActivity()).getByPublicKey(identityContact.getPublicKey(), value).cursor(), walletSelected);
+        getLoaderManager().initLoader(1, getArguments(), this);
     }
 
     @Override
@@ -422,8 +395,6 @@ public class IdentityFragment extends ListFragment
     public void onRefresh() {
         getActivity().startService(intentRequierementsService);
         getActivity().registerReceiver(broadcastReceiverWotRequierements, new IntentFilter(RequierementsService.BROADCAST_ACTION));
-        getActivity().startService(intentHistoryService);
-        getActivity().registerReceiver(broadcastReceiverTxHistory, new IntentFilter(TxHistoryService.BROADCAST_ACTION));
         mSwipeLayout.setRefreshing(false);
     }
 
@@ -489,6 +460,46 @@ public class IdentityFragment extends ListFragment
 
     private void clickDefault(){
         Toast.makeText(getActivity(),"En dev",Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+
+        this.walletSelected = (UcoinWallet) spinner.getSelectedItem();
+        long value = walletSelected!=null ? walletSelected.id() : -1;
+
+        String selection;
+        String[] selectionArgs;
+
+        if(value == (long)-1){
+            selection = SQLiteView.Tx.OUTPUT + "=?";
+            selectionArgs = new String[]{
+                    identityContact.getPublicKey()
+            };
+        }else{
+            selection = SQLiteView.Tx.WALLET_ID + "=? AND " +
+                    SQLiteView.Tx.OUTPUT + "=?";
+            selectionArgs = new String[]{
+                    String.valueOf(value),
+                    identityContact.getPublicKey()
+            };
+        }
+
+        return new CursorLoader(
+                getActivity(),
+                UcoinUris.TX_URI,
+                null, selection, selectionArgs,
+                SQLiteView.Tx.TIME + " DESC");
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        ((OperationIdentitySectionAdapter) this.getListAdapter()).swapCursor(data);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+
     }
 
     public interface ActionIdentity{

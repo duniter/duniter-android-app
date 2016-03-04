@@ -49,42 +49,12 @@ final public class Txs extends Table
     }
 
     @Override
-    public UcoinTx add(TxHistory.Tx tx, TxDirection direction) {
+    public UcoinTx add(TxHistory.Tx tx, TxDirection direction, String walletPublicKey) {
         ContentValues values = new ContentValues();
         values.put(SQLiteTable.Tx.WALLET_ID, mWalletId);
         values.put(SQLiteTable.Tx.VERSION, tx.version);
         values.put(SQLiteTable.Tx.COMMENT, tx.comment);
         values.put(SQLiteTable.Tx.DIRECTION, direction.name());
-
-        //calculate defaultAmount once
-        //Long qtAmount = (long) 0;
-        BigInteger qtAmount = new BigInteger("0");
-        switch (direction) {
-            case IN:
-                for (TxHistory.Tx.Output output : tx.outputs) {
-                    if (output.publicKey.matches(wallet().publicKey())) {
-                        //qtAmount += output.amount;
-                        qtAmount = qtAmount.add(new BigInteger(output.amount));
-                    }
-                }
-                break;
-            case OUT:
-                for (TxHistory.Tx.Input input : tx.inputs) {
-                    if (tx.issuers[input.index].matches(wallet().publicKey()))
-                        //qtAmount += input.amount;
-                        qtAmount = qtAmount.add(new BigInteger(input.amount));
-                }
-
-                for (TxHistory.Tx.Output output : tx.outputs) {
-                    if (output.publicKey.matches(wallet().publicKey())) {
-                        //qtAmount -= output.amount;
-                        qtAmount = qtAmount.subtract(new BigInteger(output.amount));
-                    }
-                }
-
-                break;
-        }
-        values.put(SQLiteTable.Tx.QUANTITATIVE_AMOUNT, qtAmount.toString());
         values.put(SQLiteTable.Tx.HASH, tx.hash);
 
         if (tx instanceof TxHistory.ConfirmedTx) {
@@ -96,6 +66,23 @@ final public class Txs extends Table
             values.put(SQLiteTable.Tx.TIME, Application.getCurrentTime());
             values.put(SQLiteTable.Tx.BLOCK, wallet().currency().blocks().currentBlock().number());
         }
+
+        BigInteger amount = BigInteger.ZERO;
+        for (TxHistory.Tx.Output output : tx.outputs) {
+            if(output.publicKey.equals(walletPublicKey)){
+                amount = amount.add(new BigInteger(output.amount));
+            }
+        }
+        if(direction.name().equals(TxDirection.OUT.name())){
+            BigInteger intInput = BigInteger.ZERO;
+            for (TxHistory.Tx.Input input : tx.inputs) {
+                if (tx.issuers[input.index].equals(walletPublicKey)){
+                    intInput = intInput.add(new BigInteger(input.amount));
+                }
+            }
+            amount = intInput.subtract(amount);
+        }
+        values.put(SQLiteTable.Tx.AMOUNT,amount.toString());
 
 
         //insertion in TX table
@@ -132,6 +119,7 @@ final public class Txs extends Table
 
         //insertions in TX_OUPUT table
         for (TxHistory.Tx.Output output : tx.outputs) {
+
             values = new ContentValues();
             values.put(SQLiteTable.TxOutput.PUBLIC_KEY, output.publicKey);
             values.put(SQLiteTable.TxOutput.AMOUNT, output.amount);
@@ -167,19 +155,19 @@ final public class Txs extends Table
     }
 
     @Override
-    public UcoinTxs add(TxHistory history) {
+    public UcoinTxs add(TxHistory history,String walletPublicKey) {
         for (TxHistory.ConfirmedTx tx : history.history.sent) {
             UcoinTx localTx = getByHash(tx.hash);
             if (localTx == null) {
                 boolean isIssuer = false;
                 for (String issuer : tx.issuers) {
-                    if (issuer.equals(wallet().publicKey())) {
+                    if (issuer.equals(walletPublicKey)) {
                         isIssuer = true;
                         break;
                     }
                 }
                 if (isIssuer) {
-                    if (tx.time != null) add(tx, TxDirection.OUT);
+                    if (tx.time != null) add(tx, TxDirection.OUT,walletPublicKey);
                 }
             } else if (localTx.state() == TxState.PENDING) {
                 localTx.setState(TxState.CONFIRMED);
@@ -195,13 +183,13 @@ final public class Txs extends Table
             if (localTx == null) {
                 boolean isIssuer = false;
                 for (String issuer : tx.issuers) {
-                    if (issuer.equals(wallet().publicKey())) {
+                    if (issuer.equals(walletPublicKey)) {
                         isIssuer = true;
                         break;
                     }
                 }
                 if (!isIssuer) {
-                    if (tx.time != null) add(tx, TxDirection.IN);
+                    if (tx.time != null) add(tx, TxDirection.IN,walletPublicKey);
                 }
             } else if (localTx.state() == TxState.PENDING) {
                 localTx.setState(TxState.CONFIRMED);
@@ -217,16 +205,16 @@ final public class Txs extends Table
             if (localTx == null) {
                 boolean isIssuer = false;
                 for (String issuer : tx.issuers) {
-                    if (issuer.equals(wallet().publicKey())) {
+                    if (issuer.equals(walletPublicKey)) {
                         isIssuer = true;
                         break;
                     }
                 }
 
                 if (!isIssuer) {
-                    add(tx, TxDirection.IN);
+                    add(tx, TxDirection.IN,walletPublicKey);
                 } else {
-                    add(tx, TxDirection.OUT);
+                    add(tx, TxDirection.OUT,walletPublicKey);
                     for (TxHistory.Tx.Input input : tx.inputs) {
                         UcoinSource source = wallet().sources().getByFingerprint(input.fingerprint);
                         if (source != null) {

@@ -550,7 +550,7 @@ public class TransferActivity extends ActionBarActivity implements SendIdentity,
                     @Override
                     public void onResponse(String response) {
                         TxHistory.PendingTx tx = TxHistory.PendingTx.fromJson(response);
-                        wallet.txs().add(tx, TxDirection.OUT);
+                        wallet.txs().add(tx, TxDirection.OUT,wallet.publicKey());
                         Toast.makeText(TransferActivity.this, getResources().getString(R.string.transaction_sent), Toast.LENGTH_LONG).show();
                         finish();
                     }

@@ -57,7 +57,8 @@ public class RefreshWalletTask extends AsyncTask<Void, Integer, Void>{
 
     public StringRequest getRequest(final UcoinWallet wallet){
         UcoinEndpoint endpoint = wallet.currency().peers().at(0).endpoints().at(0);
-        String url = "http://" + endpoint.ipv4() + ":" + endpoint.port() + "/tx/history/" + wallet.publicKey();
+        final String walletPublicKey = wallet.publicKey();
+        String url = "http://" + endpoint.ipv4() + ":" + endpoint.port() + "/tx/history/" + walletPublicKey;
 
         return new StringRequest(
                 url,
@@ -66,7 +67,7 @@ public class RefreshWalletTask extends AsyncTask<Void, Integer, Void>{
                     public void onResponse(String response) {
                         position++;
                         final TxHistory history = TxHistory.fromJson(response);
-                        wallet.txs().add(history);
+                        wallet.txs().add(history,walletPublicKey);
                         if(position>=wallets.size()){
                             finish();
                         }

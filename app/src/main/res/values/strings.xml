@@ -100,7 +100,7 @@
     <string name="confirm_password">Confirm password</string>
     <string name="pin_code">PIN code :</string>
     <string name="add_account">Add account</string>
-    <string name="salt">Sentence protection (email,...)</string>
+    <string name="salt">Protection sentence (email,...)</string>
     <string name="salt_instructions">Salt: We advice you to choose your personal e-mail as value for this
         field. But you can put any other value: it only has to carry enough entropy to avoid key
         collision. Typically, your personal e-mail is a good choice, added to the fact it is easy to

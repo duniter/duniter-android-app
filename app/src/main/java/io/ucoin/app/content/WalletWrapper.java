@@ -68,7 +68,7 @@ public class WalletWrapper implements Response.ErrorListener, RequestQueue.Reque
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        mWallet.txs().add(TxHistory.fromJson(response));
+                        mWallet.txs().add(TxHistory.fromJson(response),mWallet.publicKey());
                     }
                 }, this);
         request.setTag(this);

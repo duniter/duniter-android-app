@@ -10,44 +10,40 @@ import android.widget.TextView;
 
 import java.math.BigInteger;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
+import io.ucoin.app.Format;
 import io.ucoin.app.R;
-import io.ucoin.app.enumeration.Month;
 import io.ucoin.app.enumeration.TxDirection;
 import io.ucoin.app.enumeration.TxState;
-import io.ucoin.app.model.UcoinTx;
-import io.ucoin.app.model.UcoinWallet;
-import io.ucoin.app.model.sql.sqlite.Wallet;
-import io.ucoin.app.Format;
 import io.ucoin.app.sqlite.SQLiteView;
 
 public class OperationIdentitySectionAdapter extends CursorAdapter {
 
     private Context mContext;
     private Cursor mCursor;
-    private int quantitativeAmountIndex;
     private int commentIndex;
     private int directionIndex;
     private int stateIndex;
     private int walletIdIndex;
     private int timeIndex;
-
-    private ArrayList<UcoinTx> list;
+    private int currencyNameIndex;
+    private int amountIndex;
+    private int dtIndex;
+    private int dividendIndex;
+    private int dividendThenIndex;
 
     private HashMap<Integer, String> mSectionPosition;
-    private UcoinWallet mWallet;
 
-    public OperationIdentitySectionAdapter(Context context, Cursor cursor, UcoinWallet wallet) {
+    public OperationIdentitySectionAdapter(Context context, Cursor cursor) {
         super(context,cursor,0);
         //super(context, R.layout.list_item_tx,new ArrayList<UcoinTx>());
-        mContext = context;
+        this.mContext = context;
         this.mCursor = cursor;
-        mSectionPosition = new LinkedHashMap<>(16, (float) 0.75, false);
+        this.mSectionPosition = new LinkedHashMap<>(16, (float) 0.75, false);
         //swapCursor(cursor,wallet);
     }
 
@@ -92,37 +88,27 @@ public class OperationIdentitySectionAdapter extends CursorAdapter {
         Calendar c = Calendar.getInstance();
         c.setTime(date);
 
-//        String d = cursor.getString(dayOfWeekIndex);
-//        if (d == null) d = Integer.toString(DayOfWeek.UNKNOWN.ordinal());
-
-//        String dayOfWeek = DayOfWeek.fromInt(Integer.parseInt(d)).toString(context);
-
-
-//        holder.day.setText(dayOfWeek + " " + cursor.getString(dayIndex));
-//        holder.hour.setText(cursor.getString(hourIndex));
-        String dayOfWeek = new SimpleDateFormat("EEE").format(c.getTime());
-        holder.day.setText(dayOfWeek + " " + c.get(Calendar.DAY_OF_MONTH));
-        holder.hour.setText(date.getHours()+":"+date.getMinutes()+":"+date.getSeconds());
-//        holder.day.setText(tx.dayOfWeek().toString(mContext) + " " + tx.day());
-//        holder.hour.setText(tx.hour());
-
-        String dir ="";
+        holder.day.setText(new SimpleDateFormat("EEE dd").format(c.getTime()));
+        holder.hour.setText(new SimpleDateFormat("hh:mm:ss").format(c.getTime()));
+        String dir;
         if (cursor.isNull(directionIndex) ||
                 TxDirection.valueOf(cursor.getString(directionIndex)) == TxDirection.IN) {
             dir = "+ ";
         } else {
             dir = "- ";
         }
-        if (mWallet==null){
-            mWallet = new Wallet(mContext,cursor.getLong(walletIdIndex));
-        }
-        String value = cursor.getString(quantitativeAmountIndex);
+        String value = cursor.getString(amountIndex);
         //TODO deuxieme passage paveur à null
-
-        Format.Currency.changeUnit(context, mWallet.currency().name(), new BigInteger(value == null ? "0" : value), mWallet.udValue(), mWallet.currency().dt(), holder.amount, holder.defaultAmount, dir);
-
+        Format.Currency.changeUnit(
+                context,
+                cursor.getString(currencyNameIndex),
+                new BigInteger(value == null ? "0" : value),
+                new BigInteger(cursor.getString(dividendIndex)),
+                cursor.getInt(dtIndex),
+                holder.amount,
+                holder.defaultAmount,
+                dir);
         holder.comment.setText(cursor.getString(commentIndex));
-
         if (cursor.isNull(stateIndex)) {
             view.setBackgroundColor(context.getResources().getColor(R.color.primaryLight));
         } else if (TxState.valueOf(cursor.getString(stateIndex)) == TxState.CONFIRMED) {
@@ -143,19 +129,21 @@ public class OperationIdentitySectionAdapter extends CursorAdapter {
         ((TextView) v.findViewById(R.id.section_name)).setText(section);
     }
 
-    public Cursor swapCursor(Cursor newCursor, UcoinWallet wallet) {
+    public Cursor swapCursor(Cursor newCursor) {
         super.swapCursor(newCursor);
 
         if (newCursor == null) {
             return null;
         }
 
-        this.mWallet = wallet;
-
         timeIndex = newCursor.getColumnIndex(SQLiteView.Tx.TIME);
-        quantitativeAmountIndex = newCursor.getColumnIndex(SQLiteView.Tx.QUANTITATIVE_AMOUNT);
-        commentIndex =newCursor.getColumnIndex(SQLiteView.Tx.COMMENT);
+        amountIndex = newCursor.getColumnIndex(SQLiteView.Tx.AMOUNT);
         directionIndex = newCursor.getColumnIndex(SQLiteView.Tx.DIRECTION);
+        currencyNameIndex = newCursor.getColumnIndex(SQLiteView.Tx.CURRENCY_NAME);
+        dtIndex = newCursor.getColumnIndex(SQLiteView.Tx.CURRENCY_DT);
+        dividendIndex = newCursor.getColumnIndex(SQLiteView.Tx.CURRENCY_DIVIDEND);
+        dividendThenIndex = newCursor.getColumnIndex(SQLiteView.Tx.DIVIDEND);
+        commentIndex =newCursor.getColumnIndex(SQLiteView.Tx.COMMENT);
         stateIndex = newCursor.getColumnIndex(SQLiteView.Tx.STATE);
         walletIdIndex = newCursor.getColumnIndex(SQLiteView.Tx.WALLET_ID);
 
@@ -170,8 +158,9 @@ public class OperationIdentitySectionAdapter extends CursorAdapter {
             do{
                 Long time = newCursor.getLong(timeIndex);
                 Date date = new Date(time*1000);
-                String newSection = Month.fromInt(date.getMonth()+1).toString(mContext) + " " + (1900 + date.getYear());
-
+                Calendar c = Calendar.getInstance();
+                c.setTime(date);
+                String newSection = new SimpleDateFormat("MMMM yyyy").format(c.getTime());
                 if (!newSection.equals(section)) {
                     sectionPosition.put(position, newSection);
                     section = newSection;

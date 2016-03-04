@@ -139,7 +139,7 @@ public interface SQLiteTable {
         public static final String TIME = "time";
         public static final String DIRECTION = "direction";
         public static final String STATE = "state";
-        public static final String QUANTITATIVE_AMOUNT = "quantitative_amount";
+        public static final String AMOUNT = "amount";
     }
 
     class TxIssuer implements BaseColumns {
@@ -189,24 +189,5 @@ public interface SQLiteTable {
         public static final String TIMESTAMP = "timestamp";
         public static final String SELF = "self";
         public static final String STATE = "state";
-    }
-
-    class Operation implements BaseColumns {
-        public static final String TABLE_NAME = "operation";
-        public static final String WALLET_ID = "wallet_id";
-        public static final String TX_ID = "tx_id";
-        public static final String UD_ID = "ud_id";
-        public static final String DIRECTION = "direction";
-        public static final String COMMENT = "comment";
-        public static final String QUANTITATIVE_AMOUNT = "quantitative_amount";
-        public static final String BLOCK = "block";
-        public static final String TIME = "time";
-        public static final String STATE = "state";
-        public static final String YEAR = "year";
-        public static final String MONTH = "month";
-        public static final String DAY = "day";
-        public static final String DAY_OF_WEEK = "day_of_week";
-        public static final String HOUR = "hour";
-
     }
 }

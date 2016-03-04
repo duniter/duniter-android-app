@@ -4,7 +4,6 @@ import android.content.ContentValues;
 import android.content.Context;
 
 import io.ucoin.app.UcoinUris;
-import io.ucoin.app.enumeration.DayOfWeek;
 import io.ucoin.app.enumeration.MembershipType;
 import io.ucoin.app.model.UcoinCertifications;
 import io.ucoin.app.model.UcoinCurrency;
@@ -66,31 +65,6 @@ public class Identity extends Row
     @Override
     public Long expirationTime() {
         return getLong(SQLiteView.Identity.EXPIRATION_TIME);
-    }
-
-    @Override
-    public Integer expirationYear() {
-        return getInt(SQLiteView.Identity.EXPIRATION_YEAR);
-    }
-
-    @Override
-    public Integer expirationMonth() {
-        return getInt(SQLiteView.Identity.EXPIRATION_MONTH);
-    }
-
-    @Override
-    public Integer expirationDay() {
-        return getInt(SQLiteView.Identity.EXPIRATION_DAY);
-    }
-
-    @Override
-    public DayOfWeek expirationDayOfWeek() {
-        return DayOfWeek.valueOf(getString(SQLiteView.Identity.EXPIRATION_DAY_OF_WEEK));
-    }
-
-    @Override
-    public String expirationHour() {
-        return getString(SQLiteView.Identity.EXPIRATION_HOUR);
     }
 
     @Override

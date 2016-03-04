@@ -9,25 +9,23 @@ import android.widget.CursorAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import io.ucoin.app.R;
 import io.ucoin.app.sqlite.SQLiteView;
 
 
 public class MemberCursorAdapter extends CursorAdapter {
 
+    private int certByTimeIndex;
+    private int certOfTimeIndex;
+
     public MemberCursorAdapter(Context context, Cursor c, int flags) {
         super(context, c, flags);
     }
 
     private int uidIndex;
-    private int certByYearIndex;
-    private int certByMonthIndex;
-    private int certByDayIndex;
-    private int certByHourIndex;
-    private int certOfYearIndex;
-    private int certOfMonthIndex;
-    private int certOfDayIndex;
-    private int certOfHourIndex;
 
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
@@ -51,27 +49,25 @@ public class MemberCursorAdapter extends CursorAdapter {
 
         ViewHolder holder = (ViewHolder)view.getTag();
         holder.memberUid.setText(cursor.getString(uidIndex));
+        SimpleDateFormat formater = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
 
-        if (!cursor.isNull(certByYearIndex)) {
-            String d = cursor.getString(certByDayIndex) + "/" +
-                    cursor.getString(certByMonthIndex) + "/" +
-                    cursor.getString(certByYearIndex) + " " +
-                    cursor.getString(certByHourIndex);
+        Date d;
 
-            holder.certByDate.setText(d);
+        if (!cursor.isNull(certByTimeIndex)) {
+            d = new Date(cursor.getLong(certByTimeIndex)*1000);
+            String s = formater.format(d);
+            holder.certByDate.setText(s);
             holder.certByDate.setVisibility(View.VISIBLE);
             holder.certByImage.setVisibility(View.VISIBLE);
         } else {
             holder.certByDate.setVisibility(View.GONE);
             holder.certByImage.setVisibility(View.GONE);
         }
-        if (!cursor.isNull(certOfYearIndex)) {
-            String d = cursor.getString(certOfDayIndex) + "/" +
-                    cursor.getString(certOfMonthIndex) + "/" +
-                    cursor.getString(certOfYearIndex) + " " +
-                    cursor.getString(certOfHourIndex);
+        if (!cursor.isNull(certOfTimeIndex)) {
 
-            holder.certOfDate.setText(d);
+            d = new Date(cursor.getLong(certOfTimeIndex)*1000);
+            String s = formater.format(d);
+            holder.certOfDate.setText(s);
             holder.certOfDate.setVisibility(View.VISIBLE);
             holder.certOfImage.setVisibility(View.VISIBLE);
         } else {
@@ -85,15 +81,8 @@ public class MemberCursorAdapter extends CursorAdapter {
         if (cursor != null) {
             uidIndex = cursor.getColumnIndex(SQLiteView.Member.UID);
 
-            certByYearIndex = cursor.getColumnIndex(SQLiteView.Member.CERT_BY_YEAR);
-            certByMonthIndex = cursor.getColumnIndex(SQLiteView.Member.CERT_BY_MONTH);
-            certByDayIndex = cursor.getColumnIndex(SQLiteView.Member.CERT_BY_DAY);
-            certByHourIndex = cursor.getColumnIndex(SQLiteView.Member.CERT_BY_HOUR);
-
-            certOfYearIndex = cursor.getColumnIndex(SQLiteView.Member.CERT_OF_YEAR);
-            certOfMonthIndex = cursor.getColumnIndex(SQLiteView.Member.CERT_OF_MONTH);
-            certOfDayIndex = cursor.getColumnIndex(SQLiteView.Member.CERT_OF_DAY);
-            certOfHourIndex = cursor.getColumnIndex(SQLiteView.Member.CERT_OF_HOUR);
+            certByTimeIndex = cursor.getColumnIndex(SQLiteView.Member.CERT_BY_TIME);
+            certOfTimeIndex = cursor.getColumnIndex(SQLiteView.Member.CERT_OF_TIME);
         }
         return super.swapCursor(cursor);
     }

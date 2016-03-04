@@ -61,9 +61,6 @@ public class DbProvider extends ContentProvider implements SQLiteTable {
     private static final int CONTACT = 150;
     private static final int CONTACT_ID = 151;
 
-    private static final int OPERATION = 200;
-    private static final int OPERATION_ID = 201;
-
     private static final int REQUETE = 300;
 
     private SQLiteHelper mSQLiteHelper;
@@ -124,9 +121,6 @@ public class DbProvider extends ContentProvider implements SQLiteTable {
 
         uriMatcher.addURI(UcoinUris.CONTACT_URI.getAuthority(), UcoinUris.CONTACT_URI.getPath(), CONTACT);
         uriMatcher.addURI(UcoinUris.CONTACT_URI.getAuthority(), UcoinUris.CONTACT_URI.getPath() + "#", CONTACT_ID);
-
-        uriMatcher.addURI(UcoinUris.OPERATION_URI.getAuthority(), UcoinUris.OPERATION_URI.getPath(), OPERATION);
-        uriMatcher.addURI(UcoinUris.OPERATION_URI.getAuthority(), UcoinUris.OPERATION_URI.getPath() + "#", OPERATION_ID);
 
         uriMatcher.addURI(UcoinUris.REQUETE_URI.getAuthority(), UcoinUris.REQUETE_URI.getPath(), REQUETE);
 
@@ -357,18 +351,6 @@ public class DbProvider extends ContentProvider implements SQLiteTable {
                 break;
             case CONTACT_ID:
                 queryBuilder.setTables(Contact.TABLE_NAME);
-                cursor = queryBuilder.query(db, null,
-                        BaseColumns._ID + "=?",
-                        new String[]{uri.getLastPathSegment()},
-                        null, null, null);
-                break;
-            case OPERATION:
-                queryBuilder.setTables(SQLiteView.Operation.VIEW_NAME);
-                cursor = queryBuilder.query(db, projection, selection,
-                        selectionArgs, null, null, sortOrder);
-                break;
-            case OPERATION_ID:
-                queryBuilder.setTables(SQLiteView.Operation.VIEW_NAME);
                 cursor = queryBuilder.query(db, null,
                         BaseColumns._ID + "=?",
                         new String[]{uri.getLastPathSegment()},
@@ -786,7 +768,6 @@ public class DbProvider extends ContentProvider implements SQLiteTable {
             case TX_SIGNATURE:
             case TX_SIGNATURE_ID:
                 getContext().getContentResolver().notifyChange(UcoinUris.TX_URI, null);
-                getContext().getContentResolver().notifyChange(UcoinUris.OPERATION_URI, null);
                 notifyChange(WALLET);
                 break;
             case MEMBER:
@@ -811,7 +792,6 @@ public class DbProvider extends ContentProvider implements SQLiteTable {
             case UD:
             case UD_ID:
                 getContext().getContentResolver().notifyChange(UcoinUris.UD_URI, null);
-                getContext().getContentResolver().notifyChange(UcoinUris.OPERATION_URI, null);
                 notifyChange(WALLET);
                 break;
             case MEMBERSHIP:

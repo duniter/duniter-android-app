@@ -111,6 +111,7 @@ final public class Sources extends Table
         UcoinWallet wallet = new Wallet(mContext,mWalletId);
 
         wallet.setExp(exp);
+//        wallet.setAmount(totalAmount);
 
         try {
             applyBatch(operations);

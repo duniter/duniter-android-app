@@ -8,9 +8,9 @@ import io.ucoin.app.enumeration.TxState;
 import io.ucoin.app.model.http_api.TxHistory;
 
 public interface UcoinTxs extends SqlTable, Iterable<UcoinTx> {
-    UcoinTx add(TxHistory.Tx tx, TxDirection direction);
+    UcoinTx add(TxHistory.Tx tx, TxDirection direction, String walletPublicKey);
 
-    UcoinTxs add(TxHistory history);
+    UcoinTxs add(TxHistory history, String walletPublicKey);
 
     UcoinTx getById(Long id);
 

@@ -3,11 +3,15 @@ package io.ucoin.app.fragment.wallet;
 import android.app.AlertDialog;
 import android.app.FragmentManager;
 import android.app.ListFragment;
+import android.app.LoaderManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.CursorLoader;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.Loader;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
@@ -39,14 +43,14 @@ import java.util.Iterator;
 import java.util.Map;
 
 import io.ucoin.app.Application;
+import io.ucoin.app.Format;
 import io.ucoin.app.R;
+import io.ucoin.app.UcoinUris;
 import io.ucoin.app.activity.CurrencyActivity;
 import io.ucoin.app.activity.TransferActivity;
 import io.ucoin.app.adapter.OperationIdentitySectionAdapter;
 import io.ucoin.app.enumeration.MembershipType;
 import io.ucoin.app.fragment.currency.IdentityFragment;
-import io.ucoin.app.service.RequierementsService;
-import io.ucoin.app.service.TxHistoryService;
 import io.ucoin.app.fragment.dialog.QrCodeDialogFragment;
 import io.ucoin.app.model.UcoinBlock;
 import io.ucoin.app.model.UcoinCurrency;
@@ -56,20 +60,20 @@ import io.ucoin.app.model.UcoinSelfCertification;
 import io.ucoin.app.model.UcoinWallet;
 import io.ucoin.app.model.document.Membership;
 import io.ucoin.app.model.document.SelfCertification;
-import io.ucoin.app.model.http_api.TxHistory;
 import io.ucoin.app.model.http_api.WotRequirements;
-import io.ucoin.app.model.sql.sqlite.Txs;
 import io.ucoin.app.model.sql.sqlite.Wallet;
-import io.ucoin.app.Format;
+import io.ucoin.app.service.RequierementsService;
+import io.ucoin.app.sqlite.SQLiteView;
 import io.ucoin.app.technical.crypto.AddressFormatException;
 
 public class WalletFragment extends ListFragment
-        implements SwipeRefreshLayout.OnRefreshListener, View.OnClickListener{
+        implements LoaderManager.LoaderCallbacks<Cursor>,
+        SwipeRefreshLayout.OnRefreshListener,
+        View.OnClickListener{
 
     public static final String TAG = "Wallet Fragment";
 
     public static final int WOT_REQUIEREMENTS = 0;
-    public static final int TX_HISTORY = 1;
 
     private static final String WALLET_ID = "wallet_id";
     private static int OPERATION_LOADER_ID = 1;
@@ -88,8 +92,7 @@ public class WalletFragment extends ListFragment
     private LinearLayout actionTab;
 
     private Intent intentRequierementsService;
-    private Intent intentHistoryService;
-    private OperationIdentitySectionAdapter operationSectionCursorAdapter;
+    private OperationIdentitySectionAdapter operationIdentitySectionCursorAdapter;
 
     public static WalletFragment newInstance(Long walletId) {
         Bundle newInstanceArgs = new Bundle();
@@ -136,8 +139,6 @@ public class WalletFragment extends ListFragment
             getActivity().unregisterReceiver(broadcastReceiverWotRequierements);
             getActivity().stopService(intentRequierementsService);
         }
-        getActivity().unregisterReceiver(broadcastReceiverTxHistory);
-        getActivity().stopService(intentHistoryService);
     }
 
     private BroadcastReceiver broadcastReceiverWotRequierements = new BroadcastReceiver() {
@@ -147,25 +148,12 @@ public class WalletFragment extends ListFragment
         }
     };
 
-    private BroadcastReceiver broadcastReceiverTxHistory = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            updateUI(TX_HISTORY,intent);
-        }
-    };
-
     private void updateUI(int type,Intent intent) {
         switch (type){
             case WOT_REQUIEREMENTS:
                 Log.d(TAG, "reception requierements");
                 WotRequirements requirements = (WotRequirements) intent.getSerializableExtra(RequierementsService.WOT_REQUIEREMENTS);
                 updateRequirements(requirements);
-                break;
-            case TX_HISTORY:
-                Log.d(TAG, "reception history");
-                Object[] txHistories = (Object[]) intent.getSerializableExtra(TxHistoryService.TX_HISTORY);
-                mWallet.txs().add((TxHistory) txHistories[0]);
-                updateHistory();
                 break;
             default:
                 break;
@@ -201,7 +189,7 @@ public class WalletFragment extends ListFragment
         }catch (Exception e){
             e.printStackTrace();
         }
-        operationSectionCursorAdapter.swapCursor(new Txs(getActivity()).getByWalletId(mWallet.id()).cursor(), mWallet);
+        getLoaderManager().initLoader(OPERATION_LOADER_ID, getArguments(), this);
     }
 
     @Override
@@ -212,7 +200,6 @@ public class WalletFragment extends ListFragment
         getActivity().setTitle("");
 
         intentRequierementsService = new Intent(getActivity(), RequierementsService.class);
-        intentHistoryService = new Intent(getActivity(), TxHistoryService.class);
 
         mSwipeLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_layout);
         mSwipeLayout.setOnRefreshListener(this);
@@ -230,10 +217,6 @@ public class WalletFragment extends ListFragment
             intentRequierementsService.putExtra(RequierementsService.PUBLIC_KEY, mIdentity.publicKey());
         }
 
-        intentHistoryService.putExtra(TxHistoryService.CURRENCY_ID, mCurrency.id());
-        intentHistoryService.putExtra(TxHistoryService.PUBLIC_KEY, new String[]{mWallet.publicKey()});
-
-
         TextView alias = (TextView) view.findViewById(R.id.alias);
         alias.setText(mWallet.alias());
 
@@ -243,12 +226,12 @@ public class WalletFragment extends ListFragment
 
         actionTab = (LinearLayout) view.findViewById(R.id.action_tab);
 
-//        OperationSectionCursorAdapter operationSectionCursorAdapter
+//        OperationSectionCursorAdapter operationIdentitySectionCursorAdapter
 //                = new OperationSectionCursorAdapter(getActivity(), null, 0,mWallet.udValue(),mCurrency.dt());
-//        setListAdapter(operationSectionCursorAdapter);
-        operationSectionCursorAdapter
-                = new OperationIdentitySectionAdapter(getActivity(), null, null);
-        setListAdapter(operationSectionCursorAdapter);
+//        setListAdapter(operationIdentitySectionCursorAdapter);
+        operationIdentitySectionCursorAdapter
+                = new OperationIdentitySectionAdapter(getActivity(), null);
+        setListAdapter(operationIdentitySectionCursorAdapter);
 
         updateHistory();
     }
@@ -343,8 +326,6 @@ public class WalletFragment extends ListFragment
             getActivity().startService(intentRequierementsService);
             getActivity().registerReceiver(broadcastReceiverWotRequierements, new IntentFilter(RequierementsService.BROADCAST_ACTION));
         }
-        getActivity().startService(intentHistoryService);
-        getActivity().registerReceiver(broadcastReceiverTxHistory, new IntentFilter(TxHistoryService.BROADCAST_ACTION));
         mSwipeLayout.setRefreshing(false);
     }
 
@@ -561,5 +542,30 @@ public class WalletFragment extends ListFragment
 
         AlertDialog dialog = builder.create();
         dialog.show();
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        Long walletId = args.getLong(WALLET_ID);
+        String selection = SQLiteView.Tx.WALLET_ID + "=?";
+        String selectionArgs[] = new String[]{
+                walletId.toString()
+        };
+
+        return new CursorLoader(
+                getActivity(),
+                UcoinUris.TX_URI,
+                null, selection, selectionArgs,
+                SQLiteView.Tx.TIME + " DESC");
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        ((OperationIdentitySectionAdapter) this.getListAdapter()).swapCursor(data);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+
     }
 }

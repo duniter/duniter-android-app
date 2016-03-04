@@ -4,10 +4,8 @@ import android.content.ContentValues;
 import android.content.Context;
 
 import io.ucoin.app.UcoinUris;
-import io.ucoin.app.enumeration.DayOfWeek;
 import io.ucoin.app.enumeration.MembershipState;
 import io.ucoin.app.enumeration.MembershipType;
-import io.ucoin.app.enumeration.Month;
 import io.ucoin.app.model.UcoinIdentity;
 import io.ucoin.app.model.UcoinMembership;
 import io.ucoin.app.sqlite.SQLiteTable;
@@ -50,58 +48,8 @@ public class Membership extends Row
     }
 
     @Override
-    public Integer year() {
-        return getInt(SQLiteView.Membership.YEAR);
-    }
-
-    @Override
-    public Month month() {
-        return Month.fromInt(getInt(SQLiteView.Membership.MONTH));
-    }
-
-    @Override
-    public Integer day() {
-        return getInt(SQLiteView.Membership.DAY);
-    }
-
-    @Override
-    public DayOfWeek dayOfWeek() {
-        return DayOfWeek.fromInt(getInt(SQLiteView.Membership.DAY_OF_WEEK),false);
-    }
-
-    @Override
-    public String hour() {
-        return getString(SQLiteView.Membership.HOUR);
-    }
-
-    @Override
     public Long expirationTime() {
         return getLong(SQLiteView.Membership.EXPIRATION_TIME);
-    }
-
-    @Override
-    public Integer expirationYear() {
-        return getInt(SQLiteView.Membership.EXPIRATION_YEAR);
-    }
-
-    @Override
-    public Month expirationMonth() {
-        return Month.fromInt(getInt(SQLiteView.Membership.EXPIRATION_MONTH));
-    }
-
-    @Override
-    public Integer expirationDay() {
-        return getInt(SQLiteView.Membership.EXPIRATION_DAY);
-    }
-
-    @Override
-    public DayOfWeek expirationDayOfWeek() {
-        return DayOfWeek.fromInt(getInt(SQLiteView.Membership.EXPIRATION_DAY_OF_WEEK),false);
-    }
-
-    @Override
-    public String expirationHour() {
-        return getString(SQLiteView.Membership.EXPIRATION_HOUR);
     }
 
     @Override

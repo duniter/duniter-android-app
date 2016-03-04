@@ -3,12 +3,9 @@ package io.ucoin.app.model.sql.sqlite;
 import android.content.ContentValues;
 import android.content.Context;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
 
 import io.ucoin.app.UcoinUris;
-import io.ucoin.app.enumeration.DayOfWeek;
-import io.ucoin.app.enumeration.Month;
 import io.ucoin.app.enumeration.TxDirection;
 import io.ucoin.app.enumeration.TxState;
 import io.ucoin.app.model.UcoinTx;
@@ -73,53 +70,8 @@ public class Tx extends Row
     }
 
     @Override
-    public Integer year() {
-        return getInt(SQLiteView.Tx.YEAR);
-    }
-
-    @Override
-    public Month month() {
-        return Month.fromInt(getInt(SQLiteView.Tx.MONTH));
-    }
-
-    @Override
-    public DayOfWeek dayOfWeek() {
-        try {
-            return DayOfWeek.fromInt(getInt(SQLiteView.Tx.DAY_OF_WEEK),false);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return DayOfWeek.UNKNOWN;
-        }
-    }
-
-    @Override
-    public Integer day() {
-        //Need to parse with radix for not to be treated as octal when starting with a 0
-        String day = getString(SQLiteView.Tx.DAY);
-        if (day != null)
-            return Integer.parseInt(day);
-        else
-            return 0;
-    }
-
-    @Override
-    public String hour() {
-        return getString(SQLiteView.Tx.HOUR);
-    }
-
-    @Override
-    public BigInteger quantitativeAmount() {
-        return new BigInteger(getString(SQLiteView.Tx.QUANTITATIVE_AMOUNT));
-    }
-
-    @Override
-    public BigDecimal relativeAmountThen() {
-        return new BigDecimal(getString(SQLiteView.Tx.RELATIVE_AMOUNT_THEN));
-    }
-
-    @Override
-    public BigDecimal relativeAmountNow() {
-        return new BigDecimal(getString(SQLiteView.Tx.RELATIVE_AMOUNT_NOW));
+    public BigInteger amount() {
+        return new BigInteger(getString(SQLiteView.Tx.AMOUNT));
     }
 
     @Override
