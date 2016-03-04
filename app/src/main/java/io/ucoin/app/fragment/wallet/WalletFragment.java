@@ -34,6 +34,7 @@ import com.android.volley.toolbox.StringRequest;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -61,6 +62,8 @@ import io.ucoin.app.model.UcoinWallet;
 import io.ucoin.app.model.document.Membership;
 import io.ucoin.app.model.document.SelfCertification;
 import io.ucoin.app.model.http_api.WotRequirements;
+import io.ucoin.app.model.sql.sqlite.Currency;
+import io.ucoin.app.model.sql.sqlite.Identity;
 import io.ucoin.app.model.sql.sqlite.Wallet;
 import io.ucoin.app.service.RequierementsService;
 import io.ucoin.app.sqlite.SQLiteView;
@@ -76,27 +79,34 @@ public class WalletFragment extends ListFragment
     public static final int WOT_REQUIEREMENTS = 0;
 
     private static final String WALLET_ID = "wallet_id";
+    private static final String IDENTITY_ID = "identity_id";
+    private static int WALLET_LOADER_ID = 0;
     private static int OPERATION_LOADER_ID = 1;
 
     private SwipeRefreshLayout mSwipeLayout;
-
-    private UcoinWallet mWallet;
-    private UcoinCurrency mCurrency;
-    private UcoinIdentity mIdentity;
     private WotRequirements wotRequirements;
 
     private TextView textCertification;
 
     private TextView defaultAmount;
     private TextView amount;
+    private TextView alias;
     private LinearLayout actionTab;
 
     private Intent intentRequierementsService;
     private OperationIdentitySectionAdapter operationIdentitySectionCursorAdapter;
 
-    public static WalletFragment newInstance(Long walletId) {
+    private Long currencyId = null;
+    private Long walletId = null;
+    private String walletPublicKey = null;
+    private Long identityId = null;
+
+    private Integer currencySigQty = null;
+
+    public static WalletFragment newInstance(Long walletId, Long IdentityId) {
         Bundle newInstanceArgs = new Bundle();
         newInstanceArgs.putLong(WALLET_ID, walletId);
+        newInstanceArgs.putLong(IDENTITY_ID, walletId);
         WalletFragment fragment = new WalletFragment();
         fragment.setArguments(newInstanceArgs);
         return fragment;
@@ -129,15 +139,21 @@ public class WalletFragment extends ListFragment
     @Override
     public void onResume() {
         super.onResume();
-        onRefresh();
+        if(intentRequierementsService!=null) {
+            getActivity().startService(intentRequierementsService);
+            getActivity().registerReceiver(broadcastReceiverWotRequierements, new IntentFilter(RequierementsService.BROADCAST_ACTION));
+        }
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        if(mIdentity!=null) {
-            getActivity().unregisterReceiver(broadcastReceiverWotRequierements);
-            getActivity().stopService(intentRequierementsService);
+        if(identityId!=null) {
+            try {
+                getActivity().unregisterReceiver(broadcastReceiverWotRequierements);
+                getActivity().stopService(intentRequierementsService);
+            }catch(Exception e) {
+            }
         }
     }
 
@@ -162,7 +178,7 @@ public class WalletFragment extends ListFragment
 
     private void updateRequirements(WotRequirements requirements){
         this.wotRequirements = requirements;
-        int minimum = mCurrency.sigQty();
+        int minimum = currencySigQty!=null ? currencySigQty : 0;
         int number = wotRequirements.identities[0].certifications.length;
         textCertification.setText(String.valueOf(number));
         if(minimum>number){
@@ -183,15 +199,6 @@ public class WalletFragment extends ListFragment
         }
     }
 
-    public void updateHistory() {
-        try {
-            Format.Currency.changeUnit(getActivity(), mWallet.currency().name(), mWallet.quantitativeAmount(), mWallet.udValue(), mCurrency.dt(), amount, defaultAmount, "");
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-        getLoaderManager().initLoader(OPERATION_LOADER_ID, getArguments(), this);
-    }
-
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -199,7 +206,14 @@ public class WalletFragment extends ListFragment
         ((CurrencyActivity) getActivity()).setDrawerIndicatorEnabled(false);
         getActivity().setTitle("");
 
-        intentRequierementsService = new Intent(getActivity(), RequierementsService.class);
+        walletId = getArguments().getLong(WALLET_ID);
+        identityId = getArguments().getLong(IDENTITY_ID);
+
+        alias = (TextView) view.findViewById(R.id.alias);
+        defaultAmount = (TextView) view.findViewById(R.id.second_amount);
+        amount = (TextView) view.findViewById(R.id.principal_amount);
+        textCertification = (TextView) view.findViewById(R.id.txt_certification);
+        getLoaderManager().initLoader(WALLET_LOADER_ID, getArguments(), this);
 
         mSwipeLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_layout);
         mSwipeLayout.setOnRefreshListener(this);
@@ -208,32 +222,61 @@ public class WalletFragment extends ListFragment
         view.findViewById(R.id.certification).setOnClickListener(this);
         view.findViewById(R.id.information).setOnClickListener(this);
 
-        mWallet = new Wallet(getActivity(), getArguments().getLong(WALLET_ID));
-        mCurrency = mWallet.currency();
-        mIdentity = mWallet.identity();
-
-        if(mIdentity!=null) {
-            intentRequierementsService.putExtra(RequierementsService.CURRENCY_ID, mCurrency.id());
-            intentRequierementsService.putExtra(RequierementsService.PUBLIC_KEY, mIdentity.publicKey());
-        }
-
-        TextView alias = (TextView) view.findViewById(R.id.alias);
-        alias.setText(mWallet.alias());
-
-        defaultAmount = (TextView) view.findViewById(R.id.second_amount);
-        amount = (TextView) view.findViewById(R.id.principal_amount);
-        textCertification = (TextView) view.findViewById(R.id.txt_certification);
-
         actionTab = (LinearLayout) view.findViewById(R.id.action_tab);
 
-//        OperationSectionCursorAdapter operationIdentitySectionCursorAdapter
-//                = new OperationSectionCursorAdapter(getActivity(), null, 0,mWallet.udValue(),mCurrency.dt());
-//        setListAdapter(operationIdentitySectionCursorAdapter);
         operationIdentitySectionCursorAdapter
                 = new OperationIdentitySectionAdapter(getActivity(), null);
         setListAdapter(operationIdentitySectionCursorAdapter);
 
-        updateHistory();
+
+        getLoaderManager().initLoader(OPERATION_LOADER_ID, getArguments(), this);
+    }
+
+    private void updateFragment(Cursor cursor){
+        int idIdentityIndex = cursor.getColumnIndex(SQLiteView.Wallet.IDENTITY_ID);
+        int idCurrencyIndex = cursor.getColumnIndex(SQLiteView.Wallet.CURRENCY_ID);
+        int publicKeyIndex = cursor.getColumnIndex(SQLiteView.Wallet.PUBLIC_KEY);
+        int currencyNameIndex = cursor.getColumnIndex(SQLiteView.Wallet.CURRENCY_NAME);
+        int dividendIndex = cursor.getColumnIndex(SQLiteView.Wallet.DIVIDEND);
+        int dtIndex = cursor.getColumnIndex(SQLiteView.Wallet.DT);
+        int amountIndex = cursor.getColumnIndex(SQLiteView.Wallet.AMOUNT);
+        int aliasIndex = cursor.getColumnIndex(SQLiteView.Wallet.ALIAS);
+        int sigQtyIndex = cursor.getColumnIndex(SQLiteView.Wallet.CURRENCY_QT);
+
+        if(cursor.moveToFirst()){
+
+        }else{
+            return;
+        }
+
+        alias.setText(cursor.getString(aliasIndex));
+        identityId = cursor.getLong(idIdentityIndex);
+        currencyId =cursor.getLong(idCurrencyIndex);
+        currencySigQty = cursor.getInt(sigQtyIndex);
+        walletPublicKey = cursor.getString(publicKeyIndex);
+
+        if(identityId != null) {
+            actionTab.setVisibility(View.VISIBLE);
+        }
+        actionTab.setVisibility(View.VISIBLE);
+
+        Format.Currency.changeUnit(
+                getActivity(),
+                cursor.getString(currencyNameIndex),
+                new BigInteger(cursor.getString(amountIndex)),
+                new BigInteger(cursor.getString(dividendIndex)),
+                cursor.getInt(dtIndex),
+                amount,
+                defaultAmount, "");
+
+        if(identityId!=null && walletPublicKey!=null && intentRequierementsService==null) {
+            intentRequierementsService = new Intent(getActivity(), RequierementsService.class);
+            intentRequierementsService.putExtra(RequierementsService.CURRENCY_ID, currencyId);
+            intentRequierementsService.putExtra(RequierementsService.PUBLIC_KEY, walletPublicKey);
+            getActivity().startService(intentRequierementsService);
+            getActivity().registerReceiver(broadcastReceiverWotRequierements, new IntentFilter(RequierementsService.BROADCAST_ACTION));
+        }
+
     }
 
     @Override
@@ -248,7 +291,7 @@ public class WalletFragment extends ListFragment
         MenuItem leaveItem = menu.findItem(R.id.action_leave);
         MenuItem signItem = menu.findItem(R.id.action_sign);
 
-        if(mIdentity == null) {
+        if(identityId == null) {
             joinItem.setVisible(false);
             renewItem.setVisible(false);
             leaveItem.setVisible(false);
@@ -258,6 +301,9 @@ public class WalletFragment extends ListFragment
         }
         actionTab.setVisibility(View.VISIBLE);
 
+        UcoinIdentity mIdentity = new Identity(getActivity(),identityId);
+
+        //TODO inclure la donner dans la vue
         long selfCount = mIdentity.selfCount();
         boolean isMember = mIdentity.isMember();
 
@@ -283,6 +329,9 @@ public class WalletFragment extends ListFragment
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         boolean result;
+        UcoinCurrency mCurrency;
+        UcoinWallet mWallet;
+        UcoinIdentity mIdentity;
         switch (item.getItemId()) {
             case R.id.action_show_qrcode:
                 showQrCode();
@@ -290,20 +339,29 @@ public class WalletFragment extends ListFragment
                 break;
             case R.id.action_delete:
                 //too preform deletion asynchronously
-                mWallet.delete();
+                new Wallet(getActivity(),walletId).delete();
                 getActivity().onBackPressed();
                 result = true;
                 break;
             case R.id.action_sign:
+                mCurrency = new Currency(getActivity(),currencyId);
+                mWallet = new Wallet(getActivity(),walletId);
+                mIdentity = new Identity(getActivity(),identityId);
                 actionSelf(getActivity(),mCurrency,mWallet,mIdentity);
                 result = true;
                 break;
             case R.id.action_join:
             case R.id.action_renew:
+                mCurrency = new Currency(getActivity(),currencyId);
+                mWallet = new Wallet(getActivity(),walletId);
+                mIdentity = new Identity(getActivity(),identityId);
                 actionJoin(getActivity(),mCurrency, mWallet, mIdentity, getFragmentManager());
                 result = true;
                 break;
             case R.id.action_leave:
+                mCurrency = new Currency(getActivity(),currencyId);
+                mWallet = new Wallet(getActivity(),walletId);
+                mIdentity = new Identity(getActivity(),identityId);
                 actionLeave(getActivity(),mCurrency,mWallet,mIdentity);
                 result = true;
                 break;
@@ -314,7 +372,7 @@ public class WalletFragment extends ListFragment
     }
 
     private void showQrCode() {
-        QrCodeDialogFragment fragment = QrCodeDialogFragment.newInstance(mWallet.id());
+        QrCodeDialogFragment fragment = QrCodeDialogFragment.newInstance(walletId);
         fragment.show(getFragmentManager(),
                 fragment.getClass().getSimpleName());
 
@@ -322,10 +380,12 @@ public class WalletFragment extends ListFragment
 
     @Override
     public void onRefresh() {
-        if(mIdentity!=null) {
+        if(identityId!=null) {
             getActivity().startService(intentRequierementsService);
             getActivity().registerReceiver(broadcastReceiverWotRequierements, new IntentFilter(RequierementsService.BROADCAST_ACTION));
         }
+        getLoaderManager().initLoader(WALLET_LOADER_ID, getArguments(), this);
+        getLoaderManager().initLoader(OPERATION_LOADER_ID, getArguments(), this);
         mSwipeLayout.setRefreshing(false);
     }
 
@@ -367,14 +427,14 @@ public class WalletFragment extends ListFragment
 
     private void clickCertification(){
         if (getActivity() instanceof IdentityFragment.ActionIdentity) {
-            ((IdentityFragment.ActionIdentity) getActivity()).displayCertification(mWallet.publicKey(), mCurrency.id());
+            ((IdentityFragment.ActionIdentity) getActivity()).displayCertification(walletPublicKey, currencyId);
         }
     }
 
     private void clickTransfer(){
         Intent intent = new Intent(getActivity(), TransferActivity.class);
-        intent.putExtra(Application.EXTRA_CURRENCY_ID, mCurrency.id());
-        intent.putExtra(Application.EXTRA_WALLET_ID, mWallet.id());
+        intent.putExtra(Application.EXTRA_CURRENCY_ID, currencyId);
+        intent.putExtra(Application.EXTRA_WALLET_ID, walletId);
         startActivity(intent);
     }
 
@@ -547,21 +607,30 @@ public class WalletFragment extends ListFragment
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         Long walletId = args.getLong(WALLET_ID);
-        String selection = SQLiteView.Tx.WALLET_ID + "=?";
-        String selectionArgs[] = new String[]{
-                walletId.toString()
-        };
+        if (id == WALLET_LOADER_ID) {
+            String selection = SQLiteView.Wallet._ID + "=?";
+            String[] selectionArgs = new String[]{walletId.toString()};
 
-        return new CursorLoader(
-                getActivity(),
-                UcoinUris.TX_URI,
-                null, selection, selectionArgs,
-                SQLiteView.Tx.TIME + " DESC");
+            return new CursorLoader(
+                    getActivity(),
+                    UcoinUris.WALLET_URI,
+                    null, selection, selectionArgs,
+                    null);
+        }else {
+            String selection = SQLiteView.Tx.WALLET_ID + "=?";
+            String selectionArgs[] = new String[]{walletId.toString()};
+
+            return new CursorLoader(getActivity(), UcoinUris.TX_URI, null, selection, selectionArgs, SQLiteView.Tx.TIME + " DESC");
+        }
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        ((OperationIdentitySectionAdapter) this.getListAdapter()).swapCursor(data);
+        if(loader.getId() == WALLET_LOADER_ID){
+            updateFragment(data);
+        }else{
+            ((OperationIdentitySectionAdapter) this.getListAdapter()).swapCursor(data);
+        }
     }
 
     @Override

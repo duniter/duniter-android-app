@@ -14,8 +14,10 @@ public interface SQLiteView {
     final class Wallet extends SQLiteTable.Wallet {
         public static final String VIEW_NAME = "wallet_view";
         public static final String CURRENCY_NAME = "currency_name";
-        public static final String QUANTITATIVE_AMOUNT = "quantitative_amount";
-        public static final String UD_VALUE = "ud_amount";
+        public static final String CURRENCY_QT = "currency_qt";
+        public static final String DIVIDEND = "ud_amount";
+        public static final String IDENTITY_ID = "identity_id";
+        public static final String DT = "dt";
     }
 
 

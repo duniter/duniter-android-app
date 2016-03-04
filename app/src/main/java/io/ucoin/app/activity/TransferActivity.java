@@ -391,14 +391,14 @@ public class TransferActivity extends ActionBarActivity implements SendIdentity,
             UcoinWallets wallets = new Wallets(Application.getContext(), mcurrencyId);
             walletSelected = wallets.getById(walletId);
 
-            Format.Currency.changeUnit(this, walletSelected.currency().name(), walletSelected.quantitativeAmount(), walletSelected.udValue(), walletSelected.currency().dt(), mWalletAmount, mWalletDefaultAmount, "");
+            Format.Currency.changeUnit(this, walletSelected.currency().name(), walletSelected.amount(), walletSelected.udValue(), walletSelected.currency().dt(), mWalletAmount, mWalletDefaultAmount, "");
 
             mWalletAlias.setText(walletSelected.alias());
 
             setTitle(getResources().getString(R.string.transfer_of,walletSelected.currency().name()));
             currency = new Currency(this, walletSelected.currencyId());
         }
-        //mQuantitativeUD = new BigDecimal(data.getString(data.getColumnIndex(SQLiteView.Wallet.UD_VALUE)));
+        //mQuantitativeUD = new BigDecimal(data.getString(data.getColumnIndex(SQLiteView.Wallet.DIVIDEND)));
 
         //TODO fma metre les valeurs des amount a jour
 
@@ -428,7 +428,7 @@ public class TransferActivity extends ActionBarActivity implements SendIdentity,
     }
 
     @Override
-    public void displayWalletFragment(Long walletId) {
+    public void displayWalletFragment(Long walletId, Long identityId) {
         pressBack();
         getIntent().putExtra(Application.EXTRA_WALLET_ID, walletId);
         actionAfterWalletSelected();
@@ -482,7 +482,7 @@ public class TransferActivity extends ActionBarActivity implements SendIdentity,
     }
 
     public boolean actionTransfer() {
-        BigInteger qtAmount;
+        final BigInteger qtAmount;
         String receiverPublicKey = mReceiverPublicKey.getText().toString();
         String comment;
 
@@ -500,18 +500,19 @@ public class TransferActivity extends ActionBarActivity implements SendIdentity,
 
 
         //check funds
-        if (qtAmount.compareTo(wallet.quantitativeAmount()) == 1) {
+        if (qtAmount.compareTo(wallet.amount()) == 1) {
             defaultAmount.setError(getResources().getString(R.string.insufficient_funds));
             return false;
         }
 
         //set inputs
         BigInteger cumulativeAmount = new BigInteger("0");
+        //TODO traitement si pas assez de sources
         for (UcoinSource source : wallet.sources().getByState(SourceState.AVAILABLE)) {
             transaction.addInput(source);
             source.setState(SourceState.CONSUMED);
-            cumulativeAmount.add(source.amount());
-            if (cumulativeAmount.compareTo(qtAmount) == 1) {
+            cumulativeAmount = cumulativeAmount.add(source.amount());
+            if (cumulativeAmount.compareTo(qtAmount) >= 0) {
                 break;
             }
         }
@@ -549,8 +550,10 @@ public class TransferActivity extends ActionBarActivity implements SendIdentity,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
+                        String s = "salut";
                         TxHistory.PendingTx tx = TxHistory.PendingTx.fromJson(response);
                         wallet.txs().add(tx, TxDirection.OUT,wallet.publicKey());
+                        wallet.substractAmount(qtAmount.toString());
                         Toast.makeText(TransferActivity.this, getResources().getString(R.string.transaction_sent), Toast.LENGTH_LONG).show();
                         finish();
                     }

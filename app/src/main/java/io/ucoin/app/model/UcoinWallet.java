@@ -15,7 +15,7 @@ public interface UcoinWallet extends SqlRow {
 
     String alias();
 
-    BigInteger quantitativeAmount();
+    BigInteger amount();
 
     BigInteger udValue();
 
@@ -27,8 +27,6 @@ public interface UcoinWallet extends SqlRow {
 
     UcoinUds uds();
 
-    Integer exp();
-
     UcoinCurrency currency();
 
     UcoinIdentity identity();
@@ -37,5 +35,7 @@ public interface UcoinWallet extends SqlRow {
 
     void setSyncBlock(Long number);
 
-    void setExp(Integer exp);
+    void setAmount(String amount);
+
+    void substractAmount(String amount);
 }

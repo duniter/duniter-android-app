@@ -11,14 +11,12 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 import io.ucoin.app.Format;
 import io.ucoin.app.R;
-import io.ucoin.app.model.UcoinCurrency;
-import io.ucoin.app.model.UcoinWallet;
-import io.ucoin.app.model.sql.sqlite.Wallet;
 import io.ucoin.app.sqlite.SQLiteView;
 
 
@@ -107,6 +105,20 @@ public class WalletCursorAdapter extends CursorAdapter {
         return mCursor.getLong(mCursor.getColumnIndex(SQLiteView.Wallet._ID));
     }
 
+    public Long getIdIdentity(int position){
+        int nbSec = 0;
+        if(mSectionPosition.size()>1) {
+            for (Integer i : mSectionPosition.keySet()) {
+                if (position > i) {
+                    nbSec += 1;
+                }
+            }
+        }
+        position -= nbSec;
+        mCursor.moveToPosition(position);
+        return mCursor.getLong(mCursor.getColumnIndex(SQLiteView.Wallet.IDENTITY_ID));
+    }
+
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
         LayoutInflater inflater = (LayoutInflater) context
@@ -127,48 +139,39 @@ public class WalletCursorAdapter extends CursorAdapter {
     public void bindView(View view, Context context, Cursor cursor) {
         ViewHolder holder = (ViewHolder) view.getTag();
 
-        int idIndex = cursor.getColumnIndex(SQLiteView.Wallet._ID);
-//        int currencyNameIndex = cursor.getColumnIndex(SQLiteView.Wallet.CURRENCY_NAME);
-//        ImageView infoIdentity = (ImageView) view.findViewById(R.id.info_identity);
+        int idIdentityIndex = cursor.getColumnIndex(SQLiteView.Wallet.IDENTITY_ID);
+        int publicKeyIndex = cursor.getColumnIndex(SQLiteView.Wallet.PUBLIC_KEY);
+        int currencyNameIndex = cursor.getColumnIndex(SQLiteView.Wallet.CURRENCY_NAME);
+        int dividendIndex = cursor.getColumnIndex(SQLiteView.Wallet.DIVIDEND);
+        int dtIndex = cursor.getColumnIndex(SQLiteView.Wallet.DT);
+        int amountIndex = cursor.getColumnIndex(SQLiteView.Wallet.AMOUNT);
+        int aliasIndex = cursor.getColumnIndex(SQLiteView.Wallet.ALIAS);
 
-        final Long walletId = cursor.getLong(idIndex);
-
-        UcoinWallet wallet = new Wallet(context,walletId);
-
-        UcoinCurrency currency = wallet.currency();
-
-        try{
-            if(wallet.identity()!=null){
-                holder.is_member.setVisibility(View.VISIBLE);
-            }else{
-                holder.is_member.setVisibility(View.GONE);
-            }
-        }catch (NullPointerException e){
-            e.printStackTrace();
+        if(cursor.isNull(idIdentityIndex)){
+            holder.is_member.setVisibility(View.GONE);
+        }else{
+            holder.is_member.setVisibility(View.VISIBLE);
         }
 
-//        infoIdentity.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                ((WalletListFragment.Action)activity).showIdentity(walletId);
-//            }
-//        });
+        holder.name.setText(cursor.getString(aliasIndex));
+        holder.pubkey.setText(Format.minifyPubkey(cursor.getString(publicKeyIndex)));
 
-
-
-        holder.name.setText(wallet.alias());
-        holder.pubkey.setText(Format.minifyPubkey(wallet.publicKey()));
-
-        try{
-            Format.Currency.changeUnit(context, currency.name(), wallet.quantitativeAmount(), wallet.udValue(), currency.dt(), holder.primaryAmount, holder.secondAmount, "");
-            holder.progress.setVisibility(View.GONE);
-            holder.primaryAmount.setVisibility(View.VISIBLE);
-            holder.secondAmount.setVisibility(View.VISIBLE);
-        }catch (NullPointerException e) {
-            e.printStackTrace();
+        if(cursor.isNull(amountIndex) || cursor.isNull(dividendIndex) || cursor.isNull(dtIndex)){
             holder.progress.setVisibility(View.VISIBLE);
             holder.primaryAmount.setVisibility(View.GONE);
             holder.secondAmount.setVisibility(View.GONE);
+        }else{
+            Format.Currency.changeUnit(
+                    context,
+                    cursor.getString(currencyNameIndex),
+                    new BigInteger(cursor.getString(amountIndex)),
+                    new BigInteger(cursor.getString(dividendIndex)),
+                    cursor.getInt(dtIndex),
+                    holder.primaryAmount,
+                    holder.secondAmount, "");
+            holder.progress.setVisibility(View.GONE);
+            holder.primaryAmount.setVisibility(View.VISIBLE);
+            holder.secondAmount.setVisibility(View.VISIBLE);
         }
     }
 

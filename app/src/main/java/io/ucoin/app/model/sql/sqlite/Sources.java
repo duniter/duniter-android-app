@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import io.ucoin.app.Format;
 import io.ucoin.app.UcoinUris;
 import io.ucoin.app.enumeration.SourceState;
 import io.ucoin.app.enumeration.SourceType;
@@ -76,7 +75,6 @@ final public class Sources extends Table
         );
 
         BigInteger totalAmount = BigInteger.ZERO;
-        BigInteger maxAmount = BigInteger.ZERO;
 
         for (TxSources.Source source : sources.sources) {
             String state;
@@ -87,9 +85,6 @@ final public class Sources extends Table
                 state = SourceState.AVAILABLE.name();
                 totalAmount = totalAmount.add(amount);
             }
-            if(maxAmount.compareTo(amount)<0){
-                maxAmount = amount;
-            }
             operations.add(ContentProviderOperation.newInsert(UcoinUris.SOURCE_URI)
                     .withValue(SQLiteTable.Source.WALLET_ID, mWalletId)
                     .withValue(SQLiteTable.Source.TYPE, source.type.name())
@@ -99,18 +94,9 @@ final public class Sources extends Table
                     .withValue(SQLiteTable.Source.STATE, state)
                     .build());
         }
-
-        int exp=0;
-        while(maxAmount.compareTo(new BigInteger(Format.MAX_INTEGER))>0 ||
-                totalAmount.compareTo(new BigInteger(Format.MAX_INTEGER))>0){
-            exp+=3;
-            maxAmount = maxAmount.divide(new BigInteger("1000"));
-            totalAmount = totalAmount.divide(new BigInteger("1000"));
-        }
-
         UcoinWallet wallet = new Wallet(mContext,mWalletId);
 
-        wallet.setExp(exp);
+        wallet.setAmount(totalAmount.toString());
 //        wallet.setAmount(totalAmount);
 
         try {

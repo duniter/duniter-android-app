@@ -104,7 +104,9 @@ public class WalletListFragment extends ListFragment
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         if(getActivity() instanceof Action){
-            ((Action)getActivity()).displayWalletFragment(walletCursorAdapter.getIdWallet(position));
+            ((Action)getActivity()).displayWalletFragment(
+                    walletCursorAdapter.getIdWallet(position),
+                    walletCursorAdapter.getIdIdentity(position));
         }
     }
 
@@ -183,6 +185,6 @@ public class WalletListFragment extends ListFragment
     }
 
     public interface Action {
-        void displayWalletFragment(Long walletId);
+        void displayWalletFragment(Long walletId, Long IdentityId);
     }
 }

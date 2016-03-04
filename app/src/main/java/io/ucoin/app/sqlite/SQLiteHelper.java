@@ -9,7 +9,6 @@ import android.util.Log;
 import io.ucoin.app.BuildConfig;
 import io.ucoin.app.enumeration.CertificationType;
 import io.ucoin.app.enumeration.MembershipType;
-import io.ucoin.app.enumeration.SourceState;
 
 public class SQLiteHelper extends SQLiteOpenHelper implements SQLiteTable {
 
@@ -116,7 +115,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements SQLiteTable {
             Wallet.PUBLIC_KEY + TEXT + NOTNULL + COMMA +
             Wallet.PRIVATE_KEY + TEXT + COMMA +
             Wallet.ALIAS + TEXT + COMMA +
-            Wallet.EXP + INTEGER + NOTNULL + " DEFAULT 0 " + COMMA +
+            Wallet.AMOUNT + TEXT + NOTNULL + " DEFAULT \"0\" " + COMMA +
             Wallet.SYNC_BLOCK + INTEGER + NOTNULL + " DEFAULT 0 " + COMMA +
             "FOREIGN KEY (" + Wallet.CURRENCY_ID + ") REFERENCES " +
             Currency.TABLE_NAME + "(" + Currency._ID + ") ON DELETE CASCADE" + COMMA +
@@ -403,34 +402,24 @@ public class SQLiteHelper extends SQLiteOpenHelper implements SQLiteTable {
                     " AS SELECT " +
                     Wallet.TABLE_NAME + DOT + Wallet._ID + AS + SQLiteView.Wallet._ID + COMMA +
                     Wallet.TABLE_NAME + DOT + Wallet.CURRENCY_ID + AS + SQLiteView.Wallet.CURRENCY_ID + COMMA +
-                    Currency.TABLE_NAME + DOT + Currency.NAME + AS + SQLiteView.Wallet.CURRENCY_NAME + COMMA +
                     Wallet.TABLE_NAME + DOT + Wallet.SALT + AS + SQLiteView.Wallet.SALT + COMMA +
                     Wallet.TABLE_NAME + DOT + Wallet.PUBLIC_KEY + AS + SQLiteView.Wallet.PUBLIC_KEY + COMMA +
                     Wallet.TABLE_NAME + DOT + Wallet.PRIVATE_KEY + AS + SQLiteView.Wallet.PRIVATE_KEY + COMMA +
                     Wallet.TABLE_NAME + DOT + Wallet.ALIAS + AS + SQLiteView.Wallet.ALIAS + COMMA +
                     Wallet.TABLE_NAME + DOT + Wallet.SYNC_BLOCK + AS + SQLiteView.Wallet.SYNC_BLOCK + COMMA +
-                    Wallet.TABLE_NAME + DOT + Wallet.EXP + AS + SQLiteView.Wallet.EXP + COMMA +
-                    "ud_block" + DOT + Block.DIVIDEND + AS + SQLiteView.Wallet.UD_VALUE + COMMA +
-                    " IFNULL(CAST(SUM(" +
-                    "SUBSTR(" + Source.TABLE_NAME + DOT + Source.AMOUNT + ",-" + Wallet.TABLE_NAME + DOT + Wallet.EXP + "," +
-                    "(LENGTH(" + Source.TABLE_NAME + DOT + Source.AMOUNT + ")" + " - " + Wallet.TABLE_NAME + DOT + Wallet.EXP + ") * -1" +
-                    ")) AS TEXT), 0" + ")" + AS + SQLiteView.Wallet.QUANTITATIVE_AMOUNT +
+                    Wallet.TABLE_NAME + DOT + Wallet.AMOUNT + AS + SQLiteView.Wallet.AMOUNT + COMMA +
+                    Identity.TABLE_NAME + DOT + Identity._ID + AS + SQLiteView.Wallet.IDENTITY_ID + COMMA +
+                    SQLiteView.Currency.VIEW_NAME + DOT + SQLiteView.Currency.NAME + AS + SQLiteView.Wallet.CURRENCY_NAME + COMMA +
+                    SQLiteView.Currency.VIEW_NAME + DOT + SQLiteView.Currency.DIVIDEND + AS + SQLiteView.Wallet.DIVIDEND + COMMA +
+                    SQLiteView.Currency.VIEW_NAME + DOT + SQLiteView.Currency.DT + AS + SQLiteView.Wallet.DT + COMMA +
+                    SQLiteView.Currency.VIEW_NAME + DOT + SQLiteView.Currency.SIGQTY + AS + SQLiteView.Wallet.CURRENCY_QT +
 
                     " FROM " + Wallet.TABLE_NAME +
+                    " LEFT JOIN " + SQLiteView.Currency.VIEW_NAME +
+                    " ON " + SQLiteView.Currency.VIEW_NAME + DOT + SQLiteView.Currency._ID + "=" + Wallet.TABLE_NAME + DOT + Wallet.CURRENCY_ID +
 
-                    " LEFT JOIN " + Currency.TABLE_NAME +
-                    " ON " + Currency.TABLE_NAME + DOT + Currency._ID + "=" + Wallet.TABLE_NAME + DOT + Wallet.CURRENCY_ID +
-
-                    " LEFT JOIN (SELECT " + Block.CURRENCY_ID + COMMA + Block.DIVIDEND + COMMA + "MAX(" + Block.NUMBER + ") AS " + Block.NUMBER +
-                    " FROM " + Block.TABLE_NAME +
-                    " WHERE " + Block.TABLE_NAME + DOT + Block.DIVIDEND + " IS NOT NULL " +
-                    " GROUP BY " + Block.CURRENCY_ID + ") AS ud_block" +
-                    " ON " + "ud_block." + Block.CURRENCY_ID + "=" + Wallet.TABLE_NAME + DOT + Wallet.CURRENCY_ID +
-
-                    " LEFT JOIN " + Source.TABLE_NAME +
-                    " ON " + Wallet.TABLE_NAME + DOT + Wallet._ID + "=" + Source.TABLE_NAME + DOT + Source.WALLET_ID +
-                    " AND " + Source.TABLE_NAME + DOT + Source.STATE + "='" + SourceState.AVAILABLE.name() + "'" +
-                    " GROUP BY " + Wallet.TABLE_NAME + DOT + Wallet._ID;
+                    " LEFT JOIN " + Identity.TABLE_NAME +
+                    " ON " + Identity.TABLE_NAME + DOT + Identity.WALLET_ID + "=" + Wallet.TABLE_NAME + DOT + Wallet._ID;
             db.execSQL(CREATE_VIEW_WALLET);
 
             String CREATE_TABLE_MEMBER = "CREATE VIEW " + SQLiteView.Member.VIEW_NAME +

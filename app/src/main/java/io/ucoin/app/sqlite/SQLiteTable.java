@@ -82,7 +82,7 @@ public interface SQLiteTable {
         public static final String PRIVATE_KEY = "private_key";
         public static final String ALIAS = "alias";
         public static final String SYNC_BLOCK = "sync_block";
-        public static final String EXP = "exp";
+        public static final String AMOUNT = "amount";
     }
 
     class Source implements BaseColumns {

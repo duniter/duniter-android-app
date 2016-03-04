@@ -570,8 +570,8 @@ public class CurrencyActivity extends ActionBarActivity
     }
 
     @Override
-    public void displayWalletFragment(Long walletId){
-        currentFragment = WalletFragment.newInstance(walletId);
+    public void displayWalletFragment(Long walletId, Long identityId){
+        currentFragment = WalletFragment.newInstance(walletId,identityId);
         addFragment();
         displayFragment(currentFragment);
     }

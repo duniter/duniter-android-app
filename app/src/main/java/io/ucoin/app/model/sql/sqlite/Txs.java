@@ -156,6 +156,27 @@ final public class Txs extends Table
 
     @Override
     public UcoinTxs add(TxHistory history,String walletPublicKey) {
+
+        for (TxHistory.ConfirmedTx tx : history.history.received) {
+            UcoinTx localTx = getByHash(tx.hash);
+            if (localTx == null) {
+                boolean isIssuer = false;
+                for (String issuer : tx.issuers) {
+                    if (issuer.equals(walletPublicKey)) {
+                        isIssuer = true;
+                        break;
+                    }
+                }
+                if (!isIssuer) {
+                    if (tx.time != null) add(tx, TxDirection.IN,walletPublicKey);
+                }
+            } else if (localTx.state() == TxState.PENDING) {
+                localTx.setState(TxState.CONFIRMED);
+                localTx.setTime(tx.time);
+                localTx.setBlock(tx.block_number);
+            }
+        }
+
         for (TxHistory.ConfirmedTx tx : history.history.sent) {
             UcoinTx localTx = getByHash(tx.hash);
             if (localTx == null) {
@@ -175,28 +196,6 @@ final public class Txs extends Table
                 localTx.setBlock(tx.block_number);
             } else if (localTx.direction() == TxDirection.IN){
                 localTx.setDirection(TxDirection.OUT);
-            }
-        }
-
-        for (TxHistory.ConfirmedTx tx : history.history.received) {
-            UcoinTx localTx = getByHash(tx.hash);
-            if (localTx == null) {
-                boolean isIssuer = false;
-                for (String issuer : tx.issuers) {
-                    if (issuer.equals(walletPublicKey)) {
-                        isIssuer = true;
-                        break;
-                    }
-                }
-                if (!isIssuer) {
-                    if (tx.time != null) add(tx, TxDirection.IN,walletPublicKey);
-                }
-            } else if (localTx.state() == TxState.PENDING) {
-                localTx.setState(TxState.CONFIRMED);
-                localTx.setTime(tx.time);
-                localTx.setBlock(tx.block_number);
-            } else if (localTx.direction() == TxDirection.OUT){
-                localTx.setDirection(TxDirection.IN);
             }
         }
 

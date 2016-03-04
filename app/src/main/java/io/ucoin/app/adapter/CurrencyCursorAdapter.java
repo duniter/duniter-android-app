@@ -65,7 +65,7 @@ public class CurrencyCursorAdapter extends ArrayAdapter {
         BigInteger result = new BigInteger("0");
         ArrayList<UcoinWallet> listWalet = wallets.list();
         for(UcoinWallet w : listWalet){
-            result = result.add(w.quantitativeAmount());
+            result = result.add(w.amount());
         }
 
         UcoinBlock currentBlock = currency.blocks().currentBlock();

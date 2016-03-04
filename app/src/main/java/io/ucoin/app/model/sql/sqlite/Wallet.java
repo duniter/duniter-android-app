@@ -5,7 +5,6 @@ import android.content.Context;
 
 import java.math.BigInteger;
 
-import io.ucoin.app.Format;
 import io.ucoin.app.UcoinUris;
 import io.ucoin.app.model.UcoinCurrency;
 import io.ucoin.app.model.UcoinIdentity;
@@ -50,19 +49,13 @@ public class Wallet extends Row
     }
 
     @Override
-    public BigInteger quantitativeAmount() {
-        String s = Format.expo(getString(SQLiteView.Wallet.QUANTITATIVE_AMOUNT));
-        int exp = exp();
-        String e = "1";
-        for(int i=0;i<exp;i++){
-            e+="0";
-        }
-        return (new BigInteger(s)).multiply(new BigInteger(e));
+    public BigInteger amount() {
+        return new BigInteger(getString(SQLiteView.Wallet.AMOUNT));
     }
 
     @Override
     public BigInteger udValue() {
-        return new BigInteger(getString(SQLiteView.Wallet.UD_VALUE));
+        return new BigInteger(getString(SQLiteView.Wallet.DIVIDEND));
     }
 
     @Override
@@ -86,11 +79,6 @@ public class Wallet extends Row
     }
 
     @Override
-    public Integer exp() {
-        return getInt(SQLiteView.Wallet.EXP);
-    }
-
-    @Override
     public UcoinCurrency currency() {
         return new Currency(mContext, currencyId());
     }
@@ -102,7 +90,7 @@ public class Wallet extends Row
 
     @Override
     public UcoinIdentity addIdentity(String uid, String publicKey) throws AddressFormatException {
-        return new Identities(mContext, currencyId()).addWallet(uid, publicKey,mId);
+        return new Identities(mContext, currencyId()).addWallet(uid, publicKey, mId);
     }
 
     @Override
@@ -113,9 +101,17 @@ public class Wallet extends Row
     }
 
     @Override
-    public void setExp(Integer exp) {
+    public void setAmount(String amount) {
         ContentValues values = new ContentValues();
-        values.put(SQLiteTable.Wallet.EXP,exp);
+        values.put(SQLiteTable.Wallet.AMOUNT,amount);
+        update(values);
+    }
+
+    @Override
+    public void substractAmount(String amount) {
+        BigInteger a = amount().subtract(new BigInteger(amount));
+        ContentValues values = new ContentValues();
+        values.put(SQLiteTable.Wallet.AMOUNT,a.toString());
         update(values);
     }
 
