@@ -18,6 +18,8 @@ public interface UcoinIdentity extends SqlRow {
 
     Boolean wasMember();
 
+    long nbRequirements();
+
     MembershipType lastMembership();
 
     Long expirationTime();
@@ -33,6 +35,8 @@ public interface UcoinIdentity extends SqlRow {
     UcoinCertifications certifications();
 
     UcoinSelfCertifications selfCertifications();
+
+    UcoinRequirements requirements();
 
     UcoinMemberships memberships();
 

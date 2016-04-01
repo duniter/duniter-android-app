@@ -60,6 +60,8 @@ public class DbProvider extends ContentProvider implements SQLiteTable {
     private static final int SELF_CERTIFICATION_ID = 141;
     private static final int CONTACT = 150;
     private static final int CONTACT_ID = 151;
+    private static final int REQUIREMENT = 160;
+    private static final int REQUIREMENT_ID = 161;
 
     private static final int REQUETE = 300;
 
@@ -70,12 +72,15 @@ public class DbProvider extends ContentProvider implements SQLiteTable {
         Context context = getContext();
 
         mSQLiteHelper = new SQLiteHelper(context, context.getString(R.string.DBNAME),
-                null, context.getResources().getInteger(R.integer.DBVERSION));
+                                         null, context.getResources().getInteger(R.integer.DBVERSION));
         uriMatcher.addURI(UcoinUris.CURRENCY_URI.getAuthority(), UcoinUris.CURRENCY_URI.getPath(), CURRENCY);
         uriMatcher.addURI(UcoinUris.CURRENCY_URI.getAuthority(), UcoinUris.CURRENCY_URI.getPath() + "#", CURRENCY_ID);
 
         uriMatcher.addURI(UcoinUris.IDENTITY_URI.getAuthority(), UcoinUris.IDENTITY_URI.getPath(), IDENTITY);
         uriMatcher.addURI(UcoinUris.IDENTITY_URI.getAuthority(), UcoinUris.IDENTITY_URI.getPath() + "#", IDENTITY_ID);
+
+        uriMatcher.addURI(UcoinUris.REQUIREMENT_URI.getAuthority(), UcoinUris.REQUIREMENT_URI.getPath(), REQUIREMENT);
+        uriMatcher.addURI(UcoinUris.REQUIREMENT_URI.getAuthority(), UcoinUris.REQUIREMENT_URI.getPath() + "#", REQUIREMENT_ID);
 
         uriMatcher.addURI(UcoinUris.PEER_URI.getAuthority(), UcoinUris.PEER_URI.getPath(), PEER);
         uriMatcher.addURI(UcoinUris.PEER_URI.getAuthority(), UcoinUris.PEER_URI.getPath() + "#", PEER_ID);
@@ -144,122 +149,134 @@ public class DbProvider extends ContentProvider implements SQLiteTable {
             case CURRENCY:
                 queryBuilder.setTables(SQLiteView.Currency.VIEW_NAME);
                 cursor = queryBuilder.query(db, projection, selection,
-                        selectionArgs, null, null, sortOrder);
+                                            selectionArgs, null, null, sortOrder);
                 break;
             case CURRENCY_ID:
                 queryBuilder.setTables(SQLiteView.Currency.VIEW_NAME);
                 cursor = queryBuilder.query(db, null,
-                        BaseColumns._ID + "=?",
-                        new String[]{uri.getLastPathSegment()},
-                        null, null, null);
+                                            BaseColumns._ID + "=?",
+                                            new String[]{uri.getLastPathSegment()},
+                                            null, null, null);
                 break;
             case IDENTITY:
                 queryBuilder.setTables(SQLiteView.Identity.VIEW_NAME);
                 cursor = queryBuilder.query(db, projection, selection,
-                        selectionArgs, null, null, sortOrder);
+                                            selectionArgs, null, null, sortOrder);
                 break;
             case IDENTITY_ID:
                 queryBuilder.setTables(SQLiteView.Identity.VIEW_NAME);
                 cursor = queryBuilder.query(db, null,
-                        BaseColumns._ID + "=?",
-                        new String[]{uri.getLastPathSegment()},
-                        null, null, null);
+                                            BaseColumns._ID + "=?",
+                                            new String[]{uri.getLastPathSegment()},
+                                            null, null, null);
+                break;
+            case REQUIREMENT:
+                queryBuilder.setTables(Requirement.TABLE_NAME);
+                cursor = queryBuilder.query(db, projection, selection,
+                                            selectionArgs, null, null, sortOrder);
+                break;
+            case REQUIREMENT_ID:
+                queryBuilder.setTables(Requirement.TABLE_NAME);
+                cursor = queryBuilder.query(db, null,
+                                            BaseColumns._ID + "=?",
+                                            new String[]{uri.getLastPathSegment()},
+                                            null, null, null);
                 break;
             case PEER:
                 queryBuilder.setTables(Peer.TABLE_NAME);
                 cursor = queryBuilder.query(db, projection, selection,
-                        selectionArgs, null, null, sortOrder);
+                                            selectionArgs, null, null, sortOrder);
                 break;
             case PEER_ID:
                 queryBuilder.setTables(Peer.TABLE_NAME);
                 cursor = queryBuilder.query(db, null,
-                        BaseColumns._ID + "=?",
-                        new String[]{uri.getLastPathSegment()},
-                        null, null, null);
+                                            BaseColumns._ID + "=?",
+                                            new String[]{uri.getLastPathSegment()},
+                                            null, null, null);
                 break;
             case ENDPOINT:
                 queryBuilder.setTables(Endpoint.TABLE_NAME);
                 cursor = queryBuilder.query(db, projection, selection,
-                        selectionArgs, null, null, sortOrder);
+                                            selectionArgs, null, null, sortOrder);
                 break;
             case ENDPOINT_ID:
                 queryBuilder.setTables(Endpoint.TABLE_NAME);
                 cursor = queryBuilder.query(db, null,
-                        BaseColumns._ID + "=?",
-                        new String[]{uri.getLastPathSegment()},
-                        null, null, null);
+                                            BaseColumns._ID + "=?",
+                                            new String[]{uri.getLastPathSegment()},
+                                            null, null, null);
                 break;
             case WALLET:
                 queryBuilder.setTables(SQLiteView.Wallet.VIEW_NAME);
                 cursor = queryBuilder.query(db, projection, selection,
-                        selectionArgs, null, null, sortOrder);
+                                            selectionArgs, null, null, sortOrder);
                 break;
             case WALLET_ID:
                 queryBuilder.setTables(SQLiteView.Wallet.VIEW_NAME);
                 cursor = queryBuilder.query(db, null,
-                        Wallet._ID + "=?",
-                        new String[]{uri.getLastPathSegment()},
-                        null, null, null);
+                                            Wallet._ID + "=?",
+                                            new String[]{uri.getLastPathSegment()},
+                                            null, null, null);
                 break;
             case SOURCE:
                 queryBuilder.setTables(Source.TABLE_NAME);
                 cursor = queryBuilder.query(db, projection, selection,
-                        selectionArgs, null, null, sortOrder);
+                                            selectionArgs, null, null, sortOrder);
                 break;
             case SOURCE_ID:
                 queryBuilder.setTables(Source.TABLE_NAME);
                 cursor = queryBuilder.query(db, null,
-                        BaseColumns._ID + "=?",
-                        new String[]{uri.getLastPathSegment()},
-                        null, null, null);
+                                            BaseColumns._ID + "=?",
+                                            new String[]{uri.getLastPathSegment()},
+                                            null, null, null);
                 break;
             case MEMBER:
-                queryBuilder.setTables(SQLiteView.Member.VIEW_NAME);
+                queryBuilder.setTables(Member.TABLE_NAME);
                 cursor = queryBuilder.query(db, projection, selection,
-                        selectionArgs, null, null, sortOrder);
+                                            selectionArgs, null, null, sortOrder);
                 break;
             case MEMBER_ID:
-                queryBuilder.setTables(SQLiteView.Member.VIEW_NAME);
+                queryBuilder.setTables(Member.TABLE_NAME);
                 cursor = queryBuilder.query(db, null,
-                        BaseColumns._ID + "=?",
-                        new String[]{uri.getLastPathSegment()},
-                        null, null, null);
+                                            BaseColumns._ID + "=?",
+                                            new String[]{uri.getLastPathSegment()},
+                                            null, null, null);
                 break;
             case CERTIFICATION:
                 queryBuilder.setTables(SQLiteView.Certification.VIEW_NAME);
                 cursor = queryBuilder.query(db, projection, selection,
-                        selectionArgs, null, null, sortOrder);
+                                            selectionArgs, null, null, sortOrder);
                 break;
             case CERTIFICATION_ID:
                 queryBuilder.setTables(SQLiteView.Certification.VIEW_NAME);
                 cursor = queryBuilder.query(db, null,
-                        BaseColumns._ID + "=?",
-                        new String[]{uri.getLastPathSegment()},
-                        null, null, null);
+                                            BaseColumns._ID + "=?",
+                                            new String[]{uri.getLastPathSegment()},
+                                            null, null, null);
                 break;
             case BLOCK:
                 queryBuilder.setTables(Block.TABLE_NAME);
                 cursor = queryBuilder.query(db, projection, selection,
-                        selectionArgs, null, null, sortOrder);
+                                            selectionArgs, null, null, sortOrder);
                 break;
             case BLOCK_ID:
                 queryBuilder.setTables(Block.TABLE_NAME);
                 cursor = queryBuilder.query(db, null,
-                        BaseColumns._ID + "=?",
-                        new String[]{uri.getLastPathSegment()},
-                        null, null, null);
+                                            BaseColumns._ID + "=?",
+                                            new String[]{uri.getLastPathSegment()},
+                                            null, null, null);
                 break;
             case TX:
                 queryBuilder.setTables(SQLiteView.Tx.VIEW_NAME);
                 cursor = queryBuilder.query(db, projection, selection,
-                        selectionArgs, null, null, sortOrder);
+                                            selectionArgs, null, null, sortOrder);
                 break;
             case TX_ID:
                 queryBuilder.setTables(SQLiteView.Tx.VIEW_NAME);
                 cursor = queryBuilder.query(db, null,
-                        BaseColumns._ID + "=?",
-                        new String[]{uri.getLastPathSegment()},
-                        null, null, null);
+                                            BaseColumns._ID + "=?",
+                                            new String[]{uri.getLastPathSegment()},
+                                            null, null, null);
                 break;
             case TX_ISSUER:
                 queryBuilder.setTables(TxIssuer.TABLE_NAME);
@@ -268,93 +285,93 @@ public class DbProvider extends ContentProvider implements SQLiteTable {
             case TX_ISSUER_ID:
                 queryBuilder.setTables(TxIssuer.TABLE_NAME);
                 cursor = queryBuilder.query(db, null,
-                        BaseColumns._ID + "=?",
-                        new String[]{uri.getLastPathSegment()},
-                        null, null, null);
+                                            BaseColumns._ID + "=?",
+                                            new String[]{uri.getLastPathSegment()},
+                                            null, null, null);
                 break;
             case TX_INPUT:
                 queryBuilder.setTables(TxInput.TABLE_NAME);
                 cursor = queryBuilder.query(db, projection, selection,
-                        selectionArgs, null, null, sortOrder);
+                                            selectionArgs, null, null, sortOrder);
                 break;
             case TX_INPUT_ID:
                 queryBuilder.setTables(TxInput.TABLE_NAME);
                 cursor = queryBuilder.query(db, null,
-                        BaseColumns._ID + "=?",
-                        new String[]{uri.getLastPathSegment()},
-                        null, null, null);
+                                            BaseColumns._ID + "=?",
+                                            new String[]{uri.getLastPathSegment()},
+                                            null, null, null);
                 break;
             case TX_OUTPUT:
                 queryBuilder.setTables(TxOutput.TABLE_NAME);
                 cursor = queryBuilder.query(db, projection, selection,
-                        selectionArgs, null, null, sortOrder);
+                                            selectionArgs, null, null, sortOrder);
                 break;
             case TX_OUTPUT_ID:
                 queryBuilder.setTables(TxOutput.TABLE_NAME);
                 cursor = queryBuilder.query(db, null,
-                        BaseColumns._ID + "=?",
-                        new String[]{uri.getLastPathSegment()},
-                        null, null, null);
+                                            BaseColumns._ID + "=?",
+                                            new String[]{uri.getLastPathSegment()},
+                                            null, null, null);
                 break;
             case TX_SIGNATURE:
                 queryBuilder.setTables(TxSignature.TABLE_NAME);
                 cursor = queryBuilder.query(db, projection, selection,
-                        selectionArgs, null, null, sortOrder);
+                                            selectionArgs, null, null, sortOrder);
                 break;
             case TX_SIGNATURE_ID:
                 queryBuilder.setTables(TxSignature.TABLE_NAME);
                 cursor = queryBuilder.query(db, null,
-                        BaseColumns._ID + "=?",
-                        new String[]{uri.getLastPathSegment()},
-                        null, null, null);
+                                            BaseColumns._ID + "=?",
+                                            new String[]{uri.getLastPathSegment()},
+                                            null, null, null);
                 break;
             case UD:
                 queryBuilder.setTables(SQLiteView.Ud.VIEW_NAME);
                 cursor = queryBuilder.query(db, projection, selection,
-                        selectionArgs, null, null, sortOrder);
+                                            selectionArgs, null, null, sortOrder);
                 break;
             case UD_ID:
                 queryBuilder.setTables(SQLiteView.Ud.VIEW_NAME);
                 cursor = queryBuilder.query(db, null,
-                        BaseColumns._ID + "=?",
-                        new String[]{uri.getLastPathSegment()},
-                        null, null, null);
+                                            BaseColumns._ID + "=?",
+                                            new String[]{uri.getLastPathSegment()},
+                                            null, null, null);
                 break;
             case MEMBERSHIP:
                 queryBuilder.setTables(SQLiteView.Membership.VIEW_NAME);
                 cursor = queryBuilder.query(db, projection, selection,
-                        selectionArgs, null, null, sortOrder);
+                                            selectionArgs, null, null, sortOrder);
                 break;
             case MEMBERSHIP_ID:
                 queryBuilder.setTables(SQLiteView.Membership.VIEW_NAME);
                 cursor = queryBuilder.query(db, null,
-                        BaseColumns._ID + "=?",
-                        new String[]{uri.getLastPathSegment()},
-                        null, null, null);
+                                            BaseColumns._ID + "=?",
+                                            new String[]{uri.getLastPathSegment()},
+                                            null, null, null);
                 break;
             case SELF_CERTIFICATION:
                 queryBuilder.setTables(SelfCertification.TABLE_NAME);
                 cursor = queryBuilder.query(db, projection, selection,
-                        selectionArgs, null, null, sortOrder);
+                                            selectionArgs, null, null, sortOrder);
                 break;
             case SELF_CERTIFICATION_ID:
                 queryBuilder.setTables(SelfCertification.TABLE_NAME);
                 cursor = queryBuilder.query(db, null,
-                        BaseColumns._ID + "=?",
-                        new String[]{uri.getLastPathSegment()},
-                        null, null, null);
+                                            BaseColumns._ID + "=?",
+                                            new String[]{uri.getLastPathSegment()},
+                                            null, null, null);
                 break;
             case CONTACT:
                 queryBuilder.setTables(Contact.TABLE_NAME);
                 cursor = queryBuilder.query(db, projection, selection,
-                        selectionArgs, null, null, sortOrder);
+                                            selectionArgs, null, null, sortOrder);
                 break;
             case CONTACT_ID:
                 queryBuilder.setTables(Contact.TABLE_NAME);
                 cursor = queryBuilder.query(db, null,
-                        BaseColumns._ID + "=?",
-                        new String[]{uri.getLastPathSegment()},
-                        null, null, null);
+                                            BaseColumns._ID + "=?",
+                                            new String[]{uri.getLastPathSegment()},
+                                            null, null, null);
                 break;
             case REQUETE:
                 cursor = db.rawQuery(selection, selectionArgs);
@@ -410,6 +427,10 @@ public class DbProvider extends ContentProvider implements SQLiteTable {
             case CERTIFICATION:
                 id = db.insertWithOnConflict(Certification.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_IGNORE);
                 uri = Uri.parse(UcoinUris.CERTIFICATION_URI + Long.toString(id));
+                break;
+            case REQUIREMENT:
+                id = db.insertWithOnConflict(Requirement.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_IGNORE);
+                uri = Uri.parse(UcoinUris.REQUIREMENT_URI + Long.toString(id));
                 break;
             case BLOCK:
                 id = db.insertWithOnConflict(Block.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_IGNORE);
@@ -471,154 +492,161 @@ public class DbProvider extends ContentProvider implements SQLiteTable {
         switch (uriType) {
             case CURRENCY:
                 deletedRows = db.delete(Currency.TABLE_NAME,
-                        selection,
-                        selectionArgs);
+                                        selection,
+                                        selectionArgs);
                 break;
             case CURRENCY_ID:
                 deletedRows = db.delete(Currency.TABLE_NAME,
-                        BaseColumns._ID + "=?",
-                        new String[]{uri.getLastPathSegment()});
+                                        BaseColumns._ID + "=?",
+                                        new String[]{uri.getLastPathSegment()});
                 break;
             case BLOCK:
                 deletedRows = db.delete(Block.TABLE_NAME,
-                        selection,
-                        selectionArgs);
+                                        selection,
+                                        selectionArgs);
                 break;
             case BLOCK_ID:
                 deletedRows = db.delete(Block.TABLE_NAME,
-                        BaseColumns._ID + "=?",
-                        new String[]{uri.getLastPathSegment()});
+                                        BaseColumns._ID + "=?",
+                                        new String[]{uri.getLastPathSegment()});
                 break;
 
             case IDENTITY:
                 deletedRows = db.delete(Identity.TABLE_NAME,
-                        selection,
-                        selectionArgs);
+                                        selection,
+                                        selectionArgs);
                 break;
             case IDENTITY_ID:
                 deletedRows = db.delete(Identity.TABLE_NAME,
-                        BaseColumns._ID + "=?",
-                        new String[]{uri.getLastPathSegment()});
+                                        BaseColumns._ID + "=?",
+                                        new String[]{uri.getLastPathSegment()});
                 break;
             case PEER:
                 deletedRows = db.delete(Peer.TABLE_NAME,
-                        selection,
-                        selectionArgs);
+                                        selection,
+                                        selectionArgs);
                 break;
             case PEER_ID:
                 deletedRows = db.delete(Peer.TABLE_NAME,
-                        BaseColumns._ID + "=?",
-                        new String[]{uri.getLastPathSegment()});
+                                        BaseColumns._ID + "=?",
+                                        new String[]{uri.getLastPathSegment()});
                 break;
             case ENDPOINT:
                 deletedRows = db.delete(Endpoint.TABLE_NAME,
-                        selection,
-                        selectionArgs);
+                                        selection,
+                                        selectionArgs);
                 break;
             case ENDPOINT_ID:
                 deletedRows = db.delete(Endpoint.TABLE_NAME,
-                        BaseColumns._ID + "=?",
-                        new String[]{uri.getLastPathSegment()});
+                                        BaseColumns._ID + "=?",
+                                        new String[]{uri.getLastPathSegment()});
                 break;
             case WALLET:
                 deletedRows = db.delete(Wallet.TABLE_NAME,
-                        selection,
-                        selectionArgs);
+                                        selection,
+                                        selectionArgs);
                 break;
             case WALLET_ID:
                 deletedRows = db.delete(Wallet.TABLE_NAME,
-                        BaseColumns._ID + "=?",
-                        new String[]{uri.getLastPathSegment()});
+                                        BaseColumns._ID + "=?",
+                                        new String[]{uri.getLastPathSegment()});
                 break;
             case SOURCE:
                 deletedRows = db.delete(Source.TABLE_NAME,
-                        selection,
-                        selectionArgs);
+                                        selection,
+                                        selectionArgs);
                 break;
             case SOURCE_ID:
                 deletedRows = db.delete(Source.TABLE_NAME,
-                        BaseColumns._ID + "=?",
-                        new String[]{uri.getLastPathSegment()});
+                                        BaseColumns._ID + "=?",
+                                        new String[]{uri.getLastPathSegment()});
                 break;
             case MEMBER:
                 deletedRows = db.delete(Member.TABLE_NAME,
-                        selection,
-                        selectionArgs);
+                                        selection,
+                                        selectionArgs);
                 break;
             case MEMBER_ID:
                 deletedRows = db.delete(Member.TABLE_NAME,
-                        BaseColumns._ID + "=?",
-                        new String[]{uri.getLastPathSegment()});
+                                        BaseColumns._ID + "=?",
+                                        new String[]{uri.getLastPathSegment()});
                 break;
             case CERTIFICATION:
                 deletedRows = db.delete(Certification.TABLE_NAME,
-                        selection,
-                        selectionArgs);
+                                        selection,
+                                        selectionArgs);
                 break;
             case CERTIFICATION_ID:
                 deletedRows = db.delete(Certification.TABLE_NAME,
-                        BaseColumns._ID + "=?",
-                        new String[]{uri.getLastPathSegment()});
+                                        BaseColumns._ID + "=?",
+                                        new String[]{uri.getLastPathSegment()});
+                break;
+            case REQUIREMENT:
+                deletedRows = db.delete(Requirement.TABLE_NAME, selection, selectionArgs);
+                break;
+            case REQUIREMENT_ID:
+                deletedRows = db.delete(Requirement.TABLE_NAME, BaseColumns._ID + "=?",
+                                        new String[]{uri.getLastPathSegment()});
                 break;
             case TX:
                 deletedRows = db.delete(Tx.TABLE_NAME,
-                        selection,
-                        selectionArgs);
+                                        selection,
+                                        selectionArgs);
                 break;
             case TX_ID:
                 deletedRows = db.delete(Tx.TABLE_NAME,
-                        BaseColumns._ID + "=?",
-                        new String[]{uri.getLastPathSegment()});
+                                        BaseColumns._ID + "=?",
+                                        new String[]{uri.getLastPathSegment()});
                 break;
             case TX_ISSUER:
                 deletedRows = db.delete(TxIssuer.TABLE_NAME,
-                        selection,
-                        selectionArgs);
+                                        selection,
+                                        selectionArgs);
                 break;
             case TX_ISSUER_ID:
                 deletedRows = db.delete(TxIssuer.TABLE_NAME,
-                        BaseColumns._ID + "=?",
-                        new String[]{uri.getLastPathSegment()});
+                                        BaseColumns._ID + "=?",
+                                        new String[]{uri.getLastPathSegment()});
                 break;
             case TX_INPUT:
                 deletedRows = db.delete(TxInput.TABLE_NAME,
-                        selection,
-                        selectionArgs);
+                                        selection,
+                                        selectionArgs);
                 break;
             case TX_INPUT_ID:
                 deletedRows = db.delete(TxInput.TABLE_NAME,
-                        BaseColumns._ID + "=?",
-                        new String[]{uri.getLastPathSegment()});
+                                        BaseColumns._ID + "=?",
+                                        new String[]{uri.getLastPathSegment()});
                 break;
             case TX_OUTPUT:
                 deletedRows = db.delete(TxOutput.TABLE_NAME,
-                        selection,
-                        selectionArgs);
+                                        selection,
+                                        selectionArgs);
                 break;
             case TX_OUTPUT_ID:
                 deletedRows = db.delete(TxOutput.TABLE_NAME,
-                        BaseColumns._ID + "=?",
-                        new String[]{uri.getLastPathSegment()});
+                                        BaseColumns._ID + "=?",
+                                        new String[]{uri.getLastPathSegment()});
                 break;
             case TX_SIGNATURE:
                 deletedRows = db.delete(TxSignature.TABLE_NAME,
-                        selection,
-                        selectionArgs);
+                                        selection,
+                                        selectionArgs);
                 break;
             case TX_SIGNATURE_ID:
                 deletedRows = db.delete(TxSignature.TABLE_NAME,
-                        BaseColumns._ID + "=?",
-                        new String[]{uri.getLastPathSegment()});
+                                        BaseColumns._ID + "=?",
+                                        new String[]{uri.getLastPathSegment()});
                 break;
             case SELF_CERTIFICATION_ID:
                 deletedRows = db.delete(SelfCertification.TABLE_NAME,
-                        BaseColumns._ID + "=?",
-                        new String[]{uri.getLastPathSegment()});
+                                        BaseColumns._ID + "=?",
+                                        new String[]{uri.getLastPathSegment()});
                 break;
             case CONTACT_ID:
                 deletedRows = db.delete(Contact.TABLE_NAME,
-                        BaseColumns._ID + "=?",
-                        new String[]{uri.getLastPathSegment()});
+                                        BaseColumns._ID + "=?",
+                                        new String[]{uri.getLastPathSegment()});
                 break;
 
         }
@@ -642,82 +670,84 @@ public class DbProvider extends ContentProvider implements SQLiteTable {
         switch (uriType) {
             case CURRENCY_ID:
                 updatedRows = db.update(Currency.TABLE_NAME,
-                        values,
-                        BaseColumns._ID + "=?",
-                        new String[]{uri.getLastPathSegment()});
+                                        values,
+                                        BaseColumns._ID + "=?",
+                                        new String[]{uri.getLastPathSegment()});
                 break;
             case BLOCK_ID:
                 updatedRows = db.update(Block.TABLE_NAME,
-                        values,
-                        BaseColumns._ID + "=?",
-                        new String[]{uri.getLastPathSegment()});
+                                        values,
+                                        BaseColumns._ID + "=?",
+                                        new String[]{uri.getLastPathSegment()});
                 break;
             case WALLET_ID:
                 updatedRows = db.update(Wallet.TABLE_NAME,
-                        values,
-                        BaseColumns._ID + "=?",
-                        new String[]{uri.getLastPathSegment()});
+                                        values,
+                                        BaseColumns._ID + "=?",
+                                        new String[]{uri.getLastPathSegment()});
                 break;
             case IDENTITY_ID:
                 updatedRows = db.update(Identity.TABLE_NAME,
-                        values,
-                        BaseColumns._ID + "=?",
-                        new String[]{uri.getLastPathSegment()});
+                                        values,
+                                        BaseColumns._ID + "=?",
+                                        new String[]{uri.getLastPathSegment()});
                 break;
             case SOURCE_ID:
                 updatedRows = db.update(Source.TABLE_NAME,
-                        values,
-                        BaseColumns._ID + "=?",
-                        new String[]{uri.getLastPathSegment()});
+                                        values,
+                                        BaseColumns._ID + "=?",
+                                        new String[]{uri.getLastPathSegment()});
                 break;
             case MEMBER_ID:
                 updatedRows = db.update(Member.TABLE_NAME,
-                        values,
-                        BaseColumns._ID + "=?",
-                        new String[]{uri.getLastPathSegment()});
+                                        values,
+                                        BaseColumns._ID + "=?",
+                                        new String[]{uri.getLastPathSegment()});
                 break;
             case ENDPOINT_ID:
                 updatedRows = db.update(Endpoint.TABLE_NAME,
-                        values,
-                        BaseColumns._ID + "=?",
-                        new String[]{uri.getLastPathSegment()});
+                                        values,
+                                        BaseColumns._ID + "=?",
+                                        new String[]{uri.getLastPathSegment()});
                 break;
             case TX_ID:
                 updatedRows = db.update(Tx.TABLE_NAME,
-                        values,
-                        BaseColumns._ID + "=?",
-                        new String[]{uri.getLastPathSegment()});
+                                        values,
+                                        BaseColumns._ID + "=?",
+                                        new String[]{uri.getLastPathSegment()});
                 break;
             case UD_ID:
-                updatedRows = db.update(Ud.TABLE_NAME,
-                        values,
-                        BaseColumns._ID + "=?",
-                        new String[]{uri.getLastPathSegment()});
+                updatedRows = db.update(Ud.TABLE_NAME, values, BaseColumns._ID + "=?",
+                                        new String[]{uri.getLastPathSegment()});
+                break;
+            case REQUIREMENT_ID:
+                updatedRows = db.update(Requirement.TABLE_NAME, values, BaseColumns._ID + "=?",
+                                        new String[]{uri.getLastPathSegment()});
                 break;
             case MEMBERSHIP_ID:
                 updatedRows = db.update(Membership.TABLE_NAME,
-                        values,
-                        BaseColumns._ID + "=?",
-                        new String[]{uri.getLastPathSegment()});
+                                        values,
+                                        BaseColumns._ID + "=?",
+                                        new String[]{uri.getLastPathSegment()});
                 break;
             case SELF_CERTIFICATION_ID:
                 updatedRows = db.update(SelfCertification.TABLE_NAME,
-                        values,
-                        BaseColumns._ID + "=?",
-                        new String[]{uri.getLastPathSegment()});
+                                        values,
+                                        BaseColumns._ID + "=?",
+                                        new String[]{uri.getLastPathSegment()});
                 break;
             case CONTACT_ID:
                 updatedRows = db.update(Contact.TABLE_NAME,
-                        values,
-                        BaseColumns._ID + "=?",
-                        new String[]{uri.getLastPathSegment()});
+                                        values,
+                                        BaseColumns._ID + "=?",
+                                        new String[]{uri.getLastPathSegment()});
                 break;
 
             case CERTIFICATION_ID:
                 updatedRows = db.update(Certification.TABLE_NAME,
-                        values,
-                        BaseColumns._ID + "=?",
-                        new String[]{uri.getLastPathSegment()});
+                                        values,
+                                        BaseColumns._ID + "=?",
+                                        new String[]{uri.getLastPathSegment()});
                 break;
             default:
                 throw new IllegalArgumentException("Unknown URI: " + uri);
@@ -735,7 +765,7 @@ public class DbProvider extends ContentProvider implements SQLiteTable {
             case IDENTITY:
             case IDENTITY_ID:
                 getContext().getContentResolver().notifyChange(UcoinUris.IDENTITY_URI, null);
-                notifyChange(CURRENCY);
+                notifyChange(WALLET);
                 break;
             case PEER:
             case PEER_ID:
@@ -779,8 +809,12 @@ public class DbProvider extends ContentProvider implements SQLiteTable {
             case CERTIFICATION:
             case CERTIFICATION_ID:
                 getContext().getContentResolver().notifyChange(UcoinUris.CERTIFICATION_URI, null);
-                getContext().getContentResolver().notifyChange(UcoinUris.IDENTITY_URI, null);
+                notifyChange(IDENTITY);
                 break;
+            case REQUIREMENT:
+            case REQUIREMENT_ID:
+                getContext().getContentResolver().notifyChange(UcoinUris.REQUIREMENT_URI, null);
+                notifyChange(IDENTITY);
             case BLOCK:
             case BLOCK_ID:
                 getContext().getContentResolver().notifyChange(UcoinUris.UD_URI, null);

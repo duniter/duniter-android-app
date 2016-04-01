@@ -23,6 +23,7 @@ import io.ucoin.app.model.http_api.BlockchainMemberships;
 import io.ucoin.app.model.http_api.WotCertification;
 import io.ucoin.app.model.http_api.WotLookup;
 import io.ucoin.app.model.http_api.WotRequirements;
+import io.ucoin.app.model.sql.sqlite.Requirements;
 
 public class IdentityWrapper implements Response.ErrorListener, RequestQueue.RequestFinishedListener {
     private UcoinQueue mRequestQueue;
@@ -39,6 +40,7 @@ public class IdentityWrapper implements Response.ErrorListener, RequestQueue.Req
         mRequests.put(fetchSelfCertification(), null);
         mRequests.put(fetchCertification(CertificationType.BY), null);
         mRequests.put(fetchCertification(CertificationType.OF), null);
+        mRequests.put(fetchRequirements(), null);
         mRequests.put(fetchMemberships(), null);
     }
 
@@ -74,7 +76,25 @@ public class IdentityWrapper implements Response.ErrorListener, RequestQueue.Req
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        onCertificationRequest(WotCertification.fromJson(response), type);
+                        mIdentity.certifications().add(mIdentity.currencyId(),WotCertification.fromJson(response), type);
+                        //onCertificationRequest(WotCertification.fromJson(response), type);
+                    }
+                }, this);
+        request.setTag(this);
+        mRequestQueue.add(request);
+        return request;
+    }
+
+    private Request fetchRequirements(){
+        UcoinEndpoint endpoint = mIdentity.currency().peers().at(0).endpoints().at(0);
+        String url = "http://" + endpoint.ipv4() + ":" + endpoint.port() + "/wot/requirements/" + mIdentity.publicKey();
+
+        final StringRequest request = new StringRequest(
+                url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        mIdentity.requirements().add(mIdentity.currencyId(),WotRequirements.fromJson(response));
                     }
                 }, this);
         request.setTag(this);
@@ -175,7 +195,7 @@ public class IdentityWrapper implements Response.ErrorListener, RequestQueue.Req
             if (member.self() == null) {
                 mRequests.put(fetchMember(member), null);
             }
-            mIdentity.certifications().add(member, type, certification);
+           // mIdentity.certifications().add(member, type, certification);
         }
     }
 

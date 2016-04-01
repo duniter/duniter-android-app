@@ -14,7 +14,6 @@ import io.ucoin.app.enumeration.CertificationState;
 import io.ucoin.app.enumeration.CertificationType;
 import io.ucoin.app.model.UcoinCertification;
 import io.ucoin.app.model.UcoinCertifications;
-import io.ucoin.app.model.UcoinMember;
 import io.ucoin.app.model.http_api.WotCertification;
 import io.ucoin.app.sqlite.SQLiteTable;
 
@@ -36,11 +35,18 @@ final public class Certifications extends Table
         mIdentityId = identityId;
     }
 
-    @Override
-    public UcoinCertification add(UcoinMember member, CertificationType type, WotCertification.Certification certification) {
+    public UcoinCertification add(WotCertification.Certification certification, CertificationType type){
         ContentValues values = new ContentValues();
         values.put(SQLiteTable.Certification.IDENTITY_ID, mIdentityId);
-        values.put(SQLiteTable.Certification.MEMBER_ID, member.id());
+        values.put(SQLiteTable.Certification.UID, certification.uid);
+        values.put(SQLiteTable.Certification.PUBLIC_KEY, certification.pubkey);
+        values.put(SQLiteTable.Certification.IS_MEMBER, certification.isMember.toString());
+        values.put(SQLiteTable.Certification.WAS_MEMBER, certification.wasMember.toString());
+        values.put(SQLiteTable.Certification.SIG_DATE, certification.sigDate);
+        if(certification.written != null) {
+            values.put(SQLiteTable.Certification.NUMBER, certification.written.number);
+            values.put(SQLiteTable.Certification.HASH, certification.written.hash);
+        }
         values.put(SQLiteTable.Certification.TYPE, type.name());
         values.put(SQLiteTable.Certification.BLOCK, certification.cert_time.block);
         values.put(SQLiteTable.Certification.MEDIAN_TIME, certification.cert_time.medianTime);
@@ -49,6 +55,41 @@ final public class Certifications extends Table
 
         Uri uri = insert(values);
         return new Certification(mContext, Long.parseLong(uri.getLastPathSegment()));
+    }
+
+    @Override
+    public UcoinCertifications add(Long currencyId, WotCertification wotCertification, CertificationType type) {
+        remove(type);
+        for(WotCertification.Certification certification : wotCertification.certifications){
+            add(certification,type);
+        }
+        return new Certifications(mContext,mIdentityId);
+    }
+
+    public void remove(CertificationType type) {
+        ArrayList<UcoinCertification> list = list();
+        if(list!=null) {
+            for (UcoinCertification certification : list) {
+                if(certification.type().name().equals(type.name())) {
+                    certification.delete();
+                }
+            }
+        }
+    }
+
+    public ArrayList<UcoinCertification> list() {
+        Cursor cursor = fetch();
+        if (cursor != null) {
+            ArrayList<UcoinCertification> data = new ArrayList<>();
+            while (cursor.moveToNext()) {
+                Long id = cursor.getLong(cursor.getColumnIndex(BaseColumns._ID));
+                data.add(new Certification(mContext, id));
+            }
+            cursor.close();
+
+            return data;
+        }
+        return null;
     }
 
     @Override

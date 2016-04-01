@@ -18,14 +18,14 @@ import io.ucoin.app.sqlite.SQLiteView;
 
 public class MemberCursorAdapter extends CursorAdapter {
 
-    private int certByTimeIndex;
-    private int certOfTimeIndex;
+    //private int certByTimeIndex;
+    //private int certOfTimeIndex;
 
     public MemberCursorAdapter(Context context, Cursor c, int flags) {
         super(context, c, flags);
     }
 
-    private int uidIndex;
+    //private int uidIndex;
 
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
@@ -48,41 +48,41 @@ public class MemberCursorAdapter extends CursorAdapter {
     public void bindView(View view, Context context, Cursor cursor) {
 
         ViewHolder holder = (ViewHolder)view.getTag();
-        holder.memberUid.setText(cursor.getString(uidIndex));
+        //holder.memberUid.setText(cursor.getString(uidIndex));
         SimpleDateFormat formater = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
 
         Date d;
 
-        if (!cursor.isNull(certByTimeIndex)) {
-            d = new Date(cursor.getLong(certByTimeIndex)*1000);
-            String s = formater.format(d);
-            holder.certByDate.setText(s);
-            holder.certByDate.setVisibility(View.VISIBLE);
-            holder.certByImage.setVisibility(View.VISIBLE);
-        } else {
-            holder.certByDate.setVisibility(View.GONE);
-            holder.certByImage.setVisibility(View.GONE);
-        }
-        if (!cursor.isNull(certOfTimeIndex)) {
-
-            d = new Date(cursor.getLong(certOfTimeIndex)*1000);
-            String s = formater.format(d);
-            holder.certOfDate.setText(s);
-            holder.certOfDate.setVisibility(View.VISIBLE);
-            holder.certOfImage.setVisibility(View.VISIBLE);
-        } else {
-            holder.certOfDate.setVisibility(View.GONE);
-            holder.certOfImage.setVisibility(View.GONE);
-        }
+//        if (!cursor.isNull(certByTimeIndex)) {
+//            d = new Date(cursor.getLong(certByTimeIndex)*1000);
+//            String s = formater.format(d);
+//            holder.certByDate.setText(s);
+//            holder.certByDate.setVisibility(View.VISIBLE);
+//            holder.certByImage.setVisibility(View.VISIBLE);
+//        } else {
+//            holder.certByDate.setVisibility(View.GONE);
+//            holder.certByImage.setVisibility(View.GONE);
+//        }
+//        if (!cursor.isNull(certOfTimeIndex)) {
+//
+//            d = new Date(cursor.getLong(certOfTimeIndex)*1000);
+//            String s = formater.format(d);
+//            holder.certOfDate.setText(s);
+//            holder.certOfDate.setVisibility(View.VISIBLE);
+//            holder.certOfImage.setVisibility(View.VISIBLE);
+//        } else {
+//            holder.certOfDate.setVisibility(View.GONE);
+//            holder.certOfImage.setVisibility(View.GONE);
+//        }
     }
 
     @Override
     public Cursor swapCursor(Cursor cursor) {
         if (cursor != null) {
-            uidIndex = cursor.getColumnIndex(SQLiteView.Member.UID);
-
-            certByTimeIndex = cursor.getColumnIndex(SQLiteView.Member.CERT_BY_TIME);
-            certOfTimeIndex = cursor.getColumnIndex(SQLiteView.Member.CERT_OF_TIME);
+//            uidIndex = cursor.getColumnIndex(SQLiteModel.Member.UID);
+//
+//            certByTimeIndex = cursor.getColumnIndex(SQLiteModel.Member.CERT_BY_TIME);
+//            certOfTimeIndex = cursor.getColumnIndex(SQLiteModel.Member.CERT_OF_TIME);
         }
         return super.swapCursor(cursor);
     }

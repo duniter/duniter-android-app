@@ -54,6 +54,14 @@ public interface SQLiteTable {
         public static final String SYNC_BLOCK = "sync_block";
     }
 
+    class Requirement implements BaseColumns {
+        public static final String TABLE_NAME = "requirement";
+        public static final String CURRENCY_ID = "currency_id";
+        public static final String IDENTITY_ID = "identity_id";
+        public static final String PUBLIC_KEY = "public_key";
+        public static final String EXPIRES_IN = "expires_in";
+    }
+
     class Member implements BaseColumns {
         public static final String TABLE_NAME = "member";
         public static final String IDENTITY_ID = "identity_id";
@@ -66,11 +74,17 @@ public interface SQLiteTable {
     class Certification implements BaseColumns {
         public static final String TABLE_NAME = "certification";
         public static final String IDENTITY_ID = "identity_id";
-        public static final String MEMBER_ID = "member_id";
+        public static final String UID = "uid";
+        public static final String PUBLIC_KEY = "public_key";
+        public static final String IS_MEMBER = "is_member";
+        public static final String WAS_MEMBER = "was_member";
         public static final String TYPE = "type";
         public static final String BLOCK = "block";
         public static final String MEDIAN_TIME = "median_time";
+        public static final String SIG_DATE = "sig_date";
         public static final String SIGNATURE = "signature";
+        public static final String NUMBER = "number";
+        public static final String HASH = "hash";
         public static final String STATE = "state";
     }
 

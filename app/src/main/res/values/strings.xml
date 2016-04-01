@@ -319,6 +319,7 @@
 
     <string-array name="node">
         <item>meta_brouzouf@metab.ucoin.io:9201</item>
+        <item>super_currency@twiced.fr:9330</item>
     </string-array>
 
     <!-- Strings related to rules currency -->
@@ -395,5 +396,8 @@
     <string name="source_code">Source Code</string>
     <string name="licence">Licence</string>
     <string name="credit">Credit</string>
+    <string name="tap_pin_code">Please enter your pin code :</string>
+    <string name="tap_pin_code_bis">Please confirm your pin code :</string>
+    <string name="nb_certification">%1$d Certification</string>
 
 </resources>

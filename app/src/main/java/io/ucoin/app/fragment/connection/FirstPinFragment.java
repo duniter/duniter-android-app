@@ -6,43 +6,32 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.LinearLayout;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import io.ucoin.app.Application;
 import io.ucoin.app.R;
 
 public class FirstPinFragment extends Fragment implements View.OnClickListener {
 
-    private EditText pin1;
-    private EditText pin2;
-    private EditText pin3;
-    private EditText pin4;
-    private EditText pin5;
-    private EditText pin6;
-    private EditText pin7;
-    private EditText pin8;
-    private LinearLayout layoutPin;
-    private LinearLayout layoutPin2;
-    private Button btConnection;
+    private String code1;
+    private String code2;
 
-    private TextWatcher twPin1;
-    private TextWatcher twPin2;
-    private TextWatcher twPin3;
-    private TextWatcher twPin4;
-    private TextWatcher twPin5;
-    private TextWatcher twPin6;
-    private TextWatcher twPin7;
-    private TextWatcher twPin8;
+    private boolean confirm = false;
+
+    private ViewHolder holder;
 
     public static FirstPinFragment newInstance() {
         FirstPinFragment fragment = new FirstPinFragment();
@@ -57,270 +46,157 @@ public class FirstPinFragment extends Fragment implements View.OnClickListener {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(
+            LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-
-        return inflater.inflate(R.layout.fragment_connection_create_pin,
-                container, false);
+        return inflater.inflate(R.layout.fragment_connection_create_pin, container, false);
     }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        pin1 = (EditText) view.findViewById(R.id.pin1);
-        pin2 = (EditText) view.findViewById(R.id.pin2);
-        pin3 = (EditText) view.findViewById(R.id.pin3);
-        pin4 = (EditText) view.findViewById(R.id.pin4);
-        pin5 = (EditText) view.findViewById(R.id.pin5);
-        pin6 = (EditText) view.findViewById(R.id.pin6);
-        pin7 = (EditText) view.findViewById(R.id.pin7);
-        pin8 = (EditText) view.findViewById(R.id.pin8);
+        this.code1 = "";
+        this.code2 = "";
 
-        layoutPin = (LinearLayout) view.findViewById(R.id.layout_pin);
-        layoutPin2 = (LinearLayout) view.findViewById(R.id.layout_pin2);
-        btConnection = (Button) view.findViewById(R.id.bt_connection);
+        this.holder = new ViewHolder(view);
 
-        btConnection.setOnClickListener(this);
+        List<String> list = Arrays.asList("0", "1", "2", "3", "4", "5", "6", "7", "8", "9");
+        Collections.shuffle(list);
 
-        createTextListener();
+        this.holder.b0.setText(list.get(0));
+        this.holder.b1.setText(list.get(1));
+        this.holder.b2.setText(list.get(2));
+        this.holder.b3.setText(list.get(3));
+        this.holder.b4.setText(list.get(4));
+        this.holder.b5.setText(list.get(5));
+        this.holder.b6.setText(list.get(6));
+        this.holder.b7.setText(list.get(7));
+        this.holder.b8.setText(list.get(8));
+        this.holder.b9.setText(list.get(9));
 
-        addTextListener();
+        this.holder.del.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                remove();
+            }
+        });
+
+        this.holder.b0.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                press(holder.b0);
+            }
+        });
+
+        this.holder.b1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                press(holder.b1);
+            }
+        });
+
+        this.holder.b2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                press(holder.b2);
+            }
+        });
+
+        this.holder.b3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                press(holder.b3);
+            }
+        });
+
+        this.holder.b4.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                press(holder.b4);
+            }
+        });
+
+        this.holder.b5.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                press(holder.b5);
+            }
+        });
+
+        this.holder.b6.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                press(holder.b6);
+            }
+        });
+
+        this.holder.b7.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                press(holder.b7);
+            }
+        });
+
+        this.holder.b8.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                press(holder.b8);
+            }
+        });
+
+        this.holder.b9.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                press(holder.b9);
+            }
+        });
     }
 
-    void addTextListener() {
-        pin1.addTextChangedListener(twPin1);
-        pin2.addTextChangedListener(twPin2);
-        pin3.addTextChangedListener(twPin3);
-        pin4.addTextChangedListener(twPin4);
-        pin5.addTextChangedListener(twPin5);
-        pin6.addTextChangedListener(twPin6);
-        pin7.addTextChangedListener(twPin7);
-        pin8.addTextChangedListener(twPin8);
-    }
-
-
-    void removeTextListener(){
-        pin1.removeTextChangedListener(twPin1);
-        pin2.removeTextChangedListener(twPin2);
-        pin3.removeTextChangedListener(twPin3);
-        pin4.removeTextChangedListener(twPin4);
-        pin5.removeTextChangedListener(twPin5);
-        pin6.removeTextChangedListener(twPin6);
-        pin7.removeTextChangedListener(twPin7);
-        pin8.removeTextChangedListener(twPin8);
-    }
-
-    void createTextListener(){
-        twPin1 = new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                pin2.requestFocus();
-            }
-        };
-        twPin2 = new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                pin3.requestFocus();
-            }
-        };
-        twPin3 = new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                pin4.requestFocus();
-            }
-        };
-        twPin4 = new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                if(checkfield()) {
-                    pin5.requestFocus();
-                }
-            }
-        };
-
-        twPin5 = new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                pin6.requestFocus();
-            }
-        };
-        twPin6 = new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                pin7.requestFocus();
-            }
-        };
-        twPin7 = new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                pin8.requestFocus();
-            }
-        };
-        twPin8 = new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                connection();
-            }
-        };
-    }
-
-    public boolean checkfield(){
-        String p1 = pin1.getText().toString().equals("") ? "0" : pin1.getText().toString();
-        String p2 = pin2.getText().toString().equals("") ? "0" : pin2.getText().toString();
-        String p3 = pin3.getText().toString().equals("") ? "0" : pin3.getText().toString();
-        String p4 = pin4.getText().toString().equals("") ? "0" : pin4.getText().toString();
-
-        String text1 = p1.concat(p2).concat(p3).concat(p4);
-        if(text1.equals("0000") || text1.equals("1234")){
-            removeTextListener();
-            pin4.setText("");
-            pin3.setText("");
-            pin2.setText("");
-            pin1.setText("");
-            pin1.requestFocus();
-            addTextListener();
-            Animation shake = AnimationUtils.loadAnimation(getActivity(), R.anim.shake);
-            Vibrator mVibrator = (Vibrator) getActivity().getSystemService(Context.VIBRATOR_SERVICE);
-            layoutPin.startAnimation(shake);
-            mVibrator.vibrate(300);
-            Toast.makeText(getActivity(),getString(R.string.pin_diferent),Toast.LENGTH_SHORT).show();
-            return false;
+    private void press(Button b){
+        if (confirm) {
+            code2 += b.getText();
+            holder.listPin.get(code2.length()-1).setImageResource(R.drawable.ic_dot_activate);
+        } else {
+            code1 += b.getText();
+            holder.listPin.get(code1.length()-1).setImageResource(R.drawable.ic_dot_activate);
         }
-        return true;
+        change();
     }
 
-    public void connection(){
+    private void change(){
+        if(!confirm && code1.length()==4){
+            confirm = true;
+            remove();
+            this.holder.actual_context.setText(getString(R.string.tap_pin_code_bis));
+        }
+        if(code2.length()==4){
+            connection();
+        }
+    }
 
-        String p1 = pin1.getText().toString().equals("") ? "0" : pin1.getText().toString();
-        String p2 = pin2.getText().toString().equals("") ? "0" : pin2.getText().toString();
-        String p3 = pin3.getText().toString().equals("") ? "0" : pin3.getText().toString();
-        String p4 = pin4.getText().toString().equals("") ? "0" : pin4.getText().toString();
+    public void remove(){
+        code1 = confirm ? code1 : "";
+        code2 = confirm ? "" : code2;
 
-        String p5 = pin5.getText().toString().equals("") ? "0" : pin5.getText().toString();
-        String p6 = pin6.getText().toString().equals("") ? "0" : pin6.getText().toString();
-        String p7 = pin7.getText().toString().equals("") ? "0" : pin7.getText().toString();
-        String p8 = pin8.getText().toString().equals("") ? "0" : pin8.getText().toString();
+        for(ImageView img : this.holder.listPin){
+            img.setImageResource(R.drawable.ic_dot_disable);
+        }
+    }
 
-        String text1 = p1.concat(p2).concat(p3).concat(p4);
-
-        String text2 = p5.concat(p6).concat(p7).concat(p8);
-
-        Animation shake = AnimationUtils.loadAnimation(getActivity(), R.anim.shake);
-        Vibrator mVibrator = (Vibrator) getActivity().getSystemService(Context.VIBRATOR_SERVICE);
-
-        if(text1.equals("0000") || text1.equals("1234")){
-            removeTextListener();
-            pin4.setText("");
-            pin3.setText("");
-            pin2.setText("");
-            pin1.setText("");
-            pin5.setText("");
-            pin6.setText("");
-            pin7.setText("");
-            pin8.setText("");
-            pin1.requestFocus();
-            addTextListener();
-            layoutPin.startAnimation(shake);
-            mVibrator.vibrate(300);
-            Toast.makeText(getActivity(),getString(R.string.pin_diferent),Toast.LENGTH_SHORT).show();
-        }else if(!text1.equals(text2)) {
-            removeTextListener();
-            pin5.setText("");
-            pin6.setText("");
-            pin7.setText("");
-            pin8.setText("");
-            pin5.requestFocus();
-            addTextListener();
-            layoutPin2.startAnimation(shake);
-            mVibrator.vibrate(300);
-            Toast.makeText(getActivity(),getString(R.string.pin_dont_match),Toast.LENGTH_SHORT).show();
-        }else{
+    public void connection() {
+        if (!code1.equals(code2)) {
+            Toast.makeText(getActivity(), getString(R.string.pin_dont_match), Toast.LENGTH_SHORT).show();
+            confirm = false;
+            code1 = "";
+            code2 = "";
+            remove();
+            this.holder.actual_context.setText(getString(R.string.tap_pin_code));
+        } else {
             SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(getActivity()).edit();
-            editor.putString(Application.PIN, text1);
+            editor.putString(Application.PIN, code1);
             editor.apply();
-            if(getActivity() instanceof FinishAction){
+            if (getActivity() instanceof FinishAction) {
                 ((FinishAction) getActivity()).finishFirstPinConnection();
             }
         }
@@ -328,7 +204,7 @@ public class FirstPinFragment extends Fragment implements View.OnClickListener {
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()){
+        switch (v.getId()) {
             case R.id.bt_connection:
                 connection();
                 break;
@@ -337,5 +213,46 @@ public class FirstPinFragment extends Fragment implements View.OnClickListener {
 
     public interface FinishAction {
         void finishFirstPinConnection();
+    }
+
+    public static class ViewHolder {
+        public View      rootView;
+        public TextView  actual_context;
+
+        public ArrayList<ImageView> listPin;
+
+        public ImageView del;
+        public Button    b0;
+        public Button    b1;
+        public Button    b2;
+        public Button    b3;
+        public Button    b4;
+        public Button    b5;
+        public Button    b6;
+        public Button    b7;
+        public Button    b8;
+        public Button    b9;
+
+        public ViewHolder(View rootView) {
+            this.rootView = rootView;
+            this.actual_context = (TextView) rootView.findViewById(R.id.actual_context);
+            listPin =new ArrayList<>();
+            listPin.add((ImageView) rootView.findViewById(R.id.pin1));
+            listPin.add((ImageView) rootView.findViewById(R.id.pin2));
+            listPin.add((ImageView) rootView.findViewById(R.id.pin3));
+            listPin.add((ImageView) rootView.findViewById(R.id.pin4));
+            this.del = (ImageView) rootView.findViewById(R.id.del);
+            this.b0 = (Button) rootView.findViewById(R.id.b0);
+            this.b1 = (Button) rootView.findViewById(R.id.b1);
+            this.b2 = (Button) rootView.findViewById(R.id.b2);
+            this.b3 = (Button) rootView.findViewById(R.id.b3);
+            this.b4 = (Button) rootView.findViewById(R.id.b4);
+            this.b5 = (Button) rootView.findViewById(R.id.b5);
+            this.b6 = (Button) rootView.findViewById(R.id.b6);
+            this.b7 = (Button) rootView.findViewById(R.id.b7);
+            this.b8 = (Button) rootView.findViewById(R.id.b8);
+            this.b9 = (Button) rootView.findViewById(R.id.b9);
+        }
+
     }
 }

@@ -398,7 +398,7 @@ public class TransferActivity extends ActionBarActivity implements SendIdentity,
             setTitle(getResources().getString(R.string.transfer_of,walletSelected.currency().name()));
             currency = new Currency(this, walletSelected.currencyId());
         }
-        //mQuantitativeUD = new BigDecimal(data.getString(data.getColumnIndex(SQLiteView.Wallet.DIVIDEND)));
+        //mQuantitativeUD = new BigDecimal(data.getString(data.getColumnIndex(SQLiteModel.Wallet.DIVIDEND)));
 
         //TODO fma metre les valeurs des amount a jour
 

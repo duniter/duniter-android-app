@@ -445,7 +445,7 @@ public class IdentityFragment extends ListFragment
 
     private void clickCertification(){
         if (getActivity() instanceof ActionIdentity) {
-            ((ActionIdentity) getActivity()).displayCertification(identityContact.getPublicKey(), identityContact.getCurrencyId());
+            ((ActionIdentity) getActivity()).displayCertification(identityContact.getPublicKey(), identityContact.getCurrencyId(), null);
         }
     }
 
@@ -503,6 +503,6 @@ public class IdentityFragment extends ListFragment
     }
 
     public interface ActionIdentity{
-        public void displayCertification(String publicKey, Long currencyId);
+        public void displayCertification(String publicKey, Long currencyId, Long identityId);
     }
 }

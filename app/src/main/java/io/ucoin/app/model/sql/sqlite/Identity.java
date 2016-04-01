@@ -10,6 +10,7 @@ import io.ucoin.app.model.UcoinCurrency;
 import io.ucoin.app.model.UcoinIdentity;
 import io.ucoin.app.model.UcoinMembers;
 import io.ucoin.app.model.UcoinMemberships;
+import io.ucoin.app.model.UcoinRequirements;
 import io.ucoin.app.model.UcoinSelfCertifications;
 import io.ucoin.app.sqlite.SQLiteTable;
 import io.ucoin.app.sqlite.SQLiteView;
@@ -58,6 +59,9 @@ public class Identity extends Row
     }
 
     @Override
+    public long nbRequirements() { return getLong(SQLiteView.Identity.NB_REQUIREMENTS);}
+
+    @Override
     public MembershipType lastMembership() {
         return MembershipType.valueOf(getString(SQLiteView.Identity.LAST_MEMBERSHIP));
     }
@@ -104,6 +108,11 @@ public class Identity extends Row
     @Override
     public UcoinCertifications certifications() {
         return new Certifications(mContext, mId);
+    }
+
+    @Override
+    public UcoinRequirements requirements() {
+        return new Requirements(mContext, mId);
     }
 
     @Override

@@ -89,7 +89,7 @@ public class QrCodeDialogFragment extends DialogFragment
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         data.moveToFirst();
         String pubKey = data.getString(data.getColumnIndex(SQLiteTable.Wallet.PUBLIC_KEY));
-//        String currency = data.getString(data.getColumnIndex(SQLiteView.Wallet.CURRENCY_NAME));
+//        String currency = data.getString(data.getColumnIndex(SQLiteModel.Wallet.CURRENCY_NAME));
 //        String publicKey = pubKey.concat(":").concat(currency);
         mPublicKey.setText(pubKey);
 

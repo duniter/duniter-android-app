@@ -390,5 +390,8 @@
     <string name="source_code">Code Source</string>
     <string name="licence">Licence</string>
     <string name="credit">Credit</string>
+    <string name="tap_pin_code">Veuillez saisir votre code pin :</string>
+    <string name="tap_pin_code_bis">Veuillez confirmer votre code pin :</string>
+    <string name="nb_certification">%1$d Certification</string>
 
 </resources>

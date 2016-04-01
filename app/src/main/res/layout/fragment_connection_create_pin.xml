@@ -4,213 +4,23 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-
-    <!--<ImageView-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="match_parent"-->
-        <!--android:id="@+id/imageView"-->
-        <!--android:layout_centerVertical="true"-->
-        <!--android:layout_centerHorizontal="true"-->
-        <!--/>-->
-
-    <Button
-        android:id="@+id/bt_connection"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/valid"
-        android:textColor="@android:color/white"
-        android:textSize="@dimen/welcom_button"
-        android:background="@drawable/shape_raised_button_primary"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="@dimen/number_background"
-        android:layout_marginLeft="@dimen/number_background"
-        android:layout_marginRight="@dimen/number_background"
-        android:layout_marginStart="@dimen/number_background"
-        android:layout_marginEnd="@dimen/number_background"/>
-
-    <LinearLayout android:id="@+id/layout_pin2"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_above="@+id/bt_connection"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="@dimen/margin"
-        android:layout_marginLeft="@dimen/number_background"
-        android:layout_marginRight="@dimen/number_background"
-        android:layout_marginStart="@dimen/number_background"
-        android:layout_marginEnd="@dimen/number_background">
-
-        <EditText
-            android:id="@+id/pin5"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.25"
-            android:inputType="number"
-            android:maxLength="1"
-            android:textSize="@dimen/abc_text_size_display_3_material"
-            android:gravity="center_horizontal"
-            android:background="@drawable/edit_text_white"
-            android:textColor="@android:color/white"
-            android:cursorVisible="false"
-            android:selectAllOnFocus="true"/>
-
-        <EditText
-            android:id="@+id/pin6"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.25"
-            android:inputType="number"
-            android:maxLength="1"
-            android:textSize="@dimen/abc_text_size_display_3_material"
-            android:gravity="center_horizontal"
-            android:background="@drawable/edit_text_white"
-            android:textColor="@android:color/white"
-            android:cursorVisible="false"
-            android:selectAllOnFocus="true"/>
-
-        <EditText
-            android:id="@+id/pin7"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.25"
-            android:inputType="number"
-            android:maxLength="1"
-            android:textSize="@dimen/abc_text_size_display_3_material"
-            android:gravity="center_horizontal"
-            android:background="@drawable/edit_text_white"
-            android:textColor="@android:color/white"
-            android:cursorVisible="false"
-            android:selectAllOnFocus="true"/>
-
-        <EditText
-            android:id="@+id/pin8"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.25"
-            android:inputType="number"
-            android:maxLength="1"
-            android:textSize="@dimen/abc_text_size_display_3_material"
-            android:gravity="center_horizontal"
-            android:background="@drawable/edit_text_white"
-            android:textColor="@android:color/white"
-            android:cursorVisible="false"
-            android:imeActionLabel="@string/connection"
-            android:selectAllOnFocus="true"/>
-
-    </LinearLayout>
-
     <TextView
-        android:id="@+id/text3"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/pin_code_bis"
-        android:layout_above="@+id/layout_pin2"
-        android:layout_centerHorizontal="true"
-        android:gravity="center"
+        android:text="@string/ucoin"
+        android:id="@+id/textView5"
         android:textColor="@android:color/white"
-        android:textSize="@dimen/welcom_text"
-        android:layout_marginBottom="@dimen/demi_padding"
-        android:layout_marginLeft="@dimen/demi_padding"
-        android:layout_marginRight="@dimen/demi_padding"
-        android:layout_marginStart="@dimen/demi_padding"
-        android:layout_marginEnd="@dimen/demi_padding"
-        />
-
-    <LinearLayout android:id="@+id/layout_pin"
-                  android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:orientation="horizontal"
-                  android:layout_above="@+id/text3"
-                  android:layout_centerHorizontal="true"
-                  android:layout_marginBottom="@dimen/margin"
-                  android:layout_marginLeft="@dimen/number_background"
-                  android:layout_marginRight="@dimen/number_background"
-                  android:layout_marginStart="@dimen/number_background"
-                  android:layout_marginEnd="@dimen/number_background">
-
-        <EditText
-            android:id="@+id/pin1"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.25"
-            android:inputType="number"
-            android:maxLength="1"
-            android:textSize="@dimen/abc_text_size_display_3_material"
-            android:gravity="center_horizontal"
-            android:background="@drawable/edit_text_white"
-            android:textColor="@android:color/white"
-            android:cursorVisible="false"
-            android:selectAllOnFocus="true"/>
-
-        <EditText
-            android:id="@+id/pin2"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.25"
-            android:inputType="number"
-            android:maxLength="1"
-            android:textSize="@dimen/abc_text_size_display_3_material"
-            android:gravity="center_horizontal"
-            android:background="@drawable/edit_text_white"
-            android:textColor="@android:color/white"
-            android:cursorVisible="false"
-            android:selectAllOnFocus="true"/>
-
-        <EditText
-            android:id="@+id/pin3"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.25"
-            android:inputType="number"
-            android:maxLength="1"
-            android:textSize="@dimen/abc_text_size_display_3_material"
-            android:gravity="center_horizontal"
-            android:background="@drawable/edit_text_white"
-            android:textColor="@android:color/white"
-            android:cursorVisible="false"
-            android:selectAllOnFocus="true"/>
-
-        <EditText
-            android:id="@+id/pin4"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.25"
-            android:inputType="number"
-            android:maxLength="1"
-            android:textSize="@dimen/abc_text_size_display_3_material"
-            android:gravity="center_horizontal"
-            android:background="@drawable/edit_text_white"
-            android:textColor="@android:color/white"
-            android:cursorVisible="false"
-            android:imeActionLabel="@string/connection"
-            android:selectAllOnFocus="true"/>
-
-    </LinearLayout>
-
-    <TextView
-        android:id="@+id/text2"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/pin_code"
-        android:layout_above="@+id/layout_pin"
-        android:layout_centerHorizontal="true"
+        android:textSize="50sp"
         android:gravity="center"
-        android:textColor="@android:color/white"
-        android:textSize="@dimen/welcom_text"
-        android:layout_marginBottom="@dimen/demi_padding"
-        android:layout_marginLeft="@dimen/demi_padding"
-        android:layout_marginRight="@dimen/demi_padding"
-        android:layout_marginStart="@dimen/demi_padding"
-        android:layout_marginEnd="@dimen/demi_padding"
-        />
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"/>
 
     <TextView
         android:id="@+id/text1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/pin_description"
-        android:layout_above="@+id/text2"
+        android:layout_below="@+id/textView5"
         android:gravity="center"
         android:layout_centerHorizontal="true"
         android:textColor="@android:color/white"
@@ -222,14 +32,218 @@
         android:layout_marginEnd="@dimen/demi_padding"/>
 
     <TextView
+        android:id="@+id/actual_context"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/ucoin"
-        android:id="@+id/textView5"
-        android:textColor="@android:color/white"
-        android:textSize="50sp"
+        android:text="@string/tap_pin_code"
+        android:layout_below="@+id/text1"
+        android:layout_centerHorizontal="true"
         android:gravity="center"
-        android:layout_above="@+id/text1"
-        android:layout_centerHorizontal="true"/>
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/welcom_text"
+        android:layout_marginBottom="@dimen/demi_padding"
+        android:layout_marginLeft="@dimen/demi_padding"
+        android:layout_marginRight="@dimen/demi_padding"
+        android:layout_marginStart="@dimen/demi_padding"
+        android:layout_marginEnd="@dimen/demi_padding"
+        />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="@dimen/demi_padding"
+            android:layout_marginBottom="@dimen/demi_padding"
+            android:orientation="horizontal">
+
+            <ImageView android:id="@+id/pin1"
+                       android:layout_width="wrap_content"
+                       android:layout_height="wrap_content"
+                       android:layout_gravity="center_vertical"
+                       android:layout_marginLeft="@dimen/small_padding"
+                       android:layout_marginRight="@dimen/small_padding"
+                       android:src="@drawable/ic_dot_disable"/>
+
+            <ImageView android:id="@+id/pin2"
+                       android:layout_width="wrap_content"
+                       android:layout_height="wrap_content"
+                       android:layout_gravity="center_vertical"
+                       android:layout_marginLeft="@dimen/small_padding"
+                       android:layout_marginRight="@dimen/small_padding"
+                       android:src="@drawable/ic_dot_disable"/>
+
+            <ImageView android:id="@+id/pin3"
+                       android:layout_width="wrap_content"
+                       android:layout_height="wrap_content"
+                       android:layout_gravity="center_vertical"
+                       android:layout_marginLeft="@dimen/small_padding"
+                       android:layout_marginRight="@dimen/small_padding"
+                       android:src="@drawable/ic_dot_disable"/>
+
+            <ImageView android:id="@+id/pin4"
+                       android:layout_width="wrap_content"
+                       android:layout_height="wrap_content"
+                       android:layout_gravity="center_vertical"
+                       android:layout_marginLeft="@dimen/small_padding"
+                       android:layout_marginRight="@dimen/small_padding"
+                       android:src="@drawable/ic_dot_disable"/>
+
+            <ImageView android:id="@+id/del"
+                       android:layout_width="wrap_content"
+                       android:layout_height="wrap_content"
+                       android:layout_marginLeft="@dimen/small_padding"
+                       android:layout_marginRight="@dimen/small_padding"
+                       android:src="@drawable/ic_del"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/demi_padding"
+            android:layout_marginBottom="@dimen/demi_padding"
+            android:orientation="vertical">
+
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="@dimen/small_padding"
+                android:layout_marginBottom="@dimen/small_padding">
+
+                <Button
+                    android:id="@+id/b0"
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    android:background="@drawable/shape_circle_white"
+                    android:elevation="4dp"
+                    android:textSize="30sp"
+                    android:layout_marginLeft="@dimen/small_padding"
+                    android:layout_marginRight="@dimen/small_padding"
+                    android:text="0"/>
+
+                <Button
+                    android:id="@+id/b1"
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    android:background="@drawable/shape_circle_white"
+                    android:elevation="4dp"
+                    android:textSize="30sp"
+                    android:layout_marginLeft="@dimen/small_padding"
+                    android:layout_marginRight="@dimen/small_padding"
+                    android:text="1"/>
+
+                <Button
+                    android:id="@+id/b2"
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    android:background="@drawable/shape_circle_white"
+                    android:elevation="4dp"
+                    android:textSize="30sp"
+                    android:layout_marginLeft="@dimen/small_padding"
+                    android:layout_marginRight="@dimen/small_padding"
+                    android:text="2"/>
+
+                <Button
+                    android:id="@+id/b3"
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    android:background="@drawable/shape_circle_white"
+                    android:elevation="4dp"
+                    android:textSize="30sp"
+                    android:layout_marginLeft="@dimen/small_padding"
+                    android:layout_marginRight="@dimen/small_padding"
+                    android:text="3"/>
+
+                <Button
+                    android:id="@+id/b4"
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    android:background="@drawable/shape_circle_white"
+                    android:elevation="4dp"
+                    android:textSize="30sp"
+                    android:layout_marginLeft="@dimen/small_padding"
+                    android:layout_marginRight="@dimen/small_padding"
+                    android:text="4"/>
+
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="@dimen/small_padding"
+                android:layout_marginBottom="@dimen/small_padding">
+
+                <Button
+                    android:id="@+id/b5"
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    android:background="@drawable/shape_circle_white"
+                    android:elevation="4dp"
+                    android:textSize="30sp"
+                    android:layout_marginLeft="@dimen/small_padding"
+                    android:layout_marginRight="@dimen/small_padding"
+                    android:text="5"/>
+
+                <Button
+                    android:id="@+id/b6"
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    android:background="@drawable/shape_circle_white"
+                    android:elevation="4dp"
+                    android:textSize="30sp"
+                    android:layout_marginLeft="@dimen/small_padding"
+                    android:layout_marginRight="@dimen/small_padding"
+                    android:text="6"/>
+
+                <Button
+                    android:id="@+id/b7"
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    android:background="@drawable/shape_circle_white"
+                    android:elevation="4dp"
+                    android:textSize="30sp"
+                    android:layout_marginLeft="@dimen/small_padding"
+                    android:layout_marginRight="@dimen/small_padding"
+                    android:text="7"/>
+
+                <Button
+                    android:id="@+id/b8"
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    android:background="@drawable/shape_circle_white"
+                    android:elevation="4dp"
+                    android:textSize="30sp"
+                    android:layout_marginLeft="@dimen/small_padding"
+                    android:layout_marginRight="@dimen/small_padding"
+                    android:text="8"/>
+
+                <Button
+                    android:id="@+id/b9"
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    android:background="@drawable/shape_circle_white"
+                    android:elevation="4dp"
+                    android:textSize="30sp"
+                    android:layout_marginLeft="@dimen/small_padding"
+                    android:layout_marginRight="@dimen/small_padding"
+                    android:text="9"/>
+
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
 
 </RelativeLayout>

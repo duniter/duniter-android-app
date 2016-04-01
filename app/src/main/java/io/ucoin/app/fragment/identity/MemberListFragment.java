@@ -188,8 +188,7 @@ public class MemberListFragment extends ListFragment
         return new CursorLoader(
                 getActivity(),
                 UcoinUris.MEMBER_URI,
-                null, selection, selectionArgs,
-                SQLiteView.Member.UID + " COLLATE NOCASE ASC");
+                null, selection, selectionArgs,null);
     }
 
     @Override
@@ -224,15 +223,15 @@ public class MemberListFragment extends ListFragment
     public void onListItemClick(ListView l, View v, int position, long id) {
         super.onListItemClick(l, v, position, id);
         Cursor cursor = (Cursor) l.getItemAtPosition(position);
-        int indexPubkey = cursor.getColumnIndex(SQLiteView.Member.PUBLIC_KEY);
-        int indexUid = cursor.getColumnIndex(SQLiteView.Member.UID);
+        //int indexPubkey = cursor.getColumnIndex(SQLiteModel.Member.PUBLIC_KEY);
+        //int indexUid = cursor.getColumnIndex(SQLiteModel.Member.UID);
 
-        WotLookup.Result result = findIdentity(cursor.getString(indexPubkey), cursor.getString(indexUid));
+        //WotLookup.Result result = findIdentity(cursor.getString(indexPubkey), cursor.getString(indexUid));
 
         Intent intent = new Intent(getActivity(),
                 LookupActivity.class);
         intent.putExtra(Application.EXTRA_CURRENCY_ID, getArguments().getLong(CURRENCY_ID));
-        intent.putExtra(WotLookup.Result.class.getSimpleName(), result);
+        //intent.putExtra(WotLookup.Result.class.getSimpleName(), result);
         if(getActivity() instanceof CurrencyActivity){
             ((CurrencyActivity)getActivity()).onActivityRes(Application.ACTIVITY_LOOKUP, Activity.RESULT_OK, intent);
         }

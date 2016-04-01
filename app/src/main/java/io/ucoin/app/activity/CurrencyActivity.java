@@ -577,9 +577,10 @@ public class CurrencyActivity extends ActionBarActivity
     }
 
     @Override
-    public void displayCertification(String publicKey, Long currencyId){
+    public void displayCertification(String publicKey, Long currencyId, Long identityId){
         Bundle args = new Bundle();
         args.putString(Application.IDENTITY_PUBLICKEY, publicKey);
+        args.putLong(Application.IDENTITY_ID, identityId);
         args.putLong(Application.IDENTITY_CURRENCY_ID, currencyId);
         currentFragment = CertificationFragment.newInstance(args);
         addFragment();

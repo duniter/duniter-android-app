@@ -7,6 +7,7 @@ public class UcoinUris {
 
     public final static Uri CURRENCY_URI;
     public final static Uri IDENTITY_URI;
+    public final static Uri REQUIREMENT_URI;
     public final static Uri PEER_URI;
     public final static Uri ENDPOINT_URI;
     public final static Uri WALLET_URI;
@@ -25,45 +26,52 @@ public class UcoinUris {
     public final static Uri CONTACT_URI;
     public final static Uri REQUETE_URI;
 
+    public static final Uri WALLET_FRAGMENT_URI;
+
     static {
         CURRENCY_URI = new Uri.Builder().scheme("content").authority(AUTHORITY)
-                .path("currency/").build();
+                                        .path("currency/").build();
         IDENTITY_URI = new Uri.Builder().scheme("content").authority(AUTHORITY)
-                .path("identity/").build();
+                                        .path("identity/").build();
+        REQUIREMENT_URI = new Uri.Builder().scheme("content").authority(AUTHORITY)
+                                           .path("requirement/").build();
         PEER_URI = new Uri.Builder().scheme("content").authority(AUTHORITY)
-                .path("peer/").build();
+                                    .path("peer/").build();
         ENDPOINT_URI = new Uri.Builder().scheme("content").authority(AUTHORITY)
-                .path("endpoint/").build();
+                                        .path("endpoint/").build();
         WALLET_URI = new Uri.Builder().scheme("content").authority(AUTHORITY)
-                .path("wallet/").build();
+                                      .path("wallet/").build();
         SOURCE_URI = new Uri.Builder().scheme("content").authority(AUTHORITY)
-                .path("source/").build();
+                                      .path("source/").build();
         TX_URI = new Uri.Builder().scheme("content").authority(AUTHORITY)
-                .path("tx/").build();
+                                  .path("tx/").build();
         TX_ISSUER_URI = new Uri.Builder().scheme("content").authority(AUTHORITY)
-                .path("tx_issuer/").build();
+                                         .path("tx_issuer/").build();
         TX_INPUT_URI = new Uri.Builder().scheme("content").authority(AUTHORITY)
-                .path("tx_input/").build();
+                                        .path("tx_input/").build();
         TX_OUTPUT_URI = new Uri.Builder().scheme("content").authority(AUTHORITY)
-                .path("tx_output/").build();
+                                         .path("tx_output/").build();
         TX_SIGNATURE_URI = new Uri.Builder().scheme("content").authority(AUTHORITY)
-                .path("tx_signature/").build();
+                                            .path("tx_signature/").build();
         MEMBER_URI = new Uri.Builder().scheme("content").authority(AUTHORITY)
-                .path("member/").build();
+                                      .path("member/").build();
         CERTIFICATION_URI = new Uri.Builder().scheme("content").authority(AUTHORITY)
-                .path("certification/").build();
+                                             .path("certification/").build();
 
         BLOCK_URI = new Uri.Builder().scheme("content").authority(AUTHORITY)
-                .path("block/").build();
+                                     .path("block/").build();
         UD_URI = new Uri.Builder().scheme("content").authority(AUTHORITY)
-                .path("ud/").build();
+                                  .path("ud/").build();
         MEMBERSHIP_URI = new Uri.Builder().scheme("content").authority(AUTHORITY)
-                .path("membership/").build();
+                                          .path("membership/").build();
         SELF_CERTIFICATION_URI = new Uri.Builder().scheme("content").authority(AUTHORITY)
-                .path("self_certification/").build();
+                                                  .path("self_certification/").build();
         CONTACT_URI = new Uri.Builder().scheme("content").authority(AUTHORITY)
-                .path("contact/").build();
+                                       .path("contact/").build();
         REQUETE_URI = new Uri.Builder().scheme("content").authority(AUTHORITY)
-                .path("requete/").build();
+                                       .path("requete/").build();
+
+
+        WALLET_FRAGMENT_URI = new Uri.Builder().scheme("content").authority(AUTHORITY).path("wallet_fragment_view/").build();
     }
 }

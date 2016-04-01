@@ -101,6 +101,8 @@ public class WalletFragment extends ListFragment
     private String walletPublicKey = null;
     private Long identityId = null;
 
+    private Long nbRequirements = null;
+
     private Integer currencySigQty = null;
 
     public static WalletFragment newInstance(Long walletId, Long IdentityId) {
@@ -169,10 +171,33 @@ public class WalletFragment extends ListFragment
             case WOT_REQUIEREMENTS:
                 Log.d(TAG, "reception requierements");
                 WotRequirements requirements = (WotRequirements) intent.getSerializableExtra(RequierementsService.WOT_REQUIEREMENTS);
-                updateRequirements(requirements);
+                //updateRequirements(requirements);
+                new Identity(getActivity(),identityId).requirements().add(currencyId, requirements);
+                updateRequirements();
                 break;
             default:
                 break;
+        }
+    }
+
+    private void updateRequirements(){
+        int minimum = currencySigQty!=null ? currencySigQty : 0;
+        textCertification.setText(String.valueOf(nbRequirements));
+        if(minimum>nbRequirements){
+            textCertification.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_certification_red, 0, 0);
+            textCertification.setTextColor(getResources().getColor(R.color.red));
+            //icon.setImageResource(R.drawable.ic_no_member);
+        }else{
+            textCertification.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_certification_green, 0, 0);
+            textCertification.setTextColor(getResources().getColor(R.color.green));
+            //icon.setImageResource(R.drawable.ic_member);
+        }
+        String text = textCertification.getText().toString().concat(" ");
+        if(nbRequirements<=1) {
+            textCertification.setText(text.concat(getString(R.string.certification)));
+        }else{
+
+            textCertification.setText(text.concat(getString(R.string.certifications)));
         }
     }
 
@@ -242,6 +267,7 @@ public class WalletFragment extends ListFragment
         int amountIndex = cursor.getColumnIndex(SQLiteView.Wallet.AMOUNT);
         int aliasIndex = cursor.getColumnIndex(SQLiteView.Wallet.ALIAS);
         int sigQtyIndex = cursor.getColumnIndex(SQLiteView.Wallet.CURRENCY_QT);
+        int nbRequirementsIndex = cursor.getColumnIndex(SQLiteView.Wallet.NB_REQUIREMENTS);
 
         if(cursor.moveToFirst()){
 
@@ -254,6 +280,9 @@ public class WalletFragment extends ListFragment
         currencyId =cursor.getLong(idCurrencyIndex);
         currencySigQty = cursor.getInt(sigQtyIndex);
         walletPublicKey = cursor.getString(publicKeyIndex);
+
+        nbRequirements = cursor.getLong(nbRequirementsIndex);
+        updateRequirements();
 
         if(identityId != null) {
             actionTab.setVisibility(View.VISIBLE);
@@ -427,7 +456,7 @@ public class WalletFragment extends ListFragment
 
     private void clickCertification(){
         if (getActivity() instanceof IdentityFragment.ActionIdentity) {
-            ((IdentityFragment.ActionIdentity) getActivity()).displayCertification(walletPublicKey, currencyId);
+            ((IdentityFragment.ActionIdentity) getActivity()).displayCertification(walletPublicKey, currencyId, identityId);
         }
     }
 

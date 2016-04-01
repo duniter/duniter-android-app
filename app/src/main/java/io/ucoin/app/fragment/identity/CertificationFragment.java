@@ -2,7 +2,12 @@ package io.ucoin.app.fragment.identity;
 
 import android.app.FragmentManager;
 import android.app.ListFragment;
+import android.app.LoaderManager;
 import android.content.Context;
+import android.content.CursorLoader;
+import android.content.Loader;
+import android.database.Cursor;
+import android.nfc.tech.IsoDep;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -33,8 +38,11 @@ import java.util.ArrayList;
 
 import io.ucoin.app.Application;
 import io.ucoin.app.R;
+import io.ucoin.app.UcoinUris;
 import io.ucoin.app.activity.CurrencyActivity;
 import io.ucoin.app.adapter.CertificationBaseAdapter;
+import io.ucoin.app.adapter.CertificationCursorAdapter;
+import io.ucoin.app.enumeration.CertificationType;
 import io.ucoin.app.fragment.dialog.ListWalletDialogFragment;
 import io.ucoin.app.model.IdentityContact;
 import io.ucoin.app.model.UcoinCurrency;
@@ -47,20 +55,26 @@ import io.ucoin.app.model.http_api.WotCertification;
 import io.ucoin.app.model.sql.sqlite.Currency;
 import io.ucoin.app.model.sql.sqlite.Identities;
 import io.ucoin.app.model.sql.sqlite.Wallets;
+import io.ucoin.app.sqlite.SQLiteTable;
+import io.ucoin.app.sqlite.SQLiteView;
 import io.ucoin.app.task.SendCertificationTask;
 
 public class CertificationFragment extends ListFragment
         implements SearchView.OnQueryTextListener,
+        LoaderManager.LoaderCallbacks<Cursor>,
         SwipeRefreshLayout.OnRefreshListener,
         ListWalletDialogFragment.Listener {
 
-    private ProgressBar progress;
-    private SwipeRefreshLayout mSwipeLayout;
-    private String publicKey;
-    private Long currencyId;
-    private UcoinCurrency currency;
-    private CertificationBaseAdapter certificationBaseAdapter;
-    private UcoinWallet walletSelected;
+    private ProgressBar                progress;
+    private SwipeRefreshLayout         mSwipeLayout;
+    private String                     publicKey;
+    private Long                       identityId;
+    private Long                       currencyId;
+    private UcoinCurrency              currency;
+    private CertificationBaseAdapter   certificationBaseAdapter;
+    private CertificationCursorAdapter certificationCursorAdapter;
+    private UcoinWallet                walletSelected;
+    private Cursor mCursor;
 
     static public CertificationFragment newInstance(Bundle args) {
         CertificationFragment fragment = new CertificationFragment();
@@ -74,33 +88,33 @@ public class CertificationFragment extends ListFragment
     }
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(
+            @NonNull
+            LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
         if (getActivity() instanceof CurrencyActivity) {
             ((CurrencyActivity) getActivity()).setDrawerIndicatorEnabled(false);
         }
-
         if (savedInstanceState != null) {
-            getArguments().putSerializable(Application.IDENTITY_CONTACT, savedInstanceState.getSerializable(Application.IDENTITY_CONTACT));
+            getArguments().putSerializable(Application.IDENTITY_CONTACT,
+                                           savedInstanceState.getSerializable(Application.IDENTITY_CONTACT));
         }
-
         return inflater.inflate(R.layout.fragment_certification_list, container, false);
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putSerializable(Application.IDENTITY_CONTACT, getArguments().getSerializable(Application.IDENTITY_CONTACT));
+        outState.putSerializable(Application.IDENTITY_CONTACT,
+                                 getArguments().getSerializable(Application.IDENTITY_CONTACT));
     }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         setHasOptionsMenu(true);
-
         mSwipeLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_layout);
         mSwipeLayout.setOnRefreshListener(this);
-
         TextView emptyView = (TextView) view.findViewById(android.R.id.empty);
         emptyView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -109,18 +123,19 @@ public class CertificationFragment extends ListFragment
                 onRefresh();
             }
         });
-
         progress = (ProgressBar) view.findViewById(R.id.progress_bar);
-
         publicKey = getArguments().getString(Application.IDENTITY_PUBLICKEY);
+        identityId = getArguments().getLong(Application.IDENTITY_ID);
         currencyId = getArguments().getLong(Application.IDENTITY_CURRENCY_ID);
 
-
-        currency = new Currency(getActivity(), currencyId);
-
-        certificationBaseAdapter = new CertificationBaseAdapter(getActivity(), null, currency);
-        setListAdapter(certificationBaseAdapter);
-
+        if(identityId==null) {
+            currency = new Currency(getActivity(), currencyId);
+            certificationBaseAdapter = new CertificationBaseAdapter(getActivity(), null, currency);
+            setListAdapter(certificationBaseAdapter);
+        }else{
+            certificationCursorAdapter = new CertificationCursorAdapter(getActivity());
+            setListAdapter(certificationCursorAdapter);
+        }
         ImageButton certifyButton = (ImageButton) view.findViewById(R.id.certify_button);
         certifyButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -129,7 +144,8 @@ public class CertificationFragment extends ListFragment
             }
         });
 
-        onRefresh();
+        getLoaderManager().initLoader(0, getArguments(), this);
+        //onRefresh();
     }
 
     private void majValues(WotCertification wotCertification) {
@@ -180,8 +196,22 @@ public class CertificationFragment extends ListFragment
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         super.onListItemClick(l, v, position, id);
-        WotCertification.Certification certif= (WotCertification.Certification) l.getItemAtPosition(position);
-        IdentityContact identityContact = new IdentityContact(false,"",certif.uid,certif.pubkey,currency.name(),currencyId);
+        IdentityContact identityContact;
+        if(identityId == null){
+            WotCertification.Certification certif= (WotCertification.Certification) l.getItemAtPosition(position);
+            identityContact = new IdentityContact(false,"",certif.uid,certif.pubkey,currency.name(),currencyId);
+        }else{
+            Cursor data = (Cursor)getListAdapter().getItem(position);
+            int publicKeyIndex = data.getColumnIndex(SQLiteView.Certification.PUBLIC_KEY);
+            int uidIndex = data.getColumnIndex(SQLiteView.Certification.UID);
+            int currencyNameIndex = data.getColumnIndex(SQLiteView.Certification.CURRENCY_NAME);
+
+            identityContact = new IdentityContact(false,"",
+                                                  data.getString(uidIndex),
+                                                  data.getString(publicKeyIndex),
+                                                  data.getString(currencyNameIndex),
+                                                  currencyId);
+        }
         if(getActivity() instanceof CurrencyActivity){
             ((CurrencyActivity) getActivity()).displayIdentityFragment(identityContact);
         }
@@ -199,8 +229,8 @@ public class CertificationFragment extends ListFragment
 
     @Override
     public void onRefresh() {
-        FindWotCertification findNumberCertification = new FindWotCertification(getActivity());
-        findNumberCertification.execute();
+        /*FindWotCertification findNumberCertification = new FindWotCertification(getActivity());
+        findNumberCertification.execute();*/
     }
 
     @Override
@@ -232,6 +262,26 @@ public class CertificationFragment extends ListFragment
 
         ListWalletDialogFragment dialog = new ListWalletDialogFragment(this,listWallet);
         dialog.show(manager, "dialog");
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        if (identityId != null) {
+            String selection = SQLiteView.Certification.IDENTITY_ID + "=? AND " + SQLiteView.Certification.TYPE + "=?";
+            String[] selectionArgs = new String[]{identityId.toString(), CertificationType.OF.name()};
+            return new CursorLoader(getActivity(), UcoinUris.CERTIFICATION_URI, null, selection, selectionArgs, null);
+        }
+        return null;
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        mCursor = data;
+        certificationCursorAdapter.swapCursor(data);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
     }
 
     private class FindWotCertification extends AsyncTask<Void, Integer, Void> {

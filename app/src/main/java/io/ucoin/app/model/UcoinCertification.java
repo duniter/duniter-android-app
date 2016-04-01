@@ -6,7 +6,13 @@ import io.ucoin.app.enumeration.CertificationType;
 public interface UcoinCertification extends SqlRow {
     Long identityId();
 
-    Long memberId();
+    String uid();
+
+    String publicKey();
+
+    Boolean isMember();
+
+    Boolean wasMember();
 
     CertificationType type();
 
@@ -14,9 +20,13 @@ public interface UcoinCertification extends SqlRow {
 
     Long medianTime();
 
+    Long sigDate();
+
     String signature();
 
-    UcoinMember member();
+    Long number();
+
+    String hash();
 
     CertificationState state();
 

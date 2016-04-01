@@ -24,8 +24,23 @@ public class Certification extends Row
     }
 
     @Override
-    public Long memberId() {
-        return getLong(SQLiteTable.Certification.MEMBER_ID);
+    public String uid() {
+        return getString(SQLiteTable.Certification.UID);
+    }
+
+    @Override
+    public String publicKey() {
+        return getString(SQLiteTable.Certification.PUBLIC_KEY);
+    }
+
+    @Override
+    public Boolean isMember() {
+        return getString(SQLiteTable.Certification.IS_MEMBER).equals("true");
+    }
+
+    @Override
+    public Boolean wasMember() {
+        return getString(SQLiteTable.Certification.WAS_MEMBER).equals("true");
     }
 
     @Override
@@ -39,13 +54,23 @@ public class Certification extends Row
     }
 
     @Override
+    public Long sigDate() {
+        return getLong(SQLiteTable.Certification.SIG_DATE);
+    }
+
+    @Override
     public String signature() {
         return getString(SQLiteTable.Certification.SIGNATURE);
     }
 
     @Override
-    public UcoinMember member() {
-        return new Member(mContext, memberId());
+    public Long number() {
+        return getLong(SQLiteTable.Certification.NUMBER);
+    }
+
+    @Override
+    public String hash() {
+        return getString(SQLiteTable.Certification.HASH);
     }
 
     @Override
@@ -75,12 +100,10 @@ public class Certification extends Row
     public String toString() {
         String s = "\nCERTIFICATION id=" + ((id() == null) ? "not in database" : id()) + "\n";
         s += "\nidentityId=" + identityId();
-        s += "\nmemberId=" + memberId();
         s += "\ntype=" + type().name();
         s += "\nblock=" + block();
         s += "\nmedianTime=" + medianTime();
         s += "\nsignature=" + signature();
-        s += "\nmember=" + member().toString();
 
         return s;
     }

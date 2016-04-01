@@ -14,54 +14,53 @@ import com.android.volley.toolbox.Volley;
 
 public class Application extends android.app.Application{
 
-    public static final int ACTIVITY_LOOKUP = 0x1;
+    public static final int ACTIVITY_LOOKUP        = 0x1;
     public static final int ACTIVITY_CURRENCY_LIST = 0x2;
-    public static final int ACTIVITY_CONNECTION = 0x3;
+    public static final int ACTIVITY_CONNECTION    = 0x3;
 
 
-    public static final String EXTRA_CURRENCY_ID = "currency_id";
-    public static final String EXTRA_WALLET_ID = "wallet_id";
-    public static final String EXTRA_CONTACT_ID = "contact_id";
-    public static final String EXTRA_IDENTITY = "identity";
-    public static final String EXTRA_IS_CONTACT = "is_contact";
+    public static final String EXTRA_CURRENCY_ID  = "currency_id";
+    public static final String EXTRA_WALLET_ID    = "wallet_id";
+    public static final String EXTRA_CONTACT_ID   = "contact_id";
+    public static final String EXTRA_IDENTITY     = "identity";
+    public static final String EXTRA_IS_CONTACT   = "is_contact";
     public static final String EXTRA_VALUE_AMOUNT = "value_amount";
-    public static final String EXTRA_SYNC_OP = "sync_op";
-    public static final String IDENTITY_LOOKUP = "lookup_for_identity";
+    public static final String EXTRA_SYNC_OP      = "sync_op";
+    public static final String IDENTITY_LOOKUP    = "lookup_for_identity";
 
-    public static final String IDENTITY_CONTACT = "identity_contact";
-    public static final String IDENTITY_PUBLICKEY = "identity_publicKey";
-    public static final String IDENTITY_UID = "identity_uid";
-    public static final String IDENTITY_NAME = "identity_name";
-    public static final String IDENTITY_WALLET_ID = "identity_wallet_id";
+    public static final String IDENTITY_CONTACT     = "identity_contact";
+    public static final String IDENTITY_PUBLICKEY   = "identity_publicKey";
+    public static final String IDENTITY_ID          = "identity_id";
+    public static final String IDENTITY_UID         = "identity_uid";
+    public static final String IDENTITY_NAME        = "identity_name";
+    public static final String IDENTITY_WALLET_ID   = "identity_wallet_id";
     public static final String IDENTITY_CURRENCY_ID = "identity_currency_id";
 
-    public static final String UNIT = "currency_unit";
+    public static final String UNIT         = "currency_unit";
     public static final String UNIT_DEFAULT = "default_currency_unit";
-    public static final int UNIT_CLASSIC = 0;
-    public static final int UNIT_DU = 1;
-    public static final int UNIT_TIME = 2;
+    public static final int    UNIT_CLASSIC = 0;
+    public static final int    UNIT_DU      = 1;
+    public static final int    UNIT_TIME    = 2;
 
-    public static final String DECIMAL = "number_decimal";
+    public static final String DECIMAL    = "number_decimal";
     public static final String CONNECTION = "connection";
-    public static final String PIN = "pin";
+    public static final String PIN        = "pin";
 
-    private static Context mContext;
+
+    public static final String WALLET_ID  = "wallet_id";
+
+    private static Context      mContext;
     private static RequestQueue mRequestQueue;
 
     @Override
     public void onCreate() {
         super.onCreate();
         mContext = getApplicationContext();
-
         //LOAD account
         AccountManager accountManager = AccountManager.get(this);
-        android.accounts.Account[] accounts = accountManager
-                .getAccountsByType(getString(R.string.ACCOUNT_TYPE));
-
+        android.accounts.Account[] accounts = accountManager.getAccountsByType(getString(R.string.ACCOUNT_TYPE));
         if (accounts.length < 1) {
-            Account account = new Account(
-                    getString(R.string.app_name),
-                    getString(R.string.ACCOUNT_TYPE));
+            Account account = new Account(getString(R.string.app_name), getString(R.string.ACCOUNT_TYPE));
 
             ContentResolver.setSyncAutomatically(account, getString(R.string.AUTHORITY), true);
             ContentResolver.setIsSyncable(account, getString(R.string.AUTHORITY), 1);
