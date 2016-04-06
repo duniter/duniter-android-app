@@ -765,7 +765,7 @@ public class DbProvider extends ContentProvider implements SQLiteTable {
             case IDENTITY:
             case IDENTITY_ID:
                 getContext().getContentResolver().notifyChange(UcoinUris.IDENTITY_URI, null);
-                notifyChange(WALLET);
+                notifyChange(CURRENCY);
                 break;
             case PEER:
             case PEER_ID:
@@ -809,12 +809,13 @@ public class DbProvider extends ContentProvider implements SQLiteTable {
             case CERTIFICATION:
             case CERTIFICATION_ID:
                 getContext().getContentResolver().notifyChange(UcoinUris.CERTIFICATION_URI, null);
-                notifyChange(IDENTITY);
+                getContext().getContentResolver().notifyChange(UcoinUris.IDENTITY_URI, null);
                 break;
             case REQUIREMENT:
             case REQUIREMENT_ID:
                 getContext().getContentResolver().notifyChange(UcoinUris.REQUIREMENT_URI, null);
-                notifyChange(IDENTITY);
+                getContext().getContentResolver().notifyChange(UcoinUris.IDENTITY_URI, null);
+                break;
             case BLOCK:
             case BLOCK_ID:
                 getContext().getContentResolver().notifyChange(UcoinUris.UD_URI, null);

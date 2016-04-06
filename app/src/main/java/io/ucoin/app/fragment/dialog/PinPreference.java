@@ -1,22 +1,17 @@
-package io.ucoin.app.fragment.connection;
+package io.ucoin.app.fragment.dialog;
 
-import android.app.Fragment;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.TypedArray;
 import android.os.Bundle;
-import android.os.Vibrator;
+import android.preference.DialogPreference;
+import android.preference.Preference;
 import android.preference.PreferenceManager;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.view.LayoutInflater;
+import android.util.AttributeSet;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,42 +23,50 @@ import java.util.List;
 import io.ucoin.app.Application;
 import io.ucoin.app.R;
 
-public class PinFragment extends Fragment{
+/**
+ * Created by naivalf27 on 23/02/16.
+ */
+public class PinPreference extends DialogPreference {
 
     private String code1;
+    private String code2;
+    private String code3;
+
+    private boolean confirm1 = false;
+    private boolean confirm2 = false;
 
     private ViewHolder holder;
 
-    public static PinFragment newInstance() {
-        PinFragment fragment = new PinFragment();
-        fragment.setArguments(new Bundle());
-        return fragment;
+    private Context context;
+    private SharedPreferences preferences;
+
+    public PinPreference(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        this.context = context;
+        preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        setPersistent(false);
+        setDialogLayoutResource(R.layout.dialog_preference_pin);
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        super.onCreateView(inflater, container, savedInstanceState);
-
-        return inflater.inflate(R.layout.fragment_connection_pin,
-                container, false);
-    }
-
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+    protected void onBindDialogView(View view) {
+        super.onBindDialogView(view);
 
         this.code1 = "";
+        this.code2 = "";
+        this.code3 = "";
 
         this.holder = new ViewHolder(view);
 
         initPin();
+    }
+
+    @Override
+    protected void showDialog(Bundle state) {
+        super.showDialog(state);
+        AlertDialog alertDlg = (AlertDialog)getDialog();
+        Button btn = alertDlg.getButton(AlertDialog.BUTTON_POSITIVE);
+        btn.setVisibility(View.GONE);
     }
 
     private void initPin(){
@@ -160,63 +163,99 @@ public class PinFragment extends Fragment{
     }
 
     private void press(Button b){
-        code1 += b.getText();
-        holder.listPin.get(code1.length()-1).setImageResource(R.drawable.ic_dot_activate);
+        if (confirm1 && !confirm2) {
+            code2 += b.getText();
+            holder.listPin.get(code2.length()-1).setImageResource(R.drawable.ic_dot_activate);
+        } else if(confirm1 && confirm2) {
+            code3 += b.getText();
+            holder.listPin.get(code3.length()-1).setImageResource(R.drawable.ic_dot_activate);
+        }else{
+            code1 += b.getText();
+            holder.listPin.get(code1.length()-1).setImageResource(R.drawable.ic_dot_activate);
+        }
         change();
     }
 
     private void change(){
-        if(code1.length()==4){
-            connection();
+        if(!confirm2) {
+            if (!confirm1 && code1.length() == 4) {
+                String pin = preferences.getString(Application.PIN, "p");
+                if (code1.equals(pin)) {
+                    confirm1 = true;
+                    this.holder.actual_context.setText(this.context.getString(R.string.tap_new_pin_code));
+                    remove();
+                }else{
+                    getDialog().dismiss();
+                    Toast.makeText(context, context.getString(R.string.pin_dont_valid),Toast.LENGTH_SHORT).show();
+                    onDialogClosed(false);
+                }
+            }
+
+            if (confirm1 && code2.length() == 4){
+                confirm2 = true;
+                remove();
+                this.holder.actual_context.setText(this.context.getString(R.string.tap_confirm_pin_code));
+            }
+        }else{
+            if(code3.length()==4 && code3.equals(code2)){
+                getDialog().dismiss();
+                onDialogClosed(true);
+            }else if (code3.length()==4){
+                getDialog().dismiss();
+                Toast.makeText(context, context.getString(R.string.pin_dont_match), Toast.LENGTH_SHORT).show();
+                onDialogClosed(false);
+            }
         }
     }
 
     public void remove(){
-        code1 = "";
+        code1 = (!confirm1 && !confirm2) ? "" : code1;
+        code2 = (confirm1 && !confirm2) ? "" : code2;
+        code3 = (confirm1 && confirm2) ? "" : code3;
 
         for(ImageView img : this.holder.listPin){
             img.setImageResource(R.drawable.ic_dot_disable);
         }
     }
 
-    public void connection(){
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        String pin = preferences.getString(Application.PIN, "p");
-
-        if (!code1.equals(pin)) {
-            Toast.makeText(getActivity(), getString(R.string.pin_dont_valid), Toast.LENGTH_SHORT).show();
-            remove();
-        } else {
-            if(getActivity() instanceof FinishAction){
-                ((FinishAction) getActivity()).finishPinConnection();
-            }
+    @Override
+    protected void onDialogClosed(boolean positiveResult) {
+        if (positiveResult) {
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putString(Application.PIN, code3);
+            editor.apply();
+            Toast.makeText(context, context.getString(R.string.pin_changed_ok),Toast.LENGTH_SHORT).show();
         }
-    }
-
-    public interface FinishAction {
-        void finishPinConnection();
+        code1 = "";
+        code2 = "";
+        code3 ="";
+        confirm1 = false;
+        confirm2 = false;
+        super.onDialogClosed(positiveResult);
     }
 
     public static class ViewHolder {
-        public View      rootView;
+        public View rootView;
 
         public ArrayList<ImageView> listPin;
 
+        public TextView actual_context;
         public ImageView del;
-        public Button    b0;
-        public Button    b1;
-        public Button    b2;
-        public Button    b3;
-        public Button    b4;
-        public Button    b5;
-        public Button    b6;
-        public Button    b7;
-        public Button    b8;
-        public Button    b9;
+        public Button b0;
+        public Button b1;
+        public Button b2;
+        public Button b3;
+        public Button b4;
+        public Button b5;
+        public Button b6;
+        public Button b7;
+        public Button b8;
+        public Button b9;
 
         public ViewHolder(View rootView) {
             this.rootView = rootView;
             listPin =new ArrayList<>();
+            this.actual_context = (TextView) rootView.findViewById(R.id.actual_context);
             listPin.add((ImageView) rootView.findViewById(R.id.pin1));
             listPin.add((ImageView) rootView.findViewById(R.id.pin2));
             listPin.add((ImageView) rootView.findViewById(R.id.pin3));

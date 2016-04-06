@@ -54,6 +54,7 @@ import io.ucoin.app.model.UcoinWallets;
 import io.ucoin.app.model.http_api.WotCertification;
 import io.ucoin.app.model.sql.sqlite.Currency;
 import io.ucoin.app.model.sql.sqlite.Identities;
+import io.ucoin.app.model.sql.sqlite.Identity;
 import io.ucoin.app.model.sql.sqlite.Wallets;
 import io.ucoin.app.sqlite.SQLiteTable;
 import io.ucoin.app.sqlite.SQLiteView;
@@ -144,12 +145,19 @@ public class CertificationFragment extends ListFragment
             }
         });
 
-        getLoaderManager().initLoader(0, getArguments(), this);
-        //onRefresh();
+        if(identityId !=null){
+            getLoaderManager().initLoader(0, getArguments(), this);
+        }
+        onRefresh();
     }
 
     private void majValues(WotCertification wotCertification) {
-        certificationBaseAdapter.swapValues(wotCertification);
+        if(identityId == null){
+            certificationBaseAdapter.swapValues(wotCertification);
+        }else {
+            new Identity(getActivity(),identityId).certifications().add(currencyId, wotCertification, CertificationType.OF);
+            getLoaderManager().initLoader(0, getArguments(), this);
+        }
     }
 
     @Override
@@ -229,8 +237,8 @@ public class CertificationFragment extends ListFragment
 
     @Override
     public void onRefresh() {
-        /*FindWotCertification findNumberCertification = new FindWotCertification(getActivity());
-        findNumberCertification.execute();*/
+        FindWotCertification findNumberCertification = new FindWotCertification(getActivity());
+        findNumberCertification.execute();
     }
 
     @Override

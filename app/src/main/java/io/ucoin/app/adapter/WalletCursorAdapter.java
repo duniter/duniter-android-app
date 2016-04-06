@@ -105,6 +105,23 @@ public class WalletCursorAdapter extends CursorAdapter {
         return mCursor.getLong(mCursor.getColumnIndex(SQLiteView.Wallet._ID));
     }
 
+    public boolean dowloadFinish(int position){
+        int nbSec = 0;
+        if(mSectionPosition.size()>1) {
+            for (Integer i : mSectionPosition.keySet()) {
+                if (position > i) {
+                    nbSec += 1;
+                }
+            }
+        }
+        position -= nbSec;
+        int dividendIndex = mCursor.getColumnIndex(SQLiteView.Wallet.DIVIDEND);
+        int dtIndex = mCursor.getColumnIndex(SQLiteView.Wallet.DT);
+        int amountIndex = mCursor.getColumnIndex(SQLiteView.Wallet.AMOUNT);
+        mCursor.moveToPosition(position);
+        return !(mCursor.isNull(amountIndex) || mCursor.isNull(dividendIndex) || mCursor.isNull(dtIndex));
+    }
+
     public Long getIdIdentity(int position){
         int nbSec = 0;
         if(mSectionPosition.size()>1) {
@@ -191,6 +208,7 @@ public class WalletCursorAdapter extends CursorAdapter {
         HashMap<Integer, String> sectionPosition = new LinkedHashMap<>(16, (float) 0.75, false);
         if(newCursor.moveToFirst()){
             do{
+                long id = newCursor.getLong(newCursor.getColumnIndex(SQLiteView.Wallet._ID));
                 String name = newCursor.getString(newCursor.getColumnIndex(SQLiteView.Wallet.CURRENCY_NAME));
                 if (name == null) name = "UNKNOWN";
 

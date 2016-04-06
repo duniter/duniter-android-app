@@ -1,43 +1,15 @@
-<?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/ucoin"
-        android:id="@+id/textView5"
-        android:textColor="@android:color/white"
-        android:textSize="50sp"
-        android:gravity="center"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"/>
-
-    <TextView
-        android:id="@+id/text1"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/welcome_to_ucoin"
-        android:layout_below="@+id/textView5"
-        android:gravity="center"
-        android:layout_centerHorizontal="true"
-        android:textColor="@android:color/white"
-        android:textSize="@dimen/welcom_text"
-        android:layout_marginBottom="@dimen/margin"
-        android:layout_marginLeft="@dimen/demi_padding"
-        android:layout_marginRight="@dimen/demi_padding"
-        android:layout_marginStart="@dimen/demi_padding"
-        android:layout_marginEnd="@dimen/demi_padding"/>
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@color/primary">
 
     <TextView
         android:id="@+id/actual_context"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/welcome_description"
-        android:layout_below="@+id/text1"
-        android:layout_centerHorizontal="true"
+        android:text="@string/tap_actual_pin_code"
+        android:layout_gravity="center_horizontal"
         android:gravity="center"
         android:textColor="@android:color/white"
         android:textSize="@dimen/welcom_text"
@@ -49,10 +21,10 @@
         />
 
     <LinearLayout
+        android:id="@+id/pin"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
+        android:layout_gravity="center_horizontal"
         android:orientation="vertical">
 
         <LinearLayout
@@ -246,4 +218,7 @@
 
     </LinearLayout>
 
-</RelativeLayout>
+</LinearLayout>
+
+
+

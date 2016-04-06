@@ -98,7 +98,8 @@
     <string name="password">Password</string>
     <string name="confirm">Confirm</string>
     <string name="confirm_password">Confirm password</string>
-    <string name="pin_code">PIN code :</string>
+    <string name="pin_code_dot">PIN code :</string>
+    <string name="pin_code">PIN code</string>
     <string name="add_account">Add account</string>
     <string name="salt">Protection sentence (email,...)</string>
     <string name="salt_instructions">Salt: We advice you to choose your personal e-mail as value for this
@@ -399,5 +400,15 @@
     <string name="tap_pin_code">Please enter your pin code :</string>
     <string name="tap_pin_code_bis">Please confirm your pin code :</string>
     <string name="nb_certification">%1$d Certification</string>
+    <string name="download_not_finish">The download is not finished.\n Please wait !</string>
+    <string name="pin_dont_valid">The PIN code is not valid</string>
+
+    <string name="tap_actual_pin_code">Please enter your actual pin code :</string>
+    <string name="tap_new_pin_code">Please enter your new pin code :</string>
+    <string name="tap_confirm_pin_code">Please confirm your new pin code :</string>
+    <string name="pin_changed_ok">The PIN code has been changed</string>
+    <string name="first_currency_unit">First currency unit</string>
+    <string name="second_currency_unit">Second currency unit</string>
+    <string name="number_digit">Number of Digit</string>
 
 </resources>

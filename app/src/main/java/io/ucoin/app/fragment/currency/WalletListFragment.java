@@ -17,6 +17,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import io.ucoin.app.Application;
 import io.ucoin.app.R;
@@ -104,9 +105,13 @@ public class WalletListFragment extends ListFragment
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         if(getActivity() instanceof Action){
-            ((Action)getActivity()).displayWalletFragment(
-                    walletCursorAdapter.getIdWallet(position),
-                    walletCursorAdapter.getIdIdentity(position));
+            if(walletCursorAdapter.dowloadFinish(position)) {
+                ((Action) getActivity()).displayWalletFragment(
+                        walletCursorAdapter.getIdWallet(position),
+                        walletCursorAdapter.getIdIdentity(position));
+            }else{
+                Toast.makeText(getActivity(),getString(R.string.download_not_finish),Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
@@ -143,7 +148,7 @@ public class WalletListFragment extends ListFragment
         ((WalletCursorAdapter) this.getListAdapter()).swapCursor(null);
     }
 
-    private void actionNew(){
+    private void actionNew() {
         DialogFragment whatNew = NewWalletDialogFragment.newInstance(new NewWalletDialogFragment.Action() {
             @Override
             public void actionNew() {

@@ -12,7 +12,7 @@
         android:layout_gravity="center"
         android:gravity="center"
         android:layout_marginTop="24dp"
-        android:text="@string/pin_code"
+        android:text="@string/pin_code_dot"
         android:textColor="@color/textPrimary"
         android:textSize="@dimen/abc_text_size_display_2_material" />
 

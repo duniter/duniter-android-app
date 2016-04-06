@@ -448,10 +448,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements SQLiteTable {
                                         " ON " + SQLiteView.Currency.VIEW_NAME + DOT + SQLiteView.Currency._ID + "=" + Wallet.TABLE_NAME + DOT + Wallet.CURRENCY_ID +
 
                                         " LEFT JOIN " + Identity.TABLE_NAME +
-                                        " ON " + Identity.TABLE_NAME + DOT + Identity.WALLET_ID + "=" + Wallet.TABLE_NAME + DOT + Wallet._ID +
-
-                                        " LEFT JOIN " + Requirement.TABLE_NAME +
-                                        " ON " + Requirement.TABLE_NAME + DOT + Requirement.IDENTITY_ID + "=" + Identity.TABLE_NAME + DOT + Identity._ID;
+                                        " ON " + Identity.TABLE_NAME + DOT + Identity.WALLET_ID + "=" + Wallet.TABLE_NAME + DOT + Wallet._ID;
             db.execSQL(CREATE_VIEW_WALLET);
 
             String CREATE_VIEW_CERTIFICATION = "CREATE VIEW " + SQLiteView.Certification.VIEW_NAME +
@@ -662,9 +659,6 @@ public class SQLiteHelper extends SQLiteOpenHelper implements SQLiteTable {
                                           " LEFT JOIN " + Membership.TABLE_NAME +
                                           " ON " + Membership.TABLE_NAME + DOT + Membership.BLOCK_NUMBER + "= last_membership." + Membership.BLOCK_NUMBER +
                                           " AND " + Membership.TABLE_NAME + DOT + Membership.IDENTITY_ID + "=" + Identity.TABLE_NAME + DOT + Identity._ID +
-
-                                          " LEFT JOIN " + Requirement.TABLE_NAME +
-                                          " ON " + Requirement.TABLE_NAME + DOT + Requirement.IDENTITY_ID + "=" + Identity.TABLE_NAME + DOT + Identity._ID +
 
                                           " LEFT JOIN " + Block.TABLE_NAME +
                                           " ON " + Block.TABLE_NAME + DOT + Block.NUMBER + "= last_membership." + Membership.BLOCK_NUMBER +

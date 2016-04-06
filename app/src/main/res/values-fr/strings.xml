@@ -98,7 +98,8 @@
     <string name="password">Mot de passe</string>
     <string name="confirm">Confirmer</string>
     <string name="confirm_password">Confirmez le mot de passe</string>
-    <string name="pin_code">Code PIN :</string>
+    <string name="pin_code_dot">Code PIN :</string>
+    <string name="pin_code">Code PIN</string>
     <string name="add_account">Ajouter un compte</string>
     <string name="salt">Phrase de protection (email, ...)</string>
     <string name="salt_instructions">Salt: Nous vous conseillons de choisir votre adresse e-mail personnelle en tant que valeur pour ce champ. Mais vous pouvez mettre une autre valeur: il faut juste que la taille soit suffisante pour éviter la collision clé. En général, votre e-mail personnelle est un bon choix, et est facile à retenir.</string>
@@ -393,5 +394,17 @@
     <string name="tap_pin_code">Veuillez saisir votre code pin :</string>
     <string name="tap_pin_code_bis">Veuillez confirmer votre code pin :</string>
     <string name="nb_certification">%1$d Certification</string>
+    <string name="download_not_finish">Le téléchargement n\'est pas fini.\n Veuillez patienter !</string>
+    <string name="pin_dont_valid">Le code PIN n\'est pas valide</string>
+
+
+
+    <string name="tap_actual_pin_code">Veuillez saisir votre code pin actuel:</string>
+    <string name="tap_new_pin_code">Veuillez saisir votre nouveau code pin :</string>
+    <string name="tap_confirm_pin_code">Veuillez confirmer votre nouveau code pin :</string>
+    <string name="pin_changed_ok">Le code PIN a bien été changé</string>
+    <string name="first_currency_unit">Première unité de la monnaie</string>
+    <string name="second_currency_unit">Deuxième unité de la monnaie</string>
+    <string name="number_digit">Nombre de décimal</string>
 
 </resources>
