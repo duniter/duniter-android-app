@@ -320,7 +320,7 @@
 
     <string-array name="node">
         <item>meta_brouzouf@metab.ucoin.io:9201</item>
-        <item>super_currency@twiced.fr:9330</item>
+        <!--<item>super_currency@twiced.fr:9330</item>-->
     </string-array>
 
     <!-- Strings related to rules currency -->
@@ -410,5 +410,6 @@
     <string name="first_currency_unit">First currency unit</string>
     <string name="second_currency_unit">Second currency unit</string>
     <string name="number_digit">Number of Digit</string>
+    <string name="version">Version</string>
 
 </resources>

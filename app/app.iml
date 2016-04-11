@@ -64,8 +64,11 @@
       <sourceFolder url="file://$MODULE_DIR$/src/androidTest/jni" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/src/androidTest/rs" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/arm64-v8aDebug" />
+      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/arm64-v8aRelease" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/armeabi-v7aDebug" />
+      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/armeabi-v7aRelease" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/armeabiDebug" />
+      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/armeabiRelease" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/assets" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/classes" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/dependency-cache" />
@@ -81,15 +84,20 @@
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/incremental" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/manifests" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/mips64Debug" />
+      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/mips64Release" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/mipsDebug" />
+      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/mipsRelease" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/pre-dexed" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/res" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/rs" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/symbols" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/tmp" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/universalDebug" />
+      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/universalRelease" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/x86Debug" />
+      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/x86Release" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/x86_64Debug" />
+      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/x86_64Release" />
       <excludeFolder url="file://$MODULE_DIR$/build/outputs" />
       <excludeFolder url="file://$MODULE_DIR$/build/tmp" />
     </content>

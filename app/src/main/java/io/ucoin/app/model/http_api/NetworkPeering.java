@@ -24,6 +24,7 @@ import io.ucoin.app.enumeration.EndpointProtocol;
 
 public class NetworkPeering implements Serializable {
 
+    public int version;
     public String currency;
     public String pubkey;
     public String signature;

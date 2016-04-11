@@ -17,6 +17,7 @@ import java.util.LinkedHashMap;
 
 import io.ucoin.app.Format;
 import io.ucoin.app.R;
+import io.ucoin.app.fragment.currency.WalletListFragment;
 import io.ucoin.app.sqlite.SQLiteView;
 
 
@@ -26,13 +27,12 @@ public class WalletCursorAdapter extends CursorAdapter {
     private Context mContext;
     private Cursor mCursor;
     private HashMap<Integer, String> mSectionPosition;
-    private Activity activity;
+    private WalletListFragment parent;
 
-    public WalletCursorAdapter(Context context, final Cursor c, int flags, Activity activity) {
+    public WalletCursorAdapter(Context context, final Cursor c, int flags) {
         super(context, c, flags);
         mContext = context;
         mCursor = c;
-        this.activity = activity;
         mSectionPosition = new LinkedHashMap<>(16, (float) 0.75, false);
         nbSection =0;
     }

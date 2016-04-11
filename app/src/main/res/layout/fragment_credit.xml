@@ -39,5 +39,13 @@
             android:text="GNU GPL v3"
             style="@style/CreditLabel"/>
 
+        <TextView
+            android:text="@string/version"
+            style="@style/headline"/>
+
+        <TextView
+            android:text="v0.1"
+            style="@style/CreditLabel"/>
+
     </LinearLayout>
 </ScrollView>

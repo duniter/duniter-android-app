@@ -3,9 +3,11 @@ package io.ucoin.app.fragment.currency;
 import android.app.DialogFragment;
 import android.app.ListFragment;
 import android.app.LoaderManager;
+import android.app.ProgressDialog;
 import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.BaseColumns;
 import android.support.annotation.NonNull;
@@ -19,11 +21,15 @@ import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+
 import io.ucoin.app.Application;
 import io.ucoin.app.R;
 import io.ucoin.app.UcoinUris;
 import io.ucoin.app.activity.CurrencyActivity;
 import io.ucoin.app.adapter.WalletCursorAdapter;
+import io.ucoin.app.content.SyncAdapter;
 import io.ucoin.app.fragment.dialog.InscriptionDialogFragment;
 import io.ucoin.app.fragment.dialog.ConnectionDialogFragment;
 import io.ucoin.app.fragment.dialog.NewWalletDialogFragment;
@@ -72,11 +78,12 @@ public class WalletListFragment extends ListFragment
         setHasOptionsMenu(true);
 
         walletCursorAdapter
-                = new WalletCursorAdapter(getActivity(), null, 0, getActivity());
+                = new WalletCursorAdapter(getActivity(), null, 0);
         setListAdapter(walletCursorAdapter);
 
         mSwipeLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_layout);
         mSwipeLayout.setOnRefreshListener(this);
+
     }
 
     @Override
@@ -193,3 +200,5 @@ public class WalletListFragment extends ListFragment
         void displayWalletFragment(Long walletId, Long IdentityId);
     }
 }
+
+

@@ -315,6 +315,7 @@
 
     <string-array name="node">
         <item>meta_brouzouf@metab.ucoin.io:9201</item>
+        <!--<item>super_currency@twiced.fr:9330</item>-->
     </string-array>
 
     <!-- Strings related to rules currency -->
@@ -406,5 +407,6 @@
     <string name="first_currency_unit">Première unité de la monnaie</string>
     <string name="second_currency_unit">Deuxième unité de la monnaie</string>
     <string name="number_digit">Nombre de décimal</string>
+    <string name="version">Version</string>
 
 </resources>
