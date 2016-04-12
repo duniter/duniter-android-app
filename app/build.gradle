@@ -7,8 +7,8 @@ android {
         applicationId "io.ucoin.android"
         minSdkVersion 14
         targetSdkVersion 21
-        versionCode 8
-        versionName "0.8"
+        versionCode 9
+        versionName "0.9"
     }
     sourceSets.main {
         jniLibs.srcDir 'src/main/libs'
