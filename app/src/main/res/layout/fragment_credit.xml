@@ -40,7 +40,15 @@
             style="@style/CreditLabel"/>
 
         <TextView
-            android:text="@string/version"
+            android:text="@string/app_version"
+            style="@style/headline"/>
+
+        <TextView
+            android:text="v0.8.2"
+            style="@style/CreditLabel"/>
+
+        <TextView
+            android:text="@string/protocol_version"
             style="@style/headline"/>
 
         <TextView
