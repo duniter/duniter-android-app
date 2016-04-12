@@ -408,6 +408,6 @@
     <string name="second_currency_unit">Deuxième unité de la monnaie</string>
     <string name="number_digit">Nombre de décimal</string>
     <string name="protocol_version">Version du protocole</string>
-    <string name="app_version">Version de l'application</string>
+    <string name="app_version">Version de l\'application</string>
 
 </resources>
