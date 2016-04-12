@@ -44,7 +44,7 @@
             style="@style/headline"/>
 
         <TextView
-            android:text="v0.8.2"
+            android:text="v0.9"
             style="@style/CreditLabel"/>
 
         <TextView
