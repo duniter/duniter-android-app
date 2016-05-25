@@ -12,7 +12,9 @@ import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
+import android.text.InputFilter;
 import android.text.InputType;
+import android.text.Spanned;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
@@ -216,6 +218,19 @@ public class TransferActivity extends ActionBarActivity implements View.OnClickL
         spinnerUnit = (Spinner) findViewById(R.id.spinner_unit);
 
         mComment = (EditText) findViewById(R.id.comment);
+        InputFilter filter = new InputFilter() {
+            public CharSequence filter(CharSequence source, int start, int end,
+                                       Spanned dest, int dstart, int dend) {
+                char[] chars = {'\'','"'};
+                for (int i = start; i < end; i++) {
+                    if (new String(chars).contains(String.valueOf(source.charAt(i)))) {
+                        return "";
+                    }
+                }
+                return null;
+            }
+        };
+        mComment.setFilters(new InputFilter[] { filter });
     }
 
     private void majDefaultAmount(){
