@@ -418,5 +418,8 @@
     <string name="update">Mise à jour</string>
     <string name="update_current">Mise à jour en cours ...</string>
     <string name="wallet_information">Information du portefeuille</string>
+    <string name="amount_in">Montant en </string>
+    <string name="ud">DU</string>
+    <string name="time">temps</string>
 
 </resources>

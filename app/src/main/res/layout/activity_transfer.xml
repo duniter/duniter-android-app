@@ -210,7 +210,7 @@
                         android:layout_alignParentLeft="true"
                         android:layout_alignParentTop="true"
                         android:labelFor="@+id/rel_amount"
-                        android:text="@string/amount"
+                        android:text="@string/amount_in"
                         android:textSize="@dimen/abc_text_size_body_1_material"/>
 
                     <LinearLayout

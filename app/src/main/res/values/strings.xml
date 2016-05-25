@@ -421,6 +421,9 @@
     <string name="update">Update</string>
     <string name="update_current">Update current ...</string>
     <string name="wallet_information">Wallet information</string>
+    <string name="amount_in">Amount in </string>
+    <string name="ud">UD</string>
+    <string name="time">time</string>
 
 
     <string-array name="node" translatable="false">

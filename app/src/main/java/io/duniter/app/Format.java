@@ -128,7 +128,7 @@ public class Format {
             return result.replace(resultPartToIgnore, "");
         }
 
-        private static String unitCurrency(String currencyName){
+        public static String unitCurrency(String currencyName){
             String[] tab = currencyName.split("_");
             String result ="";
             for(String s:tab){
@@ -357,7 +357,7 @@ public class Format {
             zero = zero.concat("0");
         }
 
-        return String.format(formatDu, amount).concat(" ").concat(context.getResources().getString(R.string.UD));
+        return String.format(formatDu, amount).concat(" ").concat(context.getResources().getString(R.string.ud));
     }
 
 

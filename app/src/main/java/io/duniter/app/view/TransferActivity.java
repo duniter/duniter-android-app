@@ -167,6 +167,23 @@ public class TransferActivity extends ActionBarActivity implements View.OnClickL
         long walletId = getIntent().getExtras().getLong(Application.WALLET_ID,-1);
         setWalletSelected(walletId);
 
+        TextView amount_label = (TextView) findViewById(R.id.amount_label);
+
+        switch (unit){
+            case Application.UNIT_CLASSIC:
+                amount.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_SIGNED);
+                amount_label.setText(amount_label.getText()+" "+Format.Currency.unitCurrency(currency.getName()));
+                break;
+            case Application.UNIT_DU:
+                amount.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+                amount_label.setText(amount_label.getText()+" "+getString(R.string.ud));
+                break;
+            case Application.UNIT_TIME:
+                amount.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+                amount_label.setText(amount_label.getText()+" "+getString(R.string.time));
+                break;
+        }
+
     }
 
     private void init(){
@@ -201,18 +218,6 @@ public class TransferActivity extends ActionBarActivity implements View.OnClickL
         mReceiverPublicKey = (EditText) findViewById(R.id.receiver_public_key);
 
         amount = (EditText) findViewById(R.id.amount);
-
-        switch (unit){
-            case Application.UNIT_CLASSIC:
-                amount.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_SIGNED);
-                break;
-            case Application.UNIT_DU:
-                amount.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
-                break;
-            case Application.UNIT_TIME:
-                amount.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
-                break;
-        }
 
         defaultAmount = (TextView) findViewById(R.id.second_amount);
         spinnerUnit = (Spinner) findViewById(R.id.spinner_unit);
