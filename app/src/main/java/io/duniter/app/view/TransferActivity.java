@@ -12,6 +12,7 @@ import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
@@ -198,6 +199,19 @@ public class TransferActivity extends ActionBarActivity implements View.OnClickL
         mReceiverPublicKey = (EditText) findViewById(R.id.receiver_public_key);
 
         amount = (EditText) findViewById(R.id.amount);
+
+        switch (unit){
+            case Application.UNIT_CLASSIC:
+                amount.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_SIGNED);
+                break;
+            case Application.UNIT_DU:
+                amount.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+                break;
+            case Application.UNIT_TIME:
+                amount.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+                break;
+        }
+
         defaultAmount = (TextView) findViewById(R.id.second_amount);
         spinnerUnit = (Spinner) findViewById(R.id.spinner_unit);
 
@@ -337,6 +351,8 @@ public class TransferActivity extends ActionBarActivity implements View.OnClickL
     }
 
     public void showDialog(){
+
+
         DialogFragment dialog= null;
         if(walletSelected!=null){
             dialog = ConverterDialog.newInstance( dividend,dt, amount, spinnerUnit,currency.getName());

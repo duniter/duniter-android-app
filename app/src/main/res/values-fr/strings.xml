@@ -417,5 +417,6 @@
     <string name="show_unit_relativ">Afficher en unité relative ?</string>
     <string name="update">Mise à jour</string>
     <string name="update_current">Mise à jour en cours ...</string>
+    <string name="wallet_information">Information du portefeuille</string>
 
 </resources>

@@ -226,13 +226,13 @@
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="0.6"
-                            android:inputType="numberDecimal"
                             android:id="@+id/amount"
                             android:selectAllOnFocus="true"
                             android:gravity="end"
                             android:background="@null"
                             android:textSize="@dimen/abc_text_size_headline_material"
-                            android:layout_gravity="center_horizontal"/>
+                            android:layout_gravity="center_horizontal"
+                            android:inputType="numberSigned" />
 
                         <Spinner
                             android:layout_width="0dp"

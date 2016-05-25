@@ -420,6 +420,7 @@
     <string name="show_unit_relativ">Show in relative unit ?</string>
     <string name="update">Update</string>
     <string name="update_current">Update current ...</string>
+    <string name="wallet_information">Wallet information</string>
 
 
     <string-array name="node" translatable="false">

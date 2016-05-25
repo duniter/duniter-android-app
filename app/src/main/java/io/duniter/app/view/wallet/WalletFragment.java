@@ -1,8 +1,11 @@
 package io.duniter.app.view.wallet;
 
+import android.app.AlertDialog;
 import android.app.ListFragment;
 import android.app.LoaderManager;
+import android.app.ProgressDialog;
 import android.content.CursorLoader;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
 import android.content.SharedPreferences;
@@ -83,6 +86,12 @@ public class WalletFragment extends ListFragment
     private MenuItem renewItem;
     private MenuItem revokeItem;
     private MenuItem signItem;
+
+    private boolean needSelf;
+    private boolean needMembership;
+    private boolean needRevoke;
+    private boolean needRenew;
+    private int nbCert;
 
 
     public static WalletFragment newInstance(Long walletId) {
@@ -341,15 +350,39 @@ public class WalletFragment extends ListFragment
     }
 
     private void clickInformation(){
-        if (identityId > 0){
-            Date date = new Date(sigDate * (long)1000);
-            String textDate = getString(R.string.registration_date)
-                    .concat(": ")
-                    .concat(new SimpleDateFormat("EEE dd MMM yyyy").format(date.getTime()));
-            Toast.makeText(getActivity(),textDate,Toast.LENGTH_LONG).show();
-        }else{
-            Toast.makeText(getActivity(),getString(R.string.hasnt_member),Toast.LENGTH_LONG).show();
+        String message = "";
+        if (identity == null && identityId>0) {
+            identity = SqlService.getIdentitySql(getActivity()).getById(identityId);
         }
+        if (needSelf){
+            message += "- Vous pouvez signez votre Portefeuille\n";
+        }
+        if (needMembership){
+            message += "- Vous pouvez rejoindre la monnaie\n";
+        }
+        needSelf = true;
+        needMembership = true;
+        needRenew = false;
+
+        new AlertDialog.Builder(getActivity())
+                .setTitle(getString(R.string.wallet_information))
+                .setMessage("Are you sure you want to delete this entry?")
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        // continue with delete
+                    }
+                })
+                .setIcon(android.R.drawable.ic_dialog_info)
+                .show();
+//        if (identityId > 0){
+//            Date date = new Date(sigDate * (long)1000);
+//            String textDate = getString(R.string.registration_date)
+//                    .concat(": ")
+//                    .concat(new SimpleDateFormat("EEE dd MMM yyyy").format(date.getTime()));
+//            Toast.makeText(getActivity(),textDate,Toast.LENGTH_LONG).show();
+//        }else{
+//            Toast.makeText(getActivity(),getString(R.string.hasnt_member),Toast.LENGTH_LONG).show();
+//        }
     }
 
     private void clickCertification(){
@@ -484,17 +517,15 @@ public class WalletFragment extends ListFragment
             textCertification.setText(text.concat(getString(R.string.certifications)));
         }
 
-        boolean needSelf;
-        boolean needMembership;
-        boolean needRevoke;
-        boolean needRenew;
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
         if(nbRequirements ==-1){
+            nbCert = 0;
             needSelf = true;
             needMembership = true;
             needRevoke = false;
             needRenew = false;
         }else{
+            nbCert = (int)nbRequirements;
             needSelf = false;
             needMembership = membership<=0 && membershipPending <=0;
             needRevoke = membership>0;
