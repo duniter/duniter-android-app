@@ -421,5 +421,10 @@
     <string name="amount_in">Montant en </string>
     <string name="ud">DU</string>
     <string name="time">temps</string>
+    <string name="can_publish_wallet">Vous pouvez publier votre portefeuille.</string>
+    <string name="can_become_member">Vous pouvez devenir membre.</string>
+    <string name="can_renew_membership">Vous pouvez renouveler votre adhésion comme membre.</string>
+    <string name="remeber_ask_certify">Pensez à demander des signatures pour rester membre.</string>
+    <string name="not_important_message">Pas de message important.</string>
 
 </resources>

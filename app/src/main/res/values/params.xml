@@ -2,10 +2,10 @@
 <resources>
     <string name="app_name" translatable="false">Duniter App</string>
     <string name="ucoin" translatable="false">Duniter App</string>
-    <string name="ACCOUNT_TYPE" translatable="false">io.duniter.android</string>
-    <string name="AUTHORITY" translatable="false">io.duniter.app.model.services.dbprovider</string>
+    <string name="ACCOUNT_TYPE" translatable="false">org.duniter.android</string>
+    <string name="AUTHORITY" translatable="false">org.duniter.app.model.services.dbprovider</string>
     <string name="DBNAME" translatable="false">duniter.db</string>
-    <string name="CONTENT_URI" translatable="false">content://io.duniter.app.model.services.dbprovider</string>
+    <string name="CONTENT_URI" translatable="false">content://org.duniter.app.model.services.dbprovider</string>
     <integer name="DBVERSION" translatable="false">1</integer>
 
 </resources>

@@ -4,25 +4,25 @@
     <!-- These settings headers are only used on tablets. -->
 
     <header
-        android:fragment="io.duniter.app.activity.SettingsActivity$GeneralPreferenceFragment"
+        android:fragment="org.duniter.app.activity.SettingsActivity$GeneralPreferenceFragment"
         android:title="@string/pref_header_general" />
     <header
-        android:fragment="io.duniter.app.activity.SettingsActivity$NotificationPreferenceFragment"
+        android:fragment="org.duniter.app.activity.SettingsActivity$NotificationPreferenceFragment"
         android:title="@string/pref_header_notifications" />
     <header
-        android:fragment="io.duniter.app.activity.SettingsActivity$DataSyncPreferenceFragment"
+        android:fragment="org.duniter.app.activity.SettingsActivity$DataSyncPreferenceFragment"
         android:title="@string/pref_header_data_sync" />
 
     <!-- These settings headers are only used on tablets. -->
 
     <header
-        android:fragment="io.duniter.app.activity.SettingsActivity$GeneralPreferenceFragment"
+        android:fragment="org.duniter.app.activity.SettingsActivity$GeneralPreferenceFragment"
         android:title="@string/pref_header_general" />
     <header
-        android:fragment="io.duniter.app.activity.SettingsActivity$NotificationPreferenceFragment"
+        android:fragment="org.duniter.app.activity.SettingsActivity$NotificationPreferenceFragment"
         android:title="@string/pref_header_notifications" />
     <header
-        android:fragment="io.duniter.app.activity.SettingsActivity$DataSyncPreferenceFragment"
+        android:fragment="org.duniter.app.activity.SettingsActivity$DataSyncPreferenceFragment"
         android:title="@string/pref_header_data_sync" />
 
 </preference-headers>

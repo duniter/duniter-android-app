@@ -11,7 +11,7 @@
     <!--android:selectAllOnFocus="true"-->
     <!--android:summary="Please insert your pin"/>-->
 
-    <io.duniter.app.view.dialog.PinPreference
+    <org.duniter.app.view.dialog.PinPreference
         android:key="pin"
         android:title="@string/pin_code"
         android:defaultValue="0000"/>
@@ -28,7 +28,7 @@
         android:entries="@array/list_unit"
         android:entryValues="@array/list_unit_value" />
 
-    <io.duniter.app.view.dialog.NumberPickerPreference
+    <org.duniter.app.view.dialog.NumberPickerPreference
         android:key="decimal"
         android:title="@string/number_digit"
         android:defaultValue="2" />

@@ -21,7 +21,7 @@
             android:textSize="@dimen/abc_text_size_display_1_material" />
     </LinearLayout>
 
-    <io.duniter.app.widget.SlidingTabLayout
+    <org.duniter.app.widget.SlidingTabLayout
         android:id="@+id/sliding_tabs"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

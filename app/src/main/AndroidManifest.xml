@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="io.duniter.app"
+    package="org.duniter.app"
     android:versionCode="8"
     android:versionName="0.8">
     <!--
@@ -22,36 +22,36 @@
 
 
     <application
-        android:name="io.duniter.app.Application"
+        android:name="org.duniter.app.Application"
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme.Base">
 
-        <activity android:name="io.duniter.app.view.InitActivity">
+        <activity android:name="org.duniter.app.view.InitActivity">
             <intent-filter>
                 <category android:name="android.intent.category.LAUNCHER" />
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>
         </activity>
 
-        <provider android:name="io.duniter.app.model.services.DbProvider"
+        <provider android:name="org.duniter.app.model.services.DbProvider"
             android:authorities="@string/AUTHORITY" />
 
         <activity
-            android:name="io.duniter.app.view.connection.ConnectionActivity"
+            android:name="org.duniter.app.view.connection.ConnectionActivity"
             android:label="@string/connection"
             android:screenOrientation="portrait">
         </activity>
 
         <activity
-            android:name="io.duniter.app.view.connection.FirstConnectionActivity"
+            android:name="org.duniter.app.view.connection.FirstConnectionActivity"
             android:label="@string/connection"
             android:screenOrientation="portrait">
         </activity>
 
         <activity
-            android:name="io.duniter.app.view.MainActivity"
+            android:name="org.duniter.app.view.MainActivity"
             android:configChanges="orientation|screenSize"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize">
@@ -64,27 +64,27 @@
         </activity>
 
         <activity
-            android:name="io.duniter.app.view.AddContactActivity"
+            android:name="org.duniter.app.view.AddContactActivity"
             android:label="@string/add_contact"
             android:screenOrientation="portrait">
         </activity>
 
         <activity
-            android:name="io.duniter.app.view.TransferActivity"
+            android:name="org.duniter.app.view.TransferActivity"
             android:label="@string/transfer"
             android:screenOrientation="portrait">
         </activity>
 
         <activity
-            android:name="io.duniter.app.view.FindByQrCode"
+            android:name="org.duniter.app.view.FindByQrCode"
             android:label="@string/qr_code"
             android:screenOrientation="portrait">
         </activity>
 
-        <service android:name="io.duniter.app.Sync"/>
+        <service android:name="org.duniter.app.Sync"/>
 
         <activity
-            android:name="io.duniter.app.AppPreferences"
+            android:name="org.duniter.app.AppPreferences"
             android:label="@string/preference"
             android:screenOrientation="portrait">
         </activity>

@@ -424,6 +424,11 @@
     <string name="amount_in">Amount in </string>
     <string name="ud">UD</string>
     <string name="time">time</string>
+    <string name="can_publish_wallet">You can publish your wallet.</string>
+    <string name="can_become_member">You can become a member.</string>
+    <string name="can_renew_membership">You can renew your membership as member.</string>
+    <string name="remeber_ask_certify">Remember to ask certifcation to remain a member.</string>
+    <string name="not_important_message">No important message.</string>
 
 
     <string-array name="node" translatable="false">
