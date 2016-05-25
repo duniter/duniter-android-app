@@ -1,5 +1,5 @@
-# ucoin-android-app
-uCoin Android client application.
+# Duniter-app
+Duniter Android client application.
 
 Started on december 2014, still in progress... Developers need ! ;o)
 
@@ -44,7 +44,7 @@ sudo apt-get install build-essential libpcre3 libpcre3-dev libtool automake pyth
 	Then
 
 	```
-	git clone https://github.com/ucoin-io/ucoin-android-app.git --recursive
+	git clone https://github.com/duniter/ucoin-android-app.git --recursive
 	cd ucoin-android-app
 	./autogen.sh
 	```
