@@ -18,6 +18,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,8 +29,11 @@ import java.util.Date;
 import io.duniter.app.Application;
 import io.duniter.app.Format;
 import io.duniter.app.R;
+import io.duniter.app.model.Entity.Certification;
+import io.duniter.app.model.Entity.Contact;
 import io.duniter.app.model.Entity.Currency;
 import io.duniter.app.model.Entity.Identity;
+import io.duniter.app.model.Entity.Tx;
 import io.duniter.app.model.Entity.Wallet;
 import io.duniter.app.model.Entity.services.IdentityService;
 import io.duniter.app.model.Entity.services.WalletService;
@@ -40,6 +44,7 @@ import io.duniter.app.technical.callback.CallbackIdentity;
 import io.duniter.app.view.MainActivity;
 import io.duniter.app.view.TransferActivity;
 import io.duniter.app.view.contact.CertificationFragment;
+import io.duniter.app.view.contact.IdentityFragment;
 import io.duniter.app.view.dialog.QrCodeDialogFragment;
 import io.duniter.app.view.wallet.adapter.TxCursorAdapter;
 
@@ -505,5 +510,36 @@ public class WalletFragment extends ListFragment
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
 
+    }
+
+    @Override
+    public void onListItemClick(ListView l, View v, int position, long id) {
+        super.onListItemClick(l, v, position, id);
+
+        Cursor data = (Cursor)getListAdapter().getItem(position);
+
+        String uid = data.getString(data.getColumnIndex(ViewTxAdapter.UID));
+        long currencyId = data.getLong(data.getColumnIndex(ViewTxAdapter.CURRENCY_ID));
+        String publicKey = data.getString(data.getColumnIndex(ViewTxAdapter.PUBLIC_KEY));
+
+
+        if (uid != null && !uid.equals("")) {
+
+            Contact contact = new Contact();
+            if (currency == null){
+                currency = new Currency(currencyId);
+            }
+            contact.setCurrency(currency);
+            contact.setUid(uid);
+            contact.setPublicKey(publicKey);
+            contact.setAlias("");
+            contact.setContact(false);
+
+            if (getActivity() instanceof MainActivity) {
+                Bundle args = new Bundle();
+                args.putSerializable(Application.CONTACT, contact);
+                ((MainActivity) getActivity()).setCurrentFragment(IdentityFragment.newInstance(args));
+            }
+        }
     }
 }
