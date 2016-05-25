@@ -7,7 +7,7 @@
     its name should be the snake case of its main words
     -->
 
-    <string name="welcome_to_ucoin">Bienvenue dans l\'application uCoin!</string>
+    <string name="welcome_to_duniter">Bienvenue dans l\'application Duniter!</string>
     <string name="welcome_description">Regardez l\'état de vos comptes en temps réel.</string>
     <string name="title_activity_account">Compte</string>
 
@@ -31,6 +31,7 @@
     <string name="source_wallet">Source Wallet</string> <!-- traduction inconnu -->
     <string name="receiver_uid">Récepteur uid</string>
     <string name="amount">Montant</string>
+    <string name="amount_dot">Montant : </string>
     <string name="UD">UD</string>
     <string name="universal_dividende">Dividende universel</string>
     <string name="mutual_credit">Crédit mutuel</string>
@@ -156,7 +157,7 @@
     <string name="received">reçu</string>
     <string name="no_peer">Aucun pairs</string>
     <string name="add_peer">Ajouter un pairs</string>
-    <string name="block">block</string>
+    <string name="blockUd">blockUd</string>
     <string name="peer_not_match_currency">Ce pairs ne correspond pas à la monnaie</string>
     <string name="delete_wallet">supprimer le portefeuille</string>
     <string name="create_uid">créer l\'UID</string>
@@ -308,16 +309,6 @@
         <item>2</item>
     </string-array>
 
-    <!--<string-array name="node">-->
-        <!--<item>meta_brouzouf@metab.ucoin.io:9201</item>-->
-        <!--<item>zeta_brouzouf@ucoin.twiced.fr:9101</item>-->
-    <!--</string-array>-->
-
-    <string-array name="node">
-        <item>meta_brouzouf@metab.ucoin.io:9201</item>
-        <!--<item>super_currency@twiced.fr:9330</item>-->
-    </string-array>
-
     <!-- Strings related to rules currency -->
     <string name="rules_add_currency">Ajouter une monnaie</string>
     <string name="rules_preselected_peers">Sélectionnez une monnaie prédefinie :</string>
@@ -409,5 +400,22 @@
     <string name="number_digit">Nombre de décimal</string>
     <string name="protocol_version">Version du protocole</string>
     <string name="app_version">Version de l\'application</string>
+    <string name="self_send">Identification envoyé</string>
+    <string name="self_not_send">L\'identification n\'a pas été envoyé</string>
+    <string name="tx_send">Transaction envoyé</string>
+    <string name="tx_not_send">La transaction n\'a pas été envoyé</string>
+    <string name="join_send">Adhésion envoyé</string>
+    <string name="certify_send">Certification envoyé</string>
+    <string name="join_not_send">L\'adhésion n\'a pas été envoyé</string>
+    <string name="certify_not_send">La certification n\'a pas été envoyé</string>
+    <string name="block">Block:</string>
+    <string name="currency_probleme">Il y a un probleme avec la monnaie, s\'il vous plait contactez un administrateur.</string>
+    <string name="self_at">Self au block </string>
+    <string name="being_validated">En cours de validation</string>
+    <string name="name_curency">Nom de la monnaie</string>
+    <string name="c_actual">C actuel</string>
+    <string name="show_unit_relativ">Afficher en unité relative ?</string>
+    <string name="update">Mise à jour</string>
+    <string name="update_current">Mise à jour en cours ...</string>
 
 </resources>

@@ -15,23 +15,53 @@
             android:id="@+id/day"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="@dimen/abc_text_size_caption_material" />
+            android:textSize="@dimen/abc_text_size_caption_material"
+            android:text="mar. 13"/>
 
         <TextView
             android:id="@+id/hour"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="@dimen/abc_text_size_caption_material" />
+            android:textSize="@dimen/abc_text_size_caption_material"
+            android:text="13:44:06" />
 
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/comment"
+    <LinearLayout
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
         android:gravity="start"
-        android:textSize="@dimen/abc_text_size_caption_material" />
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_person_primary_18dp"/>
+
+            <TextView
+                android:id="@+id/pubkey"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:layout_marginStart="8dp"
+                android:text = "publicKey"/>
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/comment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/abc_text_size_caption_material"
+            android:text="blabla"/>
+
+    </LinearLayout>
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -45,14 +75,16 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="end"
-            android:textSize="@dimen/abc_text_size_title_material" />
+            android:textSize="@dimen/abc_text_size_title_material"
+            android:text="- 1000 TN"/>
 
         <TextView
             android:id="@+id/second_amount"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="end"
-            android:textSize="@dimen/abc_text_size_caption_material" />
+            android:textSize="@dimen/abc_text_size_caption_material"
+            android:text="-0,03 UD" />
 
 
     </LinearLayout>

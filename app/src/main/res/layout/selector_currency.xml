@@ -44,7 +44,7 @@
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"
             android:inputType="number"
-            android:maxLength="4"
+            android:maxLength="5"
             android:hint="port"
             android:selectAllOnFocus="true"/>
 

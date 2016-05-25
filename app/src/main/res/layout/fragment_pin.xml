@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:background="@color/primary"
     android:orientation="vertical"
-    tools:context="io.ucoin.ucoin.PinFragment">
+    tools:context="io.duniter.ucoin.PinFragment">
 
     <TextView
         android:layout_width="wrap_content"
@@ -12,7 +12,7 @@
         android:layout_gravity="center"
         android:gravity="center"
         android:layout_marginTop="24dp"
-        android:text="@string/pin_code_dot"
+        android:text="@string/pin_code"
         android:textColor="@color/textPrimary"
         android:textSize="@dimen/abc_text_size_display_2_material" />
 

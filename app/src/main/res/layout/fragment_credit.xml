@@ -1,7 +1,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
     <LinearLayout
         android:id="@+id/wrap_content"
         android:layout_width="match_parent"
@@ -14,13 +14,13 @@
             style="@style/headline"/>
 
         <TextView
-            android:text="blavenie - github.com/blavenie"
+            android:text="blavenie - https://github.com/blavenie"
             style="@style/CreditLabel"/>
         <TextView
-            android:text="mmpio - github.com/mmpio"
+            android:text="mmpio - https://github.com/mmpio"
             style="@style/CreditLabel"/>
         <TextView
-            android:text="naivalf27 - github.com/naivalf27"
+            android:text="naivalf27 - https://github.com/naivalf27"
             style="@style/CreditLabel"/>
 
         <TextView
@@ -28,7 +28,7 @@
             style="@style/headline"/>
 
         <TextView
-            android:text="github.com/ucoin-io/ucoin-android-app"
+            android:text="https://github.com/duniter/ucoin-android-app.git"
             style="@style/CreditLabel"/>
 
         <TextView
@@ -52,7 +52,7 @@
             style="@style/headline"/>
 
         <TextView
-            android:text="v0.1"
+            android:text="v0.2"
             style="@style/CreditLabel"/>
 
     </LinearLayout>

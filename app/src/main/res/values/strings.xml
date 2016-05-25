@@ -7,7 +7,7 @@
     its name should be the snake case of its main words
     -->
 
-    <string name="welcome_to_ucoin">Welcome to uCoin app !</string>
+    <string name="welcome_to_duniter">Welcome to Duniter app !</string>
     <string name="welcome_description">Look at the state of yours accounts in real time.</string>
     <string name="title_activity_account">Account</string>
 
@@ -31,8 +31,9 @@
     <string name="source_wallet">Source Wallet</string>
     <string name="receiver_uid">Receiver uid</string>
     <string name="amount">Amount</string>
+    <string name="amount_dot">Amount : </string>
     <string name="UD">UD</string>
-    <string name="universal_dividende">Universal Dividende</string>
+    <string name="universal_dividende">Universal dividende</string>
     <string name="mutual_credit">Mutual Credit</string>
     <string name="unit_coins_label">coins</string>
     <string name="wallet">Wallet</string>
@@ -161,7 +162,7 @@
     <string name="received">received</string>
     <string name="no_peer">no peer</string>
     <string name="add_peer">Add peer</string>
-    <string name="block">block</string>
+    <string name="blockUd">blockUd</string>
     <string name="peer_not_match_currency">This peer does not match the currency</string>
     <string name="delete_wallet">delete wallet</string>
     <string name="create_uid">create UID</string>
@@ -276,7 +277,7 @@
     <string name="self_certification_sent">Inscription sent</string>
     <string name="revocation_sent">Revocation sent</string>
     <string name="certification_sent">Certification sent</string>
-    <string name="current_block">Current block</string>
+    <string name="current_block">Current blockUd</string>
     <string name="certification">Certification</string>
     <string name="certifications">Certifications</string>
     <string name="no_connection">No connection</string>
@@ -313,16 +314,6 @@
         <item>2</item>
     </string-array>
 
-    <!--<string-array name="node">-->
-    <!--<item>meta_brouzouf@metab.ucoin.io:9201</item>-->
-    <!--<item>zeta_brouzouf@ucoin.twiced.fr:9101</item>-->
-    <!--</string-array>-->
-
-    <string-array name="node">
-        <item>meta_brouzouf@metab.ucoin.io:9201</item>
-        <!--<item>super_currency@twiced.fr:9330</item>-->
-    </string-array>
-
     <!-- Strings related to rules currency -->
     <string name="rules_add_currency">Add currency</string>
     <string name="rules_preselected_peers">Select a predefine currency:</string>
@@ -350,7 +341,7 @@
     <string name="rules_step_max">Maximum distance between each WoT member and a newcomer</string>
     <string name="rules_median_time_blocks">Number of blocks used for calculating median time.</string>
     <string name="rules_median_time_blocks_value">%d blocks</string>
-    <string name="rules_avg_gen_time">The average time for writing 1 block (wished time)</string>
+    <string name="rules_avg_gen_time">The average time for writing 1 blockUd (wished time)</string>
     <string name="rules_dt_diff_eval">The number of blocks required to evaluate again PoWMin value</string>
     <string name="rules_dt_diff_eval_value">%d blocks</string>
     <string name="rules_blocks_rot">The number of previous blocks to check for personalized difficulty</string>
@@ -412,5 +403,30 @@
     <string name="number_digit">Number of Digit</string>
     <string name="protocol_version">Protocol version</string>
     <string name="app_version">Application version</string>
+    <string name="self_send">Identification sent</string>
+    <string name="tx_send">Transaction sent</string>
+    <string name="self_not_send">The identification was not sent</string>
+    <string name="tx_not_send">The transaction was not sent</string>
+    <string name="join_send">Join sent</string>
+    <string name="certify_send">Certification sent</string>
+    <string name="join_not_send">The join was not sent</string>
+    <string name="certify_not_send">The certification was not sent</string>
+    <string name="block">Block:</string>
+    <string name="currency_probleme">There is a problem with the currency , please contact an administrator.</string>
+    <string name="self_at">Self at block </string>
+    <string name="being_validated">Being validated</string>
+    <string name="name_curency">Currency name</string>
+    <string name="c_actual">C actual</string>
+    <string name="show_unit_relativ">Show in relative unit ?</string>
+    <string name="update">Update</string>
+    <string name="update_current">Update current ...</string>
+
+
+    <string-array name="node" translatable="false">
+        <!--<item>meta_brouzouf@metab.ucoin.io:9201</item>-->
+        <item>test_net@twiced.fr:9330</item>
+        <!--<item>eis@test-net.duniter.fr:80</item>-->
+    </string-array>
+
 
 </resources>

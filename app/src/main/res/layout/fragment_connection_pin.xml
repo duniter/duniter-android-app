@@ -19,7 +19,7 @@
         android:id="@+id/text1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/welcome_to_ucoin"
+        android:text="@string/welcome_to_duniter"
         android:layout_below="@+id/textView5"
         android:gravity="center"
         android:layout_centerHorizontal="true"

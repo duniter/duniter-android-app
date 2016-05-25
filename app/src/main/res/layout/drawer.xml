@@ -133,7 +133,8 @@
                 android:paddingRight="16dp"
                 android:text="@string/currencies"
                 android:textColor="#000"
-                android:textSize="@dimen/abc_text_size_body_2_material" />
+                android:textSize="@dimen/abc_text_size_body_2_material"
+                android:visibility="gone"/>
 
             <TextView
                 android:id="@+id/drawer_rules"
@@ -165,7 +166,8 @@
                 android:paddingRight="16dp"
                 android:text="@string/peers"
                 android:textColor="#000"
-                android:textSize="@dimen/abc_text_size_body_2_material" />
+                android:textSize="@dimen/abc_text_size_body_2_material"
+                android:visibility="gone"/>
 
             <TextView
                 android:id="@+id/drawer_blocks"
@@ -179,6 +181,22 @@
                 android:paddingLeft="16dp"
                 android:paddingRight="16dp"
                 android:text="@string/blocks"
+                android:textColor="#000"
+                android:textSize="@dimen/abc_text_size_body_2_material"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/drawer_sources"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@drawable/list_item_background_selector"
+                android:drawablePadding="48dp"
+                android:drawableStart="@drawable/ic_label_grey600_24dp"
+                android:gravity="center_vertical"
+                android:paddingEnd="16dp"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:text="@string/sources"
                 android:textColor="#000"
                 android:textSize="@dimen/abc_text_size_body_2_material"
                 android:visibility="gone" />

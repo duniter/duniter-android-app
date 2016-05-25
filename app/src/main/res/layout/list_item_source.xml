@@ -7,6 +7,49 @@
     android:paddingRight="16dp">
 
 
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/txt_type"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:text="Type : "
+            android:textSize="@dimen/abc_text_size_caption_material" />
+
+        <TextView
+            android:id="@+id/type"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@+id/txt_type"
+            android:layout_toEndOf="@+id/txt_type"
+            android:textSize="@dimen/abc_text_size_caption_material"
+            android:text="D"/>
+
+
+
+        <TextView
+            android:id="@+id/noffset"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:textSize="@dimen/abc_text_size_caption_material"
+            android:text="4256"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@+id/noffset"
+            android:layout_toStartOf="@+id/noffset"
+            android:text="Noffset : "
+            android:textSize="@dimen/abc_text_size_caption_material" />
+    </RelativeLayout>
+
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
@@ -16,46 +59,58 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/amount"
+            android:text="Identifier : "
+            android:textSize="@dimen/abc_text_size_caption_material" />
+
+        <TextView
+            android:id="@+id/identifier"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/abc_text_size_caption_material"
+            android:text="efbdkjgfsdijghsdogjsfogu" />
+    </LinearLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/txt_amount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:text="@string/amount_dot"
             android:textSize="@dimen/abc_text_size_caption_material" />
 
         <TextView
             android:id="@+id/amount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="@dimen/abc_text_size_caption_material" />
-    </LinearLayout>
+            android:layout_toRightOf="@+id/txt_amount"
+            android:layout_toEndOf="@+id/txt_amount"
+            android:textSize="@dimen/abc_text_size_caption_material"
+            android:text="100025"/>
 
-    <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
 
+
+        <TextView
+            android:id="@+id/base"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:textSize="@dimen/abc_text_size_caption_material"
+            android:text="0"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/block"
+            android:layout_toLeftOf="@+id/base"
+            android:layout_toStartOf="@+id/base"
+            android:text="Base : "
             android:textSize="@dimen/abc_text_size_caption_material" />
-
-        <TextView
-            android:id="@+id/number"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="@dimen/abc_text_size_caption_material" />
-    </LinearLayout>
-
-    <TextView
-        android:id="@+id/fingerprint"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="@dimen/abc_text_size_caption_material" />
-
-
-    <TextView
-        android:id="@+id/state"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="@dimen/abc_text_size_caption_material" />
+    </RelativeLayout>
 
 </LinearLayout>

@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">uCoin App</string>
-    <string name="ucoin">uCoin App</string>
-    <string name="ACCOUNT_TYPE">io.ucoin.android</string>
-    <string name="AUTHORITY">io.ucoin.android.provider</string>
-    <string name="DBNAME">ucoin.db</string>
-    <integer name="DBVERSION">9</integer>
+    <string name="app_name" translatable="false">Duniter App</string>
+    <string name="ucoin" translatable="false">Duniter App</string>
+    <string name="ACCOUNT_TYPE" translatable="false">io.duniter.android</string>
+    <string name="AUTHORITY" translatable="false">io.duniter.app.model.services.dbprovider</string>
+    <string name="DBNAME" translatable="false">duniter.db</string>
+    <string name="CONTENT_URI" translatable="false">content://io.duniter.app.model.services.dbprovider</string>
+    <integer name="DBVERSION" translatable="false">1</integer>
 
 </resources>
