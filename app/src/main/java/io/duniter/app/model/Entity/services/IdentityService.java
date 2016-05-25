@@ -9,6 +9,7 @@ import org.apache.http.message.BasicNameValuePair;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import io.duniter.app.R;
 import io.duniter.app.enumeration.CertificationType;
@@ -20,12 +21,14 @@ import io.duniter.app.model.Entity.Identity;
 import io.duniter.app.model.Entity.Requirement;
 import io.duniter.app.model.Entity.json.CertifyJson;
 import io.duniter.app.model.Entity.json.LookupJson;
+import io.duniter.app.model.Entity.json.MemberJson;
 import io.duniter.app.model.Entity.json.RequirementJson;
 import io.duniter.app.model.EntityWeb.CertifiedByWeb;
 import io.duniter.app.model.EntityWeb.CertifierOfWeb;
 import io.duniter.app.model.EntityWeb.CertifyWeb;
 import io.duniter.app.model.EntityWeb.JoinWeb;
 import io.duniter.app.model.EntityWeb.LookupWeb;
+import io.duniter.app.model.EntityWeb.MemberWeb;
 import io.duniter.app.model.EntityWeb.RequirementWeb;
 import io.duniter.app.model.EntityWeb.SelfWeb;
 import io.duniter.app.model.document.CertifyDoc;
@@ -37,6 +40,7 @@ import io.duniter.app.technical.callback.CallbackBlock;
 import io.duniter.app.technical.callback.CallbackCertify;
 import io.duniter.app.technical.callback.CallbackIdentity;
 import io.duniter.app.technical.callback.CallbackLookup;
+import io.duniter.app.technical.callback.CallbackMap;
 import io.duniter.app.technical.callback.CallbackRequirement;
 import io.duniter.app.technical.crypto.AddressFormatException;
 
@@ -58,6 +62,21 @@ public class IdentityService {
                     }
                 }else{
                     Log.d("Lookup","error code:"+code);
+                }
+            }
+        });
+    }
+
+    public static void getMembers(Context context, final Currency currency, final CallbackMap callback){
+        MemberWeb memberWeb = new MemberWeb(context,currency);
+        memberWeb.getData(new WebService.WebServiceInterface() {
+            @Override
+            public void getDataFinished(int code, String response) {
+                if (code == 200){
+                    Map<String,String> map = MemberJson.fromJson(response);
+                    if (callback != null){
+                        callback.methode(map);
+                    }
                 }
             }
         });

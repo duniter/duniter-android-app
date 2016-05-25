@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import io.duniter.app.enumeration.TxState;
 import io.duniter.app.model.Entity.Tx;
@@ -48,7 +49,7 @@ public class TxJson implements Serializable {
         return result;
     }
 
-    public static List<Tx> fromTx(TxJson sourceJson, Wallet wallet){
+    public static List<Tx> fromTx(TxJson sourceJson, Wallet wallet,Map<String,String> mapMember){
         HashMap<String, Tx> txs = new HashMap<>();
         for (History.Elem e : sourceJson.history.sent){
             Tx tx = new Tx();
@@ -56,6 +57,8 @@ public class TxJson implements Serializable {
             for (History.Output o : e.outputs){
                 if (o.getPublicKey()!=null && !o.getPublicKey().equals(sourceJson.pubkey)){
                     tx.setPublicKey(o.getPublicKey());
+                    String uid = mapMember.containsKey(tx.getPublicKey()) ? mapMember.get(tx.getPublicKey()) : "";
+                    tx.setUid(uid);
                     amount = amount.subtract(new BigInteger(o.amount));
                 }
             }
@@ -84,6 +87,8 @@ public class TxJson implements Serializable {
                     }
                 }
                 tx.setPublicKey(e.issuers[0]);
+                String uid = mapMember.containsKey(tx.getPublicKey()) ? mapMember.get(tx.getPublicKey()) : "";
+                tx.setUid(uid);
                 tx.setAmount(amount);
                 tx.setCurrency(wallet.getCurrency());
                 tx.setWallet(wallet);
@@ -104,6 +109,8 @@ public class TxJson implements Serializable {
             for (History.Output o : e.outputs){
                 if (o.getPublicKey()!=null && !o.getPublicKey().equals(sourceJson.pubkey)){
                     tx.setPublicKey(o.getPublicKey());
+                    String uid = mapMember.containsKey(tx.getPublicKey()) ? mapMember.get(tx.getPublicKey()) : "";
+                    tx.setUid(uid);
                     amount = amount.subtract(new BigInteger(o.amount));
                 }
             }
@@ -132,6 +139,8 @@ public class TxJson implements Serializable {
                     }
                 }
                 tx.setPublicKey(e.issuers[0]);
+                String uid = mapMember.containsKey(tx.getPublicKey()) ? mapMember.get(tx.getPublicKey()) : "";
+                tx.setUid(uid);
                 tx.setAmount(amount);
                 tx.setCurrency(wallet.getCurrency());
                 tx.setWallet(wallet);

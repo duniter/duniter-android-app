@@ -30,6 +30,7 @@ public class TxCursorAdapter extends CursorAdapter {
     private int currencyNameIndex;
     private int amountIndex;
     private int publicKeyIndex;
+    private int uidIndex;
     private int dtIndex;
     private int dividendIndex;
     private int dividendThenIndex;
@@ -82,7 +83,13 @@ public class TxCursorAdapter extends CursorAdapter {
     public void bindView(View view, Context context, Cursor cursor) {
         ViewHolder holder = (ViewHolder) view.getTag();
 
-        holder.publicKey.setText(Format.minifyPubkey(cursor.getString(publicKeyIndex)));
+//        holder.publicKey.setText(Format.minifyPubkey(cursor.getString(publicKeyIndex)));
+        String uid = cursor.getString(uidIndex);
+        if (uid == null || uid.equals("")){
+            holder.publicKey.setText(Format.minifyPubkey(cursor.getString(publicKeyIndex)));
+        }else{
+            holder.publicKey.setText(uid);
+        }
 
         Long time = cursor.getLong(timeIndex);
         Date date;
@@ -137,6 +144,7 @@ public class TxCursorAdapter extends CursorAdapter {
         timeIndex = newCursor.getColumnIndex(ViewTxAdapter.TIME);
         amountIndex = newCursor.getColumnIndex(ViewTxAdapter.AMOUNT);
         publicKeyIndex = newCursor.getColumnIndex(ViewTxAdapter.PUBLIC_KEY);
+        uidIndex = newCursor.getColumnIndex(ViewTxAdapter.UID);
         currencyNameIndex = newCursor.getColumnIndex(ViewTxAdapter.CURRENCY_NAME);
         dtIndex = newCursor.getColumnIndex(ViewTxAdapter.DT);
         dividendIndex = newCursor.getColumnIndex(ViewTxAdapter.LAST_UD);

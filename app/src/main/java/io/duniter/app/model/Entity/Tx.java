@@ -19,6 +19,7 @@ public class Tx implements Serializable{
     private String hash;
     private long locktime;
     private String state;
+    private String uid;
 
     public Currency getCurrency() {
         return currency;
@@ -125,5 +126,13 @@ public class Tx implements Serializable{
         if (hash != null ? !hash.equals(tx.hash) : tx.hash != null) return false;
         return state != null ? state.equals(tx.state) : tx.state == null;
 
+    }
+
+    public void setUid(String uid) {
+        this.uid = uid;
+    }
+
+    public String getUid() {
+        return uid;
     }
 }

@@ -90,6 +90,7 @@ public class TxSql extends AbstractSql<Tx> {
                 TxTable.STATE + TEXT + NOTNULL + COMMA +
                 TxTable.AMOUNT + TEXT + NOTNULL + " DEFAULT \"0\"" + COMMA +
                 TxTable.PUBLIC_KEY + TEXT + NOTNULL + COMMA +
+                TxTable.UID + TEXT + COMMA +
                 TxTable.TIME + INTEGER + COMMA +
                 TxTable.BLOCK_NUMBER + INTEGER + COMMA +
                 TxTable.COMMENT + TEXT + COMMA +
@@ -111,6 +112,7 @@ public class TxSql extends AbstractSql<Tx> {
         int stateIndex = cursor.getColumnIndex(TxTable.STATE);
         int amountIndex = cursor.getColumnIndex(TxTable.AMOUNT);
         int publicKeyIndex = cursor.getColumnIndex(TxTable.PUBLIC_KEY);
+        int uidIndex = cursor.getColumnIndex(TxTable.UID);
         int timeIndex = cursor.getColumnIndex(TxTable.TIME);
         int blockNumberIndex = cursor.getColumnIndex(TxTable.BLOCK_NUMBER);
         int commentIndex = cursor.getColumnIndex(TxTable.COMMENT);
@@ -125,6 +127,7 @@ public class TxSql extends AbstractSql<Tx> {
         tx.setState(cursor.getString(stateIndex));
         tx.setAmount(new BigInteger(cursor.getString(amountIndex)));
         tx.setPublicKey(cursor.getString(publicKeyIndex));
+        tx.setUid(cursor.getString(uidIndex));
         tx.setTime(cursor.getLong(timeIndex));
         tx.setBlockNumber(cursor.getLong(blockNumberIndex));
         tx.setComment(cursor.getString(commentIndex));
@@ -143,6 +146,7 @@ public class TxSql extends AbstractSql<Tx> {
         values.put(TxTable.STATE,entity.getState());
         values.put(TxTable.AMOUNT, entity.getAmount().toString());
         values.put(TxTable.PUBLIC_KEY, entity.getPublicKey());
+        values.put(TxTable.UID, entity.getUid());
         values.put(TxTable.TIME, entity.getTime());
         values.put(TxTable.BLOCK_NUMBER, entity.getBlockNumber());
         values.put(TxTable.COMMENT, entity.getComment());
@@ -160,6 +164,7 @@ public class TxSql extends AbstractSql<Tx> {
         public static final String STATE = "state";
         public static final String AMOUNT = "amount";
         public static final String PUBLIC_KEY = "public_Key";
+        public static final String UID = "uid";
         public static final String TIME = "time";
         public static final String BLOCK_NUMBER = "block_number";
         public static final String COMMENT = "comment";

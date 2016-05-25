@@ -13,6 +13,7 @@ import org.apache.http.message.BasicNameValuePair;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -31,6 +32,7 @@ import io.duniter.app.model.document.TxDoc;
 import io.duniter.app.model.services.SqlService;
 import io.duniter.app.model.services.WebService;
 import io.duniter.app.technical.callback.Callback;
+import io.duniter.app.technical.callback.CallbackMap;
 import io.duniter.app.technical.callback.CallbackRequirement;
 import io.duniter.app.technical.callback.CallbackSource;
 import io.duniter.app.technical.callback.CallbackTx;
@@ -159,6 +161,7 @@ public class WalletService {
         private List<String[]> listSourcePending;
         private List<Source> listSource;
         private List<Tx> listTx;
+        private Map<String,String> mapMember;
         private Identity identity;
         private Requirement requirement;
 
@@ -170,6 +173,7 @@ public class WalletService {
             this.listSource = new ArrayList<>();
             this.listSourcePending = new ArrayList<>();
             this.listTx = new ArrayList<>();
+            this.mapMember=new HashMap<>();
             this.requirement = null;
             this.identity = null;
         }
@@ -185,12 +189,22 @@ public class WalletService {
         }
 
         public void getTxs(){
-            TxService.getListTx(context, wallet, new CallbackTx() {
+            TxService.getListTx(context, wallet, mapMember, new CallbackTx() {
                 @Override
                 public void methode(List<Tx> txList,List<String[]> lsp) {
                     listTx = txList;
                     listSourcePending = lsp;
                     getRequirements();
+                }
+            });
+        }
+
+        public void getMembers(){
+            IdentityService.getMembers(context, wallet.getCurrency(), new CallbackMap() {
+                @Override
+                public void methode(Map map) {
+                    mapMember = map;
+                    getSources();
                 }
             });
         }
@@ -217,7 +231,7 @@ public class WalletService {
         @Override
         protected Void doInBackground(Void... message) {
             Log.d("Update wallet","-------START------");
-            getSources();
+            getMembers();
             return null;
         }
     }

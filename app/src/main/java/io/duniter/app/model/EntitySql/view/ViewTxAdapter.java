@@ -19,6 +19,7 @@ public class ViewTxAdapter implements BaseColumns, ViewInterface {
     public static final String VIEW_NAME = "view_tx_adapter";
     public static final String WALLET_ID = "wallet_id";
     public static final String PUBLIC_KEY = "public_key";
+    public static final String UID = "uid";
     public static final String AMOUNT = "amount";
     public static final String COMMENT = "comment";
     public static final String TIME = "time";
@@ -35,6 +36,7 @@ public class ViewTxAdapter implements BaseColumns, ViewInterface {
                 TxTable.TABLE_NAME + DOT + TxTable._ID + AS + _ID + COMMA +
                 TxTable.TABLE_NAME + DOT + TxTable.WALLET_ID + AS + WALLET_ID + COMMA +
                 TxTable.TABLE_NAME + DOT + TxTable.PUBLIC_KEY + AS + PUBLIC_KEY + COMMA +
+                TxTable.TABLE_NAME + DOT + TxTable.UID + AS + UID + COMMA +
                 TxTable.TABLE_NAME + DOT + TxTable.AMOUNT + AS + AMOUNT + COMMA +
                 TxTable.TABLE_NAME + DOT + TxTable.TIME + AS + TIME + COMMA +
                 TxTable.TABLE_NAME + DOT + TxTable.COMMENT + AS + COMMENT + COMMA +
