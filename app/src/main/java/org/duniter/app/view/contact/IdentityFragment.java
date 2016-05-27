@@ -9,8 +9,10 @@ import android.content.CursorLoader;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -48,6 +50,7 @@ import org.duniter.app.technical.callback.CallbackLookup;
 import org.duniter.app.technical.callback.CallbackRequirement;
 import org.duniter.app.view.MainActivity;
 import org.duniter.app.view.TransferActivity;
+import org.duniter.app.view.dialog.InfoDialogFragment;
 import org.duniter.app.view.wallet.adapter.TxCursorAdapter;
 
 public class IdentityFragment extends ListFragment
@@ -74,6 +77,7 @@ public class IdentityFragment extends ListFragment
     private Currency currency;
 
     private TextView textCertification;
+    private TextView textInformation;
     private Spinner spinner;
 
     private int position = 0;
@@ -108,48 +112,12 @@ public class IdentityFragment extends ListFragment
         outState.putSerializable(Application.CONTACT, getArguments().getSerializable(Application.CONTACT));
     }
 
-//    private void updateUI(int type,Intent intent) {
-//        switch (type){
-//            case WOT_REQUIEREMENTS:
-//                Log.d(TAG, "reception requierements");
-//                WotRequirements requirements = (WotRequirements) intent.getSerializableExtra(RequierementsService.WOT_REQUIEREMENTS);
-//                updateRequirements(requirements);
-//                break;
-//            default:
-//                break;
-//        }
-//    }
-//
-//    private void updateRequirements(WotRequirements requirements){
-//        identityContact.setRequirements(requirements);
-//
-//        UcoinCurrency currency = new Currency(getActivity(),identityContact.getCurrencyId());
-//        int minimum = currency.sigQty();
-//        int number = identityContact.getRequirements().identities[0].certifications.length;
-//        textCertification.setText(String.valueOf(number));
-//        if(minimum>number){
-//            textCertification.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_certification_red, 0, 0);
-//            textCertification.setTextColor(getResources().getColor(R.color.red));
-//            icon.setImageResource(R.drawable.ic_no_member);
-//        }else{
-//            textCertification.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_certification_green, 0, 0);
-//            textCertification.setTextColor(getResources().getColor(R.color.green));
-//            icon.setImageResource(R.drawable.ic_member);
-//        }
-//        String text = textCertification.getText().toString();
-//        if(number<=1) {
-//            textCertification.setText(text + " " + getResources().getString(R.string.certification));
-//        }else{
-//
-//            textCertification.setText(text + " " + getResources().getString(R.string.certifications));
-//        }
-//    }
-
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         setHasOptionsMenu(true);
         ((MainActivity) getActivity()).setDrawerIndicatorEnabled(false);
+        Application.hideKeyboard(getActivity(),view);
 
         init(view);
 
@@ -236,6 +204,7 @@ public class IdentityFragment extends ListFragment
         alias = (TextView) view.findViewById(R.id.alias);
         publicKey = (TextView) view.findViewById(R.id.public_key);
         textCertification = (TextView) view.findViewById(R.id.txt_certification);
+        textInformation = (TextView) view.findViewById(R.id.txt_information);
         icon = (ImageView) view.findViewById(R.id.icon_member);
 
         mSwipeLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_layout);
@@ -251,7 +220,8 @@ public class IdentityFragment extends ListFragment
     private void updateContact(){
         IdentityService.getRequirements(getActivity(), currency, contact.getPublicKey(), new CallbackRequirement() {
             @Override
-            public void methode(Requirement requirement) {
+            public void methode(Requirement req) {
+                requirement = req;
                 updateRequirements(currency.getSigQty().intValue(),requirement.getNumberCertification(),requirement.getMembershipExpiresIn());
             }
         });
@@ -264,7 +234,6 @@ public class IdentityFragment extends ListFragment
     }
 
     private void updateRequirements(int currencySigQty, long nbRequirements, long membership){
-        textCertification.setText(String.valueOf(nbRequirements));
         if(currencySigQty>nbRequirements || membership<=0){
             textCertification.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_certification_red, 0, 0);
             textCertification.setTextColor(getResources().getColor(R.color.red));
@@ -274,13 +243,14 @@ public class IdentityFragment extends ListFragment
             textCertification.setTextColor(getResources().getColor(R.color.green));
             icon.setImageResource(R.drawable.ic_member);
         }
-        String text = textCertification.getText().toString().concat(" ");
-        if(nbRequirements<=1) {
-            textCertification.setText(text.concat(getString(R.string.certification)));
-        }else{
 
-            textCertification.setText(text.concat(getString(R.string.certifications)));
+        String text;
+        if(nbRequirements<=1) {
+            text = String.format(getString(R.string.Y_certification),String.valueOf(nbRequirements));
+        }else{
+            text = String.format(getString(R.string.Y_certifications),String.valueOf(nbRequirements));
         }
+        textCertification.setText(text);
     }
 
     public void actionContact(){
@@ -438,8 +408,10 @@ public class IdentityFragment extends ListFragment
     }
 
     private void clickInformation(){
-        if(requirement != null){
-            Toast.makeText(getActivity(),requirement.getSelfBlockUid(),Toast.LENGTH_LONG).show();
+        if (requirement!=null) {
+            int number = Integer.valueOf(requirement.getSelfBlockUid().substring(0, requirement.getSelfBlockUid().indexOf("-")));
+            InfoDialogFragment dial = InfoDialogFragment.newInstance(false, currency, null, number);
+            dial.show(getFragmentManager(), InfoDialogFragment.class.getName());
         }
     }
 

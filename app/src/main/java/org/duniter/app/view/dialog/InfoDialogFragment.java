@@ -69,20 +69,22 @@ public class InfoDialogFragment extends DialogFragment implements AdapterView.On
         final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
         LayoutInflater inflater = getActivity().getLayoutInflater();
-        final View view = inflater.inflate(R.layout.dialog_fragment_info, null);
+        int layout = isWallet ? R.layout.dialog_fragment_info : R.layout.dialog_fragment_info_contact;
+        final View view = inflater.inflate(layout, null);
         builder.setView(view);
         builder.setTitle(getString(R.string.information));
         builder.setIcon(R.drawable.ic_info);
 
-//        text = (TextView) view.findViewById(R.id.text);
-        listview = (ListView) view.findViewById(R.id.list);
-        listview.setOnItemClickListener(this);
+        if (isWallet) {
+            listview = (ListView) view.findViewById(R.id.list);
+            listview.setOnItemClickListener(this);
+
+            ArrayAdapter adapter = new ArrayAdapter(getActivity(), android.R.layout.simple_list_item_1, list);
+            listview.setAdapter(adapter);
+        }
+
         progressBar = (ProgressBar) view.findViewById(R.id.progressBar);
         date = (TextView) view.findViewById(R.id.date);
-
-        ArrayAdapter adapter = new ArrayAdapter(getActivity(),android.R.layout.simple_list_item_1,list);
-        listview.setAdapter(adapter);
-//        text.setText(string);
 
         BlockService.getBlock(getActivity(), currency, number, new CallbackBlock() {
             @Override
@@ -92,7 +94,6 @@ public class InfoDialogFragment extends DialogFragment implements AdapterView.On
                 date.setVisibility(View.VISIBLE);
             }
         });
-
 
         builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
             @Override

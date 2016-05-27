@@ -100,10 +100,11 @@
                 android:orientation="vertical">
 
                 <TextView
+                    android:id="@+id/txt_information"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:gravity="center_horizontal"
-                    android:drawableTop="@drawable/ic_info_grey"
+                    android:drawableTop="@drawable/ic_info"
                     android:layout_gravity="center_horizontal"
                     android:text="Info"/>
 
