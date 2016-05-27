@@ -40,11 +40,12 @@
             style="@style/CreditLabel"/>
 
         <TextView
-            android:text="@string/app_version"
+            android:text="@string/application_version"
             style="@style/headline"/>
 
         <TextView
-            android:text="v0.9"
+            android:id="@+id/version"
+            android:text=""
             style="@style/CreditLabel"/>
 
         <TextView

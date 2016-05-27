@@ -2,6 +2,8 @@ package org.duniter.app.view.connection.pin;
 
 import android.app.Fragment;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
@@ -9,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -54,6 +57,13 @@ public class PinFragment extends Fragment{
         this.code1 = "";
 
         this.holder = new ViewHolder(view);
+
+        try {
+            PackageInfo pInfo = getActivity().getPackageManager().getPackageInfo(getActivity().getPackageName(), 0);
+            ((TextView)view.findViewById(R.id.version)).setText("v"+pInfo.versionName);
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
 
         initPin();
     }

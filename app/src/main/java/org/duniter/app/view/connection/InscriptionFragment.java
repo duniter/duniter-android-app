@@ -1,6 +1,8 @@
 package org.duniter.app.view.connection;
 
 import android.app.Fragment;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -73,6 +75,13 @@ public class InscriptionFragment extends Fragment implements View.OnClickListene
         mConfirmPassword.setTypeface(Typeface.DEFAULT);
         btInscription = (Button) view.findViewById(R.id.bt_inscription);
         btInscription.setOnClickListener(this);
+
+        try {
+            PackageInfo pInfo = getActivity().getPackageManager().getPackageInfo(getActivity().getPackageName(), 0);
+            ((TextView)view.findViewById(R.id.version)).setText("v"+pInfo.versionName);
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
 
         selectorCurrencyView = new SelectorCurrencyView(true,getActivity(), view.findViewById(R.id.selector_currency), new SelectorCurrencyView.Action() {
             @Override

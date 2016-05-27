@@ -1,11 +1,14 @@
 package org.duniter.app.view.connection;
 
 import android.app.Fragment;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 
 import org.duniter.app.R;
 
@@ -38,6 +41,13 @@ public class InitFragment extends Fragment implements View.OnClickListener {
 
         Button btConnection = (Button) view.findViewById(R.id.bt_connection);
         Button btInscription = (Button) view.findViewById(R.id.bt_inscription);
+
+        try {
+            PackageInfo pInfo = getActivity().getPackageManager().getPackageInfo(getActivity().getPackageName(), 0);
+            ((TextView)view.findViewById(R.id.version)).setText("v"+pInfo.versionName);
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
 
         btConnection.setOnClickListener(this);
         btInscription.setOnClickListener(this);

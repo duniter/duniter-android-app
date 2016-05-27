@@ -451,6 +451,7 @@ public class TransferActivity extends ActionBarActivity implements View.OnClickL
     }
 
     public void setContactSelected(Contact contact){
+
         if (layoutTansfer.getVisibility() == View.GONE) {
             ((View) layoutTansfer.getParent()).findViewById(R.id.frame_content).setVisibility(View.GONE);
             layoutTansfer.setVisibility(View.VISIBLE);
@@ -463,6 +464,10 @@ public class TransferActivity extends ActionBarActivity implements View.OnClickL
         mReceiverPublicKey.setText(contactSelected.getPublicKey());
         mReceiverPublicKey.requestFocus();
         mContact.setText(contactSelected.getUid());
+
+        if (currency!=null && currency.getName()!=null) {
+            setTitle(getResources().getString(R.string.transfer_of, currency.getName()));
+        }
     }
 
     public void setWalletSelected(long walletId){

@@ -399,7 +399,7 @@
     <string name="second_currency_unit">Deuxième unité de la monnaie</string>
     <string name="number_digit">Nombre de décimal</string>
     <string name="protocol_version">Version du protocole</string>
-    <string name="app_version">Version de l\'application</string>
+    <string name="application_version">Version de l\'application</string>
     <string name="self_send">Identification envoyé</string>
     <string name="self_not_send">L\'identification n\'a pas été envoyé</string>
     <string name="tx_send">Transaction envoyé</string>

@@ -402,7 +402,7 @@
     <string name="second_currency_unit">Second currency unit</string>
     <string name="number_digit">Number of Digit</string>
     <string name="protocol_version">Protocol version</string>
-    <string name="app_version">Application version</string>
+    <string name="application_version">Application version</string>
     <string name="self_send">Identification sent</string>
     <string name="tx_send">Transaction sent</string>
     <string name="self_not_send">The identification was not sent</string>

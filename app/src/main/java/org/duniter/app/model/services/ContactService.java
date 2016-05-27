@@ -69,16 +69,7 @@ public class ContactService extends AsyncTask<ContentResolver, Void, String> {
 
                 if(!currencyName.equals(cName)){
                     currencyName=cName;
-                    currency = new Currency();
-                    currency.setName(currencyName);
-                    Cursor cursorCurrency = SqlService.getCurrencySql(context).query(
-                            CurrencySql.CurrencyTable.NAME+"=?",
-                            new String[]{currencyName}
-                    );
-                    if (cursorCurrency.moveToFirst()){
-                        currency.setId(cursor.getLong(cursor.getColumnIndex(BaseColumns._ID)));
-                    }
-                    cursorCurrency.close();
+                    currency = SqlService.getCurrencySql(context).getByName(currencyName);
                 }
                 if (currency!=null && currency.getId()!=null) {
                     try {
@@ -91,7 +82,7 @@ public class ContactService extends AsyncTask<ContentResolver, Void, String> {
             while (cursor.moveToNext());
         }
 
-        if (cursor.isClosed()){
+        if (!cursor.isClosed()){
             cursor.close();
         }
 

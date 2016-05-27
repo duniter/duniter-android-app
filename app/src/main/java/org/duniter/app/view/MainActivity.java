@@ -384,7 +384,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 
     public void clearAllFragments() {
         getFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
-        setTitle(R.string.ucoin);
+        setTitle(R.string.app_name);
     }
 
     public void closeDrawer() {

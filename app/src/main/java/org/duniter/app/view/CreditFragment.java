@@ -1,10 +1,13 @@
 package org.duniter.app.view;
 
 import android.app.Fragment;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import org.duniter.app.R;
 
@@ -38,5 +41,12 @@ public class CreditFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         getActivity().setTitle(getString(R.string.credit));
         setHasOptionsMenu(true);
+
+        try {
+            PackageInfo pInfo = getActivity().getPackageManager().getPackageInfo(getActivity().getPackageName(), 0);
+            ((TextView)view.findViewById(R.id.version)).setText("v"+pInfo.versionName);
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 }

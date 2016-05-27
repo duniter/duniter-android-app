@@ -50,41 +50,45 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/welcome_description"
-        android:layout_above="@+id/bt_inscription"
-        android:layout_centerHorizontal="true"
         android:gravity="center"
         android:textColor="@android:color/white"
         android:textSize="@dimen/welcom_text"
-        android:layout_marginBottom="@dimen/number_background"
-        android:layout_marginLeft="@dimen/demi_padding"
-        android:layout_marginRight="@dimen/demi_padding"
-        android:layout_marginStart="@dimen/demi_padding"
-        android:layout_marginEnd="@dimen/demi_padding"/>
+        android:layout_below="@+id/textView4"
+        android:layout_centerHorizontal="true" />
 
     <TextView
         android:id="@+id/textView4"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/welcome_to_duniter"
-        android:layout_above="@+id/textView"
         android:gravity="center"
-        android:layout_centerHorizontal="true"
         android:textColor="@android:color/white"
         android:textSize="@dimen/welcom_text"
-        android:layout_marginBottom="@dimen/margin"
-        android:layout_marginLeft="@dimen/demi_padding"
-        android:layout_marginRight="@dimen/demi_padding"
-        android:layout_marginStart="@dimen/demi_padding"
-        android:layout_marginEnd="@dimen/demi_padding"/>
+        android:layout_below="@+id/textView5"
+        android:layout_centerHorizontal="true" />
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/ucoin"
+        android:text="@string/app_name"
         android:id="@+id/textView5"
         android:textColor="@android:color/white"
         android:textSize="50sp"
         android:gravity="center"
-        android:layout_above="@+id/textView4"
-        android:layout_centerHorizontal="true"/>
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text=""
+        android:id="@+id/version"
+        android:textColor="@android:color/white"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
+
 </RelativeLayout>

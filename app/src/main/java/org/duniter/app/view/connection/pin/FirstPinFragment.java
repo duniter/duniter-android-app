@@ -1,6 +1,8 @@
 package org.duniter.app.view.connection.pin;
 
 import android.app.Fragment;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -54,6 +56,13 @@ public class FirstPinFragment extends Fragment implements View.OnClickListener {
         this.code2 = "";
 
         this.holder = new ViewHolder(view);
+
+        try {
+            PackageInfo pInfo = getActivity().getPackageManager().getPackageInfo(getActivity().getPackageName(), 0);
+            ((TextView)view.findViewById(R.id.version)).setText("v"+pInfo.versionName);
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
 
         initPin();
     }

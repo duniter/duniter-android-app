@@ -2,6 +2,8 @@ package org.duniter.app.view.connection;
 
 import android.app.AlertDialog;
 import android.app.Fragment;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -69,6 +71,13 @@ public class ConnectionFragment extends Fragment implements View.OnClickListener
         mPassword = (EditText) view.findViewById(R.id.password);
         mPassword.setTypeface(Typeface.DEFAULT);
         btConnection = (Button) view.findViewById(R.id.bt_connection);
+
+        try {
+            PackageInfo pInfo = getActivity().getPackageManager().getPackageInfo(getActivity().getPackageName(), 0);
+            ((TextView)view.findViewById(R.id.version)).setText("v"+pInfo.versionName);
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
 
         selectorCurrencyView = new SelectorCurrencyView(true,getActivity(), view.findViewById(R.id.selector_currency), new SelectorCurrencyView.Action() {
             @Override
