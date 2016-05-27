@@ -47,6 +47,8 @@ public class CurrencyService {
         private final Currency currency;
         private final CallbackListBlock callback;
 
+        private List<BlockUd> result;
+
         public Updater(Context context, Currency currency, CallbackListBlock callback){
             this.context = context;
             this.currency = currency;
@@ -56,7 +58,7 @@ public class CurrencyService {
         @Override
         protected String doInBackground(Void... message) {
             Log.d("Update ud","-------START------");
-            final List<BlockUd> result = new ArrayList<>();
+            result = new ArrayList<>();
             BlockService.getListUdBlock(context, currency, new CallbackUds() {
                 @Override
                 public void methode(final List<Integer> listNumber) {
@@ -71,16 +73,23 @@ public class CurrencyService {
                                 public void methode(BlockUd blockUd) {
                                     blockUd.setCurrency(currency);
                                     result.add(blockUd);
-                                    if (pos==listNumber.size()-1){
-                                        callback.methode(result);
-                                    }
+                                    test(pos,listNumber.size());
                                 }
                             });
+                        }else{
+                            test(i,listNumber.size());
                         }
                     }
                 }
             });
             return null;
         }
+
+        private void test(int i,int size){
+            if (i==size-1){
+                callback.methode(result);
+            }
+        }
+
     }
 }

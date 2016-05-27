@@ -66,7 +66,9 @@ public class ConnectionView {
         GenerateKeysTask task = new GenerateKeysTask(new GenerateKeysTask.OnTaskFinishedListener() {
             @Override
             public void onTaskFinished(KeyPair keyPair) {
-                generateWallet(context, currency, Base58.encode(keyPair.getPubKey()), Base58.encode(keyPair.getSecKey()));
+                String publicKey = Base58.encode(keyPair.getPubKey());
+                String privateKey = Base58.encode(keyPair.getSecKey());
+                generateWallet(context, currency, publicKey, privateKey);
             }
         });
 

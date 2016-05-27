@@ -43,7 +43,7 @@ public class BlockUdSql extends AbstractSql<BlockUd> {
 
     public BlockUd last(Long currencyId) {
         BlockUd blockUd = null;
-        Cursor cursor = query(BlockTable.CURRENCY_ID+"=?",new String[]{String.valueOf(currencyId)});
+        Cursor cursor = query(BlockTable.CURRENCY_ID+"=?",new String[]{String.valueOf(currencyId)},BlockTable.NUMBER + " DESC");
         if (cursor.moveToFirst()){
             blockUd = fromCursor(cursor);
         }

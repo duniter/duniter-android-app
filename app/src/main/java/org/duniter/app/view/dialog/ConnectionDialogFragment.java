@@ -3,6 +3,7 @@ package org.duniter.app.view.dialog;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.graphics.Typeface;
 import android.os.Bundle;
@@ -75,7 +76,7 @@ public class ConnectionDialogFragment extends DialogFragment implements Response
         connectionView = new ConnectionView(getActivity(), mSalt, mPassword, selectorCurrencyView, new ConnectionView.Action() {
             @Override
             public void onFinish() {
-                dismiss();
+                alert.dismiss();
             }
 
             @Override
@@ -112,6 +113,7 @@ public class ConnectionDialogFragment extends DialogFragment implements Response
 
         view.clearFocus();
         alert = builder.create();
+        alert.setCanceledOnTouchOutside(false);
         alert.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
             public void onShow(DialogInterface dialog) {

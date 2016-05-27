@@ -25,6 +25,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.duniter.app.Application;
 import org.duniter.app.Format;
@@ -32,6 +34,7 @@ import org.duniter.app.R;
 import org.duniter.app.model.Entity.Contact;
 import org.duniter.app.model.Entity.Currency;
 import org.duniter.app.model.Entity.Identity;
+import org.duniter.app.model.Entity.Requirement;
 import org.duniter.app.model.Entity.Wallet;
 import org.duniter.app.model.Entity.services.IdentityService;
 import org.duniter.app.model.Entity.services.WalletService;
@@ -43,6 +46,7 @@ import org.duniter.app.view.MainActivity;
 import org.duniter.app.view.TransferActivity;
 import org.duniter.app.view.contact.CertificationFragment;
 import org.duniter.app.view.contact.IdentityFragment;
+import org.duniter.app.view.dialog.InfoDialogFragment;
 import org.duniter.app.view.dialog.QrCodeDialogFragment;
 import org.duniter.app.view.wallet.adapter.TxCursorAdapter;
 
@@ -59,6 +63,7 @@ public class WalletFragment extends ListFragment
     private SwipeRefreshLayout mSwipeLayout;
 
     private TextView textCertification;
+    private TextView textInformation;
 
     private TextView secondAmount;
     private TextView firstAmount;
@@ -84,10 +89,11 @@ public class WalletFragment extends ListFragment
 
     private boolean needSelf;
     private boolean needMembership;
-    private boolean needRevoke;
+    private boolean willNeedMembership;
+    private boolean possibleRevoke;
     private boolean needRenew;
     private int nbCert;
-
+    private int willNeedCertifications;
 
     public static WalletFragment newInstance(Long walletId) {
         Bundle newInstanceArgs = new Bundle();
@@ -206,6 +212,7 @@ public class WalletFragment extends ListFragment
         secondAmount = (TextView) view.findViewById(R.id.second_amount);
         firstAmount = (TextView) view.findViewById(R.id.principal_amount);
         textCertification = (TextView) view.findViewById(R.id.txt_certification);
+        textInformation = (TextView) view.findViewById(R.id.txt_information);
 
         mSwipeLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_layout);
         mSwipeLayout.setOnRefreshListener(this);
@@ -345,48 +352,42 @@ public class WalletFragment extends ListFragment
     }
 
     private void clickInformation(){
+        List<String> messages = new ArrayList<>();
         if (currency == null){
             currency = SqlService.getCurrencySql(getActivity()).getById(wallet.getCurrency().getId());
         }
-        String message = "";
         if (identity == null && identityId>0) {
             identity = SqlService.getIdentitySql(getActivity()).getById(identityId);
         }
+
         if (needSelf){
-            message += "- "+getActivity().getString(R.string.can_publish_wallet)+"\n";
+            messages.add(getString(R.string.warning_wallet_self));
         }
-        if (needMembership){
-            message += "- "+getActivity().getString(R.string.can_become_member)+"\n";
+        if (needMembership && !willNeedMembership){
+            messages.add(getString(R.string.warning_wallet_membership));
+        }
+        if (willNeedMembership){
+            messages.add(getString(R.string.warning_wallet_load_membership));
         }
         if (needRenew){
-            message += "- "+getActivity().getString(R.string.can_renew_membership)+"\n";
+            messages.add(getString(R.string.warning_wallet_renew));
         }
-        if (nbCert<currency.getSigQty()){
-            message += "\n- "+getActivity().getString(R.string.remeber_ask_certify);
-        }
-        if (message.length()==0){
-            message = getActivity().getString(R.string.not_important_message);
+        if (willNeedCertifications>0){
+            if (willNeedCertifications==1) {
+                messages.add(getString(R.string.warning_wallet_certification));
+            }else{
+                messages.add(String.format(getString(R.string.warning_wallet_certifications),String.valueOf(willNeedCertifications)));
+            }
         }
 
-        new AlertDialog.Builder(getActivity())
-                .setTitle(getString(R.string.wallet_information))
-                .setMessage(message)
-                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        // continue with delete
-                    }
-                })
-                .setIcon(android.R.drawable.ic_dialog_info)
-                .show();
-//        if (identityId > 0){
-//            Date date = new Date(sigDate * (long)1000);
-//            String textDate = getString(R.string.registration_date)
-//                    .concat(": ")
-//                    .concat(new SimpleDateFormat("EEE dd MMM yyyy").format(date.getTime()));
-//            Toast.makeText(getActivity(),textDate,Toast.LENGTH_LONG).show();
-//        }else{
-//            Toast.makeText(getActivity(),getString(R.string.hasnt_member),Toast.LENGTH_LONG).show();
-//        }
+        if (messages.size()==0){
+            messages.add(getActivity().getString(R.string.not_important_message));
+        }
+
+        int number = Integer.valueOf(identity.getSelfBlockUid().substring(0,identity.getSelfBlockUid().indexOf("-")));
+
+        InfoDialogFragment dial = InfoDialogFragment.newInstance(true,currency,messages,number);
+        dial.show(getFragmentManager(),InfoDialogFragment.class.getName());
     }
 
     private void clickCertification(){
@@ -503,8 +504,33 @@ public class WalletFragment extends ListFragment
     }
 
     private void updateRequirements(int currencySigQty, long nbRequirements, long membership, long membershipPending){
-        textCertification.setText(String.valueOf(nbRequirements));
-        if(currencySigQty>nbRequirements || membership<=0){
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+
+        nbCert = (int)nbRequirements;
+        needMembership = membership<=0 && membershipPending <=0;//join
+        willNeedMembership = membershipPending>0;
+        willNeedCertifications = currencySigQty>nbRequirements ? (int) nbRequirements - currencySigQty : 0;//need nb certification
+        needSelf = nbRequirements ==-1; // self
+        possibleRevoke = membership>0;
+        needRenew = membership>0 && membership<preferences.getLong(Application.RENEW,129600) && membershipPending<=0;
+
+        if (currency == null){
+            currency = SqlService.getCurrencySql(getActivity()).getById(wallet.getCurrency().getId());
+        }
+        if (identity == null && identityId>0) {
+            identity = SqlService.getIdentitySql(getActivity()).getById(identityId);
+        }
+
+        if (!needSelf &&
+                !(needMembership && !willNeedMembership) &&
+                !willNeedMembership && !needRenew &&
+                !(willNeedCertifications>0)){
+            textInformation.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_info, 0, 0);
+        }else{
+            textInformation.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_info_warning, 0, 0);
+        }
+
+        if(needSelf || needMembership || willNeedCertifications>0){
             textCertification.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_certification_red, 0, 0);
             textCertification.setTextColor(getResources().getColor(R.color.red));
             //icon.setImageResource(R.drawable.ic_no_member);
@@ -513,32 +539,18 @@ public class WalletFragment extends ListFragment
             textCertification.setTextColor(getResources().getColor(R.color.green));
             //icon.setImageResource(R.drawable.ic_member);
         }
-        String text = textCertification.getText().toString().concat(" ");
+        String text;
         if(nbRequirements<=1) {
-            textCertification.setText(text.concat(getString(R.string.certification)));
+             text = String.format(getString(R.string.Y_certification),String.valueOf(nbRequirements));
         }else{
-
-            textCertification.setText(text.concat(getString(R.string.certifications)));
+            text = String.format(getString(R.string.Y_certifications),String.valueOf(nbRequirements));
         }
+        textCertification.setText(text);
 
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        if(nbRequirements ==-1){
-            nbCert = 0;
-            needSelf = true;
-            needMembership = true;
-            needRevoke = false;
-            needRenew = false;
-        }else{
-            nbCert = (int)nbRequirements;
-            needSelf = false;
-            needMembership = membership<=0 && membershipPending <=0;
-            needRevoke = membership>0;
-            needRenew = membership>0 && membership<preferences.getLong(Application.RENEW,129600) && membershipPending<=0;
-        }
 
         signItem.setVisible(needSelf);
-        joinItem.setVisible(needMembership);
-        revokeItem.setVisible(needRevoke);
+        joinItem.setVisible(needMembership && !willNeedMembership);
+        revokeItem.setVisible(possibleRevoke);
         renewItem.setVisible(needRenew);
     }
 

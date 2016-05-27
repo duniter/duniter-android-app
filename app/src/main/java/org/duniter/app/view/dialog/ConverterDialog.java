@@ -80,7 +80,7 @@ public class ConverterDialog extends DialogFragment{
         final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        unit = preferences.getInt(Application.UNIT,Application.UNIT_CLASSIC);
+        unit = Integer.parseInt(preferences.getString(Application.UNIT, Application.UNIT_CLASSIC + ""));
 
         LayoutInflater inflater = getActivity().getLayoutInflater();
         final View view = inflater.inflate(R.layout.dialog_converter, null);

@@ -19,6 +19,7 @@ import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -44,6 +45,8 @@ import org.duniter.app.view.wallet.WalletListFragment;
  */
 public class MainActivity extends ActionBarActivity implements View.OnClickListener {
 
+    private Context ctx;
+
     private ActionBarDrawerToggle mToggle;
     private DrawerLayout mDrawerLayout;
     private DrawerLayout mDrawerContact;
@@ -65,6 +68,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_currency);
+        ctx = this;
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         try {
@@ -84,6 +88,8 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
             @Override
             public void onClick(View v) {
                 Application.forcedSync();
+                closeDrawer();
+                Toast.makeText(ctx,getString(R.string.synchro),Toast.LENGTH_LONG).show();
             }
         });
 

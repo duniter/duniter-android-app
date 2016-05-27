@@ -45,7 +45,7 @@
     <string name="generate_seed">Generate seed</string>
     <string name="sign">Sign</string>
     <string name="self">Self</string>
-    <string name="revoke">Revoke</string>
+    <string name="revoke">Revoke membership</string>
     <string name="search">Search</string>
     <string name="sign_in">Sign in</string>
     <string name="dev">Dev</string>
@@ -55,7 +55,7 @@
     <string name="add">Add</string>
     <string name="CANCEL">CANCEL</string>
     <string name="OK">OK</string>
-    <string name="join">Join</string>
+    <string name="join">Register as member</string>
     <string name="delete">Delete</string>
     <string name="remove_contact">Remove contact</string>
     <string name="remove">Remove</string>
@@ -241,7 +241,7 @@
     <string name="expires_on">Expires on</string>
     <string name="expired">Expired</string>
     <string name="state">State</string>
-    <string name="renew">renew</string>
+    <string name="renew">Renew membership</string>
     <string name="no_currencies">No currencies</string>
     <string name="contacts">Contacts</string>
     <string name="blocks">Blocks</string>
@@ -358,13 +358,13 @@
     <string name="no_result_publickey">No certification for this pubkey</string>
     <string name="no_wallet_selected">No wallet selected</string>
     <string name="transfer_of">Transfer of %s</string>
-    <string name="reference">reference</string>
+    <string name="reference">Reference</string>
     <string name="with_identity">With Identity</string>
     <string name="without_identity">Without Identity</string>
     <string name="all">All</string>
     <string name="hasnt_member">This wallet isn\'t a member of the web of trust .</string>
     <string name="change_precision">number of digits</string>
-    <string name="sign_wallet">Sign this wallet</string>
+    <string name="sign_wallet">Publish pseudonym</string>
     <string name="connection_wallet">Connection to wallet</string>
     <string name="wallet_no_exists">This wallet no exists \\n Please create new wallet</string>
     <string name="connection">Connection</string>
@@ -421,14 +421,28 @@
     <string name="update">Update</string>
     <string name="update_current">Update current ...</string>
     <string name="wallet_information">Wallet information</string>
+    <string name="contact_information">Identity information</string>
     <string name="amount_in">Amount in </string>
     <string name="ud">UD</string>
     <string name="time">time</string>
-    <string name="can_publish_wallet">You can publish your wallet.</string>
-    <string name="can_become_member">You can become a member.</string>
-    <string name="can_renew_membership">You can renew your membership as member.</string>
-    <string name="remeber_ask_certify">Remember to ask certifcation to remain a member.</string>
     <string name="not_important_message">No important message.</string>
+    <string name="synchro">Synchronization ...</string>
+    <string name="select_wallet">Please select a wallet</string>
+    <string name="Y_certification">%1$s certification</string>
+    <string name="Y_certifications">%1$s certifications</string>
+
+    <string name="warning_wallet_load_membership">Sent registration Request. Waiting for validation.</string>
+    <string name="warning_info_wallet_certification">Request your friends to certify you.</string>
+    <string name="warning_info_wallet_load_membership">Must wait.</string>
+    <string name="warning_info_wallet_membership">Apply to join in the options menu.</string>
+    <string name="warning_info_wallet_renew">Apply to renew your membership in the options menu.</string>
+    <string name="warning_info_wallet_self">Apply for publication pseudonym the options menu.</string>
+    <string name="warning_wallet_certification">Are you missing 1 certification.</string>
+    <string name="warning_wallet_certifications">Are you missing %1$s certifications.</string>
+    <string name="warning_wallet_membership">You are not a member.</string>
+    <string name="warning_wallet_renew">Membership was soon expired.</string>
+    <string name="warning_wallet_self">The pseudonym was not published.</string>
+    <string name="information">Information</string>
 
 
     <string-array name="node" translatable="false">

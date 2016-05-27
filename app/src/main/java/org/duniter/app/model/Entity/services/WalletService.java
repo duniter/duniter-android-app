@@ -12,6 +12,7 @@ import org.apache.http.message.BasicNameValuePair;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -74,61 +75,60 @@ public class WalletService {
                 ls.add(s[1]);
             }
         }
-
-        SourceSql sourceSql = SqlService.getSourceSql(context);
-        List<Source> sourcesSql = sourceSql.getByWallet(wallet.getId());
-        for (Source source:sourcesSql){
-            if (!listSource.contains(source)){
-                sourceSql.delete(source.getId());
-                sourcesSql.remove(source);
-            }
-        }
-        for (Source source:listSource){
-            amount = amount.add(source.getAmount());
-            boolean noInsert;
-            if (!sourcesSql.contains(source)){
-                if (source.getType().equals("D")){
-                    noInsert = ls.contains(String.valueOf(source.getNoffset()));
-                }else{
-                    noInsert = ls.contains(source.getIdentifier());
-                }
-                if (!noInsert) {
-                    sourceSql.insert(source);
+            SourceSql sourceSql = SqlService.getSourceSql(context);
+            List<Source> sourcesSql = sourceSql.getByWallet(wallet.getId());
+            List<Source> _SourcesSql = new ArrayList<>(sourcesSql);
+            for (Source source : _SourcesSql) {
+                if (!listSource.contains(source)) {
+                    sourceSql.delete(source.getId());
+                    sourcesSql.remove(source);
                 }
             }
-        }
-        TxSql txSql = SqlService.getTxSql(context);
-
-        List<Tx> listPending = txSql.getPendingTx(wallet.getId());
-        Map<String, Tx> listValid = txSql.getTxMap(wallet.getId());
-        for (Tx tx:listPending){
-            if (!listTx.contains(tx)){
-                txSql.delete(tx.getId());
-                amount = amount.add((tx.getAmount().multiply(new BigInteger("-1"))));
-            }else{
-                amount = amount.add(tx.getAmount());
-
+            for (Source source : listSource) {
+                amount = amount.add(source.getAmount());
+                boolean noInsert;
+                if (!sourcesSql.contains(source)) {
+                    if (source.getType().equals("D")) {
+                        noInsert = ls.contains(String.valueOf(source.getNoffset()));
+                    } else {
+                        noInsert = ls.contains(source.getIdentifier());
+                    }
+                    if (!noInsert) {
+                        sourceSql.insert(source);
+                    }
+                }
             }
-        }
-        for (Tx tx:listTx){
-            if (!listValid.containsKey(tx.getHash())){
-                txSql.insert(tx);
-                amount = amount.add(tx.getAmount());
+            TxSql txSql = SqlService.getTxSql(context);
+
+            List<Tx> listPending = txSql.getPendingTx(wallet.getId());
+            Map<String, Tx> listValid = txSql.getTxMap(wallet.getId());
+            for (Tx tx : listPending) {
+                if (!listTx.contains(tx)) {
+                    txSql.delete(tx.getId());
+                    amount = amount.add((tx.getAmount().multiply(new BigInteger("-1"))));
+                } else {
+                    amount = amount.add(tx.getAmount());
+
+                }
             }
-        }
-
-        if (identity != null && requirement != null){
-            requirement.setIdentity(identity);
-            SqlService.getRequirementSql(context).insert(requirement);
-            if (identity.getSelfBlockUid()==null){
-                identity.setSelfBlockUid(requirement.getSelfBlockUid());
-                SqlService.getIdentitySql(context).update(identity,identity.getId());
+            for (Tx tx : listTx) {
+                if (!listValid.containsKey(tx.getHash())) {
+                    txSql.insert(tx);
+                    amount = amount.add(tx.getAmount());
+                }
             }
-        }
 
-        wallet.setAmount(amount);
-        SqlService.getWalletSql(context).update(wallet,wallet.getId());
+            if (identity != null && requirement != null) {
+                requirement.setIdentity(identity);
+                SqlService.getRequirementSql(context).insert(requirement);
+                if (identity.getSelfBlockUid() == null) {
+                    identity.setSelfBlockUid(requirement.getSelfBlockUid());
+                    SqlService.getIdentitySql(context).update(identity, identity.getId());
+                }
+            }
 
+            wallet.setAmount(amount);
+            SqlService.getWalletSql(context).update(wallet, wallet.getId());
         Log.d("Update wallet","-------FINISH------");
     }
 

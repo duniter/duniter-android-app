@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.math.BigInteger;
@@ -74,6 +75,7 @@ public class TxCursorAdapter extends CursorAdapter {
         holder.defaultAmount = (TextView) view.findViewById(R.id.second_amount);
         holder.comment = (TextView) view.findViewById(R.id.comment);
         holder.publicKey = (TextView) view.findViewById(R.id.pubkey);
+        holder.icon = (ImageView) view.findViewById(R.id.icon);
 
         view.setTag(holder);
         return view;
@@ -87,8 +89,10 @@ public class TxCursorAdapter extends CursorAdapter {
         String uid = cursor.getString(uidIndex);
         if (uid == null || uid.equals("")){
             holder.publicKey.setText(Format.minifyPubkey(cursor.getString(publicKeyIndex)));
+            holder.icon.setImageResource(R.drawable.ic_key_primary_18dp);
         }else{
             holder.publicKey.setText(uid);
+            holder.icon.setImageResource(R.drawable.ic_person_primary_18dp);
         }
 
         Long time = cursor.getLong(timeIndex);
@@ -216,6 +220,7 @@ public class TxCursorAdapter extends CursorAdapter {
         public TextView defaultAmount;
         public TextView comment;
         public TextView publicKey;
+        public ImageView icon;
     }
 
 }

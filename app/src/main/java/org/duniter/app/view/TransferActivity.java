@@ -28,6 +28,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
@@ -371,11 +372,11 @@ public class TransferActivity extends ActionBarActivity implements View.OnClickL
     }
 
     public void showDialog(){
-
-
         DialogFragment dialog= null;
         if(walletSelected!=null){
             dialog = ConverterDialog.newInstance( dividend,dt, amount, spinnerUnit,currency.getName());
+        }else{
+            Toast.makeText(this,getString(R.string.select_wallet),Toast.LENGTH_SHORT).show();
         }
         if(dialog!=null){
             dialog.show(getFragmentManager(), "listDialog");
@@ -460,6 +461,7 @@ public class TransferActivity extends ActionBarActivity implements View.OnClickL
         }
         contactSelected = contact;
         mReceiverPublicKey.setText(contactSelected.getPublicKey());
+        mReceiverPublicKey.requestFocus();
         mContact.setText(contactSelected.getUid());
     }
 
@@ -566,6 +568,7 @@ public class TransferActivity extends ActionBarActivity implements View.OnClickL
         if ((comment = validateComment()) == null) return false;
 
         final String pubKey = receiverPublicKey;
+        final String uid = contactSelected!=null ? contactSelected.getUid() : "";
         final String com = comment;
 
         //check funds
@@ -630,6 +633,7 @@ public class TransferActivity extends ActionBarActivity implements View.OnClickL
                         BigInteger amount = BigInteger.ZERO;
                         amount = amount.subtract(qtAmount);
                         tx.setPublicKey(pubKey);
+                        tx.setUid(uid);
                         tx.setAmount(amount);
                         tx.setCurrency(currency);
                         tx.setWallet(walletSelected);
