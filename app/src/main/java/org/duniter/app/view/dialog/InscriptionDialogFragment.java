@@ -16,9 +16,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.volley.NoConnectionError;
+/*import com.android.volley.NoConnectionError;
 import com.android.volley.Response;
-import com.android.volley.VolleyError;
+import com.android.volley.VolleyError;*/
 
 import org.duniter.app.Application;
 import org.duniter.app.R;
@@ -27,7 +27,7 @@ import org.duniter.app.technical.callback.CallbackBoolean;
 import org.duniter.app.widget.InscriptionView;
 import org.duniter.app.widget.SelectorCurrencyView;
 
-public class InscriptionDialogFragment extends DialogFragment implements Response.ErrorListener {
+public class InscriptionDialogFragment extends DialogFragment{
 
     private LinearLayout mFieldLayout;
     private LinearLayout mProgressLayout;
@@ -181,7 +181,7 @@ public class InscriptionDialogFragment extends DialogFragment implements Respons
         mUid.selectAll();
         mUid.requestFocus();
     }
-
+/*
     @Override
     public void onErrorResponse(VolleyError error) {
         error.printStackTrace();
@@ -199,7 +199,7 @@ public class InscriptionDialogFragment extends DialogFragment implements Respons
         alert.getButton(AlertDialog.BUTTON_POSITIVE).setVisibility(View.VISIBLE);
         alert.getButton(AlertDialog.BUTTON_NEUTRAL).setVisibility(View.VISIBLE);
         alert.getButton(AlertDialog.BUTTON_NEGATIVE).setVisibility(View.VISIBLE);
-    }
+    }*/
 }
 
 

@@ -124,7 +124,6 @@
     <orderEntry type="library" exported="" name="zxing-android-embedded-2.3.0" level="project" />
     <orderEntry type="library" exported="" name="support-v13-21.0.3" level="project" />
     <orderEntry type="library" exported="" name="cardview-v7-21.0.3" level="project" />
-    <orderEntry type="module" module-name="volley" exported="" />
     <orderEntry type="module" module-name="kalium-jni" exported="" />
     <orderEntry type="module" module-name="scrypt" exported="" />
   </component>
