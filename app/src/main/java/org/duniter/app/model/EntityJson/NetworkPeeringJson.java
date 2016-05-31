@@ -1,4 +1,4 @@
-package org.duniter.app.model.Entity.json;
+package org.duniter.app.model.EntityJson;
 
 import android.util.Patterns;
 

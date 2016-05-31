@@ -14,7 +14,7 @@ public abstract class AbstractSql<T> implements InterfaceSql<T>{
     public Context context;
     public Uri uri;
 
-    public static final String AUTHORITY = "org.duniter.app.model.services.dbprovider";
+    public static final String AUTHORITY = "org.duniter.app.services.dbprovider";
 
     public AbstractSql(Context context, Uri URI){
         this.context = context;

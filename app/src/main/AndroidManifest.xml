@@ -35,7 +35,7 @@
             </intent-filter>
         </activity>
 
-        <provider android:name="org.duniter.app.model.services.DbProvider"
+        <provider android:name="org.duniter.app.services.DbProvider"
             android:authorities="@string/AUTHORITY" />
 
         <activity

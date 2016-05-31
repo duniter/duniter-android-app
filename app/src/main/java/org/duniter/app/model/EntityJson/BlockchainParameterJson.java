@@ -1,4 +1,4 @@
-package org.duniter.app.model.Entity.json;
+package org.duniter.app.model.EntityJson;
 
 import com.google.gson.Gson;
 
@@ -29,7 +29,7 @@ public class BlockchainParameterJson implements Serializable {
     public Long blocksRot;
     public Float percentRot;
 
-    public static org.duniter.app.model.Entity.json.BlockchainParameterJson fromJson(String response) {
+    public static org.duniter.app.model.EntityJson.BlockchainParameterJson fromJson(String response) {
         Gson gson = new Gson();
         return gson.fromJson(response, BlockchainParameterJson.class);
     }

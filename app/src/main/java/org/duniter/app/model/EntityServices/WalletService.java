@@ -1,4 +1,4 @@
-package org.duniter.app.model.Entity.services;
+package org.duniter.app.model.EntityServices;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -12,7 +12,6 @@ import org.apache.http.message.BasicNameValuePair;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.ConcurrentModificationException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -30,8 +29,8 @@ import org.duniter.app.model.EntitySql.SourceSql;
 import org.duniter.app.model.EntitySql.TxSql;
 import org.duniter.app.model.EntityWeb.TxWeb;
 import org.duniter.app.model.document.TxDoc;
-import org.duniter.app.model.services.SqlService;
-import org.duniter.app.model.services.WebService;
+import org.duniter.app.services.SqlService;
+import org.duniter.app.services.WebService;
 import org.duniter.app.technical.callback.Callback;
 import org.duniter.app.technical.callback.CallbackMap;
 import org.duniter.app.technical.callback.CallbackRequirement;

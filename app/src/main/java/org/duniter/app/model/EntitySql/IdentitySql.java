@@ -13,7 +13,7 @@ import org.duniter.app.model.Entity.Currency;
 import org.duniter.app.model.Entity.Identity;
 import org.duniter.app.model.Entity.Wallet;
 import org.duniter.app.model.EntitySql.base.AbstractSql;
-import org.duniter.app.model.services.SqlService;
+import org.duniter.app.services.SqlService;
 
 /**
  * Created by naivalf27 on 05/04/16.

@@ -22,9 +22,9 @@ import java.util.List;
 
 import org.duniter.app.model.Entity.Contact;
 import org.duniter.app.model.Entity.Currency;
-import org.duniter.app.model.Entity.services.IdentityService;
+import org.duniter.app.model.EntityServices.IdentityService;
 import org.duniter.app.model.EntitySql.CurrencySql;
-import org.duniter.app.model.services.SqlService;
+import org.duniter.app.services.SqlService;
 import org.duniter.app.technical.callback.CallbackLookup;
 
 /**

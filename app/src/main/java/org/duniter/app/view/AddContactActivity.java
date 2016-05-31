@@ -27,7 +27,7 @@ import org.duniter.app.Format;
 import org.duniter.app.R;
 import org.duniter.app.model.Entity.Contact;
 import org.duniter.app.model.Entity.Currency;
-import org.duniter.app.model.services.SqlService;
+import org.duniter.app.services.SqlService;
 
 public class AddContactActivity extends ActionBarActivity{
     private Toolbar mToolbar;

@@ -298,7 +298,7 @@
     </string-array>
 
     <string-array name="list_unit">
-        <item>Monnaie principal</item>
+        <item>Monnaie principale</item>
         <item>Dividende Universel</item>
         <item>Crédit mutuel</item>
     </string-array>
@@ -321,7 +321,7 @@
     <string name="rules_money">Monnaie</string>
     <string name="rules_wot">Toile de confiance</string>
     <string name="rules_blockchain">Blockchain</string>
-    <string name="rules_c_and_dt">Croissance fondammentale (c) / Durée (dt) entre deux DU</string>
+    <string name="rules_c_and_dt">Croissance fondamentale (c) / Durée (dt) entre deux DU</string>
     <string name="rules_c_and_dt_value">%1$.0f %% / %2$.0f jours (%3$d secondes)</string>
     <string name="rules_ud0">Dividende Universel initial UD(0) en unité</string>
     <string name="rules_ud0_value">%d unités</string>
@@ -329,19 +329,19 @@
     <string name="rules_value_minutes_and_seconds">%1$.0f min %2$d s (%3$d s)</string>
     <string name="rules_sig_delay">Délai minimum entre 2 certiciations identiques (même clés)</string>
     <string name="rules_sig_validity">Durée maximale d\'une certiciation valide</string>
-    <string name="rules_sig_qty">Quantité minimum de certficiations pour devenir membre de la toile de confiance</string>
-    <string name="rules_sig_qty_value">%d certficiations</string>
+    <string name="rules_sig_qty">Quantité minimum de certificiations pour devenir membre de la toile de confiance</string>
+    <string name="rules_sig_qty_value">%d certificiations</string>
     <string name="rules_sig_woT">Quantité minimum de certification valide pour faire partie de la toile de confiancepar rapport au règle de distance</string>
     <string name="rules_ms_validity">Durée maximale de participation à la toile de confiance (sans renouvellement)</string>
     <string name="rules_step_max">Distance maximale entre chaque member de la toile de confiance et un postulant</string>
-    <string name="rules_median_time_blocks">Nombre de blocs utilisé pour calculer le temps médian.</string>
+    <string name="rules_median_time_blocks">Nombre de blocs utilisés pour calculer le temps médian.</string>
     <string name="rules_median_time_blocks_value">%d blocs</string>
-    <string name="rules_avg_gen_time">Temps moyen pour entre deux écritures de blocs (temps espéré)</string>
+    <string name="rules_avg_gen_time">Temps moyen entre deux écritures de blocs (temps espéré)</string>
     <string name="rules_dt_diff_eval">Nombre de blocs requis pour pouvoir évaluer à nouveau la valeur PoWMin</string>
     <string name="rules_dt_diff_eval_value">%d blocs</string>
     <string name="rules_blocks_rot">Nombre de blocs à contrôler pour le calcul de la difficulté personnelle</string>
     <string name="rules_blocks_rot_value">%d blocs</string>
-    <string name="rules_percent_rot">Le pourcentage des éditions précédentes, pour atteindre pour la difficulté personnalisé</string>
+    <string name="rules_percent_rot">Le pourcentage des éditions précédentes, pour atteindre la difficulté personnalisé</string>
     <string name="rules_percent_rot_value">%.0f %%</string>
     <string name="converter">Convertisseur de monnaies</string>
 
@@ -382,7 +382,7 @@
     <string name="developed_by">Développé par</string>
     <string name="source_code">Code Source</string>
     <string name="licence">Licence</string>
-    <string name="credit">Credit</string>
+    <string name="credit">Crédit</string>
     <string name="tap_pin_code">Veuillez saisir votre code pin :</string>
     <string name="tap_pin_code_bis">Veuillez confirmer votre code pin :</string>
     <string name="nb_certification">%1$d Certification</string>
@@ -396,8 +396,8 @@
     <string name="tap_confirm_pin_code">Veuillez confirmer votre nouveau code pin :</string>
     <string name="pin_changed_ok">Le code PIN a bien été changé</string>
     <string name="first_currency_unit">Première unité de la monnaie</string>
-    <string name="second_currency_unit">Deuxième unité de la monnaie</string>
-    <string name="number_digit">Nombre de décimal</string>
+    <string name="second_currency_unit">Seconde unité de la monnaie</string>
+    <string name="number_digit">Nombre de décimales</string>
     <string name="protocol_version">Version du protocole</string>
     <string name="application_version">Version de l\'application</string>
     <string name="self_send">Identification envoyé</string>

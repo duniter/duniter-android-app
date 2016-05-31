@@ -9,10 +9,8 @@ import android.content.CursorLoader;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -43,9 +41,9 @@ import org.duniter.app.model.Entity.Contact;
 import org.duniter.app.model.Entity.Currency;
 import org.duniter.app.model.Entity.Requirement;
 import org.duniter.app.model.Entity.Wallet;
-import org.duniter.app.model.Entity.services.IdentityService;
+import org.duniter.app.model.EntityServices.IdentityService;
 import org.duniter.app.model.EntitySql.view.ViewTxAdapter;
-import org.duniter.app.model.services.SqlService;
+import org.duniter.app.services.SqlService;
 import org.duniter.app.technical.callback.CallbackLookup;
 import org.duniter.app.technical.callback.CallbackRequirement;
 import org.duniter.app.view.MainActivity;
@@ -222,7 +220,17 @@ public class IdentityFragment extends ListFragment
             @Override
             public void methode(Requirement req) {
                 requirement = req;
-                updateRequirements(currency.getSigQty().intValue(),requirement.getNumberCertification(),requirement.getMembershipExpiresIn());
+                if(req == null){
+                    updateRequirements(
+                            currency.getSigQty().intValue(),
+                            0,
+                            -1);
+                }else {
+                    updateRequirements(
+                            currency.getSigQty().intValue(),
+                            requirement.getNumberCertification(),
+                            requirement.getMembershipExpiresIn());
+                }
             }
         });
         IdentityService.getIdentity(getActivity(), currency, contact.getPublicKey(), new CallbackLookup() {

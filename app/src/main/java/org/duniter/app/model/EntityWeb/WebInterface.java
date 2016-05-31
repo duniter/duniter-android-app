@@ -4,7 +4,7 @@ import org.apache.http.NameValuePair;
 
 import java.util.ArrayList;
 
-import org.duniter.app.model.services.WebService;
+import org.duniter.app.services.WebService;
 
 /**
  * Created by naivalf27 on 19/04/16.

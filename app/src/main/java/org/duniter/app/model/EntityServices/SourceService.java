@@ -1,4 +1,4 @@
-package org.duniter.app.model.Entity.services;
+package org.duniter.app.model.EntityServices;
 
 import android.content.Context;
 
@@ -6,9 +6,9 @@ import java.util.List;
 
 import org.duniter.app.model.Entity.Source;
 import org.duniter.app.model.Entity.Wallet;
-import org.duniter.app.model.Entity.json.SourceJson;
+import org.duniter.app.model.EntityJson.SourceJson;
 import org.duniter.app.model.EntityWeb.SourceWeb;
-import org.duniter.app.model.services.WebService;
+import org.duniter.app.services.WebService;
 import org.duniter.app.technical.callback.CallbackSource;
 
 /**

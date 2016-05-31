@@ -1,4 +1,4 @@
-package org.duniter.app.model.services;
+package org.duniter.app.services;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;

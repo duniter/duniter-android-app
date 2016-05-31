@@ -1,6 +1,5 @@
 package org.duniter.app.view.connection;
 
-import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -20,7 +19,7 @@ import android.widget.Toast;
 import org.duniter.app.Application;
 import org.duniter.app.R;
 import org.duniter.app.model.Entity.Currency;
-import org.duniter.app.model.services.SqlService;
+import org.duniter.app.services.SqlService;
 import org.duniter.app.technical.callback.CallbackBoolean;
 import org.duniter.app.widget.ConnectionView;
 import org.duniter.app.widget.SelectorCurrencyView;

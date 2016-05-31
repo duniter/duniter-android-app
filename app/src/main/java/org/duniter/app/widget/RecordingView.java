@@ -8,7 +8,7 @@ import android.widget.EditText;
 import org.duniter.app.R;
 import org.duniter.app.model.Entity.Currency;
 import org.duniter.app.model.Entity.Wallet;
-import org.duniter.app.model.services.SqlService;
+import org.duniter.app.services.SqlService;
 import org.duniter.app.task.GenerateKeysTask;
 import org.duniter.app.technical.crypto.Base58;
 import org.duniter.app.technical.crypto.KeyPair;

@@ -1,4 +1,4 @@
-package org.duniter.app.model.services;
+package org.duniter.app.services;
 
 import android.content.ContentResolver;
 import android.content.ContentUris;
@@ -9,7 +9,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.provider.BaseColumns;
 import android.provider.ContactsContract;
 import android.util.Log;
 
@@ -19,7 +18,6 @@ import java.util.Map;
 import org.duniter.app.Format;
 import org.duniter.app.model.Entity.Contact;
 import org.duniter.app.model.Entity.Currency;
-import org.duniter.app.model.EntitySql.CurrencySql;
 
 /**
  * Created by naivalf27 on 05/04/16.

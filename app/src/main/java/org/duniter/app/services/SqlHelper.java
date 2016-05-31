@@ -1,4 +1,4 @@
-package org.duniter.app.model.services;
+package org.duniter.app.services;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;

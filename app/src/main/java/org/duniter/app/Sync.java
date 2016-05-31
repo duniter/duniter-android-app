@@ -17,9 +17,9 @@ import java.util.TimerTask;
 import org.duniter.app.model.Entity.Currency;
 import org.duniter.app.model.Entity.Identity;
 import org.duniter.app.model.Entity.Wallet;
-import org.duniter.app.model.Entity.services.CurrencyService;
-import org.duniter.app.model.Entity.services.WalletService;
-import org.duniter.app.model.services.SqlService;
+import org.duniter.app.model.EntityServices.CurrencyService;
+import org.duniter.app.model.EntityServices.WalletService;
+import org.duniter.app.services.SqlService;
 import org.duniter.app.technical.callback.Callback;
 
 /**

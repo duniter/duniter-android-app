@@ -11,7 +11,7 @@ import android.widget.TextView;
 import org.duniter.app.Format;
 import org.duniter.app.model.Entity.Identity;
 import org.duniter.app.model.EntitySql.IdentitySql;
-import org.duniter.app.model.services.SqlService;
+import org.duniter.app.services.SqlService;
 
 /**
  * Created by naivalf27 on 03/05/16.

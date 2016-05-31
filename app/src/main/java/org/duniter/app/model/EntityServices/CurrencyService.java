@@ -1,4 +1,4 @@
-package org.duniter.app.model.Entity.services;
+package org.duniter.app.model.EntityServices;
 
 import android.content.Context;
 import android.os.AsyncTask;
@@ -10,7 +10,7 @@ import java.util.List;
 import org.duniter.app.model.Entity.BlockUd;
 import org.duniter.app.model.Entity.Currency;
 import org.duniter.app.model.EntitySql.BlockUdSql;
-import org.duniter.app.model.services.SqlService;
+import org.duniter.app.services.SqlService;
 import org.duniter.app.technical.callback.Callback;
 import org.duniter.app.technical.callback.CallbackBlock;
 import org.duniter.app.technical.callback.CallbackListBlock;

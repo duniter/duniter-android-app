@@ -1,10 +1,8 @@
 package org.duniter.app.view.wallet;
 
-import android.app.AlertDialog;
 import android.app.ListFragment;
 import android.app.LoaderManager;
 import android.content.CursorLoader;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
 import android.content.SharedPreferences;
@@ -34,13 +32,12 @@ import org.duniter.app.R;
 import org.duniter.app.model.Entity.Contact;
 import org.duniter.app.model.Entity.Currency;
 import org.duniter.app.model.Entity.Identity;
-import org.duniter.app.model.Entity.Requirement;
 import org.duniter.app.model.Entity.Wallet;
-import org.duniter.app.model.Entity.services.IdentityService;
-import org.duniter.app.model.Entity.services.WalletService;
+import org.duniter.app.model.EntityServices.IdentityService;
+import org.duniter.app.model.EntityServices.WalletService;
 import org.duniter.app.model.EntitySql.view.ViewTxAdapter;
 import org.duniter.app.model.EntitySql.view.ViewWalletIdentityAdapter;
-import org.duniter.app.model.services.SqlService;
+import org.duniter.app.services.SqlService;
 import org.duniter.app.technical.callback.CallbackIdentity;
 import org.duniter.app.view.MainActivity;
 import org.duniter.app.view.TransferActivity;

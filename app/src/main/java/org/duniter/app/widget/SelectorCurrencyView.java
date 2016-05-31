@@ -19,15 +19,14 @@ import java.util.ArrayList;
 
 import org.duniter.app.Application;
 import org.duniter.app.R;
-import org.duniter.app.model.Entity.json.BlockchainParameterJson;
+import org.duniter.app.model.EntityJson.BlockchainParameterJson;
 import org.duniter.app.model.Entity.Currency;
 import org.duniter.app.model.Entity.Endpoint;
-import org.duniter.app.model.Entity.json.NetworkPeeringJson;
+import org.duniter.app.model.EntityJson.NetworkPeeringJson;
 import org.duniter.app.model.EntityWeb.BlockChainParameterWeb;
 import org.duniter.app.model.EntityWeb.NetworkPeeringWeb;
-import org.duniter.app.model.services.SqlService;
-import org.duniter.app.model.services.WebService;
-import org.duniter.app.technical.callback.Callback;
+import org.duniter.app.services.SqlService;
+import org.duniter.app.services.WebService;
 import org.duniter.app.technical.callback.CallbackBoolean;
 
 public class SelectorCurrencyView {

@@ -10,8 +10,8 @@ import android.widget.Toast;
 
 import org.duniter.app.Application;
 import org.duniter.app.model.EntitySql.CurrencySql;
-import org.duniter.app.model.services.ContactService;
-import org.duniter.app.model.services.SqlService;
+import org.duniter.app.services.ContactService;
+import org.duniter.app.services.SqlService;
 import org.duniter.app.view.connection.ConnectionActivity;
 import org.duniter.app.view.connection.FirstConnectionActivity;
 

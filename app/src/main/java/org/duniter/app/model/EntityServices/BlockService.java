@@ -1,4 +1,4 @@
-package org.duniter.app.model.Entity.services;
+package org.duniter.app.model.EntityServices;
 
 import android.content.Context;
 
@@ -11,11 +11,11 @@ import java.util.List;
 
 import org.duniter.app.model.Entity.BlockUd;
 import org.duniter.app.model.Entity.Currency;
-import org.duniter.app.model.Entity.json.BlockJson;
+import org.duniter.app.model.EntityJson.BlockJson;
 import org.duniter.app.model.EntityWeb.BlockWeb;
 import org.duniter.app.model.EntityWeb.CurrentBlockWeb;
 import org.duniter.app.model.EntityWeb.UdWeb;
-import org.duniter.app.model.services.WebService;
+import org.duniter.app.services.WebService;
 import org.duniter.app.technical.callback.CallbackBlock;
 import org.duniter.app.technical.callback.CallbackUds;
 
