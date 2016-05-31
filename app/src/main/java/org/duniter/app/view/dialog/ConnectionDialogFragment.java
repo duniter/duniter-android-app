@@ -66,7 +66,7 @@ public class ConnectionDialogFragment extends DialogFragment implements Response
         mPassword = (EditText) view.findViewById(R.id.password);
         mPassword.setTypeface(Typeface.DEFAULT);
 
-        selectorCurrencyView = new SelectorCurrencyView(true,getActivity(), view.findViewById(R.id.selector_currency), new SelectorCurrencyView.Action() {
+        selectorCurrencyView = new SelectorCurrencyView(false,getActivity(), view.findViewById(R.id.selector_currency), new SelectorCurrencyView.Action() {
             @Override
             public void currencyIdFind(Currency c) {
                 currency = c;
