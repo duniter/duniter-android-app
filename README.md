@@ -44,7 +44,7 @@ sudo apt-get install build-essential libpcre3 libpcre3-dev libtool automake pyth
 	Then
 
 	```
-	git clone https://github.com/duniter/ucoin-android-app.git --recursive
-	cd ucoin-android-app
+	git clone https://github.com/duniter/duniter-android-app.git --recursive
+	cd duniter-android-app
 	./autogen.sh
 	```
