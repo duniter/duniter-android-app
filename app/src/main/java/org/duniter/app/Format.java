@@ -43,7 +43,7 @@ public class Format {
         PREFIX_VALUE.put(TRILLIARD," Z");   //Trilliard
     }
 
-    public static final String CONTACT_PATH = "ucoin://";
+    public static final String CONTACT_PATH = "duniter://";
     public static final String SEPARATOR1 = ":";
     public static final String SEPARATOR2 = "@";
 
