@@ -1,4 +1,4 @@
-package org.duniter.app.view.contact;
+package org.duniter.app.view.identity;
 
 import android.app.AlertDialog;
 import android.app.ListFragment;
@@ -49,6 +49,7 @@ import org.duniter.app.technical.callback.CallbackRequirement;
 import org.duniter.app.view.MainActivity;
 import org.duniter.app.view.TransferActivity;
 import org.duniter.app.view.dialog.InfoDialogFragment;
+import org.duniter.app.view.identity.adapter.SpinnerWalletArrayAdapter;
 import org.duniter.app.view.wallet.adapter.TxCursorAdapter;
 
 public class IdentityFragment extends ListFragment
@@ -123,6 +124,14 @@ public class IdentityFragment extends ListFragment
 
         currency = contact.getCurrency();
 
+        if (!contact.isContact()) {
+            String val = SqlService.getContactSql(getActivity()).isContact(contact.getUid(),contact.getPublicKey(),contact.getCurrency().getId());
+            if (val != null){
+                contact.setContact(true);
+                contact.setAlias(val);
+            }
+        }
+
         if (currency.getSigQty()==null){
             currency = SqlService.getCurrencySql(getActivity()).getById(currency.getId());
             contact.setCurrency(currency);
@@ -134,57 +143,7 @@ public class IdentityFragment extends ListFragment
         alias.setText(nom);
         publicKey.setText(Format.minifyPubkey(contact.getPublicKey()));
 
-        spinnerAdapter = new ArrayAdapter<Wallet>(getActivity(), R.layout.spinner_item_wallet,listWallet){
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                if(position==0){
-                    return newFirst(parent,false);
-                }else{
-                    return super.getView(position, convertView, parent);
-                }
-            }
-
-            @Override
-            public View getDropDownView(int position, View convertView, ViewGroup parent) {
-                if(position==0){
-                    return newFirst(parent,true);
-                }else{
-                    return super.getDropDownView(position, convertView, parent);
-                }
-            }
-
-            public View newFirst(ViewGroup parent,boolean isDropDown){
-                LayoutInflater inflater = (LayoutInflater) getContext()
-                        .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
-                View v;
-
-                if(!isDropDown){
-                    v = inflater.inflate(R.layout.spinner_item_wallet, parent, false);
-                }else{
-                    v = inflater.inflate(android.R.layout.simple_spinner_dropdown_item, parent, false);
-                }
-                TextView text = (TextView) v;
-                text.setText(getContext().getString(R.string.all));
-                return v;
-            }
-
-            @Override
-            public Wallet getItem(int position) {
-                if(position==0){
-                    return null;
-                }else{
-                    return super.getItem(position-1);
-                }
-            }
-
-            @Override
-            public int getCount() {
-                return super.getCount()+1;
-            }
-        };
-
-        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerAdapter = new SpinnerWalletArrayAdapter(getActivity(),listWallet);
 
         txCursorAdapter = new TxCursorAdapter(getActivity(), null);
         setListAdapter(txCursorAdapter);

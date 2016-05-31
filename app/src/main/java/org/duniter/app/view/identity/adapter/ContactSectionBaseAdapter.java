@@ -1,4 +1,4 @@
-package org.duniter.app.view.contact.adapter;
+package org.duniter.app.view.identity.adapter;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -14,19 +14,19 @@ import java.util.LinkedHashMap;
 import org.duniter.app.Format;
 import org.duniter.app.R;
 import org.duniter.app.model.Entity.Contact;
-import org.duniter.app.view.contact.ContactListFragment;
+import org.duniter.app.view.identity.IdentityListFragment;
 
 public class ContactSectionBaseAdapter extends BaseAdapter {
 
     private Context mContext;
     private HashMap<Integer, String> mSectionPosition;
 
-    private ContactListFragment fragment;
+    private IdentityListFragment fragment;
 
     private ArrayList<Contact> list;
 
 
-    public ContactSectionBaseAdapter(Context context, ArrayList<Contact> list, ContactListFragment fragment) {
+    public ContactSectionBaseAdapter(Context context, ArrayList<Contact> list, IdentityListFragment fragment) {
         if(list == null){
             this.list = new ArrayList<>();
         }else {

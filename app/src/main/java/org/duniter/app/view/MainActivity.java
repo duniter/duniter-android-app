@@ -34,7 +34,7 @@ import org.duniter.app.model.EntityServices.BlockService;
 import org.duniter.app.model.EntityServices.CurrencyService;
 import org.duniter.app.services.SqlService;
 import org.duniter.app.technical.callback.CallbackBlock;
-import org.duniter.app.view.contact.ContactListFragment;
+import org.duniter.app.view.identity.IdentityListFragment;
 import org.duniter.app.view.currency.BlockListFragment;
 import org.duniter.app.view.currency.RulesFragment;
 import org.duniter.app.view.currency.SourceListFragment;
@@ -243,7 +243,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
             drawerContactsView.setActivated(false);
             drawerRulesView.setActivated(false);
             drawerCreditView.setActivated(false);
-        }else if(currentFragment instanceof ContactListFragment){
+        }else if(currentFragment instanceof IdentityListFragment){
             drawerWalletsView.setActivated(false);
             drawerContactsView.setActivated(true);
             drawerRulesView.setActivated(false);
@@ -408,7 +408,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
                 break;
             case R.id.drawer_contacts:
                 removeList(false);
-                setCurrentFragment(ContactListFragment.newInstance(currency.getId(),true,true));
+                setCurrentFragment(IdentityListFragment.newInstance(currency.getId(),true,true));
                 break;
 //            case R.id.drawer_currency:
 //                removeList(false);

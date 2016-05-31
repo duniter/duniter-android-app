@@ -1,4 +1,4 @@
-package org.duniter.app.view.contact;
+package org.duniter.app.view.identity;
 
 import android.app.ListFragment;
 import android.app.LoaderManager;
@@ -43,9 +43,9 @@ import org.duniter.app.technical.callback.CallbackLookup;
 import org.duniter.app.view.FindByQrCode;
 import org.duniter.app.view.MainActivity;
 import org.duniter.app.view.TransferActivity;
-import org.duniter.app.view.contact.adapter.ContactSectionBaseAdapter;
+import org.duniter.app.view.identity.adapter.ContactSectionBaseAdapter;
 
-public class ContactListFragment extends ListFragment
+public class IdentityListFragment extends ListFragment
         implements LoaderManager.LoaderCallbacks<Cursor>,
         SearchView.OnQueryTextListener, AdapterView.OnItemClickListener {
 
@@ -69,25 +69,25 @@ public class ContactListFragment extends ListFragment
 
     boolean findByPubKey = false;
 
-    static public ContactListFragment newInstance(Long currencyId,boolean seeContact,boolean addContact){
+    static public IdentityListFragment newInstance(Long currencyId, boolean seeContact, boolean addContact){
         Bundle newInstanceArgs = new Bundle();
         newInstanceArgs.putLong(CURRENCY_ID, currencyId);
         newInstanceArgs.putBoolean(SEE_CONTACT,seeContact);
         newInstanceArgs.putBoolean(ADD_CONTACT,addContact);
-        ContactListFragment fragment = new ContactListFragment();
+        IdentityListFragment fragment = new IdentityListFragment();
         fragment.setArguments(newInstanceArgs);
 
         return fragment;
     }
 
-    static public ContactListFragment newInstance(Long currencyId,boolean seeContact,boolean addContact,String txt){
+    static public IdentityListFragment newInstance(Long currencyId, boolean seeContact, boolean addContact, String txt){
         Bundle newInstanceArgs = new Bundle();
         newInstanceArgs.putLong(CURRENCY_ID, currencyId);
         newInstanceArgs.putBoolean(SEE_CONTACT, seeContact);
         newInstanceArgs.putBoolean(ADD_CONTACT,addContact);
         newInstanceArgs.putString(TEXT_SEARCH,txt);
         newInstanceArgs.putBoolean(OPEN_SEARCH,true);
-        ContactListFragment fragment = new ContactListFragment();
+        IdentityListFragment fragment = new IdentityListFragment();
         fragment.setArguments(newInstanceArgs);
 
         return fragment;

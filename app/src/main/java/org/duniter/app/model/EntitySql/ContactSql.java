@@ -24,6 +24,21 @@ public class ContactSql extends AbstractSql<Contact> {
         super(context,URI);
     }
 
+    public String isContact(String uid, String publicKey,long currencyId) {
+        String result = null;
+        Cursor cursor = query(
+                ContactTable.UID + "=? AND "+ContactTable.PUBLIC_KEY + "=? AND "+ContactTable.CURRENCY_ID + "=?",
+                new String[]{uid,publicKey,String.valueOf(currencyId)});
+        if (cursor.moveToFirst()){
+            result = cursor.getString(cursor.getColumnIndex(ContactTable.ALIAS));
+        }
+        cursor.close();
+//        if (!cursor.isClosed()){
+//            cursor.close();
+//        }
+        return result;
+    }
+
 
     /*################################FONCTION DE BASE################################*\
                                     Basic CRUD functions.

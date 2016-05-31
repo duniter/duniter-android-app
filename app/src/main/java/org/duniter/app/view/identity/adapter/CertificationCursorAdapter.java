@@ -1,4 +1,4 @@
-package org.duniter.app.view.contact.adapter;
+package org.duniter.app.view.identity.adapter;
 
 import android.content.Context;
 import android.database.Cursor;
