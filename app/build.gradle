@@ -7,8 +7,8 @@ android {
         applicationId "org.duniter.android"
         minSdkVersion 14
         targetSdkVersion 21
-        versionCode 10
-        versionName "0.10"
+        versionCode 11
+        versionName "0.11"
     }
 //    sourceSets.main {
 //        jniLibs.srcDir 'src/main/libs'

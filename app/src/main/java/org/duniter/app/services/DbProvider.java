@@ -375,6 +375,7 @@ public class DbProvider extends ContentProvider {
                 getContext().getContentResolver().notifyChange(WalletSql.URI, null);
                 getContext().getContentResolver().notifyChange(ViewWalletIdentityAdapter.URI, null);
                 getContext().getContentResolver().notifyChange(ViewWalletAdapter.URI, null);
+                getContext().getContentResolver().notifyChange(ViewTxAdapter.URI, null);
                 break;
             case SourceSql.CODE:
                 getContext().getContentResolver().notifyChange(SourceSql.URI, null);
