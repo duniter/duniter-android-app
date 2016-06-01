@@ -444,5 +444,9 @@
     <string name="warning_wallet_certifications">Il vous manque %1$s certifications.</string>
     <string name="warning_info_wallet_certification">Demande à vos amis de vous certifier.</string>
     <string name="information">Information</string>
+    <string name="new_member">Nouveaux membres</string>
+    <string name="monetary_by_member">Masse par membre</string>
+    <string name="current_time">Heure de la blockchain</string>
+    <string name="common_difficulty">Niveau de difficulté</string>
 
 </resources>

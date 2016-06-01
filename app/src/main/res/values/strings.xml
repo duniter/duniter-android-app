@@ -443,6 +443,10 @@
     <string name="warning_wallet_renew">Membership was soon expired.</string>
     <string name="warning_wallet_self">The pseudonym was not published.</string>
     <string name="information">Information</string>
+    <string name="new_member">Incoming members</string>
+    <string name="monetary_by_member">Money share</string>
+    <string name="current_time">Current time</string>
+    <string name="common_difficulty">Common difficulty</string>
 
 
     <string-array name="node" translatable="false">
