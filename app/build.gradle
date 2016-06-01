@@ -1,5 +1,3 @@
-import org.apache.tools.ant.taskdefs.condition.Os
-
 apply plugin: 'com.android.application'
 
 android {
@@ -18,22 +16,6 @@ android {
 //    }
     sourceSets.main.jni.srcDirs = []
     sourceSets.main.jniLibs.srcDir 'src/main/libs'
-
-    task ndkBuild(type: Exec) {
-        workingDir file('src/main')
-        commandLine getNdkBuildCmd()
-    }
-
-    tasks.withType(JavaCompile) {
-        compileTask -> compileTask.dependsOn ndkBuild
-    }
-
-    task cleanNative(type: Exec) {
-        workingDir file('src/main')
-        commandLine getNdkBuildCmd(), 'clean'
-    }
-
-    clean.dependsOn cleanNative
 
     buildTypes {
         release {
@@ -102,26 +84,4 @@ dependencies {
     //fin test
     compile 'com.journeyapps:zxing-android-integration:2.3.0@aar'
     compile 'com.google.zxing:core:3.2.0'
-}
-
-def getNdkDir() {
-    if (System.env.ANDROID_NDK_ROOT !=null){
-        return System.env.ANDROID_NDK_ROOT
-    }
-
-    Properties properties = new Properties()
-    properties.load(project.rootProject.file('local.properties').newDataInputStream())
-    def ndkdir = properties.getProperty('ndk.dir',null)
-    if (ndkdir == null){
-        throw new GradleException("NDK location not found. Define location with ndk.dir in the local.properties file or with an ANDROID_NDK_ROOT environment variable.")
-    }
-    return ndkdir
-}
-
-def getNdkBuildCmd(){
-    def ndkBuild = getNdkDir() + "/ndk-build"
-    if (Os.isFamily(Os.FAMILY_WINDOWS)){
-        ndkBuild += ".cmd"
-    }
-    return ndkBuild
 }
