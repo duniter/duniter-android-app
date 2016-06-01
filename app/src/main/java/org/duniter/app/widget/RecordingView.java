@@ -8,8 +8,11 @@ import android.widget.EditText;
 import org.duniter.app.R;
 import org.duniter.app.model.Entity.Currency;
 import org.duniter.app.model.Entity.Wallet;
+import org.duniter.app.model.EntityServices.CurrencyService;
+import org.duniter.app.model.EntityServices.WalletService;
 import org.duniter.app.services.SqlService;
 import org.duniter.app.task.GenerateKeysTask;
+import org.duniter.app.technical.callback.Callback;
 import org.duniter.app.technical.crypto.Base58;
 import org.duniter.app.technical.crypto.KeyPair;
 
@@ -86,7 +89,23 @@ public class RecordingView {
 
 //                WalletService.updateWallet(mContext,wallet,true,null);
 
-                action.onFinish();
+                final Wallet w = wallet;
+                WalletService.updateWallet(mContext, w, true, new Callback() {
+                    @Override
+                    public void methode() {
+                        CurrencyService.updateCurrency(mContext, currency, new Callback() {
+                            @Override
+                            public void methode() {
+                                WalletService.updateWallet(mContext, w, true, new Callback() {
+                                    @Override
+                                    public void methode() {
+                                        action.onFinish();
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
             }
         });
 

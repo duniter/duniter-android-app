@@ -79,7 +79,7 @@ public class InscriptionDialogFragment extends DialogFragment{
         inscriptionView = new InscriptionView(getActivity(), mUid, mSalt, mPassword, mConfirmPassword, selectorCurrencyView, new InscriptionView.Action() {
             @Override
             public void onFinish() {
-                dismiss();
+                alert.dismiss();
             }
 
             @Override
@@ -120,6 +120,7 @@ public class InscriptionDialogFragment extends DialogFragment{
 
         view.clearFocus();
         alert = builder.create();
+        alert.setCanceledOnTouchOutside(false);
         alert.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
             public void onShow(DialogInterface dialog) {

@@ -75,7 +75,7 @@ public class RecordingDialogFragment extends DialogFragment {
         recordingView = new RecordingView(getActivity(), mUid, mSalt, mPassword, mConfirmPassword, selectorCurrencyView, new RecordingView.Action() {
             @Override
             public void onFinish() {
-                dismiss();
+                alert.dismiss();
             }
         });
 
@@ -107,6 +107,7 @@ public class RecordingDialogFragment extends DialogFragment {
 
         view.clearFocus();
         alert = builder.create();
+        alert.setCanceledOnTouchOutside(false);
         alert.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
             public void onShow(DialogInterface dialog) {

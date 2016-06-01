@@ -10,11 +10,14 @@ import org.duniter.app.R;
 import org.duniter.app.model.Entity.Currency;
 import org.duniter.app.model.Entity.Identity;
 import org.duniter.app.model.Entity.Wallet;
+import org.duniter.app.model.EntityServices.CurrencyService;
 import org.duniter.app.model.EntityServices.IdentityService;
+import org.duniter.app.model.EntityServices.WalletService;
 import org.duniter.app.model.EntityWeb.LookupWeb;
 import org.duniter.app.services.SqlService;
 import org.duniter.app.services.WebService;
 import org.duniter.app.task.GenerateKeysTask;
+import org.duniter.app.technical.callback.Callback;
 import org.duniter.app.technical.callback.CallbackIdentity;
 import org.duniter.app.technical.crypto.Base58;
 import org.duniter.app.technical.crypto.KeyPair;
@@ -153,22 +156,40 @@ public class InscriptionView {
         identity.setCurrency(currency);
         identity.setId(SqlService.getIdentitySql(mContext).insert(identity));
 
-        if(identity!=null){
-            IdentityService.selfIdentity(mContext, identity, new CallbackIdentity() {
-                @Override
-                public void methode(Identity identity) {
-                    IdentityService.joinIdentity(mContext, identity, new CallbackIdentity() {
-                        @Override
-                        public void methode(Identity identity) {
-                            action.onFinish();
-                        }
-                    });
-                }
-            });
-        }else{
-            Log.e("InscriptionView","Identity == null");
-            action.onFinish();
-        }
+        final Wallet w=wallet;
+        final Identity i = identity;
+
+        WalletService.updateWallet(mContext, w, true, new Callback() {
+            @Override
+            public void methode() {
+                CurrencyService.updateCurrency(mContext, currency, new Callback() {
+                    @Override
+                    public void methode() {
+                        WalletService.updateWallet(mContext, w, true, new Callback() {
+                            @Override
+                            public void methode() {
+                                if(i!=null){
+                                    IdentityService.selfIdentity(mContext, i, new CallbackIdentity() {
+                                        @Override
+                                        public void methode(Identity identity) {
+                                            IdentityService.joinIdentity(mContext, identity, new CallbackIdentity() {
+                                                @Override
+                                                public void methode(Identity identity) {
+                                                    action.onFinish();
+                                                }
+                                            });
+                                        }
+                                    });
+                                }else{
+                                    Log.e("InscriptionView","Identity == null");
+                                    action.onFinish();
+                                }
+                            }
+                        });
+                    }
+                });
+            }
+        });
     }
 
     public interface Action{
