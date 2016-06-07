@@ -10,6 +10,11 @@ import org.duniter.app.model.Entity.Contact;
 import org.duniter.app.model.Entity.Currency;
 import org.duniter.app.model.EntitySql.base.AbstractSql;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
  * Created by naivalf27 on 05/04/16.
  */
@@ -37,6 +42,52 @@ public class ContactSql extends AbstractSql<Contact> {
 //            cursor.close();
 //        }
         return result;
+    }
+
+    public Map<String, String> getMap(Long currencyId) {
+        Map<String,String> result = new HashMap<>();
+        Cursor cursor = query(
+                ContactTable.CURRENCY_ID + "=?",
+                new String[]{String.valueOf(currencyId)});
+        if (cursor.moveToFirst()){
+            do {
+                String name = cursor.getString(cursor.getColumnIndex(ContactTable.ALIAS));
+                String uid = cursor.getString(cursor.getColumnIndex(ContactTable.UID));
+
+                String val = (name==null || name.length()==0) ? uid : name;
+                result.put(cursor.getString(cursor.getColumnIndex(ContactTable.PUBLIC_KEY)),val);
+            }while (cursor.moveToNext());
+        }
+        cursor.close();
+        return result;
+    }
+
+    public List<Contact> findByPublicKey(Long currencyId, String publicKey) {
+        List<Contact> contacts = new ArrayList<>();
+        Cursor cursor = query(
+                ContactTable.CURRENCY_ID + "=? AND " + ContactTable.PUBLIC_KEY + "=?",
+                new String[]{String.valueOf(currencyId),publicKey},ContactTable.PUBLIC_KEY+" ASC");
+        if (cursor.moveToFirst()){
+            do {
+                contacts.add(fromCursor(cursor));
+            }while (cursor.moveToNext());
+        }
+        cursor.close();
+        return null;
+    }
+
+    public List<Contact> findByName(Long currencyId,String search) {
+        List<Contact> contacts = new ArrayList<>();
+        Cursor cursor = query(
+                ContactTable.CURRENCY_ID + "=? AND (" + ContactTable.UID + "=? OR " + ContactTable.ALIAS + "=? )",
+                new String[]{String.valueOf(currencyId),search,search},ContactTable.UID+" ASC");
+        if (cursor.moveToFirst()){
+            do {
+                contacts.add(fromCursor(cursor));
+            }while (cursor.moveToNext());
+        }
+        cursor.close();
+        return null;
     }
 
 

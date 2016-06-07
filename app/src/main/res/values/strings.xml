@@ -447,6 +447,8 @@
     <string name="monetary_by_member">Money share</string>
     <string name="current_time">Current time</string>
     <string name="common_difficulty">Common difficulty</string>
+    <string name="no_identity_found">No identity found</string>
+    <string name="directory">Directory</string>
 
 
     <string-array name="node" translatable="false">

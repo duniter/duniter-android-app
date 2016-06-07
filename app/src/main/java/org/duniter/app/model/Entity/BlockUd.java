@@ -17,6 +17,7 @@ public class BlockUd implements Serializable{
     private BigInteger monetaryMass;
     private String hash;
     private BigInteger dividend;
+    private long powMin;
 
     public Currency getCurrency() {
         return currency;
@@ -94,5 +95,13 @@ public class BlockUd implements Serializable{
 
     public String getUid() {
         return number + "-" + hash;
+    }
+
+    public void setPowMin(long powMin) {
+        this.powMin = powMin;
+    }
+
+    public long getPowMin() {
+        return powMin;
     }
 }

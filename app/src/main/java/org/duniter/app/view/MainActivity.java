@@ -34,6 +34,7 @@ import org.duniter.app.model.EntityServices.BlockService;
 import org.duniter.app.model.EntityServices.CurrencyService;
 import org.duniter.app.services.SqlService;
 import org.duniter.app.technical.callback.CallbackBlock;
+import org.duniter.app.view.currency.RulesBisFragment;
 import org.duniter.app.view.identity.IdentityListFragment;
 import org.duniter.app.view.currency.BlockListFragment;
 import org.duniter.app.view.currency.RulesFragment;
@@ -181,6 +182,12 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         }
     }
 
+    @Override
+    public void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        mToggle.syncState();
+    }
+
     private void setCurrency(Currency currency){
         this.currency = currency;
         TextView drawerMembersCount = (TextView) findViewById(R.id.drawer_members_count);
@@ -199,12 +206,6 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 
         Date d = new Date(this.currency.getCurrentBlock().getMedianTime() * 1000);
         drawerDate.setText(new SimpleDateFormat("EEE dd MMM yyyy hh:mm:ss").format(d));
-    }
-
-    @Override
-    public void onPostCreate(Bundle savedInstanceState) {
-        super.onPostCreate(savedInstanceState);
-        mToggle.syncState();
     }
 
     @Override
@@ -288,53 +289,53 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         super.onBackPressed();
     }
 
-    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        super.onActivityResult(requestCode, resultCode, intent);
-        if(resultCode == RESULT_OK){
-            Long currencyId = intent.getExtras().getLong(Application.CURRENCY_ID);
-            switch (requestCode){
-//                case Application.ACTIVITY_LOOKUP:
-//                    WotLookup.Result result = (WotLookup.Result)intent.getExtras().getSerializable(WotLookup.Result.class.getSimpleName());
-//                    Bundle args = new Bundle();
-//                    args.putLong(BaseColumns._ID, currencyId);
-//                    args.putSerializable(WotLookup.Result.class.getSimpleName(),result);
-//                    Fragment fragment = WalletIdentityFragment.newInstance(args);
-//                    FragmentManager fragmentManager = getFragmentManager();
-//
-//                    fragmentManager.beginTransaction()
-//                            .setCustomAnimations(
-//                                    R.animator.delayed_fade_in,
-//                                    R.animator.fade_out,
-//                                    R.animator.delayed_fade_in,
-//                                    R.animator.fade_out)
-//                            .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
-//                            .addToBackStack(fragment.getClass().getSimpleName())
-//                            .commit();
-//                    closeDrawer();
-//                    break;
-//                case RESULT_SCAN:
-//                    WotLookup.Result identity = (WotLookup.Result)intent.getExtras().getSerializable(WotLookup.Result.class.getSimpleName());
-//                    Bundle args = new Bundle();
-//                    args.putLong(BaseColumns._ID, currencyId);
-//                    args.putSerializable(WotLookup.Result.class.getSimpleName(),result);
-//                    Fragment fragment = WalletIdentityFragment.newInstance(args);
-//                    FragmentManager fragmentManager = getFragmentManager();
-//
-//                    fragmentManager.beginTransaction()
-//                            .setCustomAnimations(
-//                                    R.animator.delayed_fade_in,
-//                                    R.animator.fade_out,
-//                                    R.animator.delayed_fade_in,
-//                                    R.animator.fade_out)
-//                            .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
-//                            .addToBackStack(fragment.getClass().getSimpleName())
-//                            .commit();
-//                    // close the drawer
-//                    closeDrawer();
-//                    break;
-            }
-        }
-    }
+//    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+//        super.onActivityResult(requestCode, resultCode, intent);
+//        if(resultCode == RESULT_OK){
+//            Long currencyId = intent.getExtras().getLong(Application.CURRENCY_ID);
+//            switch (requestCode){
+////                case Application.ACTIVITY_LOOKUP:
+////                    WotLookup.Result result = (WotLookup.Result)intent.getExtras().getSerializable(WotLookup.Result.class.getSimpleName());
+////                    Bundle args = new Bundle();
+////                    args.putLong(BaseColumns._ID, currencyId);
+////                    args.putSerializable(WotLookup.Result.class.getSimpleName(),result);
+////                    Fragment fragment = WalletIdentityFragment.newInstance(args);
+////                    FragmentManager fragmentManager = getFragmentManager();
+////
+////                    fragmentManager.beginTransaction()
+////                            .setCustomAnimations(
+////                                    R.animator.delayed_fade_in,
+////                                    R.animator.fade_out,
+////                                    R.animator.delayed_fade_in,
+////                                    R.animator.fade_out)
+////                            .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
+////                            .addToBackStack(fragment.getClass().getSimpleName())
+////                            .commit();
+////                    closeDrawer();
+////                    break;
+////                case RESULT_SCAN:
+////                    WotLookup.Result identity = (WotLookup.Result)intent.getExtras().getSerializable(WotLookup.Result.class.getSimpleName());
+////                    Bundle args = new Bundle();
+////                    args.putLong(BaseColumns._ID, currencyId);
+////                    args.putSerializable(WotLookup.Result.class.getSimpleName(),result);
+////                    Fragment fragment = WalletIdentityFragment.newInstance(args);
+////                    FragmentManager fragmentManager = getFragmentManager();
+////
+////                    fragmentManager.beginTransaction()
+////                            .setCustomAnimations(
+////                                    R.animator.delayed_fade_in,
+////                                    R.animator.fade_out,
+////                                    R.animator.delayed_fade_in,
+////                                    R.animator.fade_out)
+////                            .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
+////                            .addToBackStack(fragment.getClass().getSimpleName())
+////                            .commit();
+////                    // close the drawer
+////                    closeDrawer();
+////                    break;
+//            }
+//        }
+//    }
 
     public void setDrawerIndicatorEnabled(final boolean enabled) {
         if (mToggle.isDrawerIndicatorEnabled() == enabled) {
@@ -382,10 +383,10 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         offsetAnimator.start();
     }
 
-    public void clearAllFragments() {
-        getFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
-        setTitle(R.string.app_name);
-    }
+//    public void clearAllFragments() {
+//        getFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+//        setTitle(R.string.app_name);
+//    }
 
     public void closeDrawer() {
         mDrawerLayout.closeDrawer(findViewById(R.id.drawer_panel));
@@ -416,7 +417,8 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 //                break;
             case R.id.drawer_rules:
                 removeList(false);
-                setCurrentFragment(RulesFragment.newInstance(currency));
+//                setCurrentFragment(RulesFragment.newInstance(currency));
+                setCurrentFragment(RulesBisFragment.newInstance(currency));
                 break;
 //            case R.id.drawer_peers:
 //                removeList(false);
@@ -453,38 +455,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 //        addFragment();
 //        displayFragment(currentFragment);
 //    }
-//
-//    private void displayListPeerFragment(){
-//        currentFragment = PeerListFragment.newInstance(currency);
-//        addFragment();
-//        displayFragment(currentFragment);
-//    }
-//
-//    public void displayIdentityFragment(IdentityContact identityContact){
-//        Bundle args = new Bundle();
-//        args.putSerializable(Application.IDENTITY_CONTACT, identityContact);
-//        currentFragment = IdentityFragment.newInstance(args);
-//        addFragment();
-//        displayFragment(currentFragment);
-//    }
-//
-//    @Override
-//    public void displayWalletFragment(Long walletId, Long identityId){
-//        currentFragment = WalletFragment.newInstance(walletId,identityId);
-//        addFragment();
-//        displayFragment(currentFragment);
-//    }
-//
-//    @Override
-//    public void displayCertification(String publicKey, Long currencyId, Long identityId){
-//        Bundle args = new Bundle();
-//        args.putString(Application.IDENTITY_PUBLICKEY, publicKey);
-//        args.putLong(Application.IDENTITY_ID, identityId);
-//        args.putLong(Application.IDENTITY_CURRENCY_ID, currencyId);
-//        currentFragment = CertificationFragment.newInstance(args);
-//        addFragment();
-//        displayFragment(currentFragment);
-//    }
+
 
     private void deconnection(boolean total){
         PreferenceManager.getDefaultSharedPreferences(getApplicationContext())
@@ -531,15 +502,4 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
             listFragment.add(f);
         }
     }
-
-//    @Override
-//    public void onFinish(Long currencyId) {
-//        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-//        SharedPreferences.Editor editor = preferences.edit();
-//        editor.putLong(BaseColumns._ID, currencyId);
-//        editor.apply();
-//        this.currencyId = currencyId;
-//        updateDrawer();
-//        displayListWalletFragment();
-//    }
 }

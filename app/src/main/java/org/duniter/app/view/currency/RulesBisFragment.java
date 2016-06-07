@@ -2,19 +2,45 @@ package org.duniter.app.view.currency;
 
 import android.app.Fragment;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.ScrollView;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import org.duniter.app.Application;
+import org.duniter.app.Format;
 import org.duniter.app.R;
+import org.duniter.app.model.Entity.BlockUd;
 import org.duniter.app.model.Entity.Currency;
+import org.duniter.app.model.EntityServices.BlockService;
+import org.duniter.app.services.SqlService;
+import org.duniter.app.technical.callback.CallbackBlock;
 import org.duniter.app.view.MainActivity;
 
-public class RulesBisFragment extends Fragment {
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.math.RoundingMode;
+import java.text.Normalizer;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+public class RulesBisFragment extends Fragment implements
+        SwipeRefreshLayout.OnRefreshListener {
 
     private static Currency currency;
+
+    private BlockUd lastUd;
+    private BlockUd currentBlock;
+
+    private ViewHolder holder;
+    private SwipeRefreshLayout mSwipeLayout;
 
     public static RulesBisFragment newInstance(Currency _currency) {
         currency = _currency;
@@ -22,11 +48,6 @@ public class RulesBisFragment extends Fragment {
         fragment.setArguments(new Bundle());
         return fragment;
     }
-
-
-//    public RulesFragment(Currency currency){
-//        this.currency = currency;
-//    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -50,12 +71,69 @@ public class RulesBisFragment extends Fragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         setHasOptionsMenu(true);
-        ViewHolder holder = new ViewHolder(view);
-        init(holder);
+        holder = new ViewHolder(view);
+
+        mSwipeLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_layout);
+        mSwipeLayout.setOnRefreshListener(this);
+
+        onRefresh();
     }
 
-    private void init(ViewHolder holder){
+    private void initDu(){
+        int decimal = PreferenceManager.getDefaultSharedPreferences(getActivity()).getInt(Application.DECIMAL, 2);
 
+        BigInteger mass = currentBlock.getMonetaryMass();
+        BigInteger massMember = currentBlock.getMonetaryMass().divide(new BigInteger(String.valueOf(currentBlock.getMembersCount())));
+        BigInteger du = lastUd.getDividend();
+
+        BigDecimal _mass = new BigDecimal(mass).divide(new BigDecimal(du),decimal, RoundingMode.HALF_EVEN);
+        BigDecimal _massMember = new BigDecimal(massMember).divide(new BigDecimal(du),decimal, RoundingMode.HALF_EVEN);
+        BigDecimal _du = new BigDecimal(du).divide(new BigDecimal(du),decimal, RoundingMode.HALF_EVEN);
+
+        String cActual = _du.divide(_massMember,8, RoundingMode.HALF_EVEN).multiply(new BigDecimal("100")).setScale(2, BigDecimal.ROUND_HALF_EVEN).toString();
+
+        if (!holder.switch2.isChecked()){
+            holder.monetary_mass.setText(Format.quantitativeFormatter(getActivity(),mass,currency.getName()));
+            holder.monetary_member.setText(Format.quantitativeFormatter(getActivity(),massMember,currency.getName()));
+            holder.universale_dividende.setText(Format.quantitativeFormatter(getActivity(),du,currency.getName()));
+        }else{
+            holder.monetary_mass.setText(Format.relativeFormatter(getActivity(),_mass));
+            holder.monetary_member.setText(Format.relativeFormatter(getActivity(),_massMember));
+            holder.universale_dividende.setText(Format.relativeFormatter(getActivity(),_du));
+        }
+
+        holder.c.setText(cActual+"%");
+    }
+
+    private void init(){
+
+        holder.currency_name.setText(currency.getName());
+        holder.nb_member.setText(String.valueOf(currentBlock.getMembersCount()));
+        holder.nb_new_member.setText(String.valueOf(currentBlock.getMembersCount()-lastUd.getMembersCount()));
+        holder.current_time.setText(new SimpleDateFormat("dd MMM yyyy\nHH:mm").format(new Date(currentBlock.getMedianTime() * 1000)));
+        holder.common_difficulty.setText(String.valueOf(currentBlock.getPowMin()));
+
+        holder.switch2.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                initDu();
+            }
+        });
+
+        initDu();
+        mSwipeLayout.setRefreshing(false);
+    }
+
+    @Override
+    public void onRefresh() {
+        lastUd = SqlService.getBlockSql(getActivity()).last(currency.getId());
+        BlockService.getCurrentBlock(getActivity(), currency, new CallbackBlock() {
+            @Override
+            public void methode(BlockUd blockUd) {
+                currentBlock = blockUd;
+                init();
+            }
+        });
     }
 
     public static class ViewHolder {

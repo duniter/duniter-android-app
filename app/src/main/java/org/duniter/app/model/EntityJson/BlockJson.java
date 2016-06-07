@@ -51,6 +51,7 @@ public final class BlockJson {
         res.setMembersCount(block.membersCount);
         res.setMonetaryMass(new BigInteger(String.valueOf(block.monetaryMass)));
         res.setHash(block.hash);
+        res.setPowMin(block.powMin);
         res.setDividend(new BigInteger(String.valueOf(block.dividend)));
 
         return res;

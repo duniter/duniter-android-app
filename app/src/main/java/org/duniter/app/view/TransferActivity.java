@@ -33,6 +33,8 @@ import android.widget.Toast;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
+import org.duniter.app.model.EntityServices.IdentityService;
+import org.duniter.app.technical.callback.CallbackLookup;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -41,6 +43,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import org.duniter.app.Application;
 import org.duniter.app.Format;
@@ -341,34 +344,35 @@ public class TransferActivity extends ActionBarActivity implements View.OnClickL
             return;
 
         IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
-//        if (requestCode == Application.ACTIVITY_LOOKUP) {
-//            getIntent().putExtra(Application.EXTRA_IS_CONTACT,false);
-//            identityConatct = (IdentityContact) intent.getSerializableExtra(Application.IDENTITY_LOOKUP);
-//            if (identityConatct.getPublicKey().matches(PUBLIC_KEY_REGEX)) {
-//                mReceiverPublicKey.setText(identityConatct.getPublicKey());
-//                mContact.setText(identityConatct.getUid());
-//            } else {
-//                mReceiverPublicKey.setText("");
-//            }
-//        } else {
-//            if (scanResult.getContents().matches(PUBLIC_KEY_REGEX)) {
-//                mContact.setText("Find by Qr Code");
-//                Map<String, String> data = Format.parseUri(scanResult.getContents());
-//
-//                String uid = Format.isNull(data.get(Format.UID));
-//                String publicKey = Format.isNull(data.get(Format.PUBLICKEY));
-//                String currencyName = Format.isNull(data.get(Format.CURRENCY));
-//
-//                mReceiverPublicKey.setText(publicKey);
-//                if(uid.isEmpty()) {
-//                    FindIdentityTask findIdentityTask = new FindIdentityTask(this, mcurrencyId, publicKey, this);
-//                    findIdentityTask.execute();
-//                }else{
-//                    mContact.setText(uid);
-//                }
-//            } else
-//                mReceiverPublicKey.setText("");
-//        }
+        if (scanResult.getContents().matches(PUBLIC_KEY_REGEX)) {
+            mContact.setText("Find by Qr Code");
+            Map<String, String> data = Format.parseUri(scanResult.getContents());
+
+            String uid = Format.isNull(data.get(Format.UID));
+            String publicKey = Format.isNull(data.get(Format.PUBLICKEY));
+            String currencyName = Format.isNull(data.get(Format.CURRENCY));
+
+//            Currency c = SqlService.getCurrencySql(this).getByName(currencyName);
+            Currency c = walletSelected.getCurrency();
+
+            mReceiverPublicKey.setText(publicKey);
+            if(uid.isEmpty() && c!=null) {
+                final Context ctx = this;
+                IdentityService.getIdentity(this, c, publicKey, new CallbackLookup() {
+                    @Override
+                    public void methode(List<Contact> contactList) {
+                        if (contactList.size()!=0){
+                            mContact.setText(contactList.get(0).getUid());
+                        }else{
+                            Toast.makeText(ctx,getString(R.string.no_identity_found),Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+            }else{
+                mContact.setText(uid);
+            }
+        } else
+            mReceiverPublicKey.setText("");
     }
 
     public void showDialog(){
