@@ -16,6 +16,11 @@
     <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="android.permission.WRITE_CONTACTS" />
 
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_LOGS" />
+    <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES" />
+
     <uses-permission android:name="android.permission.VIBRATE" />
 
 
@@ -85,6 +90,17 @@
             android:name="org.duniter.app.AppPreferences"
             android:label="@string/preference"
             android:screenOrientation="portrait">
+        </activity>
+
+        <activity
+            android:name="org.duniter.app.SendLog"
+            android:theme="@android:style/Theme.Dialog"
+            android:textAppearance="@android:style/TextAppearance.Large"
+            android:windowSoftInputMode="stateHidden">
+            <intent-filter>
+                <action android:name="org.duniter.app.SEND_LOG" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
         </activity>
 
         <!--<service-->

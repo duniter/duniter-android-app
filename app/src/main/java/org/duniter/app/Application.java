@@ -1,10 +1,14 @@
 package org.duniter.app;
 
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Toast;
 
 public class Application extends android.app.Application{
 
@@ -35,11 +39,49 @@ public class Application extends android.app.Application{
 
     private static Context      mContext;
 
+    private boolean has_send_log = false;
+
+    public boolean getHasSendLog(){
+        return has_send_log;
+    }
+
+    public void setHas_send_log(boolean b){
+        has_send_log = b;
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
         mContext = getApplicationContext();
         requestSync();
+
+        Thread.setDefaultUncaughtExceptionHandler (new Thread.UncaughtExceptionHandler()
+        {
+            @Override
+            public void uncaughtException (Thread thread, Throwable e)
+            {
+                handleUncaughtException (thread, e);
+            }
+        });
+    }
+
+    public void handleUncaughtException (Thread thread, Throwable e)
+    {
+        e.printStackTrace(); // not all Android versions will print the stack trace automatically
+        String ms = e.getMessage() +":\n";
+        StackTraceElement[] stack = e.getStackTrace();
+        if (stack != null) {
+            for (StackTraceElement aStack : stack) {
+                ms += aStack.toString()+"\n";
+            }
+        }
+        Log.e("FATAL",ms+"\n");
+        Intent intent = new Intent ();
+        intent.setAction ("org.duniter.app.SEND_LOG");
+        intent.setFlags (Intent.FLAG_ACTIVITY_NEW_TASK); // required when starting from Application
+        startActivity (intent);
+
+        System.exit(1);// kill off the crashed app
     }
 
     public static Context getContext() {

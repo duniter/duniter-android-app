@@ -449,6 +449,9 @@
     <string name="common_difficulty">Common difficulty</string>
     <string name="no_identity_found">No identity found</string>
     <string name="directory">Directory</string>
+    <string name="send_log">An error has occurred and the application has been stopped.\nWant to send an email with the details of the error to the developers ?</string>
+    <string name="no">No</string>
+    <string name="yes">Yes</string>
 
 
     <string-array name="node" translatable="false">

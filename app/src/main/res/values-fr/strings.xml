@@ -450,5 +450,8 @@
     <string name="common_difficulty">Niveau de difficulté</string>
     <string name="no_identity_found">Pas d\'ientité trouvé</string>
     <string name="directory">Annuaire</string>
+    <string name="send_log">Une erreur est survenue et l\'application a été arrêter.\nVoulez-vous envoyer un mail avec le détail de l\'erreur aux développeurs?</string>
+    <string name="no">Non</string>
+    <string name="yes">Oui</string>
 
 </resources>
