@@ -409,7 +409,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
                 break;
             case R.id.drawer_contacts:
                 removeList(false);
-                setCurrentFragment(IdentityListFragment.newInstance(currency.getId(),true,true));
+                setCurrentFragment(IdentityListFragment.newInstance(currency,"",false,false,false,true,true));
                 break;
 //            case R.id.drawer_currency:
 //                removeList(false);

@@ -38,56 +38,58 @@ public class ContactSql extends AbstractSql<Contact> {
             result = cursor.getString(cursor.getColumnIndex(ContactTable.ALIAS));
         }
         cursor.close();
-//        if (!cursor.isClosed()){
-//            cursor.close();
-//        }
         return result;
     }
 
-    public Map<String, String> getMap(Long currencyId) {
-        Map<String,String> result = new HashMap<>();
+    public Map<String,Contact> findByPublicKey(Currency currency, String publicKey) {
+        Map<String,Contact> contacts = new HashMap<>();
+        Contact contact;
+        Cursor cursor = query(
+                ContactTable.CURRENCY_ID + "=? AND " + ContactTable.PUBLIC_KEY + " LIKE ?",
+                new String[]{String.valueOf(currency.getId()),"%"+publicKey+"%"},ContactTable.PUBLIC_KEY+" DESC");
+        if (cursor.moveToFirst()){
+            do {
+                contact = fromCursor(cursor);
+                contact.setCurrency(currency);
+                contacts.put(contact.getPublicKey(),contact);
+            }while (cursor.moveToNext());
+        }
+        cursor.close();
+        return contacts;
+    }
+
+    public Map<String,Contact> findByName(Currency currency,String search) {
+        Map<String,Contact> contacts = new HashMap<>();
+        Contact contact;
+        Cursor cursor = query(
+                ContactTable.CURRENCY_ID + "=? AND (" + ContactTable.ALIAS + " LIKE ? OR " + ContactTable.UID + " LIKE ? )",
+                new String[]{String.valueOf(currency.getId()),search+"%",search+"%"},ContactTable.ALIAS+" DESC");
+        if (cursor.moveToFirst()){
+            do {
+                contact = fromCursor(cursor);
+                contact.setCurrency(currency);
+                contacts.put(contact.getPublicKey(),contact);
+            }while (cursor.moveToNext());
+        }
+        cursor.close();
+        return contacts;
+    }
+
+    public Map<String, Contact> findAllInMap(Currency currency) {
+        Map<String,Contact> contacts = new HashMap<>();
+        Contact contact;
         Cursor cursor = query(
                 ContactTable.CURRENCY_ID + "=?",
-                new String[]{String.valueOf(currencyId)});
+                new String[]{String.valueOf(currency.getId())},ContactTable.ALIAS+" ASC");
         if (cursor.moveToFirst()){
             do {
-                String name = cursor.getString(cursor.getColumnIndex(ContactTable.ALIAS));
-                String uid = cursor.getString(cursor.getColumnIndex(ContactTable.UID));
-
-                String val = (name==null || name.length()==0) ? uid : name;
-                result.put(cursor.getString(cursor.getColumnIndex(ContactTable.PUBLIC_KEY)),val);
+                contact = fromCursor(cursor);
+                contact.setCurrency(currency);
+                contacts.put(contact.getPublicKey(),contact);
             }while (cursor.moveToNext());
         }
         cursor.close();
-        return result;
-    }
-
-    public List<Contact> findByPublicKey(Long currencyId, String publicKey) {
-        List<Contact> contacts = new ArrayList<>();
-        Cursor cursor = query(
-                ContactTable.CURRENCY_ID + "=? AND " + ContactTable.PUBLIC_KEY + "=?",
-                new String[]{String.valueOf(currencyId),publicKey},ContactTable.PUBLIC_KEY+" ASC");
-        if (cursor.moveToFirst()){
-            do {
-                contacts.add(fromCursor(cursor));
-            }while (cursor.moveToNext());
-        }
-        cursor.close();
-        return null;
-    }
-
-    public List<Contact> findByName(Long currencyId,String search) {
-        List<Contact> contacts = new ArrayList<>();
-        Cursor cursor = query(
-                ContactTable.CURRENCY_ID + "=? AND (" + ContactTable.UID + "=? OR " + ContactTable.ALIAS + "=? )",
-                new String[]{String.valueOf(currencyId),search,search},ContactTable.UID+" ASC");
-        if (cursor.moveToFirst()){
-            do {
-                contacts.add(fromCursor(cursor));
-            }while (cursor.moveToNext());
-        }
-        cursor.close();
-        return null;
+        return contacts;
     }
 
 
@@ -133,7 +135,11 @@ public class ContactSql extends AbstractSql<Contact> {
     public ContentValues toContentValues(Contact entity) {
         ContentValues values = new ContentValues();
         values.put(ContactTable.CURRENCY_ID, entity.getCurrency().getId());
-        values.put(ContactTable.ALIAS, entity.getAlias());
+        if (entity.getAlias()!=null && entity.getAlias().length()>0){
+            values.put(ContactTable.ALIAS, entity.getAlias());
+        }else{
+            values.put(ContactTable.ALIAS,entity.getUid());
+        }
         values.put(ContactTable.UID, entity.getUid());
         values.put(ContactTable.PUBLIC_KEY, entity.getPublicKey());
         return values;

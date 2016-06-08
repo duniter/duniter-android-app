@@ -40,6 +40,7 @@ import org.duniter.app.technical.callback.CallbackBlock;
 import org.duniter.app.technical.callback.CallbackCertify;
 import org.duniter.app.technical.callback.CallbackIdentity;
 import org.duniter.app.technical.callback.CallbackLookup;
+import org.duniter.app.technical.callback.CallbackLookupFilter;
 import org.duniter.app.technical.callback.CallbackMap;
 import org.duniter.app.technical.callback.CallbackRequirement;
 import org.duniter.app.technical.crypto.AddressFormatException;
@@ -49,19 +50,41 @@ import org.duniter.app.technical.crypto.AddressFormatException;
  */
 public class IdentityService {
 
-    public static void getIdentity(Context context, final Currency currency, String search, final CallbackLookup callback){
+    public static void getIdentity(Context context, final Currency currency,final String search,final boolean filtred, final List<String> publicKeysfilter, final boolean findByPublicKey, final CallbackLookupFilter callback){
         LookupWeb lookupWeb = new LookupWeb(context,currency,search);
         lookupWeb.getData(new WebService.WebServiceInterface() {
             @Override
             public void getDataFinished(int code, String response) {
                 if (code == 200){
-                    LookupJson lookupJson = LookupJson.fromJson(response);
-                    List<Contact> contactList = LookupJson.fromLookup(lookupJson,currency);
+                    List<Contact> contactList = LookupJson.fromJson(response,currency,search,filtred,findByPublicKey,publicKeysfilter);
+                    if (callback!=null){
+                        callback.methode(contactList,search);
+                    }
+                }else{
+                    Log.d("Lookup","error code:"+code);
+                    if (callback!=null){
+                        callback.methode(new ArrayList<Contact>(),search);
+                    }
+                }
+            }
+        });
+    }
+
+    public static void getIdentity(Context context, final Currency currency,final String search, final CallbackLookup callback){
+        LookupWeb lookupWeb = new LookupWeb(context,currency,search);
+        lookupWeb.getData(new WebService.WebServiceInterface() {
+            @Override
+            public void getDataFinished(int code, String response) {
+                if (code == 200){
+                    List<Contact> contactList = LookupJson.fromJson(response,currency,search,false,false,null);
                     if (callback!=null){
                         callback.methode(contactList);
                     }
                 }else{
                     Log.d("Lookup","error code:"+code);
+                    if (callback!=null){
+                        callback.methode(new ArrayList<Contact>());
+                    }
                 }
             }
         });

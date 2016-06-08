@@ -35,6 +35,7 @@ import com.google.zxing.integration.android.IntentResult;
 
 import org.duniter.app.model.EntityServices.IdentityService;
 import org.duniter.app.technical.callback.CallbackLookup;
+import org.duniter.app.view.identity.IdentityListFragment;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -60,7 +61,6 @@ import org.duniter.app.model.document.TxDoc;
 import org.duniter.app.services.SqlService;
 import org.duniter.app.services.WebService;
 import org.duniter.app.technical.crypto.AddressFormatException;
-import org.duniter.app.view.identity.IdentityListFragment;
 import org.duniter.app.view.dialog.ConverterDialog;
 import org.duniter.app.view.wallet.WalletListFragment;
 
@@ -535,7 +535,7 @@ public class TransferActivity extends ActionBarActivity implements View.OnClickL
         Fragment fragment;
 
         if(mReceiverPublicKey.getText().toString().isEmpty()){
-            fragment = IdentityListFragment.newInstance(currency.getId(), true, false,"");
+            fragment  = IdentityListFragment.newInstance(currency,"",true,false,false,false,true);
         }else{
             String search ="";
             if (mReceiverPublicKey.getText().toString().length()>5){
@@ -543,7 +543,7 @@ public class TransferActivity extends ActionBarActivity implements View.OnClickL
             }else{
                 search = mReceiverPublicKey.getText().toString();
             }
-            fragment = IdentityListFragment.newInstance(currency.getId(), true, false,search);
+            fragment = IdentityListFragment.newInstance(currency,search,true,false,false,false,true);
         }
         FragmentManager fragmentManager = getFragmentManager();
 

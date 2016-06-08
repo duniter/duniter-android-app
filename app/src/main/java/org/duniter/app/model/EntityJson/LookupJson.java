@@ -15,12 +15,10 @@ public final class LookupJson {
     public Boolean partial;
     public Result[] results;
 
-    public static LookupJson fromJson(String response) {
+    public static List<Contact> fromJson(String response, Currency currency, String search, boolean filtred, boolean findByPublicKey, List<String> publicKeysfilter) {
         Gson gson = new Gson();
-        return gson.fromJson(response, LookupJson.class);
-    }
+        LookupJson lookupJson = gson.fromJson(response, LookupJson.class);
 
-    public static List<Contact> fromLookup(LookupJson lookupJson, Currency currency){
         List<Contact> contactList = new ArrayList<>();
         for (Result result:lookupJson.results){
             Contact contact = new Contact();
@@ -32,7 +30,23 @@ public final class LookupJson {
             contact.setPublicKey(result.pubkey);
             contact.setTimestamp(result.uids[0].meta.timestamp);
             contact.setSignature(result.uids[0].self);
-            contactList.add(contact);
+
+            if (filtred){
+                if (publicKeysfilter==null || !publicKeysfilter.contains(contact.getPublicKey())){
+                    if (findByPublicKey){
+                        if (contact.getPublicKey().toLowerCase().contains(search.toLowerCase())){
+                            contactList.add(contact);
+                        }
+                    }else{
+                        String base = contact.getUid().toLowerCase().substring(0,search.length());
+                        if (base.equals(search.toLowerCase())){
+                            contactList.add(contact);
+                        }
+                    }
+                }
+            }else{
+                contactList.add(contact);
+            }
         }
         return contactList;
     }
