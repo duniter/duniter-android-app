@@ -454,5 +454,8 @@
     <string name="no">Non</string>
     <string name="yes">Oui</string>
     <string name="identities">Identités</string>
+    <string name="dont_know_currency">La monnaie utilisée n\'est pas reconnue</string>
+    <string name="found_issue_qrcode">Il y a un problème avec le QrCode</string>
+    <string name="contact_not_correct_currency">Cette identité n\'utilise pas la bonne monnaie</string>
 
 </resources>

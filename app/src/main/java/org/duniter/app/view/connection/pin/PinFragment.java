@@ -162,9 +162,11 @@ public class PinFragment extends Fragment{
     }
 
     private void press(Button b){
-        code1 += b.getText();
-        holder.listPin.get(code1.length()-1).setImageResource(R.drawable.ic_dot_activate);
-        change();
+        if(code1.length()<4) {
+            code1 += b.getText();
+            holder.listPin.get(code1.length() - 1).setImageResource(R.drawable.ic_dot_activate);
+            change();
+        }
     }
 
     private void change(){

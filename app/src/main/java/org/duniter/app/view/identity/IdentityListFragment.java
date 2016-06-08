@@ -2,6 +2,7 @@ package org.duniter.app.view.identity;
 
 import android.app.ListFragment;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
@@ -18,6 +19,8 @@ import android.widget.ProgressBar;
 import android.widget.SearchView;
 import android.widget.Switch;
 import android.widget.Toast;
+
+import com.google.zxing.integration.android.IntentIntegrator;
 
 import org.duniter.app.Application;
 import org.duniter.app.R;
@@ -154,6 +157,7 @@ public class IdentityListFragment extends ListFragment
         progress.bringToFront();
         advancedSearch = (LinearLayout) view.findViewById(R.id.search_advenced);
         ImageButton addContactButton = (ImageButton) view.findViewById(R.id.add_contact_button);
+        ImageButton searchQrcodeButton = (ImageButton) view.findViewById(R.id.search_qrcode);
         advancedSearch = (LinearLayout) view.findViewById(R.id.search_advenced);
         Switch switch1 = (Switch) view.findViewById(R.id.switch1);
         switch1.setChecked(findByPublicKey);
@@ -178,8 +182,16 @@ public class IdentityListFragment extends ListFragment
                     actionAddContact();
                 }
             });
+            searchQrcodeButton.setVisibility(View.VISIBLE);
+            searchQrcodeButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    actionSearchQrcode();
+                }
+            });
         }else{
             addContactButton.setVisibility(View.GONE);
+            searchQrcodeButton.setVisibility(View.GONE);
         }
 
         initData();
@@ -233,10 +245,14 @@ public class IdentityListFragment extends ListFragment
 //        startActivityForResult(intent,215565);
     }
 
-    private void actionScanQrCode(){
-        Intent intent = new Intent(getActivity(), FindByQrCode.class);
-        intent.putExtra(FindByQrCode.SCAN_QR_CODE, true);
-        startActivityForResult(intent, MainActivity.RESULT_SCAN);
+    private void actionSearchQrcode() {
+        IntentIntegrator integrator = new IntentIntegrator(getActivity());
+        integrator.setDesiredBarcodeFormats(IntentIntegrator.QR_CODE_TYPES);
+        integrator.setOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        integrator.initiateScan();
+//        Intent intent = new Intent(getActivity(), FindByQrCode.class);
+//        intent.putExtra(FindByQrCode.SCAN_QR_CODE, true);
+//        startActivityForResult(intent, MainActivity.RESULT_SCAN);
     }
 
     @Override

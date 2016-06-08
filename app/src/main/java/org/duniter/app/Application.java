@@ -55,14 +55,14 @@ public class Application extends android.app.Application{
         mContext = getApplicationContext();
         requestSync();
 
-        Thread.setDefaultUncaughtExceptionHandler (new Thread.UncaughtExceptionHandler()
-        {
-            @Override
-            public void uncaughtException (Thread thread, Throwable e)
-            {
-                handleUncaughtException (thread, e);
-            }
-        });
+//        Thread.setDefaultUncaughtExceptionHandler (new Thread.UncaughtExceptionHandler()
+//        {
+//            @Override
+//            public void uncaughtException (Thread thread, Throwable e)
+//            {
+//                handleUncaughtException (thread, e);
+//            }
+//        });
     }
 
     public void handleUncaughtException (Thread thread, Throwable e)

@@ -21,20 +21,30 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 import org.duniter.app.AppPreferences;
 import org.duniter.app.Application;
+import org.duniter.app.Format;
 import org.duniter.app.R;
 import org.duniter.app.model.Entity.BlockUd;
+import org.duniter.app.model.Entity.Contact;
 import org.duniter.app.model.Entity.Currency;
 import org.duniter.app.model.EntityServices.BlockService;
 import org.duniter.app.model.EntityServices.CurrencyService;
+import org.duniter.app.model.EntityServices.IdentityService;
 import org.duniter.app.services.SqlService;
 import org.duniter.app.technical.callback.CallbackBlock;
+import org.duniter.app.technical.callback.CallbackLookup;
 import org.duniter.app.view.currency.RulesBisFragment;
+import org.duniter.app.view.identity.IdentityFragment;
 import org.duniter.app.view.identity.IdentityListFragment;
 import org.duniter.app.view.currency.BlockListFragment;
 import org.duniter.app.view.currency.RulesFragment;
@@ -59,7 +69,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
     private TextView drawerCreditView;
     private Fragment currentFragment;
     private ArrayList<Fragment> listFragment = null;
-    public static int RESULT_SCAN = 10562;
+    public static int RESULT_SCAN = 49374;
 
     private static Long wId;
 
@@ -289,7 +299,59 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         super.onBackPressed();
     }
 
-//    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        super.onActivityResult(requestCode, resultCode, intent);
+        if (resultCode == RESULT_OK){
+            if (requestCode == RESULT_SCAN){
+                IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
+                Map<String, String> data = Format.parseUri(scanResult.getContents());
+                Currency currency;
+
+                final String uid = Format.isNull(data.get(Format.UID));
+                final String publicKey = Format.isNull(data.get(Format.PUBLICKEY));
+                final String currencyName = Format.isNull(data.get(Format.CURRENCY));
+
+                if (currencyName.length()!=0){
+                    currency = SqlService.getCurrencySql(this).getByName(currencyName);
+                    if (currency == null){
+                        Toast.makeText(this,getString(R.string.dont_know_currency),Toast.LENGTH_LONG).show();
+                    }
+                }else{
+                    if(this.currency == null){
+                        Toast.makeText(this,getString(R.string.contact_not_correct_currency),Toast.LENGTH_LONG).show();
+                        currency = null;
+                    }else{
+                        currency = this.currency;
+                    }
+                }
+
+                if (currency != null) {
+                    IdentityService.getIdentity(this, currency, publicKey, new CallbackLookup() {
+                        @Override
+                        public void methode(List<Contact> contactList) {
+                            if (contactList.size() != 0) {
+                                if (uid.length() == 0 || uid.equals(contactList.get(0).getUid())) {
+                                    Contact contact = contactList.get(0);
+                                    Bundle args = new Bundle();
+                                    args.putSerializable(Application.CONTACT, contact);
+                                    setCurrentFragment(IdentityFragment.newInstance(args));
+                                }else{
+                                    Toast.makeText(ctx,ctx.getString(R.string.found_issue_qrcode),Toast.LENGTH_LONG).show();
+                                }
+                            }else{
+                                Toast.makeText(ctx,getString(R.string.no_identity_found),Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
+                }
+            }
+        }else{
+            return;
+        }
+    }
+
+    //    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
 //        super.onActivityResult(requestCode, resultCode, intent);
 //        if(resultCode == RESULT_OK){
 //            Long currencyId = intent.getExtras().getLong(Application.CURRENCY_ID);

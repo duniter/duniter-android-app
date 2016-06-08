@@ -34,8 +34,11 @@ import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
 import org.duniter.app.model.EntityServices.IdentityService;
+import org.duniter.app.technical.PartialRegexInputFilter;
 import org.duniter.app.technical.callback.CallbackLookup;
+import org.duniter.app.view.identity.IdentityFragment;
 import org.duniter.app.view.identity.IdentityListFragment;
+import org.duniter.app.widget.ActionEditText;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -73,7 +76,6 @@ public class TransferActivity extends ActionBarActivity implements View.OnClickL
     */
     private static final String COMMENT_REGEX = "^[\\p{Alnum}\\p{Space}{\\-_:/;\\*\\[\\]\\(\\)\\?\\!\\^\\+=@&~\\#\\{\\}\\|\\\\<>%\\.}]{0,255}";
     private static final String AMOUNT_REGEX = "^[0-9]{1,3}(\\.[0-9]{0,8})?$";
-    private static final String PUBLIC_KEY_REGEX = "[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{43,44}$";
     public static final String SEARCH_IDENTITY = "search_identity";
     private TextView mWalletAlias;
     private TextView mWalletAmount;
@@ -82,7 +84,7 @@ public class TransferActivity extends ActionBarActivity implements View.OnClickL
     private TextView defaultAmount;
     private TextView noDataWallet;
 
-    private EditText mReceiverPublicKey;
+    private ActionEditText mReceiverPublicKey;
     private EditText amount;
     private EditText mComment;
 
@@ -219,7 +221,12 @@ public class TransferActivity extends ActionBarActivity implements View.OnClickL
         mWalletAmount = (TextView) findViewById(R.id.wallet_amount);
         mWalletDefaultAmount = (TextView) findViewById(R.id.wallet_default_amount);
 
-        mReceiverPublicKey = (EditText) findViewById(R.id.receiver_public_key);
+        mReceiverPublicKey = (ActionEditText) findViewById(R.id.receiver_public_key);
+        mReceiverPublicKey.setFilters(
+                new InputFilter[] {
+                        new PartialRegexInputFilter(Format.PUBLIC_KEY_REGEX)
+                }
+        );
 
         amount = (EditText) findViewById(R.id.amount);
 
@@ -227,19 +234,49 @@ public class TransferActivity extends ActionBarActivity implements View.OnClickL
         spinnerUnit = (Spinner) findViewById(R.id.spinner_unit);
 
         mComment = (EditText) findViewById(R.id.comment);
-        InputFilter filter = new InputFilter() {
-            public CharSequence filter(CharSequence source, int start, int end,
-                                       Spanned dest, int dstart, int dend) {
-                char[] chars = {'\'','"'};
-                for (int i = start; i < end; i++) {
-                    if (new String(chars).contains(String.valueOf(source.charAt(i)))) {
-                        return "";
-                    }
+        mComment.setFilters(
+                new InputFilter[] {
+                        new PartialRegexInputFilter(Format.COMMENT_REGEX)
                 }
-                return null;
-            }
-        };
-        mComment.setFilters(new InputFilter[] { filter });
+        );
+//        mComment.addTextChangedListener(
+//                new TextWatcher(){
+//
+//                    @Override
+//                    public void afterTextChanged(Editable s) {
+//                        String value  = s.toString();
+//                        if(value.matches(regex))
+//                            txt.setTextColor(Color.BLACK);
+//                        else
+//                            txt.setTextColor(Color.RED);
+//                    }
+//
+//                    @Override
+//                    public void beforeTextChanged(CharSequence s, int start,
+//                                                  int count, int after) {}
+//
+//                    @Override
+//                    public void onTextChanged(CharSequence s, int start,
+//                                              int before, int count) {}
+//
+//                }
+//        );
+
+
+
+//        InputFilter filter = new InputFilter() {
+//            public CharSequence filter(CharSequence source, int start, int end,
+//                                       Spanned dest, int dstart, int dend) {
+//                char[] chars = {'\'','"'};
+//                for (int i = start; i < end; i++) {
+//                    if (new String(chars).contains(String.valueOf(source.charAt(i)))) {
+//                        return "";
+//                    }
+//                }
+//                return null;
+//            }
+//        };
+//        mComment.setFilters(new InputFilter[] { filter });
     }
 
     private void majDefaultAmount(){
@@ -340,39 +377,64 @@ public class TransferActivity extends ActionBarActivity implements View.OnClickL
 
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
-        if (resultCode != RESULT_OK)
-            return;
+        if (resultCode == RESULT_OK) {
+            if (requestCode == MainActivity.RESULT_SCAN) {
+                IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
+                Map<String, String> data = Format.parseUri(scanResult.getContents());
+                Currency c = null;
 
-        IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
-        if (scanResult.getContents().matches(PUBLIC_KEY_REGEX)) {
-            mContact.setText("Find by Qr Code");
-            Map<String, String> data = Format.parseUri(scanResult.getContents());
+                final String uid = Format.isNull(data.get(Format.UID));
+                final String publicKey = Format.isNull(data.get(Format.PUBLICKEY));
+                final String currencyName = Format.isNull(data.get(Format.CURRENCY));
 
-            String uid = Format.isNull(data.get(Format.UID));
-            String publicKey = Format.isNull(data.get(Format.PUBLICKEY));
-            String currencyName = Format.isNull(data.get(Format.CURRENCY));
-
-//            Currency c = SqlService.getCurrencySql(this).getByName(currencyName);
-            Currency c = walletSelected.getCurrency();
-
-            mReceiverPublicKey.setText(publicKey);
-            if(uid.isEmpty() && c!=null) {
-                final Context ctx = this;
-                IdentityService.getIdentity(this, c, publicKey, new CallbackLookup() {
-                    @Override
-                    public void methode(List<Contact> contactList) {
-                        if (contactList.size()!=0){
-                            mContact.setText(contactList.get(0).getUid());
+                if (currencyName.length()!=0){
+                    if (currency != null){
+                        if (currency.getName().equals(currencyName)){
+                            c = currency;
                         }else{
-                            Toast.makeText(ctx,getString(R.string.no_identity_found),Toast.LENGTH_SHORT).show();
+                            Toast.makeText(this,getString(R.string.contact_not_correct_currency),Toast.LENGTH_LONG).show();
+                        }
+                    }else{
+                        c = SqlService.getCurrencySql(this).getByName(currencyName);
+                        if (c == null){
+                            Toast.makeText(this,getString(R.string.dont_know_currency),Toast.LENGTH_LONG).show();
                         }
                     }
-                });
-            }else{
-                mContact.setText(uid);
+
+                }else{
+                    if(this.currency == null){
+                        Toast.makeText(this,getString(R.string.contact_not_correct_currency),Toast.LENGTH_LONG).show();
+                        currency = null;
+                    }else{
+                        c = this.currency;
+                    }
+                }
+                mContact.setText("");
+                mReceiverPublicKey.setText("");
+                if (c != null) {
+                    final Context ctx = this;
+                    IdentityService.getIdentity(this, currency, publicKey, new CallbackLookup() {
+                        @Override
+                        public void methode(List<Contact> contactList) {
+                            if (contactList.size() != 0) {
+                                if (uid.length() == 0 || uid.equals(contactList.get(0).getUid())) {
+                                    Contact contact = contactList.get(0);
+                                    mContact.setText(contact.getUid());
+                                    mReceiverPublicKey.setText(contact.getPublicKey());
+                                }else{
+                                    Toast.makeText(ctx,ctx.getString(R.string.found_issue_qrcode),Toast.LENGTH_LONG).show();
+                                }
+                            }else{
+                                Toast.makeText(ctx,ctx.getString(R.string.no_identity_found),Toast.LENGTH_SHORT).show();
+                                mContact.setText("Find by Qr Code");
+                                mReceiverPublicKey.setText(publicKey);
+                            }
+                        }
+                    });
+                }
+
             }
-        } else
-            mReceiverPublicKey.setText("");
+        }
     }
 
     public void showDialog(){
@@ -667,7 +729,7 @@ public class TransferActivity extends ActionBarActivity implements View.OnClickL
     }
 
     private String validatePublicKey(String publicKey) {
-        if (!publicKey.matches(PUBLIC_KEY_REGEX)) {
+        if (!publicKey.matches(Format.PUBLIC_KEY_REGEX)) {
             mReceiverPublicKey.setError(getResources().getString(R.string.public_key_is_not_valid));
             mReceiverPublicKey.requestFocus();
             return null;
@@ -689,11 +751,13 @@ public class TransferActivity extends ActionBarActivity implements View.OnClickL
     }
 
     private String validateComment() {
-//        if (!comment.matches(COMMENT_REGEX)) {
-//            mComment.setError(getResources().getString(R.string.comment_is_not_valid));
-//            return null;
-//        }
-
+        if (!mComment.getText().toString().matches(Format.COMMENT_REGEX)) {
+            mComment.setError(getResources().getString(R.string.comment_is_not_valid));
+            mComment.requestFocus();
+            return null;
+        }else{
+            mReceiverPublicKey.setError(null);
+        }
         return mComment.getText().toString();
     }
 }

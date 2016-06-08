@@ -453,6 +453,9 @@
     <string name="no">No</string>
     <string name="yes">Yes</string>
     <string name="identities">Identities</string>
+    <string name="dont_know_currency">The currency is not recognized</string>
+    <string name="found_issue_qrcode">There is an issue with the QrCode</string>
+    <string name="contact_not_correct_currency">This identity does not use good money</string>
 
 
     <string-array name="node" translatable="false">

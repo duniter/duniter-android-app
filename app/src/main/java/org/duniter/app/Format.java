@@ -32,6 +32,9 @@ public class Format {
     private static final BigInteger TRILLIARD   = new BigInteger(("1 000 000 000 000 000 000 000").replaceAll(" ",""));
 
     private static final Map<BigInteger,String> PREFIX_VALUE;
+    public static final String PUBLIC_KEY_REGEX = "[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{43,44}";
+    public static final String UID_REGEX = "[A-Za-z0-9_-]*";
+    public static final String COMMENT_REGEX = "[ a-zA-Z0-9-_:/;*\\\\[\\\\]()?!^\\\\+=@&~#{}|\\\\\\\\<>%.]{0,255}";
 
     static{
         PREFIX_VALUE = new HashMap<>();

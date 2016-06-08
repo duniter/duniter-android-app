@@ -176,15 +176,17 @@
 
                         </LinearLayout>
 
-                        <EditText
+                        <org.duniter.app.widget.ActionEditText
                             android:id="@+id/receiver_public_key"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:layout_toLeftOf="@+id/search_button"
-                            android:singleLine="true"
+                            android:layout_toStartOf="@+id/search_button"
+                            android:selectAllOnFocus="true"
+                            android:inputType="textFilter|textMultiLine|textNoSuggestions"
+                            android:imeOptions="actionNext"
                             android:background="@null"
                             android:layout_centerVertical="true"/>
-
 
                     </RelativeLayout>
 
