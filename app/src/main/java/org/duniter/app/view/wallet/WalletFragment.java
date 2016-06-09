@@ -490,14 +490,22 @@ public class WalletFragment extends ListFragment
             actionTab.setVisibility(View.VISIBLE);
         }
 
-        Format.Currency.changeUnit(
-                getActivity(),
-                cursor.getString(currencyNameIndex),
-                new BigInteger(cursor.getString(amountIndex)),
-                new BigInteger(cursor.getString(dividendIndex)),
-                cursor.getInt(dtIndex),
-                firstAmount,
-                secondAmount, "");
+        String currencyName = cursor.getString(currencyNameIndex);
+        BigInteger amount = new BigInteger(cursor.getString(amountIndex));
+        BigInteger dividend = new BigInteger(cursor.getString(dividendIndex));
+        Long delay = cursor.getLong(dtIndex);
+
+        Format.initUnit(getActivity(),firstAmount,amount,delay,dividend,true,currencyName);
+        Format.initUnit(getActivity(),secondAmount,amount,delay,dividend,false,currencyName);
+
+//        Format.Currency.changeUnit(
+//                getActivity(),
+//                currencyName,
+//                amount,
+//                dividend,
+//                delay.intValue(),
+//                firstAmount,
+//                secondAmount, "");
     }
 
     private void updateRequirements(int currencySigQty, long nbRequirements, long membership, long membershipPending){

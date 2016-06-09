@@ -43,6 +43,7 @@ import org.duniter.app.model.EntityServices.IdentityService;
 import org.duniter.app.services.SqlService;
 import org.duniter.app.technical.callback.CallbackBlock;
 import org.duniter.app.technical.callback.CallbackLookup;
+import org.duniter.app.technical.format.Contantes;
 import org.duniter.app.view.currency.RulesBisFragment;
 import org.duniter.app.view.identity.IdentityFragment;
 import org.duniter.app.view.identity.IdentityListFragment;
@@ -308,9 +309,9 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
                 Map<String, String> data = Format.parseUri(scanResult.getContents());
                 Currency currency;
 
-                final String uid = Format.isNull(data.get(Format.UID));
-                final String publicKey = Format.isNull(data.get(Format.PUBLICKEY));
-                final String currencyName = Format.isNull(data.get(Format.CURRENCY));
+                final String uid = Format.isNull(data.get(Contantes.UID));
+                final String publicKey = Format.isNull(data.get(Contantes.PUBLICKEY));
+                final String currencyName = Format.isNull(data.get(Contantes.CURRENCY));
 
                 if (currencyName.length()!=0){
                     currency = SqlService.getCurrencySql(this).getByName(currencyName);

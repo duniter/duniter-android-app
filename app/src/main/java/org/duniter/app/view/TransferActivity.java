@@ -36,6 +36,9 @@ import com.google.zxing.integration.android.IntentResult;
 import org.duniter.app.model.EntityServices.IdentityService;
 import org.duniter.app.technical.PartialRegexInputFilter;
 import org.duniter.app.technical.callback.CallbackLookup;
+import org.duniter.app.technical.format.Contantes;
+import org.duniter.app.technical.format.Time;
+import org.duniter.app.technical.format.UnitCurrency;
 import org.duniter.app.view.identity.IdentityFragment;
 import org.duniter.app.view.identity.IdentityListFragment;
 import org.duniter.app.widget.ActionEditText;
@@ -128,7 +131,7 @@ public class TransferActivity extends ActionBarActivity implements View.OnClickL
             ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this,
                     android.R.layout.simple_spinner_item, list);
             spinnerUnit.setAdapter(dataAdapter);
-            spinnerUnit.setSelection(Format.Time.MINUTE);
+            spinnerUnit.setSelection(Time.MINUTE);
             spinnerUnit.setVisibility(View.VISIBLE);
             spinnerUnit.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
@@ -178,14 +181,14 @@ public class TransferActivity extends ActionBarActivity implements View.OnClickL
         switch (unit){
             case Application.UNIT_CLASSIC:
                 amount.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_SIGNED);
-                amount_label.setText(amount_label.getText()+" "+Format.Currency.unitCurrency(currency.getName()));
+                amount_label.setText(amount_label.getText()+" "+UnitCurrency.unitCurrency(currency.getName()));
                 break;
             case Application.UNIT_DU:
                 amount.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
                 amount_label.setText(amount_label.getText()+" "+getString(R.string.ud));
                 break;
             case Application.UNIT_TIME:
-                amount.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+                amount.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_SIGNED);
                 amount_label.setText(amount_label.getText()+" "+getString(R.string.time));
                 break;
         }
@@ -224,7 +227,7 @@ public class TransferActivity extends ActionBarActivity implements View.OnClickL
         mReceiverPublicKey = (ActionEditText) findViewById(R.id.receiver_public_key);
         mReceiverPublicKey.setFilters(
                 new InputFilter[] {
-                        new PartialRegexInputFilter(Format.PUBLIC_KEY_REGEX)
+                        new PartialRegexInputFilter(Contantes.PUBLIC_KEY_REGEX)
                 }
         );
 
@@ -236,7 +239,7 @@ public class TransferActivity extends ActionBarActivity implements View.OnClickL
         mComment = (EditText) findViewById(R.id.comment);
         mComment.setFilters(
                 new InputFilter[] {
-                        new PartialRegexInputFilter(Format.COMMENT_REGEX)
+                        new PartialRegexInputFilter(Contantes.COMMENT_REGEX)
                 }
         );
 //        mComment.addTextChangedListener(
@@ -294,22 +297,24 @@ public class TransferActivity extends ActionBarActivity implements View.OnClickL
                     quantitative = new BigInteger(val);
                     break;
                 case Application.UNIT_DU:
-                    quantitative = Format.Currency.relativeToQuantitative(this, new BigDecimal(val), dividend);
+                    quantitative = UnitCurrency.relatif_quantitatif(new BigDecimal(val), dividend);
                     break;
                 case Application.UNIT_TIME:
-                    val = Format.Time.toSecond(this, new BigDecimal(val), spinnerUnit.getSelectedItemPosition()).toString();
-                    quantitative = Format.Currency.timeToQuantitative(this, new BigDecimal(val), dt, dividend);
+                    long i = Time.toMilliSecond(Long.valueOf(val), spinnerUnit.getSelectedItemPosition());
+                    quantitative = UnitCurrency.time_quantitatif(i, dividend, dt);
                     break;
             }
-            Format.Currency.changeUnit(
-                    this,
-                    currency.getName(),
-                    quantitative,
-                    dividend,
-                    dt,
-                    null,
-                    defaultAmount,
-                    "");
+            Format.initUnit(this,defaultAmount,quantitative,dt,dividend,false,currency.getName());
+
+//            Format.Currency.changeUnit(
+//                    this,
+//                    currency.getName(),
+//                    quantitative,
+//                    dividend,
+//                    dt,
+//                    null,
+//                    defaultAmount,
+//                    "");
         }
     }
 
@@ -321,11 +326,11 @@ public class TransferActivity extends ActionBarActivity implements View.OnClickL
                     res = val.toBigInteger();
                     break;
                 case Application.UNIT_DU:
-                    res = Format.Currency.relativeToQuantitative(this, val, dividend);
+                    res = UnitCurrency.relatif_quantitatif(val, dividend);
                     break;
                 case Application.UNIT_TIME:
-                    val = Format.Time.toSecond(this, val, spinnerUnit.getSelectedItemPosition());
-                    res = Format.Currency.timeToQuantitative(this, val, dt, dividend);
+                    long i = Time.toMilliSecond(Long.valueOf(val.toString()), spinnerUnit.getSelectedItemPosition());
+                    res = UnitCurrency.time_quantitatif(i, dividend, dt);
                     break;
             }
         }
@@ -383,9 +388,9 @@ public class TransferActivity extends ActionBarActivity implements View.OnClickL
                 Map<String, String> data = Format.parseUri(scanResult.getContents());
                 Currency c = null;
 
-                final String uid = Format.isNull(data.get(Format.UID));
-                final String publicKey = Format.isNull(data.get(Format.PUBLICKEY));
-                final String currencyName = Format.isNull(data.get(Format.CURRENCY));
+                final String uid = Format.isNull(data.get(Contantes.UID));
+                final String publicKey = Format.isNull(data.get(Contantes.PUBLICKEY));
+                final String currencyName = Format.isNull(data.get(Contantes.CURRENCY));
 
                 if (currencyName.length()!=0){
                     if (currency != null){
@@ -455,16 +460,21 @@ public class TransferActivity extends ActionBarActivity implements View.OnClickL
             noDataWallet.setVisibility(View.VISIBLE);
         }else {
             dataWallet.setVisibility(View.VISIBLE);
-            noDataWallet.setVisibility(View.GONE);
 
-            Format.Currency.changeUnit(
-                    this,
-                    currency.getName(),
-                    walletSelected.getAmount(),
-                    currency.getLastUdBlock().getDividend(),
-                    currency.getDt().intValue(),
-                    mWalletAmount,
-                    mWalletDefaultAmount, "");
+            BigInteger dividend = currency.getLastUdBlock().getDividend();
+            long delay = currency.getDt();
+
+            Format.initUnit(this,mWalletAmount,walletSelected.getAmount(),delay,dividend,true,currency.getName());
+            Format.initUnit(this,mWalletDefaultAmount,walletSelected.getAmount(),delay,dividend,false,currency.getName());
+
+//            Format.Currency.changeUnit(
+//                    this,
+//                    currency.getName(),
+//                    walletSelected.getAmount(),
+//                    dividend,
+//                    delay.intValue(),
+//                    mWalletAmount,
+//                    mWalletDefaultAmount, "");
 
             mWalletAlias.setText(walletSelected.getAlias());
 
@@ -729,7 +739,7 @@ public class TransferActivity extends ActionBarActivity implements View.OnClickL
     }
 
     private String validatePublicKey(String publicKey) {
-        if (!publicKey.matches(Format.PUBLIC_KEY_REGEX)) {
+        if (!publicKey.matches(Contantes.PUBLIC_KEY_REGEX)) {
             mReceiverPublicKey.setError(getResources().getString(R.string.public_key_is_not_valid));
             mReceiverPublicKey.requestFocus();
             return null;
@@ -751,7 +761,7 @@ public class TransferActivity extends ActionBarActivity implements View.OnClickL
     }
 
     private String validateComment() {
-        if (!mComment.getText().toString().matches(Format.COMMENT_REGEX)) {
+        if (!mComment.getText().toString().matches(Contantes.COMMENT_REGEX)) {
             mComment.setError(getResources().getString(R.string.comment_is_not_valid));
             mComment.requestFocus();
             return null;

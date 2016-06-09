@@ -6,10 +6,12 @@ import android.util.Log;
 import java.util.List;
 import java.util.Map;
 
+import org.duniter.app.model.Entity.BlockUd;
 import org.duniter.app.model.Entity.Tx;
 import org.duniter.app.model.Entity.Wallet;
 import org.duniter.app.model.EntityJson.TxJson;
 import org.duniter.app.model.EntityWeb.TxWeb;
+import org.duniter.app.services.SqlService;
 import org.duniter.app.services.WebService;
 import org.duniter.app.technical.callback.CallbackTx;
 
@@ -18,7 +20,7 @@ import org.duniter.app.technical.callback.CallbackTx;
  */
 public class TxService {
 
-    public static void getListTx(Context context, final Wallet wallet, final Map<String,String> mapMember, final CallbackTx callback){
+    public static void getListTx(final Context context, final Wallet wallet, final Map<String,String> mapMember, final CallbackTx callback){
         TxWeb txWeb = new TxWeb(context,wallet.getCurrency(),wallet.getPublicKey());
         txWeb.getData(new WebService.WebServiceInterface() {
             @Override

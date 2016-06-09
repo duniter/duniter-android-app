@@ -22,6 +22,8 @@ import org.duniter.app.model.Entity.Currency;
 import org.duniter.app.model.EntityServices.BlockService;
 import org.duniter.app.services.SqlService;
 import org.duniter.app.technical.callback.CallbackBlock;
+import org.duniter.app.technical.format.Formater;
+import org.duniter.app.technical.format.UnitCurrency;
 import org.duniter.app.view.MainActivity;
 
 import java.math.BigDecimal;
@@ -86,23 +88,23 @@ public class RulesBisFragment extends Fragment implements
         BigInteger massMember = currentBlock.getMonetaryMass().divide(new BigInteger(String.valueOf(currentBlock.getMembersCount())));
         BigInteger du = lastUd.getDividend();
 
-        BigDecimal _mass = new BigDecimal(mass).divide(new BigDecimal(du),decimal, RoundingMode.HALF_EVEN);
-        BigDecimal _massMember = new BigDecimal(massMember).divide(new BigDecimal(du),decimal, RoundingMode.HALF_EVEN);
-        BigDecimal _du = new BigDecimal(du).divide(new BigDecimal(du),decimal, RoundingMode.HALF_EVEN);
+        BigDecimal _mass = UnitCurrency.quantitatif_relatif(mass,du);
+        BigDecimal _massMember = UnitCurrency.quantitatif_relatif(massMember,du);
+        BigDecimal _du = UnitCurrency.quantitatif_relatif(du,du);
 
         String cActual = _du.divide(_massMember,8, RoundingMode.HALF_EVEN).multiply(new BigDecimal("100")).setScale(2, BigDecimal.ROUND_HALF_EVEN).toString();
 
         if (!holder.switch2.isChecked()){
-            holder.monetary_mass.setText(Format.quantitativeFormatter(getActivity(),mass,currency.getName()));
-            holder.monetary_member.setText(Format.quantitativeFormatter(getActivity(),massMember,currency.getName()));
-            holder.universale_dividende.setText(Format.quantitativeFormatter(getActivity(),du,currency.getName()));
+            holder.monetary_mass.setText(Formater.quantitatifFormatter(mass,currency.getName()));
+            holder.monetary_member.setText(Formater.quantitatifFormatter(massMember,currency.getName()));
+            holder.universale_dividende.setText(Formater.quantitatifFormatter(du,currency.getName()));
         }else{
-            holder.monetary_mass.setText(Format.relativeFormatter(getActivity(),_mass));
-            holder.monetary_member.setText(Format.relativeFormatter(getActivity(),_massMember));
-            holder.universale_dividende.setText(Format.relativeFormatter(getActivity(),_du));
+            holder.monetary_mass.setText(Formater.relatifFormatter(getActivity(),decimal,_mass));
+            holder.monetary_member.setText(Formater.relatifFormatter(getActivity(),decimal,_massMember));
+            holder.universale_dividende.setText(Formater.relatifFormatter(getActivity(),decimal,_du));
         }
 
-        holder.c.setText(cActual+"%");
+        holder.c.setText(cActual+"% /"+getString(R.string.year));
     }
 
     private void init(){

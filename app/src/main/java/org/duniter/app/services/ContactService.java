@@ -18,6 +18,7 @@ import java.util.Map;
 import org.duniter.app.Format;
 import org.duniter.app.model.Entity.Contact;
 import org.duniter.app.model.Entity.Currency;
+import org.duniter.app.technical.format.Contantes;
 
 /**
  * Created by naivalf27 on 05/04/16.
@@ -41,7 +42,7 @@ public class ContactService extends AsyncTask<ContentResolver, Void, String> {
                 + ContactsContract.CommonDataKinds.Website.URL + " LIKE ?";
         String[] whereParams = new String[]{
                 ContactsContract.CommonDataKinds.Website.CONTENT_ITEM_TYPE,
-                Format.CONTACT_PATH+"%"};
+                Contantes.CONTACT_PATH+"%"};
 
         final Cursor cursor = contentResolver.query(ContactsContract.Data.CONTENT_URI, null, where, whereParams, null);
 
@@ -61,9 +62,9 @@ public class ContactService extends AsyncTask<ContentResolver, Void, String> {
                 String webSite = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Website.URL));
                 Map<String, String > data = Format.parseUri(webSite);
 
-                String uid = Format.isNull(data.get(Format.UID));
-                String pubkey = Format.isNull(data.get(Format.PUBLICKEY));
-                String cName = Format.isNull(data.get(Format.CURRENCY));
+                String uid = Format.isNull(data.get(Contantes.UID));
+                String pubkey = Format.isNull(data.get(Contantes.PUBLICKEY));
+                String cName = Format.isNull(data.get(Contantes.CURRENCY));
 
                 if(!currencyName.equals(cName)){
                     currencyName=cName;

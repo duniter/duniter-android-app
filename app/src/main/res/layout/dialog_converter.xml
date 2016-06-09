@@ -79,7 +79,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="0.6"
-                    android:inputType="numberDecimal"
+                    android:inputType="numberSigned"
                     android:id="@+id/txt_time"
                     android:selectAllOnFocus="true"
                     android:layout_gravity="center_horizontal"/>

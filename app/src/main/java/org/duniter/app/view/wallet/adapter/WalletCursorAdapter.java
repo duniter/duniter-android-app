@@ -177,14 +177,21 @@ public class WalletCursorAdapter extends CursorAdapter {
             holder.primaryAmount.setVisibility(View.GONE);
             holder.secondAmount.setVisibility(View.GONE);
         }else{
-            Format.Currency.changeUnit(
-                    context,
-                    cursor.getString(currencyNameIndex),
-                    new BigInteger(cursor.getString(amountIndex)),
-                    new BigInteger(cursor.getString(dividendIndex)),
-                    cursor.getInt(dtIndex),
-                    holder.primaryAmount,
-                    holder.secondAmount, "");
+            String currencyName = cursor.getString(currencyNameIndex);
+            BigInteger amount = new BigInteger(cursor.getString(amountIndex));
+            BigInteger dividend = new BigInteger(cursor.getString(dividendIndex));
+            Long delay = cursor.getLong(dtIndex);
+
+            Format.initUnit(context,holder.primaryAmount,amount,delay,dividend,true,currencyName);
+            Format.initUnit(context,holder.secondAmount,amount,delay,dividend,false,currencyName);
+//            Format.Currency.changeUnit(
+//                    context,
+//                    currencyName,
+//                    amount,
+//                    dividend,
+//                    delay.intValue(),
+//                    holder.primaryAmount,
+//                    holder.secondAmount, "");
             holder.progress.setVisibility(View.GONE);
             holder.primaryAmount.setVisibility(View.VISIBLE);
             holder.secondAmount.setVisibility(View.VISIBLE);

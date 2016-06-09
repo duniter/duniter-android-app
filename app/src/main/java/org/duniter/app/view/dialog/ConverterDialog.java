@@ -19,12 +19,15 @@ import android.widget.TextView;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.util.Arrays;
 import java.util.List;
 
 import org.duniter.app.Application;
 import org.duniter.app.R;
-import org.duniter.app.Format;
+import org.duniter.app.technical.format.Formater;
+import org.duniter.app.technical.format.Time;
+import org.duniter.app.technical.format.UnitCurrency;
 
 /**
  * Created by naivalf27 on 26/10/15.
@@ -33,8 +36,8 @@ public class ConverterDialog extends DialogFragment{
 
 
 
-    private int timeSelected = Format.Time.MINUTE;
-    private int lastTimeSelected = Format.Time.MINUTE;
+    private int timeSelected = Time.MINUTE;
+    private int lastTimeSelected = Time.MINUTE;
 
     private EditText txt_coin;
     private EditText txt_du;
@@ -42,10 +45,11 @@ public class ConverterDialog extends DialogFragment{
 
     private EditText txt_time;
 
-    private static BigInteger mUd;
+    private static BigInteger dividend;
 
     private static int delay;
     private int unit;
+    private int decimal;
 
     private TextWatcher for_coin, for_du;
     private TextWatcher for_time;
@@ -54,8 +58,8 @@ public class ConverterDialog extends DialogFragment{
     private TextView time_converted;
     private static String currencyName;
 
-    public static ConverterDialog newInstance(BigInteger _mUd, int _delay, EditText _mAmount, Spinner _spinner,String _name) {
-        mUd = _mUd;
+    public static ConverterDialog newInstance(BigInteger _dividend, int _delay, EditText _mAmount, Spinner _spinner,String _name) {
+        dividend = _dividend;
         delay = _delay;
         mAmount = _mAmount;
         mSpinner = _spinner;
@@ -67,8 +71,8 @@ public class ConverterDialog extends DialogFragment{
         return fragment;
     }
 
-//    public ConverterDialog(BigInteger mUd, int delay, EditText mAmount, Spinner spinner,String name) {
-//        this.mUd = mUd;
+//    public ConverterDialog(BigInteger dividend, int delay, EditText mAmount, Spinner spinner,String name) {
+//        this.dividend = dividend;
 //        this.delay = delay;
 //        this.mAmount = mAmount;
 //        this.mSpinner = spinner;
@@ -80,6 +84,7 @@ public class ConverterDialog extends DialogFragment{
         final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        decimal = preferences.getInt(Application.DECIMAL,2);
         unit = Integer.parseInt(preferences.getString(Application.UNIT, Application.UNIT_CLASSIC + ""));
 
         LayoutInflater inflater = getActivity().getLayoutInflater();
@@ -99,20 +104,24 @@ public class ConverterDialog extends DialogFragment{
         ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(getActivity(),
                 android.R.layout.simple_spinner_item, list);
         list_Unit_time.setAdapter(dataAdapter);
-        list_Unit_time.setSelection(Format.Time.MINUTE);
+        list_Unit_time.setSelection(Time.MINUTE);
         list_Unit_time.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                lastTimeSelected = timeSelected;
                 timeSelected = position;
-                String val = txt_time.getText().toString();
-                if(val.equals("") || val.equals(".") || val.equals(" ")) {
-                    val ="0";
+                if (lastTimeSelected != timeSelected) {
+                    lastTimeSelected = timeSelected;
+                    String val = txt_time.getText().toString();
+                    if (val.equals("") || val.equals(".") || val.equals(" ")) {
+                        val = "0";
+                    }
+                    if (val.substring(0, 1).equals(".")) {
+                        val = "0" + val;
+                    }
+                    long value = Time.toMilliSecond(Long.valueOf(val), timeSelected);
+
+                    majValue(String.valueOf(value), Application.UNIT_TIME);
                 }
-                if(val.substring(0,1).equals(".")){
-                    val = "0"+val;
-                }
-                majTime(val,false);
             }
 
             @Override
@@ -120,6 +129,7 @@ public class ConverterDialog extends DialogFragment{
 
             }
         });
+
         time_converted = (TextView) view.findViewById(R.id.time_converted);
 
         viewCreated();
@@ -143,39 +153,81 @@ public class ConverterDialog extends DialogFragment{
         return builder.create();
     }
 
-    private void majTime(String textview,boolean is_second){
-        BigDecimal val = new BigDecimal(textview);
-        if(!is_second) {
-            val = Format.Time.toSecond(getActivity(), val, timeSelected);
-            BigInteger coin = Format.Currency.timeToQuantitative(getActivity(), val, delay, mUd);
-            removeTextWatcher();
-            time_converted.setText(Format.timeFormatter(getActivity(), val));
-            txt_coin.setText(String.valueOf(coin));
-            txt_du.setText(Format.Currency.quantitativeToRelative(getActivity(), coin, mUd).toString());
-            addTextWatcher();
-        }else{
-            time_converted.setText(Format.timeFormatter(getActivity(), val));
-            val = convertTime(val);
-            txt_time.setText(String.valueOf(val));
+    private void majValue(String value,int unit){
+        BigInteger quantitatif;
+        String valueQuantitatif;
+        BigDecimal relatif;
+        String valueRelatif;
+        long time;
+        removeTextWatcher();
+        switch (unit){
+            case Application.UNIT_CLASSIC:
+                quantitatif = new BigInteger(value);
+
+                relatif = UnitCurrency.quantitatif_relatif(quantitatif, dividend);
+                relatif = relatif.setScale(decimal, RoundingMode.HALF_EVEN);
+                valueRelatif = relatif.toString();
+                txt_du.setText(valueRelatif);
+
+                time = UnitCurrency.quantitatif_time(quantitatif, dividend,delay);
+                time_converted.setText(Formater.timeFormatterV2(getActivity(),time));
+                txt_time.setText(String.valueOf(convertTime(time)));
+                break;
+            case Application.UNIT_DU:
+                relatif = new BigDecimal(value);
+
+                quantitatif = UnitCurrency.relatif_quantitatif(relatif,dividend);
+                valueQuantitatif = quantitatif.toString();
+                txt_coin.setText(valueQuantitatif);
+
+                time = UnitCurrency.quantitatif_time(quantitatif, dividend,delay);
+                time_converted.setText(Formater.timeFormatterV2(getActivity(),time));
+                txt_time.setText(String.valueOf(convertTime(time)));
+                break;
+            case Application.UNIT_TIME:
+                time = Long.valueOf(value);
+                time_converted.setText(Formater.timeFormatterV2(getActivity(),time));
+
+                quantitatif = UnitCurrency.time_quantitatif(time,dividend,delay);
+                valueQuantitatif = quantitatif.toString();
+                txt_coin.setText(valueQuantitatif);
+
+                relatif = UnitCurrency.quantitatif_relatif(quantitatif, dividend);
+                relatif = relatif.setScale(decimal, RoundingMode.HALF_EVEN);
+                valueRelatif = relatif.toString();
+                txt_du.setText(valueRelatif);
+                break;
         }
+        addTextWatcher();
     }
 
-    private BigDecimal convertTime(BigDecimal val){
+//    private void majTime(String textview,boolean is_second){
+//        BigDecimal val = new BigDecimal(textview);
+//        BigInteger i = Time.toMilliSecond(val, timeSelected);
+//        BigInteger coin = UnitCurrency.time_quantitatif(i, dividend, delay);
+//        removeTextWatcher();
+//        time_converted.setText(Formater.timeFormatterV2(getActivity(), i));
+//        txt_coin.setText(String.valueOf(coin));
+//        txt_du.setText(String.valueOf(UnitCurrency.quantitatif_relatif(coin, dividend)));
+//        addTextWatcher();
+//    }
+
+    private long convertTime(long val){
         switch (timeSelected){
-            case Format.Time.YEAR:
-                val = Format.Time.secondToYear(getActivity(), val);
+            case Time.YEAR:
+                val = Time.milliSecondToYear(val);
                 break;
-            case Format.Time.DAY:
-                val = Format.Time.secondToDay(getActivity(), val);
+            case Time.DAY:
+                val = Time.milliSecondToDay(val);
                 break;
-            case Format.Time.HOUR:
-                val = Format.Time.secondToHour(getActivity(), val);
+            case Time.HOUR:
+                val = Time.milliSecondToHour(val);
                 break;
-            case Format.Time.MINUTE:
-                val = Format.Time.secondToMinute(getActivity(), val);
+            case Time.MINUTE:
+                val = Time.milliSecondToMinute(val);
                 break;
-            case Format.Time.MILLI_SECOND:
-                val = Format.Time.secondToMilliSecond(val);
+            case Time.SECOND:
+                val = Time.milliSecondToSeconde(val);
                 break;
         }
         return val;
@@ -183,7 +235,6 @@ public class ConverterDialog extends DialogFragment{
 
     private void viewCreated(){
         creatTextWatcher();
-
         addTextWatcher();
 
         String val = mAmount.getText().toString();
@@ -235,10 +286,7 @@ public class ConverterDialog extends DialogFragment{
                 if(val.substring(0,1).equals(".")){
                     val = "0"+val;
                 }
-                removeTextWatcher();
-                txt_du.setText(Format.Currency.quantitativeToRelative(getActivity(), new BigInteger(val), mUd).toString());
-                majTime(Format.Currency.quantitativeToTime(getActivity(), new BigInteger(val), delay, mUd).toString(), true);
-                addTextWatcher();
+                majValue(val,Application.UNIT_CLASSIC);
             }
 
             @Override
@@ -261,11 +309,7 @@ public class ConverterDialog extends DialogFragment{
                 if(val.substring(0,1).equals(".")){
                     val = "0"+val;
                 }
-                BigInteger coin = Format.Currency.relativeToQuantitative(getActivity(), new BigDecimal(val), mUd);
-                removeTextWatcher();
-                txt_coin.setText(String.valueOf(coin));
-                majTime(Format.Currency.quantitativeToTime(getActivity(), coin, delay, mUd).toString(), true);
-                addTextWatcher();
+                majValue(val,Application.UNIT_DU);
             }
 
             @Override
@@ -287,19 +331,15 @@ public class ConverterDialog extends DialogFragment{
                 if(val.substring(0,1).equals(".")){
                     val = "0"+val;
                 }
-                majTime(val,false);
+                long value =Time.toMilliSecond(Long.valueOf(val),timeSelected);
+
+                majValue(String.valueOf(value),Application.UNIT_TIME);
             }
 
             @Override
             public void afterTextChanged(Editable s) {
             }
         };
-    }
-
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-
     }
 
 

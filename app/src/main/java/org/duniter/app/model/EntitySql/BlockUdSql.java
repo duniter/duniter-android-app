@@ -8,7 +8,9 @@ import android.provider.BaseColumns;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.duniter.app.model.Entity.BlockUd;
 import org.duniter.app.model.Entity.Currency;
@@ -35,6 +37,19 @@ public class BlockUdSql extends AbstractSql<BlockUd> {
             do {
                 int val = cursor.getInt(cursor.getColumnIndex(BlockTable.NUMBER));
                 result.add(val);
+            }while (cursor.moveToNext());
+            cursor.close();
+        }
+        return result;
+    }
+
+    public Map<Long, BlockUd> getMapByNumber(Long currencyId) {
+        Map<Long,BlockUd> result = new HashMap<>();
+        Cursor cursor = query(BlockTable.CURRENCY_ID+"=?",new String[]{String.valueOf(currencyId)});
+        if (cursor.moveToFirst()){
+            do {
+                BlockUd block = fromCursor(cursor);
+                result.put(block.getNumber(),block);
             }while (cursor.moveToNext());
             cursor.close();
         }

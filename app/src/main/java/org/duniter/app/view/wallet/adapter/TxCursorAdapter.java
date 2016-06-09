@@ -35,6 +35,7 @@ public class TxCursorAdapter extends CursorAdapter {
     private int dtIndex;
     private int dividendIndex;
     private int dividendThenIndex;
+    private int lastDividendIndex;
 
     private HashMap<Integer, String> mSectionPosition;
 
@@ -108,15 +109,25 @@ public class TxCursorAdapter extends CursorAdapter {
         holder.day.setText(new SimpleDateFormat("EEE dd").format(date.getTime()));
         String value = cursor.getString(amountIndex);
 
-        Format.Currency.changeUnit(
-                context,
-                cursor.getString(currencyNameIndex),
-                new BigInteger(value == null ? "0" : value),
-                new BigInteger(cursor.getString(dividendIndex)),
-                cursor.getInt(dtIndex),
-                holder.amount,
-                holder.defaultAmount,
-                "");
+
+        String currencyName = cursor.getString(currencyNameIndex);
+        BigInteger dividend = new BigInteger(cursor.getString(dividendIndex));
+        BigInteger amount = new BigInteger(value == null ? "0" : value);
+
+        long delay = cursor.getLong(dtIndex);
+
+        Format.initUnit(context,holder.amount,amount,delay,dividend,true,currencyName);
+        Format.initUnit(context,holder.defaultAmount,amount,delay,dividend,false,currencyName);
+
+//        Format.Currency.changeUnit(
+//                context,
+//                currencyName,
+//                amount,
+//                dividend,
+//                Long.valueOf(delay).intValue(),
+//                holder.amount,
+//                holder.defaultAmount,
+//                "");
         holder.comment.setText(cursor.getString(commentIndex));
 //        if (cursor.isNull(stateIndex)) {
 //            view.setBackgroundColor(context.getResources().getColor(R.color.primaryLight));

@@ -11,13 +11,16 @@ import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.duniter.app.enumeration.TxState;
+import org.duniter.app.model.Entity.BlockUd;
 import org.duniter.app.model.Entity.Tx;
 import org.duniter.app.model.Entity.Wallet;
+import org.duniter.app.services.SqlService;
 
 
 /**
@@ -63,6 +66,7 @@ public class TxJson implements Serializable {
             if (tx.getPublicKey()==null){
                 tx.setPublicKey(sourceJson.pubkey);
             }
+
             String uid = mapMember.containsKey(tx.getPublicKey()) ? mapMember.get(tx.getPublicKey()) : "";
             tx.setUid(uid);
             tx.setAmount(amount);

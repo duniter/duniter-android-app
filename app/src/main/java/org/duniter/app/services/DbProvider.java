@@ -35,9 +35,9 @@ public class DbProvider extends ContentProvider {
 
     @Override
     public boolean onCreate() {
+        initMatcher();
         dbHelper = new SqlHelper(getContext());
         db = dbHelper.getWritableDatabase();
-        initMatcher();
         return true;
     }
 
