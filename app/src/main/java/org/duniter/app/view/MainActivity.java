@@ -8,8 +8,10 @@ import android.app.FragmentManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -129,6 +131,28 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 //            displayListWalletFragment();
 //        }
         updateDrawer();
+
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        preferences.registerOnSharedPreferenceChangeListener(new SharedPreferences.OnSharedPreferenceChangeListener() {
+            public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
+                switch (key){
+                    case Application.UNIT:
+                    case Application.UNIT_DEFAULT:
+                    case Application.DECIMAL:
+                    case Application.USE_OBLIVION:
+                    case Application.DISPLAY_DU:
+                        updateFragment();
+                        break;
+                    case Application.DELAY_SYNC:
+                        Application.forcedSync();
+                        break;
+                }
+            }
+        });
+    }
+
+    private void updateFragment() {
+        currentFragment.onResume();
     }
 
     private void initDrawer(){
@@ -351,54 +375,6 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
             return;
         }
     }
-
-    //    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-//        super.onActivityResult(requestCode, resultCode, intent);
-//        if(resultCode == RESULT_OK){
-//            Long currencyId = intent.getExtras().getLong(Application.CURRENCY_ID);
-//            switch (requestCode){
-////                case Application.ACTIVITY_LOOKUP:
-////                    WotLookup.Result result = (WotLookup.Result)intent.getExtras().getSerializable(WotLookup.Result.class.getSimpleName());
-////                    Bundle args = new Bundle();
-////                    args.putLong(BaseColumns._ID, currencyId);
-////                    args.putSerializable(WotLookup.Result.class.getSimpleName(),result);
-////                    Fragment fragment = WalletIdentityFragment.newInstance(args);
-////                    FragmentManager fragmentManager = getFragmentManager();
-////
-////                    fragmentManager.beginTransaction()
-////                            .setCustomAnimations(
-////                                    R.animator.delayed_fade_in,
-////                                    R.animator.fade_out,
-////                                    R.animator.delayed_fade_in,
-////                                    R.animator.fade_out)
-////                            .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
-////                            .addToBackStack(fragment.getClass().getSimpleName())
-////                            .commit();
-////                    closeDrawer();
-////                    break;
-////                case RESULT_SCAN:
-////                    WotLookup.Result identity = (WotLookup.Result)intent.getExtras().getSerializable(WotLookup.Result.class.getSimpleName());
-////                    Bundle args = new Bundle();
-////                    args.putLong(BaseColumns._ID, currencyId);
-////                    args.putSerializable(WotLookup.Result.class.getSimpleName(),result);
-////                    Fragment fragment = WalletIdentityFragment.newInstance(args);
-////                    FragmentManager fragmentManager = getFragmentManager();
-////
-////                    fragmentManager.beginTransaction()
-////                            .setCustomAnimations(
-////                                    R.animator.delayed_fade_in,
-////                                    R.animator.fade_out,
-////                                    R.animator.delayed_fade_in,
-////                                    R.animator.fade_out)
-////                            .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
-////                            .addToBackStack(fragment.getClass().getSimpleName())
-////                            .commit();
-////                    // close the drawer
-////                    closeDrawer();
-////                    break;
-//            }
-//        }
-//    }
 
     public void setDrawerIndicatorEnabled(final boolean enabled) {
         if (mToggle.isDrawerIndicatorEnabled() == enabled) {

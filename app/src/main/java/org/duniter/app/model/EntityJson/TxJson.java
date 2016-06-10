@@ -15,6 +15,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedMap;
 
 import org.duniter.app.enumeration.TxState;
 import org.duniter.app.model.Entity.BlockUd;
@@ -52,7 +53,7 @@ public class TxJson implements Serializable {
         return result;
     }
 
-    public static List<Tx> fromTx(TxJson sourceJson, Wallet wallet,Map<String,String> mapMember){
+    public static List<Tx> fromTx(TxJson sourceJson, Wallet wallet, Map<String, String> mapMember){
         HashMap<String, Tx> txs = new HashMap<>();
         for (History.Elem e : sourceJson.history.sent){
             Tx tx = new Tx();
@@ -79,6 +80,7 @@ public class TxJson implements Serializable {
             tx.setHash(e.hash);
             tx.setBlockNumber(e.block_number);
             tx.setLocktime(e.locktime);
+            tx.setUd(false);
             txs.put(e.hash,tx);
         }
 
@@ -97,6 +99,7 @@ public class TxJson implements Serializable {
                 if (tx.getPublicKey()==null){
                     tx.setPublicKey(sourceJson.pubkey);
                 }
+
                 String uid = mapMember.containsKey(tx.getPublicKey()) ? mapMember.get(tx.getPublicKey()) : "";
                 tx.setUid(uid);
                 tx.setAmount(amount);
@@ -109,6 +112,7 @@ public class TxJson implements Serializable {
                 tx.setHash(e.hash);
                 tx.setBlockNumber(e.block_number);
                 tx.setLocktime(e.locktime);
+                tx.setUd(false);
                 txs.put(e.hash,tx);
             }
         }
@@ -125,6 +129,7 @@ public class TxJson implements Serializable {
             if (tx.getPublicKey()==null){
                 tx.setPublicKey(sourceJson.pubkey);
             }
+
             String uid = mapMember.containsKey(tx.getPublicKey()) ? mapMember.get(tx.getPublicKey()) : "";
             tx.setUid(uid);
             tx.setAmount(amount);
@@ -137,6 +142,7 @@ public class TxJson implements Serializable {
             tx.setHash(e.hash);
             tx.setBlockNumber(0);
             tx.setLocktime(e.locktime);
+            tx.setUd(false);
             txs.put(e.hash,tx);
         }
 
@@ -155,6 +161,7 @@ public class TxJson implements Serializable {
                 if (tx.getPublicKey()==null){
                     tx.setPublicKey(sourceJson.pubkey);
                 }
+
                 String uid = mapMember.containsKey(tx.getPublicKey()) ? mapMember.get(tx.getPublicKey()) : "";
                 tx.setUid(uid);
                 tx.setAmount(amount);
@@ -167,6 +174,7 @@ public class TxJson implements Serializable {
                 tx.setHash(e.hash);
                 tx.setBlockNumber(0);
                 tx.setLocktime(e.locktime);
+                tx.setUd(false);
                 txs.put(e.hash,tx);
             }
         }

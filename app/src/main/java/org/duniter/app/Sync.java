@@ -4,9 +4,11 @@ import android.app.ActivityManager;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
@@ -49,9 +51,13 @@ public class Sync extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         timer = new Timer();
-        timer.scheduleAtFixedRate(new mainTask(), 0, 600000);//10 minute
-
-        return super.onStartCommand(intent, flags, startId);
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        long delay = Long.valueOf(preferences.getString(Application.DELAY_SYNC,"600000"));
+        if (delay!=0) {
+            timer.scheduleAtFixedRate(new mainTask(), 0, delay);
+            return super.onStartCommand(intent, flags, startId);
+        }
+        return 1;
     }
 
     @Override

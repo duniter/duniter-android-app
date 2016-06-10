@@ -35,6 +35,9 @@ public class Application extends android.app.Application{
     public static final String PUBLIC_KEY = "public_key";
     public static final String RENEW = "renew_membership";
     public static final String CONTACT = "contact";
+    public static final String USE_OBLIVION = "use_oblivion";
+    public static final String DISPLAY_DU = "display_du";
+    public static final String DELAY_SYNC = "delay_sync";
 
 
     private static Context      mContext;
@@ -55,14 +58,14 @@ public class Application extends android.app.Application{
         mContext = getApplicationContext();
         requestSync();
 
-//        Thread.setDefaultUncaughtExceptionHandler (new Thread.UncaughtExceptionHandler()
-//        {
-//            @Override
-//            public void uncaughtException (Thread thread, Throwable e)
-//            {
-//                handleUncaughtException (thread, e);
-//            }
-//        });
+        Thread.setDefaultUncaughtExceptionHandler (new Thread.UncaughtExceptionHandler()
+        {
+            @Override
+            public void uncaughtException (Thread thread, Throwable e)
+            {
+                handleUncaughtException (thread, e);
+            }
+        });
     }
 
     public void handleUncaughtException (Thread thread, Throwable e)

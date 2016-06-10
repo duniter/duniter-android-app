@@ -20,6 +20,16 @@ public class Tx implements Serializable{
     private long locktime;
     private String state;
     private String uid;
+    private BigInteger dividend;
+    private Boolean isUd;
+
+    public Boolean getUd() {
+        return isUd;
+    }
+
+    public void setUd(Boolean ud) {
+        isUd = ud;
+    }
 
     public Currency getCurrency() {
         return currency;
@@ -134,5 +144,13 @@ public class Tx implements Serializable{
 
     public String getUid() {
         return uid;
+    }
+
+    public void setDividend(BigInteger dividend) {
+        this.dividend = dividend;
+    }
+
+    public BigInteger getDividend() {
+        return dividend;
     }
 }

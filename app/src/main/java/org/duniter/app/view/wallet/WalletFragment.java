@@ -92,6 +92,8 @@ public class WalletFragment extends ListFragment
     private int nbCert;
     private int willNeedCertifications;
 
+    private SharedPreferences preferences;
+
     public static WalletFragment newInstance(Long walletId) {
         Bundle newInstanceArgs = new Bundle();
         newInstanceArgs.putLong(Application.WALLET_ID, walletId);
@@ -124,63 +126,11 @@ public class WalletFragment extends ListFragment
         outState.putLong(Application.WALLET_ID, getArguments().getLong(Application.WALLET_ID));
     }
 
-//    private void updateUI(int type,Intent intent) {
-//        switch (type){
-//            case WOT_REQUIEREMENTS:
-//                Log.d(TAG, "reception requierements");
-//                WotRequirements requirements = (WotRequirements) intent.getSerializableExtra(RequierementsService.WOT_REQUIEREMENTS);
-//                //updateRequirements(requirements);
-//                new Identity(getActivity(),identityId).requirements().add(currencyId, requirements);
-//                updateRequirements();
-//                break;
-//            default:
-//                break;
-//        }
-//    }
-//
-//    private void updateRequirements(){
-//        int minimum = currencySigQty!=null ? currencySigQty : 0;
-//        textCertification.setText(String.valueOf(nbRequirements));
-//        if(minimum>nbRequirements){
-//            textCertification.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_certification_red, 0, 0);
-//            textCertification.setTextColor(getResources().getColor(R.color.red));
-//            //icon.setImageResource(R.drawable.ic_no_member);
-//        }else{
-//            textCertification.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_certification_green, 0, 0);
-//            textCertification.setTextColor(getResources().getColor(R.color.green));
-//            //icon.setImageResource(R.drawable.ic_member);
-//        }
-//        String text = textCertification.getText().toString().concat(" ");
-//        if(nbRequirements<=1) {
-//            textCertification.setText(text.concat(getString(R.string.certification)));
-//        }else{
-//
-//            textCertification.setText(text.concat(getString(R.string.certifications)));
-//        }
-//    }
-//
-//    private void updateRequirements(WotRequirements requirements){
-//        this.wotRequirements = requirements;
-//        int minimum = currencySigQty!=null ? currencySigQty : 0;
-//        int number = wotRequirements.identities[0].certifications.length;
-//        textCertification.setText(String.valueOf(number));
-//        if(minimum>number){
-//            textCertification.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_certification_red, 0, 0);
-//            textCertification.setTextColor(getResources().getColor(R.color.red));
-//            //icon.setImageResource(R.drawable.ic_no_member);
-//        }else{
-//            textCertification.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_certification_green, 0, 0);
-//            textCertification.setTextColor(getResources().getColor(R.color.green));
-//            //icon.setImageResource(R.drawable.ic_member);
-//        }
-//        String text = textCertification.getText().toString().concat(" ");
-//        if(number<=1) {
-//            textCertification.setText(text.concat(getString(R.string.certification)));
-//        }else{
-//
-//            textCertification.setText(text.concat(getString(R.string.certifications)));
-//        }
-//    }
+    @Override
+    public void onResume() {
+        super.onResume();
+        onRefresh();
+    }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
@@ -188,6 +138,9 @@ public class WalletFragment extends ListFragment
         setHasOptionsMenu(true);
         ((MainActivity) getActivity()).setDrawerIndicatorEnabled(false);
         getActivity().setTitle("");
+
+
+        preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
 
         walletId = getArguments().getLong(Application.WALLET_ID);
 
@@ -198,9 +151,9 @@ public class WalletFragment extends ListFragment
         txCursorAdapter = new TxCursorAdapter(getActivity(), null);
         setListAdapter(txCursorAdapter);
 
-        WalletService.updateWallet(getActivity(),wallet,false,null);
-        getLoaderManager().initLoader(WALLET_LOADER_ID, getArguments(), this);
-        getLoaderManager().initLoader(TX_LOADER_ID, getArguments(), this);
+//        WalletService.updateWallet(getActivity(),wallet,false,null);
+//        getLoaderManager().initLoader(WALLET_LOADER_ID, getArguments(), this);
+//        getLoaderManager().initLoader(TX_LOADER_ID, getArguments(), this);
 
     }
 
@@ -429,9 +382,15 @@ public class WalletFragment extends ListFragment
                 selectionArgs = new String[]{String.valueOf(walletId)};
                 break;
             case TX_LOADER_ID:
+                boolean display_ud = preferences.getBoolean(Application.DISPLAY_DU,true);
                 uri = ViewTxAdapter.URI;
-                selection = ViewTxAdapter.WALLET_ID + "=?";
-                selectionArgs = new String[]{String.valueOf(walletId)};
+                if (display_ud){
+                    selection = ViewTxAdapter.WALLET_ID + "=?";
+                    selectionArgs = new String[]{String.valueOf(walletId)};
+                }else{
+                    selection = ViewTxAdapter.WALLET_ID + "=? AND "+ViewTxAdapter.IS_UD + "=?";
+                    selectionArgs = new String[]{String.valueOf(walletId),String.valueOf(false)};
+                }
                 orderBy = ViewTxAdapter.TIME + " DESC";
                 break;
         }
@@ -447,7 +406,8 @@ public class WalletFragment extends ListFragment
                 updateViewWallet(data);
                 break;
             case TX_LOADER_ID:
-                ((TxCursorAdapter) this.getListAdapter()).swapCursor(data);
+                boolean useOblivion = preferences.getBoolean(Application.USE_OBLIVION,true);
+                ((TxCursorAdapter) this.getListAdapter()).swapCursor(data,useOblivion);
                 break;
         }
     }

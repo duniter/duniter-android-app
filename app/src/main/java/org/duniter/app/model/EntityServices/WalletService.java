@@ -12,6 +12,7 @@ import org.apache.http.message.BasicNameValuePair;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -19,6 +20,7 @@ import java.util.Map;
 
 import org.duniter.app.Application;
 import org.duniter.app.R;
+import org.duniter.app.model.Entity.BlockUd;
 import org.duniter.app.model.Entity.Currency;
 import org.duniter.app.model.Entity.Identity;
 import org.duniter.app.model.Entity.Requirement;
@@ -36,6 +38,7 @@ import org.duniter.app.technical.callback.CallbackMap;
 import org.duniter.app.technical.callback.CallbackRequirement;
 import org.duniter.app.technical.callback.CallbackSource;
 import org.duniter.app.technical.callback.CallbackTx;
+import org.duniter.app.technical.callback.CallbackUdReceived;
 import org.duniter.app.technical.callback.CallbackUpdateWallet;
 
 /**
@@ -51,8 +54,8 @@ public class WalletService {
         if (forced || (currentTime >= (lastTime+fiveMin))){
             Updater updater = new Updater(context, wallet, new CallbackUpdateWallet() {
                 @Override
-                public void methode(Wallet wallet, List<Source> listSources, List<Tx> listTx,List<String[]> listSourcePending, Requirement requirement, Identity identity) {
-                    insert(context, wallet, identity, listSources, listTx,listSourcePending, requirement);
+                public void methode(Wallet wallet, List<Source> listSources, List<Tx> listTx,List<Tx> listUd,List<String[]> listSourcePending, Requirement requirement, Identity identity) {
+                    insert(context, wallet, identity, listSources, listTx,listUd,listSourcePending, requirement);
                     preferences.edit().putLong(Application.LAST_UPDATE,currentTime).apply();
                     if (callback != null) {
                         callback.methode();
@@ -63,7 +66,7 @@ public class WalletService {
         }
     }
 
-    public static void insert(Context context, Wallet wallet,Identity identity,List<Source> listSource,List<Tx> listTx,List<String[]> lsp, Requirement requirement){
+    public static void insert(Context context, Wallet wallet,Identity identity,List<Source> listSource,List<Tx> listTx,List<Tx> listUd,List<String[]> lsp, Requirement requirement){
         BigInteger amount = BigInteger.ZERO;
         List<String> ls = new ArrayList<>();
 
@@ -99,6 +102,11 @@ public class WalletService {
             }
             TxSql txSql = SqlService.getTxSql(context);
 
+        //TODO recuperer le dividend
+        Map<Long,BlockUd> mapBlock = SqlService.getBlockSql(context).getMapByNumber(wallet.getCurrency().getId());
+        List<Long> numbers = new ArrayList<>(mapBlock.keySet());
+        Collections.sort(numbers);
+
             List<Tx> listPending = txSql.getPendingTx(wallet.getId());
             Map<String, Tx> listValid = txSql.getTxMap(wallet.getId());
             for (Tx tx : listPending) {
@@ -112,10 +120,30 @@ public class WalletService {
             }
             for (Tx tx : listTx) {
                 if (!listValid.containsKey(tx.getHash())) {
+                    for (int i= 0;i<numbers.size();i++){
+                        if (i == numbers.size()-1 || (tx.getBlockNumber()==0)){
+                            tx.setDividend(mapBlock.get(numbers.get(i)).getDividend());
+                            break;
+                        }
+                        if (numbers.get(i) == tx.getBlockNumber()){
+                            tx.setDividend(mapBlock.get(numbers.get(i)).getDividend());
+                            break;
+                        }
+                        if (numbers.get(i) > tx.getBlockNumber()){
+                            tx.setDividend(mapBlock.get(numbers.get(i-1)).getDividend());
+                            break;
+                        }
+                    }
                     txSql.insert(tx);
                     amount = amount.add(tx.getAmount());
                 }
             }
+        Map<Long, Tx> listUdSql = txSql.getUdMap(wallet.getId());
+        for (Tx tx:listUd){
+            if (!listUdSql.containsKey(tx.getBlockNumber())){
+                txSql.insert(tx);
+            }
+        }
 
             if (identity != null && requirement != null) {
                 requirement.setIdentity(identity);
@@ -160,6 +188,7 @@ public class WalletService {
         private List<String[]> listSourcePending;
         private List<Source> listSource;
         private List<Tx> listTx;
+        private List<Tx> listUd;
         private Map<String,String> mapMember;
         private Identity identity;
         private Requirement requirement;
@@ -193,6 +222,16 @@ public class WalletService {
                 public void methode(List<Tx> txList,List<String[]> lsp) {
                     listTx = txList;
                     listSourcePending = lsp;
+                    getUds();
+                }
+            });
+        }
+
+        public void getUds(){
+            TxService.getListUd(context, wallet, new CallbackUdReceived() {
+                @Override
+                public void methode(List<Tx> txList) {
+                    listUd = txList;
                     getRequirements();
                 }
             });
@@ -224,7 +263,7 @@ public class WalletService {
         }
 
         public void finish(){
-            callback.methode(wallet, listSource, listTx, listSourcePending, requirement,identity);
+            callback.methode(wallet, listSource, listTx, listUd, listSourcePending, requirement,identity);
         }
 
         @Override

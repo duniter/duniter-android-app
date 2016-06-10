@@ -1,28 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!--<EditTextPreference android:title="Your Pin"-->
-    <!--android:key="pin"-->
-    <!--android:inputType="number"-->
-    <!--android:maxEms="4"-->
-    <!--android:minEms="4"-->
-    <!--android:maxLength="4"-->
-    <!--android:defaultValue="0000"-->
-    <!--android:selectAllOnFocus="true"-->
-    <!--android:summary="Please insert your pin"/>-->
-
     <org.duniter.app.view.dialog.PinPreference
         android:key="pin"
         android:title="@string/pin_code"
         android:defaultValue="0000"/>
 
-    <ListPreference     android:title="@string/first_currency_unit"
+    <ListPreference
+        android:title="@string/first_currency_unit"
         android:key="unit"
         android:defaultValue="0"
         android:entries="@array/list_unit"
         android:entryValues="@array/list_unit_value" />
 
-    <ListPreference     android:title="@string/second_currency_unit"
+    <ListPreference
+        android:title="@string/second_currency_unit"
         android:key="default_unit"
         android:defaultValue="1"
         android:entries="@array/list_unit"
@@ -32,4 +24,24 @@
         android:key="decimal"
         android:title="@string/number_digit"
         android:defaultValue="2" />
+
+    <SwitchPreference
+        android:title="@string/use_oblivion"
+        android:summary="@string/ask_use_oblivion"
+        android:key="use_oblivion"
+        android:defaultValue="false"/>
+
+    <SwitchPreference
+        android:title="@string/display_dividend"
+        android:summary="@string/display_dividend_received"
+        android:key="display_du"
+        android:defaultValue="true"/>
+
+    <ListPreference
+        android:title="@string/time_sync"
+        android:key="delay_sync"
+        android:defaultValue="600000"
+        android:entries="@array/list_time_sync"
+        android:entryValues="@array/list_time_sync_value" />
+
 </PreferenceScreen>

@@ -31,11 +31,14 @@ public class TxCursorAdapter extends CursorAdapter {
     private int currencyNameIndex;
     private int amountIndex;
     private int publicKeyIndex;
+    private int isUdIndex;
     private int uidIndex;
     private int dtIndex;
     private int dividendIndex;
     private int dividendThenIndex;
     private int lastDividendIndex;
+
+    private boolean useOblivion;
 
     private HashMap<Integer, String> mSectionPosition;
 
@@ -44,6 +47,7 @@ public class TxCursorAdapter extends CursorAdapter {
         //super(context, R.layout.list_item_tx,new ArrayList<UcoinTx>());
         this.mContext = context;
         this.mCursor = cursor;
+        this.useOblivion = true;
         this.mSectionPosition = new LinkedHashMap<>(16, (float) 0.75, false);
         //swapCursor(cursor,wallet);
     }
@@ -88,12 +92,19 @@ public class TxCursorAdapter extends CursorAdapter {
 
 //        holder.publicKey.setText(Format.minifyPubkey(cursor.getString(publicKeyIndex)));
         String uid = cursor.getString(uidIndex);
-        if (uid == null || uid.equals("")){
-            holder.publicKey.setText(Format.minifyPubkey(cursor.getString(publicKeyIndex)));
-            holder.icon.setImageResource(R.drawable.ic_key_primary_18dp);
+        String publicKey = cursor.getString(publicKeyIndex);
+        boolean isUd = Boolean.valueOf(cursor.getString(isUdIndex));
+        if (isUd){
+            holder.publicKey.setText("DU");
+            holder.icon.setImageResource(R.drawable.ic_redeem_primary_18dp);
         }else{
-            holder.publicKey.setText(uid);
-            holder.icon.setImageResource(R.drawable.ic_person_primary_18dp);
+            if (uid == null || uid.equals("")){
+                holder.publicKey.setText(Format.minifyPubkey(publicKey));
+                holder.icon.setImageResource(R.drawable.ic_key_primary_18dp);
+            }else{
+                holder.publicKey.setText(uid);
+                holder.icon.setImageResource(R.drawable.ic_person_primary_18dp);
+            }
         }
 
         Long time = cursor.getLong(timeIndex);
@@ -112,12 +123,18 @@ public class TxCursorAdapter extends CursorAdapter {
 
         String currencyName = cursor.getString(currencyNameIndex);
         BigInteger dividend = new BigInteger(cursor.getString(dividendIndex));
+        BigInteger dividendThen = new BigInteger(cursor.getString(dividendThenIndex));
         BigInteger amount = new BigInteger(value == null ? "0" : value);
 
         long delay = cursor.getLong(dtIndex);
 
-        Format.initUnit(context,holder.amount,amount,delay,dividend,true,currencyName);
-        Format.initUnit(context,holder.defaultAmount,amount,delay,dividend,false,currencyName);
+        if (!useOblivion){
+            Format.initUnit(context, holder.amount, amount, delay, dividendThen, true, currencyName);
+            Format.initUnit(context, holder.defaultAmount, amount, delay, dividendThen, false, currencyName);
+        }else {
+            Format.initUnit(context, holder.amount, amount, delay, dividend, true, currencyName);
+            Format.initUnit(context, holder.defaultAmount, amount, delay, dividend, false, currencyName);
+        }
 
 //        Format.Currency.changeUnit(
 //                context,
@@ -149,8 +166,10 @@ public class TxCursorAdapter extends CursorAdapter {
         ((TextView) v.findViewById(R.id.section_name)).setText(section);
     }
 
-    public Cursor swapCursor(Cursor newCursor) {
+    public Cursor swapCursor(Cursor newCursor,boolean useOblivion) {
         super.swapCursor(newCursor);
+
+        this.useOblivion = useOblivion;
 
         if (newCursor == null) {
             return null;
@@ -159,11 +178,12 @@ public class TxCursorAdapter extends CursorAdapter {
         timeIndex = newCursor.getColumnIndex(ViewTxAdapter.TIME);
         amountIndex = newCursor.getColumnIndex(ViewTxAdapter.AMOUNT);
         publicKeyIndex = newCursor.getColumnIndex(ViewTxAdapter.PUBLIC_KEY);
+        isUdIndex = newCursor.getColumnIndex(ViewTxAdapter.IS_UD);
         uidIndex = newCursor.getColumnIndex(ViewTxAdapter.UID);
         currencyNameIndex = newCursor.getColumnIndex(ViewTxAdapter.CURRENCY_NAME);
         dtIndex = newCursor.getColumnIndex(ViewTxAdapter.DT);
         dividendIndex = newCursor.getColumnIndex(ViewTxAdapter.LAST_UD);
-        dividendThenIndex = newCursor.getColumnIndex(ViewTxAdapter.FIRST_UD);
+        dividendThenIndex = newCursor.getColumnIndex(ViewTxAdapter.DIVIDEND);
         commentIndex =newCursor.getColumnIndex(ViewTxAdapter.COMMENT);
         walletIdIndex = newCursor.getColumnIndex(ViewTxAdapter.WALLET_ID);
 

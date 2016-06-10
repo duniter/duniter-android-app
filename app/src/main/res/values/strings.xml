@@ -308,6 +308,20 @@
         <item>Mutual Credit</item>
     </string-array>
 
+    <string-array name="list_time_sync">
+        <item>10 minutes</item>
+        <item>30 minutes</item>
+        <item>1 hour</item>
+        <item>Manually</item>
+    </string-array>
+
+    <string-array name="list_time_sync_value">
+        <item>600000</item>
+        <item>1800000</item>
+        <item>3600000</item>
+        <item>0</item>
+    </string-array>
+
     <string-array name="list_unit_value">
         <item>0</item>
         <item>1</item>
@@ -398,8 +412,8 @@
     <string name="tap_new_pin_code">Please enter your new pin code :</string>
     <string name="tap_confirm_pin_code">Please confirm your new pin code :</string>
     <string name="pin_changed_ok">The PIN code has been changed</string>
-    <string name="first_currency_unit">First currency unit</string>
-    <string name="second_currency_unit">Second currency unit</string>
+    <string name="first_currency_unit">Primary unit of currency</string>
+    <string name="second_currency_unit">Secondary unit of currency</string>
     <string name="number_digit">Number of Digit</string>
     <string name="protocol_version">Protocol version</string>
     <string name="application_version">Application version</string>
@@ -456,6 +470,11 @@
     <string name="dont_know_currency">The currency is not recognized</string>
     <string name="found_issue_qrcode">There is an issue with the QrCode</string>
     <string name="contact_not_correct_currency">This identity does not use good money</string>
+    <string name="ask_use_oblivion">Do you want to display the amounts with oblivion?</string>
+    <string name="use_oblivion">Activiate oblivion</string>
+    <string name="display_dividend_received">Display unviersals dividends received</string>
+    <string name="display_dividend">Display UD</string>
+    <string name="time_sync">Time synchronization</string>
 
 
     <string-array name="node" translatable="false">

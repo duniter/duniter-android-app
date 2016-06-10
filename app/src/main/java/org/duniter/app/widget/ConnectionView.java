@@ -111,22 +111,34 @@ public class ConnectionView {
 
                     final Wallet w = wallet;
 
-                    WalletService.updateWallet(mContext, w, true, new Callback() {
+                    CurrencyService.updateCurrency(mContext, currency, new Callback() {
                         @Override
                         public void methode() {
-                            CurrencyService.updateCurrency(mContext, currency, new Callback() {
+                            WalletService.updateWallet(mContext, w, true, new Callback() {
                                 @Override
                                 public void methode() {
-                                    WalletService.updateWallet(mContext, w, true, new Callback() {
-                                        @Override
-                                        public void methode() {
-                                            action.onFinish();
-                                        }
-                                    });
+                                    action.onFinish();
                                 }
                             });
                         }
                     });
+
+//                    WalletService.updateWallet(mContext, w, true, new Callback() {
+//                        @Override
+//                        public void methode() {
+//                            CurrencyService.updateCurrency(mContext, currency, new Callback() {
+//                                @Override
+//                                public void methode() {
+//                                    WalletService.updateWallet(mContext, w, true, new Callback() {
+//                                        @Override
+//                                        public void methode() {
+//                                            action.onFinish();
+//                                        }
+//                                    });
+//                                }
+//                            });
+//                        }
+//                    });
                 }else{
                     action.onError();
                 }

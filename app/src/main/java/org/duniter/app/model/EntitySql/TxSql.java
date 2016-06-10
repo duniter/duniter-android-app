@@ -40,11 +40,24 @@ public class TxSql extends AbstractSql<Tx> {
 
     public Map<String,Tx> getTxMap(long id) {
         Map<String,Tx> result = new HashMap<>();
-        Cursor cursor = query(TxTable.WALLET_ID+"=?",new String[]{String.valueOf(id)});
+        Cursor cursor = query(TxTable.WALLET_ID+"=? AND "+TxTable.IS_UD+"=?",new String[]{String.valueOf(id),String.valueOf(false)});
         if (cursor.moveToFirst()){
             do {
                 Tx tx = fromCursor(cursor);
                 result.put(tx.getHash(),tx);
+            }while (cursor.moveToNext());
+        }
+        cursor.close();
+        return result;
+    }
+
+    public Map<Long,Tx> getUdMap(long id) {
+        Map<Long,Tx> result = new HashMap<>();
+        Cursor cursor = query(TxTable.WALLET_ID+"=? AND "+TxTable.IS_UD+"=?",new String[]{String.valueOf(id),String.valueOf(true)});
+        if (cursor.moveToFirst()){
+            do {
+                Tx tx = fromCursor(cursor);
+                result.put(tx.getBlockNumber(),tx);
             }while (cursor.moveToNext());
         }
         cursor.close();
@@ -90,9 +103,11 @@ public class TxSql extends AbstractSql<Tx> {
                 TxTable.STATE + TEXT + NOTNULL + COMMA +
                 TxTable.AMOUNT + TEXT + NOTNULL + " DEFAULT \"0\"" + COMMA +
                 TxTable.PUBLIC_KEY + TEXT + NOTNULL + " DEFAULT \"UNKNOWN\"" + COMMA +
+                TxTable.IS_UD + TEXT + NOTNULL + " DEFAULT \"false\"" + COMMA +
                 TxTable.UID + TEXT + COMMA +
                 TxTable.TIME + INTEGER + COMMA +
                 TxTable.BLOCK_NUMBER + INTEGER + COMMA +
+                TxTable.DIVIDEND + TEXT + NOTNULL + COMMA +
                 TxTable.COMMENT + TEXT + COMMA +
                 TxTable.ENC + TEXT + COMMA +
                 TxTable.HASH + TEXT + COMMA +
@@ -101,7 +116,7 @@ public class TxSql extends AbstractSql<Tx> {
                 CurrencySql.CurrencyTable.TABLE_NAME + "(" + CurrencySql.CurrencyTable._ID + ") ON DELETE CASCADE" + COMMA +
                 "FOREIGN KEY (" + TxTable.WALLET_ID + ") REFERENCES " +
                 WalletSql.WalletTable.TABLE_NAME + "(" + WalletSql.WalletTable._ID + ") ON DELETE CASCADE" + COMMA +
-                UNIQUE + "(" + TxTable.HASH + COMMA + TxTable.WALLET_ID + ")" +
+                UNIQUE + "(" + TxTable.HASH + COMMA + TxTable.WALLET_ID + COMMA + TxTable.BLOCK_NUMBER + COMMA + TxTable.AMOUNT + ")" +
                 ")";
     }
 
@@ -116,10 +131,12 @@ public class TxSql extends AbstractSql<Tx> {
         int uidIndex = cursor.getColumnIndex(TxTable.UID);
         int timeIndex = cursor.getColumnIndex(TxTable.TIME);
         int blockNumberIndex = cursor.getColumnIndex(TxTable.BLOCK_NUMBER);
+        int dividendIndex = cursor.getColumnIndex(TxTable.DIVIDEND);
         int commentIndex = cursor.getColumnIndex(TxTable.COMMENT);
         int encIndex = cursor.getColumnIndex(TxTable.ENC);
         int hashIndex = cursor.getColumnIndex(TxTable.HASH);
         int locktimeIndex = cursor.getColumnIndex(TxTable.LOCKTIME);
+        int isUdIndex = cursor.getColumnIndex(TxTable.IS_UD);
 
         Tx tx = new Tx();
         tx.setId(cursor.getLong(idIndex));
@@ -131,10 +148,12 @@ public class TxSql extends AbstractSql<Tx> {
         tx.setUid(cursor.getString(uidIndex));
         tx.setTime(cursor.getLong(timeIndex));
         tx.setBlockNumber(cursor.getLong(blockNumberIndex));
+        tx.setDividend(new BigInteger(cursor.getString(dividendIndex)));
         tx.setComment(cursor.getString(commentIndex));
         tx.setEnc(Boolean.getBoolean(cursor.getString(encIndex)));
         tx.setHash(cursor.getString(hashIndex));
         tx.setLocktime(cursor.getLong(locktimeIndex));
+        tx.setUd(Boolean.valueOf(cursor.getString(isUdIndex)));
 
         return tx;
     }
@@ -150,10 +169,12 @@ public class TxSql extends AbstractSql<Tx> {
         values.put(TxTable.UID, entity.getUid());
         values.put(TxTable.TIME, entity.getTime());
         values.put(TxTable.BLOCK_NUMBER, entity.getBlockNumber());
+        values.put(TxTable.DIVIDEND,entity.getDividend().toString());
         values.put(TxTable.COMMENT, entity.getComment());
         values.put(TxTable.ENC, String.valueOf(entity.isEnc()));
         values.put(TxTable.HASH, entity.getHash());
         values.put(TxTable.LOCKTIME, entity.getLocktime());
+        values.put(TxTable.IS_UD, String.valueOf(entity.getUd()));
         return values;
     }
 
@@ -172,5 +193,7 @@ public class TxSql extends AbstractSql<Tx> {
         public static final String ENC = "enc";
         public static final String HASH = "hash";
         public static final String LOCKTIME = "locktime";
+        public static final String DIVIDEND = "dividend";
+        public static final String IS_UD = "is_ud";
     }
 }

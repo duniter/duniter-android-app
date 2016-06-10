@@ -159,37 +159,64 @@ public class InscriptionView {
         final Wallet w=wallet;
         final Identity i = identity;
 
-        WalletService.updateWallet(mContext, w, true, new Callback() {
+        CurrencyService.updateCurrency(mContext, currency, new Callback() {
             @Override
             public void methode() {
-                CurrencyService.updateCurrency(mContext, currency, new Callback() {
+                WalletService.updateWallet(mContext, w, true, new Callback() {
                     @Override
                     public void methode() {
-                        WalletService.updateWallet(mContext, w, true, new Callback() {
-                            @Override
-                            public void methode() {
-                                if(i!=null){
-                                    IdentityService.selfIdentity(mContext, i, new CallbackIdentity() {
+                        if(i!=null){
+                            IdentityService.selfIdentity(mContext, i, new CallbackIdentity() {
+                                @Override
+                                public void methode(Identity identity) {
+                                    IdentityService.joinIdentity(mContext, identity, new CallbackIdentity() {
                                         @Override
                                         public void methode(Identity identity) {
-                                            IdentityService.joinIdentity(mContext, identity, new CallbackIdentity() {
-                                                @Override
-                                                public void methode(Identity identity) {
-                                                    action.onFinish();
-                                                }
-                                            });
+                                            action.onFinish();
                                         }
                                     });
-                                }else{
-                                    Log.e("InscriptionView","Identity == null");
-                                    action.onFinish();
                                 }
-                            }
-                        });
+                            });
+                        }else{
+                            Log.e("InscriptionView","Identity == null");
+                            action.onFinish();
+                        }
                     }
                 });
             }
         });
+
+//        WalletService.updateWallet(mContext, w, true, new Callback() {
+//            @Override
+//            public void methode() {
+//                CurrencyService.updateCurrency(mContext, currency, new Callback() {
+//                    @Override
+//                    public void methode() {
+//                        WalletService.updateWallet(mContext, w, true, new Callback() {
+//                            @Override
+//                            public void methode() {
+//                                if(i!=null){
+//                                    IdentityService.selfIdentity(mContext, i, new CallbackIdentity() {
+//                                        @Override
+//                                        public void methode(Identity identity) {
+//                                            IdentityService.joinIdentity(mContext, identity, new CallbackIdentity() {
+//                                                @Override
+//                                                public void methode(Identity identity) {
+//                                                    action.onFinish();
+//                                                }
+//                                            });
+//                                        }
+//                                    });
+//                                }else{
+//                                    Log.e("InscriptionView","Identity == null");
+//                                    action.onFinish();
+//                                }
+//                            }
+//                        });
+//                    }
+//                });
+//            }
+//        });
     }
 
     public interface Action{

@@ -16,6 +16,7 @@ public interface CallbackUpdateWallet {
             Wallet wallet,
             List<Source> sources,
             List<Tx> listTx,
+            List<Tx> listUd,
             List<String[]> listSourcePending,
             Requirement requirement,
             Identity identity);

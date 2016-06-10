@@ -23,12 +23,13 @@ public class ViewTxAdapter implements BaseColumns, ViewInterface {
     public static final String AMOUNT = "amount";
     public static final String COMMENT = "comment";
     public static final String TIME = "time";
+    public static final String IS_UD = "is_ud";
 
     public static final String CURRENCY_ID = "currency_id";
     public static final String CURRENCY_NAME = "currency_name";
     public static final String DT = "dt";
     public static final String LAST_UD = "last_ud";
-    public static final String FIRST_UD = "first_ud";
+    public static final String DIVIDEND = "dividend";
 
     public static String getCreation() {
         return "CREATE VIEW " + VIEW_NAME +
@@ -40,6 +41,8 @@ public class ViewTxAdapter implements BaseColumns, ViewInterface {
                 TxTable.TABLE_NAME + DOT + TxTable.AMOUNT + AS + AMOUNT + COMMA +
                 TxTable.TABLE_NAME + DOT + TxTable.TIME + AS + TIME + COMMA +
                 TxTable.TABLE_NAME + DOT + TxTable.COMMENT + AS + COMMENT + COMMA +
+                TxTable.TABLE_NAME + DOT + TxTable.DIVIDEND + AS + DIVIDEND + COMMA +
+                TxTable.TABLE_NAME + DOT + TxTable.IS_UD + AS + IS_UD + COMMA +
 
                 CurrencyTable.TABLE_NAME + DOT + CurrencyTable._ID + AS + CURRENCY_ID + COMMA +
                 CurrencyTable.TABLE_NAME + DOT + CurrencyTable.NAME + AS + CURRENCY_NAME + COMMA +
@@ -48,14 +51,6 @@ public class ViewTxAdapter implements BaseColumns, ViewInterface {
                 " CASE WHEN " + BlockTable.TABLE_NAME + DOT + BlockTable.DIVIDEND  + " IS NULL" +
                 " THEN " + CurrencyTable.TABLE_NAME + DOT + CurrencyTable.UD0 +
                 " ELSE " + BlockTable.TABLE_NAME + DOT + BlockTable.DIVIDEND + " END" + AS + LAST_UD + COMMA +
-
-                "(SELECT " + BlockTable.TABLE_NAME + DOT + BlockTable.DIVIDEND +
-                FROM + BlockTable.TABLE_NAME +
-                WHERE + BlockTable.TABLE_NAME + DOT + BlockTable.NUMBER + "=" +
-                "(SELECT MAX(" + BlockTable.TABLE_NAME + DOT + BlockTable.NUMBER + ") " +
-                FROM + BlockTable.TABLE_NAME + WHERE + BlockTable.TABLE_NAME + DOT + BlockTable.NUMBER + "<=" +
-                TxTable.TABLE_NAME + DOT + TxTable.BLOCK_NUMBER + " )"+
-                " )" + AS + FIRST_UD + COMMA +
 
                 "(SELECT MAX(" + BlockTable.TABLE_NAME + DOT + BlockTable.NUMBER + ") " +
                 FROM + BlockTable.TABLE_NAME + WHERE + BlockTable.TABLE_NAME + DOT + BlockTable.CURRENCY_ID + "=" +

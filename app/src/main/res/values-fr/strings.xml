@@ -309,6 +309,20 @@
         <item>2</item>
     </string-array>
 
+    <string-array name="list_time_sync">
+        <item>10 minutes</item>
+        <item>30 minutes</item>
+        <item>1 heure</item>
+        <item>Manuellement</item>
+    </string-array>
+
+    <string-array name="list_time_sync_value">
+        <item>600000</item>
+        <item>1800000</item>
+        <item>3600000</item>
+        <item>0</item>
+    </string-array>
+
     <!-- Strings related to rules currency -->
     <string name="rules_add_currency">Ajouter une monnaie</string>
     <string name="rules_preselected_peers">Sélectionnez une monnaie prédefinie :</string>
@@ -395,8 +409,8 @@
     <string name="tap_new_pin_code">Veuillez saisir votre nouveau code pin :</string>
     <string name="tap_confirm_pin_code">Veuillez confirmer votre nouveau code pin :</string>
     <string name="pin_changed_ok">Le code PIN a bien été changé</string>
-    <string name="first_currency_unit">Première unité de la monnaie</string>
-    <string name="second_currency_unit">Seconde unité de la monnaie</string>
+    <string name="first_currency_unit">Unité principale de la monnaie</string>
+    <string name="second_currency_unit">Unité secondaire de la monnaie</string>
     <string name="number_digit">Nombre de décimales</string>
     <string name="protocol_version">Version du protocole</string>
     <string name="application_version">Version de l\'application</string>
@@ -457,5 +471,10 @@
     <string name="dont_know_currency">La monnaie utilisée n\'est pas reconnue</string>
     <string name="found_issue_qrcode">Il y a un problème avec le QrCode</string>
     <string name="contact_not_correct_currency">Cette identité n\'utilise pas la bonne monnaie</string>
+    <string name="ask_use_oblivion">Voulez-vous afficher les montants avec l\'oubli ?</string>
+    <string name="use_oblivion">Activer l\'oubli</string>
+    <string name="display_dividend_received">Afficher les dividendes universels reçus</string>
+    <string name="display_dividend">Afficher les DU</string>
+    <string name="time_sync">Délai de synchronisation</string>
 
 </resources>

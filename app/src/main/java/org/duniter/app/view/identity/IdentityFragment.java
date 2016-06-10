@@ -9,8 +9,10 @@ import android.content.CursorLoader;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -79,6 +81,8 @@ public class IdentityFragment extends ListFragment
     private TextView textInformation;
     private Spinner spinner;
 
+    private  SharedPreferences preferences;
+
     private int position = 0;
 
     public static IdentityFragment newInstance(Bundle args) {
@@ -144,6 +148,8 @@ public class IdentityFragment extends ListFragment
         publicKey.setText(Format.minifyPubkey(contact.getPublicKey()));
 
         spinnerAdapter = new SpinnerWalletArrayAdapter(getActivity(),listWallet);
+
+        preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
 
         txCursorAdapter = new TxCursorAdapter(getActivity(), null);
         setListAdapter(txCursorAdapter);
@@ -304,6 +310,14 @@ public class IdentityFragment extends ListFragment
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        if (spinner!=null) {
+            onRefresh();
+        }
+    }
+
+    @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.toolbar_identity, menu);
         MenuItem item = menu.findItem(R.id.spinner);
@@ -431,7 +445,8 @@ public class IdentityFragment extends ListFragment
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        ((TxCursorAdapter) this.getListAdapter()).swapCursor(data);
+        boolean useOblivion = preferences.getBoolean(Application.USE_OBLIVION,true);
+        ((TxCursorAdapter) this.getListAdapter()).swapCursor(data,useOblivion);
     }
 
     @Override
