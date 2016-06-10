@@ -78,12 +78,6 @@
             android:screenOrientation="portrait">
         </activity>
 
-        <activity
-            android:name="org.duniter.app.view.FindByQrCode"
-            android:label="@string/qr_code"
-            android:screenOrientation="portrait">
-        </activity>
-
         <service android:name="org.duniter.app.Sync"/>
 
         <activity

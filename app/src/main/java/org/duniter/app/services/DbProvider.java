@@ -150,7 +150,6 @@ public class DbProvider extends ContentProvider {
     @Override
     public Uri insert(Uri uri, ContentValues values) {
 //        SQLiteDatabase db = dbHelper.getWritableDatabase();
-        //TODO verifier uri si necessaire rappel dans chaque switch
         int uriType = uriMatcher.match(uri);
         long id;
         try {

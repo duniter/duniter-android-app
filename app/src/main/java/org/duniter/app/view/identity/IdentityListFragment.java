@@ -1,7 +1,6 @@
 package org.duniter.app.view.identity;
 
 import android.app.ListFragment;
-import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -30,7 +29,6 @@ import org.duniter.app.model.EntityServices.IdentityService;
 import org.duniter.app.model.EntitySql.ContactSql;
 import org.duniter.app.services.SqlService;
 import org.duniter.app.technical.callback.CallbackLookupFilter;
-import org.duniter.app.view.FindByQrCode;
 import org.duniter.app.view.MainActivity;
 import org.duniter.app.view.TransferActivity;
 import org.duniter.app.view.identity.adapter.IdentitySectionBaseAdapter;

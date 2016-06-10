@@ -1,5 +1,3 @@
-TODO - in french, sorry ;/
-
 Build
 ~~~~~
 

@@ -102,7 +102,7 @@ public class WalletService {
             }
             TxSql txSql = SqlService.getTxSql(context);
 
-        //TODO recuperer le dividend
+        //TODO revoir le calcul du montant et chnage l'oubli
         Map<Long,BlockUd> mapBlock = SqlService.getBlockSql(context).getMapByNumber(wallet.getCurrency().getId());
         List<Long> numbers = new ArrayList<>(mapBlock.keySet());
         Collections.sort(numbers);

@@ -78,7 +78,6 @@ dependencies {
     compile project(':kalium-jni')
     //compile 'com.mcxiaoke.volley:library:1.0.19'
     // Supports Android 4.0.3 and later (API level 15)
-    //TODO A tester
     compile 'com.journeyapps:zxing-android-embedded:2.3.0@aar'
     compile 'com.journeyapps:zxing-android-legacy:2.3.0@aar'
     //fin test
