@@ -1,26 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <org.duniter.app.view.dialog.PinPreference
+    <org.duniter.app.view.dialog.preference.PinPreference
         android:key="pin"
         android:title="@string/pin_code"
         android:defaultValue="0000"/>
 
-    <ListPreference
+    <org.duniter.app.view.dialog.preference.ListPreference
         android:title="@string/first_currency_unit"
         android:key="unit"
         android:defaultValue="0"
         android:entries="@array/list_unit"
         android:entryValues="@array/list_unit_value" />
 
-    <ListPreference
+    <org.duniter.app.view.dialog.preference.ListPreference
         android:title="@string/second_currency_unit"
         android:key="default_unit"
         android:defaultValue="1"
         android:entries="@array/list_unit"
         android:entryValues="@array/list_unit_value" />
 
-    <org.duniter.app.view.dialog.NumberPickerPreference
+    <org.duniter.app.view.dialog.preference.NumberPickerPreference
         android:key="decimal"
         android:title="@string/number_digit"
         android:defaultValue="2" />
@@ -37,7 +37,7 @@
         android:key="display_du"
         android:defaultValue="true"/>
 
-    <ListPreference
+    <org.duniter.app.view.dialog.preference.ListPreference
         android:title="@string/time_sync"
         android:key="delay_sync"
         android:defaultValue="600000"

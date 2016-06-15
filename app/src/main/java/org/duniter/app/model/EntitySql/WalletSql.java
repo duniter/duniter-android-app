@@ -6,13 +6,13 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.provider.BaseColumns;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.duniter.app.model.Entity.Currency;
 import org.duniter.app.model.Entity.Wallet;
 import org.duniter.app.model.EntitySql.base.AbstractSql;
+import org.duniter.app.technical.AmountPair;
 
 /**
  * Created by naivalf27 on 05/04/16.
@@ -37,6 +37,10 @@ public class WalletSql extends AbstractSql<Wallet> {
         }
         cursor.close();
         return walletList;
+    }
+
+    public AmountPair getReelAmount(long walletId) {
+        return new AmountPair(0,0);
     }
 
     public List<Wallet> getByCurrency(Currency currency) {
@@ -81,7 +85,10 @@ public class WalletSql extends AbstractSql<Wallet> {
                 WalletTable.PUBLIC_KEY + TEXT + NOTNULL + COMMA +
                 WalletTable.PRIVATE_KEY + TEXT + COMMA +
                 WalletTable.ALIAS + TEXT + COMMA +
-                WalletTable.AMOUNT + TEXT + NOTNULL + " DEFAULT \"0\" " + COMMA +
+                WalletTable.AMOUNT + INTEGER + NOTNULL + COMMA +
+                WalletTable.BASE + INTEGER + NOTNULL + COMMA +
+                WalletTable.AMOUNT_TIME + INTEGER + NOTNULL + COMMA +
+                WalletTable.AMOUNT_TIME_ORIGIN + INTEGER + NOTNULL + COMMA +
                 WalletTable.SYNC_BLOCK + INTEGER + NOTNULL + " DEFAULT 0 " + COMMA +
                 "FOREIGN KEY (" + WalletTable.CURRENCY_ID + ") REFERENCES " +
                 CurrencySql.CurrencyTable.TABLE_NAME + "(" + CurrencySql.CurrencyTable._ID + ") ON DELETE CASCADE" + COMMA +
@@ -101,6 +108,8 @@ public class WalletSql extends AbstractSql<Wallet> {
         int aliasIndex = cursor.getColumnIndex(WalletTable.ALIAS);
         int syncBlockIndex = cursor.getColumnIndex(WalletTable.SYNC_BLOCK);
         int amountIndex = cursor.getColumnIndex(WalletTable.AMOUNT);
+        int amountTimeIndex = cursor.getColumnIndex(WalletTable.AMOUNT_TIME);
+        int amountTimeOblivionIndex = cursor.getColumnIndex(WalletTable.AMOUNT_TIME_ORIGIN);
 
         Wallet wallet = new Wallet();
         wallet.setId(cursor.getLong(idIndex));
@@ -111,7 +120,9 @@ public class WalletSql extends AbstractSql<Wallet> {
         wallet.setPrivateKey(cursor.getString(privaetKeyIndex));
         wallet.setAlias(cursor.getString(aliasIndex));
         wallet.setSyncBlock(cursor.getLong(syncBlockIndex));
-        wallet.setAmount(new BigInteger(cursor.getString(amountIndex)));
+        wallet.setAmount(cursor.getLong(amountIndex));
+        wallet.setAmountTime(cursor.getLong(amountTimeIndex));
+        wallet.setAmountTimeOrigin(cursor.getLong(amountTimeOblivionIndex));
 
         return wallet;
     }
@@ -126,7 +137,10 @@ public class WalletSql extends AbstractSql<Wallet> {
         values.put(WalletTable.PUBLIC_KEY, entity.getPublicKey());
         values.put(WalletTable.PRIVATE_KEY, entity.getPrivateKey());
         values.put(WalletTable.SYNC_BLOCK, entity.getSyncBlock());
-        values.put(WalletTable.AMOUNT, entity.getAmount().toString());
+        values.put(WalletTable.AMOUNT, entity.getAmount());
+        values.put(WalletTable.BASE, entity.getBase());
+        values.put(WalletTable.AMOUNT_TIME, entity.getAmountTime());
+        values.put(WalletTable.AMOUNT_TIME_ORIGIN, entity.getAmountTimeOrigin());
         return values;
     }
 
@@ -141,5 +155,8 @@ public class WalletSql extends AbstractSql<Wallet> {
         public static final String ALIAS = "alias";
         public static final String SYNC_BLOCK = "sync_block";
         public static final String AMOUNT = "amount";
+        public static final String BASE = "base";
+        public static final String AMOUNT_TIME = "amount_time";
+        public static final String AMOUNT_TIME_ORIGIN = "amount_time_origin";
     }
 }

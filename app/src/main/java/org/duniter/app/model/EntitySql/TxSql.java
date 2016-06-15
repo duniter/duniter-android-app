@@ -17,6 +17,7 @@ import org.duniter.app.model.Entity.Currency;
 import org.duniter.app.model.Entity.Tx;
 import org.duniter.app.model.Entity.Wallet;
 import org.duniter.app.model.EntitySql.base.AbstractSql;
+import org.duniter.app.technical.format.UnitCurrency;
 
 /**
  * Created by naivalf27 on 05/04/16.
@@ -36,6 +37,17 @@ public class TxSql extends AbstractSql<Tx> {
         for (Tx tx: list){
             insert(tx);
         }
+    }
+
+    public long getWalletTime(long walletId) {
+        long timeAmount = 0;
+        String requete = "SELECT sum("+TxTable.AMOUNT_TIME_ORIGIN+") FROM "+TxTable.TABLE_NAME+" WHERE "+TxTable.WALLET_ID + "="+walletId+" AND "+TxTable.IS_UD+"=\"false\"";
+        Cursor cursor = query(requete);
+        if (cursor.moveToFirst()){
+            timeAmount = cursor.getLong(0);
+        }
+        cursor.close();
+        return timeAmount;
     }
 
     public Map<String,Tx> getTxMap(long id) {
@@ -64,13 +76,13 @@ public class TxSql extends AbstractSql<Tx> {
         return result;
     }
 
-    public BigInteger getPendingAmount(long id) {
-        BigInteger result = BigInteger.ZERO;
+    public long getPendingAmount(long id) {
+        long result = 0;
         Cursor cursor = query(TxTable.WALLET_ID+"=? AND "+TxTable.STATE+"=?",new String[]{String.valueOf(id), TxState.PENDING.name()});
         if (cursor.moveToFirst()){
             do {
                 Tx tx = fromCursor(cursor);
-                result.add(tx.getAmount());
+                result += tx.getAmount();
             }while (cursor.moveToNext());
         }
         cursor.close();
@@ -101,13 +113,15 @@ public class TxSql extends AbstractSql<Tx> {
                 TxTable.CURRENCY_ID + INTEGER + NOTNULL + COMMA +
                 TxTable.WALLET_ID + INTEGER + NOTNULL + COMMA +
                 TxTable.STATE + TEXT + NOTNULL + COMMA +
-                TxTable.AMOUNT + TEXT + NOTNULL + " DEFAULT \"0\"" + COMMA +
+                TxTable.AMOUNT + INTEGER + NOTNULL + COMMA +
+                TxTable.BASE + INTEGER + NOTNULL + COMMA +
+                TxTable.AMOUNT_TIME_ORIGIN + INTEGER + NOTNULL + COMMA +
+                TxTable.AMOUNT_RELATIF_ORIGIN + REAL + NOTNULL + COMMA +
                 TxTable.PUBLIC_KEY + TEXT + NOTNULL + " DEFAULT \"UNKNOWN\"" + COMMA +
-                TxTable.IS_UD + TEXT + NOTNULL + " DEFAULT \"false\"" + COMMA +
+                TxTable.IS_UD + TEXT + NOTNULL + COMMA +
                 TxTable.UID + TEXT + COMMA +
                 TxTable.TIME + INTEGER + COMMA +
                 TxTable.BLOCK_NUMBER + INTEGER + COMMA +
-                TxTable.DIVIDEND + TEXT + NOTNULL + COMMA +
                 TxTable.COMMENT + TEXT + COMMA +
                 TxTable.ENC + TEXT + COMMA +
                 TxTable.HASH + TEXT + COMMA +
@@ -127,11 +141,13 @@ public class TxSql extends AbstractSql<Tx> {
         int walletIdIndex = cursor.getColumnIndex(TxTable.WALLET_ID);
         int stateIndex = cursor.getColumnIndex(TxTable.STATE);
         int amountIndex = cursor.getColumnIndex(TxTable.AMOUNT);
+        int baseIndex =cursor.getColumnIndex(TxTable.BASE);
+        int amountTimeOriginIndex = cursor.getColumnIndex(TxTable.AMOUNT_TIME_ORIGIN);
+        int amountRelatifOriginIndex = cursor.getColumnIndex(TxTable.AMOUNT_RELATIF_ORIGIN);
         int publicKeyIndex = cursor.getColumnIndex(TxTable.PUBLIC_KEY);
         int uidIndex = cursor.getColumnIndex(TxTable.UID);
         int timeIndex = cursor.getColumnIndex(TxTable.TIME);
         int blockNumberIndex = cursor.getColumnIndex(TxTable.BLOCK_NUMBER);
-        int dividendIndex = cursor.getColumnIndex(TxTable.DIVIDEND);
         int commentIndex = cursor.getColumnIndex(TxTable.COMMENT);
         int encIndex = cursor.getColumnIndex(TxTable.ENC);
         int hashIndex = cursor.getColumnIndex(TxTable.HASH);
@@ -143,12 +159,14 @@ public class TxSql extends AbstractSql<Tx> {
         tx.setWallet(new Wallet(cursor.getLong(walletIdIndex)));
         tx.setCurrency(new Currency(cursor.getLong(currencyIdIndex)));
         tx.setState(cursor.getString(stateIndex));
-        tx.setAmount(new BigInteger(cursor.getString(amountIndex)));
+        tx.setAmount(cursor.getLong(amountIndex));
+        tx.setBase(cursor.getInt(baseIndex));
+        tx.setAmountTimeOrigin(cursor.getLong(amountTimeOriginIndex));
+        tx.setAmountRelatifOrigin(cursor.getDouble(amountRelatifOriginIndex));
         tx.setPublicKey(cursor.getString(publicKeyIndex));
         tx.setUid(cursor.getString(uidIndex));
         tx.setTime(cursor.getLong(timeIndex));
         tx.setBlockNumber(cursor.getLong(blockNumberIndex));
-        tx.setDividend(new BigInteger(cursor.getString(dividendIndex)));
         tx.setComment(cursor.getString(commentIndex));
         tx.setEnc(Boolean.getBoolean(cursor.getString(encIndex)));
         tx.setHash(cursor.getString(hashIndex));
@@ -164,12 +182,14 @@ public class TxSql extends AbstractSql<Tx> {
         values.put(TxTable.CURRENCY_ID, entity.getCurrency().getId());
         values.put(TxTable.WALLET_ID, entity.getWallet().getId());
         values.put(TxTable.STATE,entity.getState());
-        values.put(TxTable.AMOUNT, entity.getAmount().toString());
+        values.put(TxTable.AMOUNT, entity.getAmount());
+        values.put(TxTable.BASE, entity.getBase());
+        values.put(TxTable.AMOUNT_TIME_ORIGIN, entity.getAmountTimeOrigin());
+        values.put(TxTable.AMOUNT_RELATIF_ORIGIN, entity.getAmountRelatifOrigin());
         values.put(TxTable.PUBLIC_KEY, entity.getPublicKey());
         values.put(TxTable.UID, entity.getUid());
         values.put(TxTable.TIME, entity.getTime());
         values.put(TxTable.BLOCK_NUMBER, entity.getBlockNumber());
-        values.put(TxTable.DIVIDEND,entity.getDividend().toString());
         values.put(TxTable.COMMENT, entity.getComment());
         values.put(TxTable.ENC, String.valueOf(entity.isEnc()));
         values.put(TxTable.HASH, entity.getHash());
@@ -185,6 +205,9 @@ public class TxSql extends AbstractSql<Tx> {
         public static final String WALLET_ID = "wallet_id";
         public static final String STATE = "state";
         public static final String AMOUNT = "amount";
+        public static final String BASE = "base";
+        public static final String AMOUNT_TIME_ORIGIN = "amount_time_origin";
+        public static final String AMOUNT_RELATIF_ORIGIN = "amount_relatif_origin";
         public static final String PUBLIC_KEY = "public_Key";
         public static final String UID = "uid";
         public static final String TIME = "time";
@@ -193,7 +216,6 @@ public class TxSql extends AbstractSql<Tx> {
         public static final String ENC = "enc";
         public static final String HASH = "hash";
         public static final String LOCKTIME = "locktime";
-        public static final String DIVIDEND = "dividend";
         public static final String IS_UD = "is_ud";
     }
 }

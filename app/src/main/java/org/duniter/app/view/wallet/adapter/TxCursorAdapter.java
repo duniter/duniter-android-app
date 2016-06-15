@@ -1,7 +1,9 @@
 package org.duniter.app.view.wallet.adapter;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,9 +17,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
+import org.duniter.app.Application;
 import org.duniter.app.Format;
 import org.duniter.app.R;
 import org.duniter.app.model.EntitySql.view.ViewTxAdapter;
+import org.duniter.app.technical.format.Formater;
 
 public class TxCursorAdapter extends CursorAdapter {
 
@@ -30,13 +34,15 @@ public class TxCursorAdapter extends CursorAdapter {
     private int timeIndex;
     private int currencyNameIndex;
     private int amountIndex;
+    private int baseIndex;
     private int publicKeyIndex;
     private int isUdIndex;
     private int uidIndex;
     private int dtIndex;
-    private int dividendIndex;
-    private int dividendThenIndex;
-    private int lastDividendIndex;
+    private int amountRelatifOriginIndex;
+    private int amountTimeOriginIndex;
+    private int currentUdIndex;
+    private int baseCurrentUdIndex;
 
     private boolean useOblivion;
 
@@ -118,22 +124,32 @@ public class TxCursorAdapter extends CursorAdapter {
         }
 
         holder.day.setText(new SimpleDateFormat("EEE dd").format(date.getTime()));
-        String value = cursor.getString(amountIndex);
 
 
         String currencyName = cursor.getString(currencyNameIndex);
-        BigInteger dividend = new BigInteger(cursor.getString(dividendIndex));
-        BigInteger dividendThen = new BigInteger(cursor.getString(dividendThenIndex));
-        BigInteger amount = new BigInteger(value == null ? "0" : value);
+        int base = cursor.getInt(baseIndex);
+        long amount = cursor.getLong(amountIndex);
+        long timeOrigin = cursor.getLong(amountTimeOriginIndex);
+        double relatifOrigin = cursor.getDouble(amountRelatifOriginIndex);
+
+        long dividend = cursor.getLong(currentUdIndex);
+        int baseDividend = cursor.getInt(baseCurrentUdIndex);
 
         long delay = cursor.getLong(dtIndex);
 
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        int decimal = preferences.getInt(Application.DECIMAL,2);
+
+        int firstUnit = Integer.parseInt(preferences.getString(Application.UNIT, String.valueOf(Application.UNIT_CLASSIC)));
+        int secondUnit = Integer.parseInt(preferences.getString(Application.UNIT_DEFAULT, String.valueOf(Application.UNIT_DU)));
+
         if (!useOblivion){
-            Format.initUnit(context, holder.amount, amount, delay, dividendThen, true, currencyName);
-            Format.initUnit(context, holder.defaultAmount, amount, delay, dividendThen, false, currencyName);
+            amount = Format.convertBase(amount,base,baseDividend);
+            setAmount(holder.amount,firstUnit,context,currencyName,decimal,amount,relatifOrigin,timeOrigin);
+            setAmount(holder.defaultAmount,secondUnit,context,currencyName,decimal,amount,relatifOrigin,timeOrigin);
         }else {
-            Format.initUnit(context, holder.amount, amount, delay, dividend, true, currencyName);
-            Format.initUnit(context, holder.defaultAmount, amount, delay, dividend, false, currencyName);
+            Format.initUnit(context, holder.amount, amount, base, delay, dividend, baseDividend, true, currencyName);
+            Format.initUnit(context, holder.defaultAmount, amount, base, delay, dividend, baseDividend, false, currencyName);
         }
 
 //        Format.Currency.changeUnit(
@@ -153,6 +169,20 @@ public class TxCursorAdapter extends CursorAdapter {
 //        } else {
 //            view.setBackgroundColor(context.getResources().getColor(R.color.accentLight));
 //        }
+    }
+
+    private void setAmount(TextView view ,int unit, Context context, String currencyName, int decimal, long amount, double relatif, long time){
+        switch (unit) {
+            case Application.UNIT_CLASSIC:
+                view.setText(Formater.quantitatifFormatter(amount,currencyName));
+                break;
+            case Application.UNIT_DU:
+                view.setText(Formater.relatifFormatter(context,decimal,relatif));
+                break;
+            case Application.UNIT_TIME:
+                view.setText(Formater.timeFormatterV2(context,time));
+                break;
+        }
     }
 
     public View newSectionView(Context context, ViewGroup parent) {
@@ -177,13 +207,16 @@ public class TxCursorAdapter extends CursorAdapter {
 
         timeIndex = newCursor.getColumnIndex(ViewTxAdapter.TIME);
         amountIndex = newCursor.getColumnIndex(ViewTxAdapter.AMOUNT);
+        baseIndex = newCursor.getColumnIndex(ViewTxAdapter.BASE);
         publicKeyIndex = newCursor.getColumnIndex(ViewTxAdapter.PUBLIC_KEY);
         isUdIndex = newCursor.getColumnIndex(ViewTxAdapter.IS_UD);
         uidIndex = newCursor.getColumnIndex(ViewTxAdapter.UID);
         currencyNameIndex = newCursor.getColumnIndex(ViewTxAdapter.CURRENCY_NAME);
         dtIndex = newCursor.getColumnIndex(ViewTxAdapter.DT);
-        dividendIndex = newCursor.getColumnIndex(ViewTxAdapter.LAST_UD);
-        dividendThenIndex = newCursor.getColumnIndex(ViewTxAdapter.DIVIDEND);
+        currentUdIndex = newCursor.getColumnIndex(ViewTxAdapter.CURRENT_UD);
+        baseCurrentUdIndex = newCursor.getColumnIndex(ViewTxAdapter.BASE_CURRENT_UD);
+        amountRelatifOriginIndex = newCursor.getColumnIndex(ViewTxAdapter.AMOUNT_RELATIF_ORIGIN);
+        amountTimeOriginIndex = newCursor.getColumnIndex(ViewTxAdapter.AMOUNT_TIME_ORIGIN);
         commentIndex =newCursor.getColumnIndex(ViewTxAdapter.COMMENT);
         walletIdIndex = newCursor.getColumnIndex(ViewTxAdapter.WALLET_ID);
 

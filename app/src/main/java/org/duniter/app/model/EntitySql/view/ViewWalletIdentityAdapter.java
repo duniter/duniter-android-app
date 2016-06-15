@@ -22,6 +22,9 @@ public class ViewWalletIdentityAdapter implements BaseColumns, ViewInterface {
 
     public static final String PUBLIC_KEY = "public_key";
     public static final String AMOUNT = "amount";
+    public static final String BASE = "base";
+    public static final String AMOUNT_TIME = "amount_time";
+    public static final String AMOUNT_TIME_ORIGIN = "amount_time_origin";
     public static final String ALIAS = "alias";
     public static final String CURRENCY_NAME = "currency_name";
     public static final String SIG_NEED_QTY = "sig_need_qty";
@@ -29,7 +32,8 @@ public class ViewWalletIdentityAdapter implements BaseColumns, ViewInterface {
     public static final String CURRENCY_ID = "currency_id";
     public static final String DT = "dt";
     public static final String IDENTITY_ID = "identity_id";
-    public static final String LAST_UD = "last_ud";
+    public static final String CURRENT_UD = "current_ud";
+    public static final String BASE_CURRENT_UD = "base_current_ud";
 
     public static final String NB_REQUIREMENTS = "nb_requirements";
     public static final String MEMBERSHIP = "membership_expire_in";
@@ -41,7 +45,10 @@ public class ViewWalletIdentityAdapter implements BaseColumns, ViewInterface {
                 WalletTable.TABLE_NAME + DOT + WalletTable._ID + AS + _ID + COMMA +
                 WalletTable.TABLE_NAME + DOT + WalletTable.PUBLIC_KEY + AS + PUBLIC_KEY + COMMA +
                 WalletTable.TABLE_NAME + DOT + WalletTable.AMOUNT + AS + AMOUNT + COMMA +
+                WalletTable.TABLE_NAME + DOT + WalletTable.BASE + AS + BASE + COMMA +
                 WalletTable.TABLE_NAME + DOT + WalletTable.ALIAS + AS + ALIAS + COMMA +
+                WalletTable.TABLE_NAME + DOT + WalletTable.AMOUNT_TIME + AS + AMOUNT_TIME + COMMA +
+                WalletTable.TABLE_NAME + DOT + WalletTable.AMOUNT_TIME_ORIGIN + AS + AMOUNT_TIME_ORIGIN + COMMA +
 
                 CurrencyTable.TABLE_NAME + DOT + CurrencyTable._ID + AS + CURRENCY_ID + COMMA +
                 CurrencyTable.TABLE_NAME + DOT + CurrencyTable.NAME + AS + CURRENCY_NAME + COMMA +
@@ -57,7 +64,8 @@ public class ViewWalletIdentityAdapter implements BaseColumns, ViewInterface {
 
                 " CASE WHEN " + BlockTable.TABLE_NAME + DOT + BlockTable.DIVIDEND  + " IS NULL" +
                 " THEN " + CurrencyTable.TABLE_NAME + DOT + CurrencyTable.UD0 +
-                " ELSE " + BlockTable.TABLE_NAME + DOT + BlockTable.DIVIDEND + " END" + AS + LAST_UD + COMMA +
+                " ELSE " + BlockTable.TABLE_NAME + DOT + BlockTable.DIVIDEND + " END" + AS + CURRENT_UD + COMMA +
+                BlockTable.TABLE_NAME + DOT + BlockTable.BASE + AS + BASE_CURRENT_UD + COMMA +
 
                 "(SELECT MAX(" + BlockTable.TABLE_NAME + DOT + BlockTable.NUMBER + ") " +
                 FROM + BlockTable.TABLE_NAME + WHERE + BlockTable.TABLE_NAME + DOT + BlockTable.CURRENCY_ID + "=" +

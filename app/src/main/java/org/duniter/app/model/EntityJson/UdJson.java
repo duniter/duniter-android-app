@@ -38,8 +38,8 @@ public class UdJson implements Serializable {
             Tx tx = new Tx();
             tx.setPublicKey("");
             tx.setUid("");
-            tx.setAmount(new BigInteger(e.amount));
-            tx.setDividend(new BigInteger(e.amount));
+            tx.setAmount(e.amount);
+            tx.setBase(e.base);
             tx.setCurrency(wallet.getCurrency());
             tx.setWallet(wallet);
             tx.setState(TxState.VALID.name());
@@ -61,7 +61,7 @@ public class UdJson implements Serializable {
             public long block_number;
             public boolean consumed;
             public long time;
-            public String amount;
+            public long amount;
             public int base;
         }
     }

@@ -39,6 +39,7 @@ import org.duniter.app.model.EntitySql.view.ViewTxAdapter;
 import org.duniter.app.model.EntitySql.view.ViewWalletIdentityAdapter;
 import org.duniter.app.services.SqlService;
 import org.duniter.app.technical.callback.CallbackIdentity;
+import org.duniter.app.technical.format.Formater;
 import org.duniter.app.view.MainActivity;
 import org.duniter.app.view.TransferActivity;
 import org.duniter.app.view.identity.CertificationFragment;
@@ -46,6 +47,7 @@ import org.duniter.app.view.identity.IdentityFragment;
 import org.duniter.app.view.dialog.InfoDialogFragment;
 import org.duniter.app.view.dialog.QrCodeDialogFragment;
 import org.duniter.app.view.wallet.adapter.TxCursorAdapter;
+import org.duniter.app.view.wallet.adapter.WalletCursorAdapter;
 
 public class WalletFragment extends ListFragment
         implements LoaderManager.LoaderCallbacks<Cursor>,
@@ -275,8 +277,8 @@ public class WalletFragment extends ListFragment
     @Override
     public void onRefresh() {
         WalletService.updateWallet(getActivity(),wallet,true,null);
-        getLoaderManager().initLoader(WALLET_LOADER_ID, getArguments(), this);
-        getLoaderManager().initLoader(TX_LOADER_ID, getArguments(), this);
+        getLoaderManager().restartLoader(WALLET_LOADER_ID, getArguments(), this);
+        getLoaderManager().restartLoader(TX_LOADER_ID, getArguments(), this);
         mSwipeLayout.setRefreshing(false);
     }
 
@@ -418,9 +420,14 @@ public class WalletFragment extends ListFragment
         int currencyIdIndex = cursor.getColumnIndex(ViewWalletIdentityAdapter.CURRENCY_ID);
         int publicKeyIndex = cursor.getColumnIndex(ViewWalletIdentityAdapter.PUBLIC_KEY);
         int currencyNameIndex = cursor.getColumnIndex(ViewWalletIdentityAdapter.CURRENCY_NAME);
-        int dividendIndex = cursor.getColumnIndex(ViewWalletIdentityAdapter.LAST_UD);
+        int dividendIndex = cursor.getColumnIndex(ViewWalletIdentityAdapter.CURRENT_UD);
+        int baseDividendIndex = cursor.getColumnIndex(ViewWalletIdentityAdapter.BASE_CURRENT_UD);
         int dtIndex = cursor.getColumnIndex(ViewWalletIdentityAdapter.DT);
         int amountIndex = cursor.getColumnIndex(ViewWalletIdentityAdapter.AMOUNT);
+        int baseIndex = cursor.getColumnIndex(ViewWalletIdentityAdapter.BASE);
+        int amountTimeIndex = cursor.getColumnIndex(ViewWalletIdentityAdapter.AMOUNT_TIME);
+        int amountTimeOriginIndex = cursor.getColumnIndex(ViewWalletIdentityAdapter.AMOUNT_TIME_ORIGIN);
+
         int aliasIndex = cursor.getColumnIndex(ViewWalletIdentityAdapter.ALIAS);
         int sigQtyIndex = cursor.getColumnIndex(ViewWalletIdentityAdapter.SIG_NEED_QTY);
         int nbRequirementsIndex = cursor.getColumnIndex(ViewWalletIdentityAdapter.NB_REQUIREMENTS);
@@ -451,12 +458,34 @@ public class WalletFragment extends ListFragment
         }
 
         String currencyName = cursor.getString(currencyNameIndex);
-        BigInteger amount = new BigInteger(cursor.getString(amountIndex));
-        BigInteger dividend = new BigInteger(cursor.getString(dividendIndex));
-        Long delay = cursor.getLong(dtIndex);
+        long amount = cursor.getLong(amountIndex);
+        int base = cursor.getInt(baseIndex);
 
-        Format.initUnit(getActivity(),firstAmount,amount,delay,dividend,true,currencyName);
-        Format.initUnit(getActivity(),secondAmount,amount,delay,dividend,false,currencyName);
+        long dividend = cursor.getLong(dividendIndex);
+        int baseDividend = cursor.getInt(baseDividendIndex);
+
+        long amountTime = cursor.getLong(amountTimeIndex);
+        long amountTimeOrigin =cursor.getLong(amountTimeOriginIndex);
+        int delay = cursor.getInt(dtIndex);
+
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+
+        boolean useOblivion = preferences.getBoolean(Application.USE_OBLIVION,true);
+
+        int firstUnit = Integer.parseInt(preferences.getString(Application.UNIT, String.valueOf(Application.UNIT_CLASSIC)));
+        int secondUnit = Integer.parseInt(preferences.getString(Application.UNIT_DEFAULT, String.valueOf(Application.UNIT_DU)));
+
+        if (firstUnit == Application.UNIT_TIME){
+            firstAmount.setText(Formater.timeFormatterV2(getActivity(),useOblivion ? amountTime : amountTimeOrigin));
+        }else{
+            Format.initUnit(getActivity(),firstAmount,amount,base,delay,dividend,baseDividend,true,currencyName);
+        }
+
+        if (secondUnit == Application.UNIT_TIME){
+            secondAmount.setText(Formater.timeFormatterV2(getActivity(),useOblivion ? amountTime : amountTimeOrigin));
+        }else{
+            Format.initUnit(getActivity(),secondAmount,amount,base,delay,dividend,baseDividend,false,currencyName);
+        }
 
 //        Format.Currency.changeUnit(
 //                getActivity(),
@@ -521,7 +550,7 @@ public class WalletFragment extends ListFragment
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-
+        ((TxCursorAdapter) this.getListAdapter()).swapCursor(null,false);
     }
 
     @Override

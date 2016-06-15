@@ -32,7 +32,7 @@ public class TxService {
                 if (code == 200){
                     TxJson txJson = TxJson.fromJson(response);
                     List<Tx> txList = TxJson.fromTx(txJson,wallet,mapMember);
-                    List<String[]> listSource = TxJson.fromTxGetSourcesPending(txJson);
+                    List<String> listSource = TxJson.fromTxGetSourcesPending(txJson);
                     if (callback!=null){
                         callback.methode(txList,listSource);
                     }

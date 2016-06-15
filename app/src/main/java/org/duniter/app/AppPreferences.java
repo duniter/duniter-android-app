@@ -1,13 +1,11 @@
 package org.duniter.app;
 
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
-import android.preference.PreferenceManager;
 
-import org.duniter.app.view.dialog.NumberPickerPreference;
+import org.duniter.app.view.dialog.preference.ListPreference;
+import org.duniter.app.view.dialog.preference.NumberPickerPreference;
 
 /**
  * Created by naivalf27 on 22/02/16.
@@ -32,14 +30,6 @@ public class AppPreferences extends PreferenceActivity {
                 pref.setSummary(val);
             }
         }
-
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        preferences.registerOnSharedPreferenceChangeListener(new SharedPreferences.OnSharedPreferenceChangeListener() {
-            public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
-                onCreate(savedInstanceState);
-            }
-        });
-
     }
 
 }

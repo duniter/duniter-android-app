@@ -30,32 +30,9 @@ public class SourceSql extends AbstractSql<Source> {
         super(context,URI);
     }
 
-    public BigInteger insertList(List<Source> list, long walletId, BigInteger amount){
-        List<Source> listSql = getByWallet(walletId);
-
-        for (Source s:listSql){
-            if (!list.contains(s)){
-                delete(s.getId());
-                amount = amount.subtract(s.getAmount());
-            }
-        }
-
-        for (Source s : list){
-            if (!listSql.contains(s)){
-                try {
-                    insert(s);
-                }catch (SQLiteConstraintException e){
-
-                }
-                amount = amount.add(s.getAmount());
-            }
-        }
-        return amount;
-    }
-
     public List<Source> getByWallet(long id) {
         List<Source> sources = new ArrayList<>();
-        Cursor cursor = query(SourceTable.WALLET_ID+"=?",new String[]{String.valueOf(id)});
+        Cursor cursor = query(SourceTable.WALLET_ID+"=?",new String[]{String.valueOf(id)},SourceTable.BASE+" ASC");
         if (cursor.moveToFirst()){
             do {
                 sources.add(fromCursor(cursor));
@@ -76,7 +53,8 @@ public class SourceSql extends AbstractSql<Source> {
                 SourceTable.CURRENCY_ID + INTEGER + NOTNULL + COMMA +
                 SourceTable.WALLET_ID + INTEGER + NOTNULL + COMMA +
                 SourceTable.STATE + TEXT + NOTNULL + COMMA +
-                SourceTable.AMOUNT + TEXT + NOTNULL + " DEFAULT \"0\"" + COMMA +
+                SourceTable.AMOUNT + INTEGER + NOTNULL + COMMA +
+                SourceTable.BASE + INTEGER + NOTNULL + COMMA +
                 SourceTable.IDENTIFIER + TEXT + COMMA +
                 SourceTable.NOFFSET + INTEGER + COMMA +
                 SourceTable.TYPE + TEXT + NOTNULL + COMMA +
@@ -97,16 +75,18 @@ public class SourceSql extends AbstractSql<Source> {
         int identifierIndex = cursor.getColumnIndex(SourceTable.IDENTIFIER);
         int noffsetIndex = cursor.getColumnIndex(SourceTable.NOFFSET);
         int typeIndex = cursor.getColumnIndex(SourceTable.TYPE);
+        int baseIndex = cursor.getColumnIndex(SourceTable.BASE);
 
         Source source = new Source();
         source.setId(cursor.getLong(idIndex));
         source.setCurrency(new Currency(cursor.getLong(currencyIdIndex)));
         source.setWallet(new Wallet(cursor.getLong(walletIdIndex)));
         source.setState(cursor.getString(stateIndex));
-        source.setAmount(new BigInteger(cursor.getString(amountIndex)));
+        source.setAmount(cursor.getLong(amountIndex));
         source.setIdentifier(cursor.getString(identifierIndex));
         source.setNoffset(cursor.getInt(noffsetIndex));
         source.setType(cursor.getString(typeIndex));
+        source.setBase(cursor.getInt(baseIndex));
 
         return source;
     }
@@ -116,7 +96,8 @@ public class SourceSql extends AbstractSql<Source> {
         ContentValues values = new ContentValues();
         values.put(SourceTable.CURRENCY_ID, entity.getCurrency().getId());
         values.put(SourceTable.WALLET_ID, entity.getWallet().getId());
-        values.put(SourceTable.AMOUNT, entity.getAmount().toString());
+        values.put(SourceTable.AMOUNT, entity.getAmount());
+        values.put(SourceTable.BASE, entity.getBase());
         values.put(SourceTable.STATE, entity.getState());
         values.put(SourceTable.IDENTIFIER, entity.getIdentifier());
         values.put(SourceTable.NOFFSET, entity.getNoffset());
@@ -130,6 +111,7 @@ public class SourceSql extends AbstractSql<Source> {
         public static final String CURRENCY_ID = "currency_id";
         public static final String WALLET_ID = "wallet_id";
         public static final String AMOUNT = "amount";
+        public static final String BASE = "base";
         public static final String STATE = "state";
         public static final String IDENTIFIER = "identifier";
         public static final String NOFFSET = "noffset";

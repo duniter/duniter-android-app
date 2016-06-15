@@ -76,8 +76,8 @@ public class TxDoc {
         unlocks.add(pos+":SIG("+unlock+")");
     }
 
-    public void addOutput(BigInteger qtAmount, int base, String publicKey){
-        outputs.add(qtAmount.toString()+":"+base+":SIG("+publicKey+")");
+    public void addOutput(long qtAmount, int base, String publicKey){
+        outputs.add(qtAmount+":"+base+":SIG("+publicKey+")");
     }
 
     public String toString() {

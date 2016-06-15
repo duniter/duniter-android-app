@@ -12,6 +12,7 @@ public interface InterfaceSql<T> {
     public long insert(T entity);
     public Cursor query(String selection,String[] selectionArgs,String orderBy);
     public Cursor query(String selection,String[] selectionArgs);
+    public Cursor query(String querySql);
     public int delete(long id);
     public int update(T entity,long id);
 

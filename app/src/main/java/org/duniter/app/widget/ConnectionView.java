@@ -90,6 +90,7 @@ public class ConnectionView {
                     Wallet wallet = new Wallet();
                     wallet.setCurrency(currency);
                     wallet.setSalt(mSalt.getText().toString());
+                    wallet.setBase(0);
                     wallet.setAlias(requirement.getUid());
                     wallet.setPublicKey(publicKey);
                     wallet.setPrivateKey(privateKey);

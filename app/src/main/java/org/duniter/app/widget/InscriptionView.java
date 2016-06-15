@@ -140,6 +140,7 @@ public class InscriptionView {
 
         Wallet wallet = new Wallet();
         wallet.setCurrency(currency);
+        wallet.setBase(0);
         wallet.setSalt(mSalt.getText().toString());
         wallet.setAlias(mUid.getText().toString());
         wallet.setPublicKey(publicKey);

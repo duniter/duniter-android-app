@@ -10,7 +10,7 @@ public class Ud implements Serializable{
     public long id;
     public Wallet wallet;
     public Currency currency;
-    private BigInteger amount;
+    private long amount;
     private String publicKey;
     private long time;
     private long blockNumber;
@@ -49,11 +49,11 @@ public class Ud implements Serializable{
         this.currency = currency;
     }
 
-    public BigInteger getAmount() {
+    public long getAmount() {
         return amount;
     }
 
-    public void setAmount(BigInteger amount) {
+    public void setAmount(long amount) {
         this.amount = amount;
     }
 

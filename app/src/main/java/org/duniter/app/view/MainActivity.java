@@ -70,6 +70,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
     private TextView drawerBlocksView;
     private TextView drawerSourcesView;
     private TextView drawerCreditView;
+    private TextView drawerDbView;
     private Fragment currentFragment;
     private ArrayList<Fragment> listFragment = null;
     public static int RESULT_SCAN = 49374;
@@ -166,6 +167,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         drawerRulesView = (TextView) mDrawerLayout.findViewById(R.id.drawer_rules);
         drawerBlocksView = (TextView) mDrawerLayout.findViewById(R.id.drawer_blocks);
         drawerSourcesView = (TextView) mDrawerLayout.findViewById(R.id.drawer_sources);
+        drawerDbView = (TextView) mDrawerLayout.findViewById(R.id.export_db);
 
         drawerRulesView.setOnClickListener(this);
         drawerWalletsView.setOnClickListener(this);
@@ -183,6 +185,9 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 
             drawerSourcesView.setVisibility(View.VISIBLE);
             drawerSourcesView.setOnClickListener(this);
+
+            drawerDbView.setVisibility(View.VISIBLE);
+            drawerDbView.setOnClickListener(this);
         }
     }
 
@@ -478,6 +483,9 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
             case R.id.drawer_credits:
                 removeList(false);
                 setCurrentFragment(CreditFragment.newInstance());
+                break;
+            case R.id.export_db:
+                Application.exportDb();
                 break;
         }
     }

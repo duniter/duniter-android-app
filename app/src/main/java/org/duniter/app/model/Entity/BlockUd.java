@@ -16,8 +16,9 @@ public class BlockUd implements Serializable{
     private long membersCount;
     private BigInteger monetaryMass;
     private String hash;
-    private BigInteger dividend;
+    private long dividend;
     private long powMin;
+    private int base;
 
     public Currency getCurrency() {
         return currency;
@@ -85,11 +86,11 @@ public class BlockUd implements Serializable{
         return hash;
     }
 
-    public void setDividend(BigInteger dividend) {
+    public void setDividend(long dividend) {
         this.dividend = dividend;
     }
 
-    public BigInteger getDividend() {
+    public long getDividend() {
         return dividend;
     }
 
@@ -103,5 +104,13 @@ public class BlockUd implements Serializable{
 
     public long getPowMin() {
         return powMin;
+    }
+
+    public int getBase() {
+        return base;
+    }
+
+    public void setBase(int base) {
+        this.base = base;
     }
 }

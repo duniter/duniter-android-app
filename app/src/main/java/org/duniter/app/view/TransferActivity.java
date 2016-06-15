@@ -34,6 +34,7 @@ import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
 import org.duniter.app.model.EntityServices.IdentityService;
+import org.duniter.app.technical.AmountPair;
 import org.duniter.app.technical.PartialRegexInputFilter;
 import org.duniter.app.technical.callback.CallbackLookup;
 import org.duniter.app.technical.format.Contantes;
@@ -101,7 +102,8 @@ public class TransferActivity extends ActionBarActivity implements View.OnClickL
     private int defaultUnit;
 
     private Currency currency;
-    private BigInteger dividend;
+    private long dividend;
+    private int baseDividend;
     private int dt;
     private Wallet walletSelected;
     private Contact contactSelected;
@@ -291,20 +293,27 @@ public class TransferActivity extends ActionBarActivity implements View.OnClickL
             val="0"+val;
         }
         if(unit!=defaultUnit) {
-            BigInteger quantitative = null;
+            AmountPair pair;
+            long quantitative = 0;
+            int base = 0;
             switch (unit){
                 case Application.UNIT_CLASSIC:
-                    quantitative = new BigInteger(val);
+                    quantitative = Long.valueOf(val);
+                    base = walletSelected.getBase();
                     break;
                 case Application.UNIT_DU:
-                    quantitative = UnitCurrency.relatif_quantitatif(new BigDecimal(val), dividend);
+                    pair = UnitCurrency.relatif_quantitatif(Long.valueOf(val),walletSelected.getBase(), dividend, baseDividend);
+                    quantitative = pair.quantitatif;
+                    base = pair.base;
                     break;
                 case Application.UNIT_TIME:
                     long i = Time.toMilliSecond(Long.valueOf(val), spinnerUnit.getSelectedItemPosition());
-                    quantitative = UnitCurrency.time_quantitatif(i, dividend, dt);
+                    pair = UnitCurrency.time_quantitatif(i, dividend, baseDividend,dt);
+                    quantitative = pair.quantitatif;
+                    base = pair.base;
                     break;
             }
-            Format.initUnit(this,defaultAmount,quantitative,dt,dividend,false,currency.getName());
+            Format.initUnit(this,defaultAmount,quantitative,base,dt,dividend,baseDividend,false,currency.getName());
 
 //            Format.Currency.changeUnit(
 //                    this,
@@ -318,23 +327,23 @@ public class TransferActivity extends ActionBarActivity implements View.OnClickL
         }
     }
 
-    private BigInteger toQuantitative(BigDecimal val){
-        BigInteger res = null;
+    private AmountPair toQuantitative(Double val){
+        AmountPair pair = null;
         if(currency!=null) {
             switch (unit) {
                 case Application.UNIT_CLASSIC:
-                    res = val.toBigInteger();
+                    pair = new AmountPair(val.longValue(),walletSelected.getBase());
                     break;
                 case Application.UNIT_DU:
-                    res = UnitCurrency.relatif_quantitatif(val, dividend);
+                    pair = UnitCurrency.relatif_quantitatif(val, walletSelected.getBase(), dividend,baseDividend);
                     break;
                 case Application.UNIT_TIME:
                     long i = Time.toMilliSecond(Long.valueOf(val.toString()), spinnerUnit.getSelectedItemPosition());
-                    res = UnitCurrency.time_quantitatif(i, dividend, dt);
+                    pair = UnitCurrency.time_quantitatif(i, dividend,baseDividend, dt);
                     break;
             }
         }
-        return res;
+        return pair;
     }
 
     @Override
@@ -445,7 +454,7 @@ public class TransferActivity extends ActionBarActivity implements View.OnClickL
     public void showDialog(){
         DialogFragment dialog= null;
         if(walletSelected!=null){
-            dialog = ConverterDialog.newInstance( dividend,dt, amount, spinnerUnit,currency.getName());
+            dialog = ConverterDialog.newInstance( dividend,dt, walletSelected.getBase(),amount, spinnerUnit,currency.getName());
         }else{
             Toast.makeText(this,getString(R.string.select_wallet),Toast.LENGTH_SHORT).show();
         }
@@ -461,11 +470,11 @@ public class TransferActivity extends ActionBarActivity implements View.OnClickL
         }else {
             dataWallet.setVisibility(View.VISIBLE);
 
-            BigInteger dividend = currency.getLastUdBlock().getDividend();
+//            dividend = currency.getLastUdBlock().getDividend();
             long delay = currency.getDt();
 
-            Format.initUnit(this,mWalletAmount,walletSelected.getAmount(),delay,dividend,true,currency.getName());
-            Format.initUnit(this,mWalletDefaultAmount,walletSelected.getAmount(),delay,dividend,false,currency.getName());
+            Format.initUnit(this,mWalletAmount,walletSelected.getAmount(),walletSelected.getBase(),delay,dividend,baseDividend,true,currency.getName());
+            Format.initUnit(this,mWalletDefaultAmount,walletSelected.getAmount(),walletSelected.getBase(),delay,dividend,baseDividend,false,currency.getName());
 
 //            Format.Currency.changeUnit(
 //                    this,
@@ -543,6 +552,23 @@ public class TransferActivity extends ActionBarActivity implements View.OnClickL
 
         if (currency!=null && currency.getName()!=null) {
             setTitle(getResources().getString(R.string.transfer_of, currency.getName()));
+        }else if(currency.getName() == null){
+            currency = SqlService.getCurrencySql(this).getById(
+                    contactSelected == null ?
+                            walletSelected.getCurrency().getId() :
+                            contactSelected.getCurrency().getId()
+            );
+            currency.setLastUdBlock(SqlService.getBlockSql(this).last(currency.getId()));
+            if (walletSelected!=null){
+                walletSelected.setCurrency(currency);
+            }
+            if (contactSelected!=null){
+                contactSelected.setCurrency(currency);
+            }
+
+            dividend = currency.getLastUdBlock().getDividend();
+            baseDividend = currency.getLastUdBlock().getBase();
+            dt = currency.getDt().intValue();
         }
     }
 
@@ -571,6 +597,7 @@ public class TransferActivity extends ActionBarActivity implements View.OnClickL
             }
 
             dividend = currency.getLastUdBlock().getDividend();
+            baseDividend = currency.getLastUdBlock().getBase();
             dt = currency.getDt().intValue();
         }
 
@@ -640,7 +667,7 @@ public class TransferActivity extends ActionBarActivity implements View.OnClickL
     }
 
     public boolean actionTransfer() {
-        final BigInteger qtAmount;
+        final AmountPair qtAmount;
         String receiverPublicKey = mReceiverPublicKey.getText().toString();
         String comment;
 
@@ -652,8 +679,10 @@ public class TransferActivity extends ActionBarActivity implements View.OnClickL
         final String uid = contactSelected!=null ? contactSelected.getUid() : "";
         final String com = comment;
 
+        final AmountPair reelAmount = SqlService.getWalletSql(this).getReelAmount(walletSelected.getId());
+
         //check funds
-        if (qtAmount.compareTo(walletSelected.getAmount()) == 1) {
+        if (qtAmount.quantitatif<reelAmount.quantitatif) {
             defaultAmount.setError(getResources().getString(R.string.insufficient_funds));
             return false;
         }
@@ -665,15 +694,20 @@ public class TransferActivity extends ActionBarActivity implements View.OnClickL
         txDoc.addIssuer(walletSelected.getPublicKey());
 
         //set inputs
-        BigInteger cumulativeAmount = BigInteger.ZERO;
+        long cumulativeAmount = 0;
+        int base = 0;
         SourceSql sourceSql = SqlService.getSourceSql(this);
         List<Source> sources = sourceSql.getByWallet(walletSelected.getId());
         List<Source> usedSources = new ArrayList<>();
         for (Source source : sources) {
             txDoc.addInput(source.getType(),source.getIdentifier(),source.getNoffset());
             usedSources.add(source);
-            cumulativeAmount = cumulativeAmount.add(source.getAmount());
-            if (cumulativeAmount.compareTo(qtAmount) >= 0) {
+            if (base<source.getBase()){
+                cumulativeAmount = Format.convertBase(cumulativeAmount,base,source.getBase());
+                base = source.getBase();
+            }
+            cumulativeAmount += source.getAmount();
+            if (cumulativeAmount>=qtAmount.quantitatif) {
                 break;
             }
         }
@@ -683,10 +717,10 @@ public class TransferActivity extends ActionBarActivity implements View.OnClickL
             sourceSql.delete(usedSources.get(i).getId());
         }
 
-        txDoc.addOutput(qtAmount,0,receiverPublicKey);
-        BigInteger refundAmount = cumulativeAmount.subtract(qtAmount);
-        if (refundAmount.compareTo(BigInteger.ZERO) > 0) {
-            txDoc.addOutput(refundAmount,0,walletSelected.getPublicKey());
+        txDoc.addOutput(qtAmount.quantitatif,base,receiverPublicKey);
+        long refundAmount = cumulativeAmount-qtAmount.quantitatif;
+        if (refundAmount > 0) {
+            txDoc.addOutput(refundAmount,base,walletSelected.getPublicKey());
         }
 
         boolean signed = false;
@@ -711,11 +745,13 @@ public class TransferActivity extends ActionBarActivity implements View.OnClickL
                             e.printStackTrace();
                         }
                         Tx tx = new Tx();
-                        BigInteger amount = BigInteger.ZERO;
-                        amount = amount.subtract(qtAmount);
+                        long amount = 0;
+                        amount -= qtAmount.quantitatif;
                         tx.setPublicKey(pubKey);
                         tx.setUid(uid);
                         tx.setAmount(amount);
+                        tx.setAmountTimeOrigin(UnitCurrency.quantitatif_time(amount,qtAmount.base,dividend,baseDividend,dt));
+                        tx.setAmountRelatifOrigin(UnitCurrency.quantitatif_relatif(amount,qtAmount.base,dividend,baseDividend));
                         tx.setCurrency(currency);
                         tx.setWallet(walletSelected);
                         tx.setState(TxState.PENDING.name());
@@ -725,10 +761,11 @@ public class TransferActivity extends ActionBarActivity implements View.OnClickL
                         tx.setHash(hash);
                         tx.setBlockNumber(0);
                         tx.setLocktime(0);
+                        tx.setUd(false);
 
                         SqlService.getTxSql(context).insert(tx);
 
-                        walletSelected.setAmount(walletSelected.getAmount().subtract(qtAmount));
+                        walletSelected.setAmount(walletSelected.getAmount()-qtAmount.quantitatif);
                         SqlService.getWalletSql(context).update(walletSelected,walletSelected.getId());
                         finish();
                     }
@@ -749,7 +786,7 @@ public class TransferActivity extends ActionBarActivity implements View.OnClickL
         return publicKey;
     }
 
-    private BigInteger validateAmount() {
+    private AmountPair validateAmount() {
         if (amount.getText().toString().isEmpty()) {
             amount.setError(getResources().getString(R.string.amount_is_empty));
             amount.requestFocus();
@@ -757,7 +794,7 @@ public class TransferActivity extends ActionBarActivity implements View.OnClickL
         }else{
             amount.setError(null);
         }
-        return toQuantitative(new BigDecimal(amount.getText().toString()));
+        return toQuantitative(Double.valueOf(amount.getText().toString()));
     }
 
     private String validateComment() {

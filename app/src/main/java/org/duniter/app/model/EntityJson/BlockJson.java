@@ -17,8 +17,8 @@ public final class BlockJson {
     public long time;
     public long medianTime;
     public long membersCount;
-    public long monetaryMass;
-    public long unitbase;
+    public String monetaryMass;
+    public int unitbase;
     public String currency;
     public String issuer;
     public String signature;
@@ -27,7 +27,7 @@ public final class BlockJson {
     public String previousHash;
     public String previousIssuer;
     public String inner_hash;
-    public long dividend;
+    public Long dividend;
 //    public String[] identities;
 //    public String[] joiners;
 //    public String[] actives;
@@ -49,10 +49,11 @@ public final class BlockJson {
         res.setNumber(block.number);
         res.setMedianTime(block.medianTime);
         res.setMembersCount(block.membersCount);
-        res.setMonetaryMass(new BigInteger(String.valueOf(block.monetaryMass)));
+        res.setMonetaryMass(new BigInteger(block.monetaryMass));
         res.setHash(block.hash);
         res.setPowMin(block.powMin);
-        res.setDividend(new BigInteger(String.valueOf(block.dividend)));
+        res.setBase(block.unitbase);
+        res.setDividend(block.dividend!=null?block.dividend:0);
 
         return res;
     }

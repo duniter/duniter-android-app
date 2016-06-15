@@ -37,7 +37,8 @@ public class SourceJson implements Serializable {
             source.setType(s.type);
             source.setNoffset(s.noffset);
             source.setIdentifier(s.identifier);
-            source.setAmount(new BigInteger(String.valueOf(s.amount)));
+            source.setAmount(s.amount);
+            source.setBase(s.base);
             res.add(source);
         }
         return res;
@@ -48,5 +49,6 @@ public class SourceJson implements Serializable {
         public int noffset;
         public String identifier;
         public long amount;
+        public int base;
     }
 }

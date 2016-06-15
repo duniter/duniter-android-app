@@ -77,7 +77,8 @@ public class BlockUdSql extends AbstractSql<BlockUd> {
                 BlockTable.CURRENCY_ID + INTEGER + NOTNULL + COMMA +
                 BlockTable.NUMBER + INTEGER + NOTNULL + COMMA +
                 BlockTable.MEDIAN_TIME + INTEGER + NOTNULL + COMMA +
-                BlockTable.DIVIDEND + TEXT + COMMA +
+                BlockTable.DIVIDEND + INTEGER + COMMA +
+                BlockTable.BASE + INTEGER + COMMA +
                 BlockTable.MONETARY_MASS + TEXT + NOTNULL + COMMA +
                 BlockTable.MEMBERS_COUNT + INTEGER + NOTNULL + COMMA +
                 BlockTable.HASH + INTEGER + NOTNULL + COMMA +
@@ -97,6 +98,7 @@ public class BlockUdSql extends AbstractSql<BlockUd> {
         int monetaryMassIndex = cursor.getColumnIndex(BlockTable.MONETARY_MASS);
         int hashIndex = cursor.getColumnIndex(BlockTable.HASH);
         int dividendIndex = cursor.getColumnIndex(BlockTable.DIVIDEND);
+        int baseIndex = cursor.getColumnIndex(BlockTable.BASE);
 
         BlockUd blockUd =new BlockUd();
         blockUd.setId(cursor.getLong(idIndex));
@@ -106,7 +108,8 @@ public class BlockUdSql extends AbstractSql<BlockUd> {
         blockUd.setMembersCount(cursor.getLong(membersCountIndex));
         blockUd.setMonetaryMass(new BigInteger(cursor.getString(monetaryMassIndex)));
         blockUd.setHash(cursor.getString(hashIndex));
-        blockUd.setDividend(new BigInteger(cursor.getString(dividendIndex)));
+        blockUd.setDividend(cursor.getLong(dividendIndex));
+        blockUd.setBase(cursor.getInt(baseIndex));
 
         return blockUd;
     }
@@ -120,7 +123,8 @@ public class BlockUdSql extends AbstractSql<BlockUd> {
         values.put(BlockTable.MONETARY_MASS, entity.getMonetaryMass().toString());
         values.put(BlockTable.MEDIAN_TIME, entity.getMedianTime());
         values.put(BlockTable.MEMBERS_COUNT, entity.getMembersCount());
-        values.put(BlockTable.DIVIDEND, entity.getDividend().toString());
+        values.put(BlockTable.DIVIDEND, entity.getDividend());
+        values.put(BlockTable.BASE, entity.getBase());
         values.put(BlockTable.HASH, entity.getHash());
 
         return values;
@@ -133,6 +137,7 @@ public class BlockUdSql extends AbstractSql<BlockUd> {
         public static final String NUMBER = "number";
         public static final String MEDIAN_TIME = "median_time";
         public static final String DIVIDEND = "dividend";
+        public static final String BASE = "base";
         public static final String MONETARY_MASS = "monetary_mass";
         public static final String MEMBERS_COUNT = "members_count";
         public static final String HASH = "hash";

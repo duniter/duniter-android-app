@@ -13,8 +13,9 @@ public class Source implements Serializable{
     private String type;
     private int noffset;
     private String identifier;
-    private BigInteger amount;
+    private long amount;
     private String state;
+    private int base;
 
     public Source(long id) {
         this.id =id;
@@ -70,11 +71,11 @@ public class Source implements Serializable{
         return identifier;
     }
 
-    public void setAmount(BigInteger amount) {
+    public void setAmount(long amount) {
         this.amount = amount;
     }
 
-    public BigInteger getAmount() {
+    public long getAmount() {
         return amount;
     }
 
@@ -84,10 +85,12 @@ public class Source implements Serializable{
         if (o == null || getClass() != o.getClass()) return false;
 
         Source source = (Source) o;
+
+        if (noffset != source.noffset) return false;
+        if (amount != source.amount) return false;
+        if (base != source.base) return false;
         if (type != null ? !type.equals(source.type) : source.type != null) return false;
-        if (identifier != null ? !identifier.equals(source.identifier) : source.identifier != null)
-            return false;
-        return amount != null ? amount.equals(source.amount) : source.amount == null;
+        return identifier != null ? identifier.equals(source.identifier) : source.identifier == null;
 
     }
 
@@ -97,5 +100,13 @@ public class Source implements Serializable{
 
     public void setState(String state) {
         this.state = state;
+    }
+
+    public void setBase(int base) {
+        this.base = base;
+    }
+
+    public int getBase() {
+        return base;
     }
 }

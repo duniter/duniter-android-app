@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.duniter.app.Application;
+import org.duniter.app.Format;
 import org.duniter.app.R;
 import org.duniter.app.model.Entity.BlockUd;
 import org.duniter.app.model.Entity.Currency;
@@ -33,13 +34,16 @@ import org.duniter.app.model.EntityWeb.TxWeb;
 import org.duniter.app.model.document.TxDoc;
 import org.duniter.app.services.SqlService;
 import org.duniter.app.services.WebService;
+import org.duniter.app.technical.AmountPair;
 import org.duniter.app.technical.callback.Callback;
+import org.duniter.app.technical.callback.CallbackBlock;
 import org.duniter.app.technical.callback.CallbackMap;
 import org.duniter.app.technical.callback.CallbackRequirement;
 import org.duniter.app.technical.callback.CallbackSource;
 import org.duniter.app.technical.callback.CallbackTx;
 import org.duniter.app.technical.callback.CallbackUdReceived;
 import org.duniter.app.technical.callback.CallbackUpdateWallet;
+import org.duniter.app.technical.format.UnitCurrency;
 
 /**
  * Created by naivalf27 on 27/04/16.
@@ -54,8 +58,8 @@ public class WalletService {
         if (forced || (currentTime >= (lastTime+fiveMin))){
             Updater updater = new Updater(context, wallet, new CallbackUpdateWallet() {
                 @Override
-                public void methode(Wallet wallet, List<Source> listSources, List<Tx> listTx,List<Tx> listUd,List<String[]> listSourcePending, Requirement requirement, Identity identity) {
-                    insert(context, wallet, identity, listSources, listTx,listUd,listSourcePending, requirement);
+                public void methode(Wallet wallet, BlockUd currentBlock, List<Source> listSources, List<Tx> listTx,List<Tx> listUd,List<String> listSourcePending, Requirement requirement, Identity identity) {
+                    insert(context, wallet, identity, currentBlock, listSources, listTx,listUd,listSourcePending, requirement);
                     preferences.edit().putLong(Application.LAST_UPDATE,currentTime).apply();
                     if (callback != null) {
                         callback.methode();
@@ -66,96 +70,114 @@ public class WalletService {
         }
     }
 
-    public static void insert(Context context, Wallet wallet,Identity identity,List<Source> listSource,List<Tx> listTx,List<Tx> listUd,List<String[]> lsp, Requirement requirement){
-        BigInteger amount = BigInteger.ZERO;
-        List<String> ls = new ArrayList<>();
+    public static void insert(Context context,
+                              Wallet wallet,
+                              Identity identity,
+                              BlockUd currentBlock,
+                              List<Source> listSource,
+                              List<Tx> listTx,
+                              List<Tx> listUd,
+                              List<String> listSourcePending,
+                              Requirement requirement){
 
-        for (String[] s : lsp){
-            if (s[0].equals("D")){
-                ls.add(s[2]);
-            }else if(s[0].equals("T")){
-                ls.add(s[1]);
+        long amount = 0;
+        long amountTimeOblivion = 0;
+        int base = currentBlock.getBase();
+
+        Currency currency = wallet.getCurrency();
+        if (currency.getDt()==null || currency.getDt()==0){
+            currency = SqlService.getCurrencySql(context).getById(currency.getId());
+        }
+
+        SourceSql sourceSql = SqlService.getSourceSql(context);
+        List<Source> sourcesSql = sourceSql.getByWallet(wallet.getId());
+        List<Source> _SourcesSql = new ArrayList<>(sourcesSql);
+        for (Source source : _SourcesSql) {
+            if (!listSource.contains(source)) {
+                sourceSql.delete(source.getId());
+                sourcesSql.remove(source);
             }
         }
-            SourceSql sourceSql = SqlService.getSourceSql(context);
-            List<Source> sourcesSql = sourceSql.getByWallet(wallet.getId());
-            List<Source> _SourcesSql = new ArrayList<>(sourcesSql);
-            for (Source source : _SourcesSql) {
-                if (!listSource.contains(source)) {
-                    sourceSql.delete(source.getId());
-                    sourcesSql.remove(source);
+        for (Source source : listSource) {
+            amount += Format.convertBase(source.getAmount(),source.getBase(),base);
+            if (!sourcesSql.contains(source)) {
+                if (source.getType().equals("D") ?
+                        !listSourcePending.contains(String.valueOf(source.getNoffset())) :
+                        !listSourcePending.contains(source.getIdentifier())) {
+                    sourceSql.insert(source);
                 }
             }
-            for (Source source : listSource) {
-                amount = amount.add(source.getAmount());
-                boolean noInsert;
-                if (!sourcesSql.contains(source)) {
-                    if (source.getType().equals("D")) {
-                        noInsert = ls.contains(String.valueOf(source.getNoffset()));
-                    } else {
-                        noInsert = ls.contains(source.getIdentifier());
-                    }
-                    if (!noInsert) {
-                        sourceSql.insert(source);
-                    }
-                }
-            }
-            TxSql txSql = SqlService.getTxSql(context);
+        }
 
+        TxSql txSql = SqlService.getTxSql(context);
         //TODO revoir le calcul du montant et chnage l'oubli
         Map<Long,BlockUd> mapBlock = SqlService.getBlockSql(context).getMapByNumber(wallet.getCurrency().getId());
         List<Long> numbers = new ArrayList<>(mapBlock.keySet());
         Collections.sort(numbers);
 
-            List<Tx> listPending = txSql.getPendingTx(wallet.getId());
-            Map<String, Tx> listValid = txSql.getTxMap(wallet.getId());
-            for (Tx tx : listPending) {
-                if (!listTx.contains(tx)) {
-                    txSql.delete(tx.getId());
-                    amount = amount.add((tx.getAmount().multiply(new BigInteger("-1"))));
-                } else {
-                    amount = amount.add(tx.getAmount());
+        List<Tx> listPending = txSql.getPendingTx(wallet.getId());
+        Map<String, Tx> listValid = txSql.getTxMap(wallet.getId());
+        for (Tx tx : listPending) {
+            if (!listTx.contains(tx)) {
+                txSql.delete(tx.getId());
+            }else{
+                amount += Format.convertBase(tx.getAmount(),tx.getBase(),base);
+                amountTimeOblivion += Format.convertBase(tx.getAmount(),tx.getBase(),base);
+            }
+        }
 
-                }
-            }
-            for (Tx tx : listTx) {
-                if (!listValid.containsKey(tx.getHash())) {
-                    for (int i= 0;i<numbers.size();i++){
-                        if (i == numbers.size()-1 || (tx.getBlockNumber()==0)){
-                            tx.setDividend(mapBlock.get(numbers.get(i)).getDividend());
-                            break;
-                        }
-                        if (numbers.get(i) == tx.getBlockNumber()){
-                            tx.setDividend(mapBlock.get(numbers.get(i)).getDividend());
-                            break;
-                        }
-                        if (numbers.get(i) > tx.getBlockNumber()){
-                            tx.setDividend(mapBlock.get(numbers.get(i-1)).getDividend());
-                            break;
-                        }
+        for (Tx tx : listTx) {
+            if (!listValid.containsKey(tx.getHash())) {
+                int i = 0;
+                long dividend;
+                int b;
+                if (tx.getBlockNumber()==0){
+                    dividend = mapBlock.get(numbers.get(numbers.size()-1)).getDividend();
+                    b = mapBlock.get(numbers.get(numbers.size()-1)).getBase();
+                }else{
+                    while (i<numbers.size() && numbers.get(i) <= tx.getBlockNumber()){
+                        i++;
                     }
-                    txSql.insert(tx);
-                    amount = amount.add(tx.getAmount());
+                    dividend = mapBlock.get(numbers.get(i-1)).getDividend();
+                    b = mapBlock.get(numbers.get(i-1)).getBase();
                 }
+                tx.setAmountTimeOrigin(UnitCurrency.quantitatif_time(tx.getAmount(),tx.getBase(),dividend,b,currency.getDt()));
+                tx.setAmountRelatifOrigin(UnitCurrency.quantitatif_relatif(tx.getAmount(),tx.getBase(),dividend,b));
+                txSql.insert(tx);
             }
+            amountTimeOblivion += Format.convertBase(tx.getAmount(),tx.getBase(),base);
+        }
+
         Map<Long, Tx> listUdSql = txSql.getUdMap(wallet.getId());
         for (Tx tx:listUd){
             if (!listUdSql.containsKey(tx.getBlockNumber())){
+                tx.setAmountTimeOrigin(UnitCurrency.quantitatif_time(tx.getAmount(),tx.getBase(),tx.getAmount(),tx.getBase(),currency.getDt()));
+                tx.setAmountRelatifOrigin(UnitCurrency.quantitatif_relatif(tx.getAmount(),tx.getBase(),tx.getAmount(),tx.getBase()));
                 txSql.insert(tx);
             }
         }
 
-            if (identity != null && requirement != null) {
-                requirement.setIdentity(identity);
-                SqlService.getRequirementSql(context).insert(requirement);
-                if (identity.getSelfBlockUid() == null) {
-                    identity.setSelfBlockUid(requirement.getSelfBlockUid());
-                    SqlService.getIdentitySql(context).update(identity, identity.getId());
-                }
+        if (identity != null && requirement != null) {
+            requirement.setIdentity(identity);
+            SqlService.getRequirementSql(context).insert(requirement);
+            if (identity.getSelfBlockUid() == null) {
+                identity.setSelfBlockUid(requirement.getSelfBlockUid());
+                SqlService.getIdentitySql(context).update(identity, identity.getId());
             }
+        }
 
-            wallet.setAmount(amount);
-            SqlService.getWalletSql(context).update(wallet, wallet.getId());
+        long dividend = mapBlock.get(numbers.get(numbers.size()-1)).getDividend();
+
+        dividend = Format.convertBase(dividend,mapBlock.get(numbers.get(numbers.size()-1)).getBase(),base);
+
+        long walletTimeOblivion = Double.valueOf(((double)amountTimeOblivion/(double)dividend)*((double)(currency.getDt()*1000L))).longValue();
+        long walletTime = txSql.getWalletTime(wallet.getId());
+
+        wallet.setBase(base);
+        wallet.setAmount(amount);
+        wallet.setAmountTime(walletTime);
+        wallet.setAmountTimeOrigin(walletTimeOblivion);
+        SqlService.getWalletSql(context).update(wallet, wallet.getId());
         Log.d("Update wallet","-------FINISH------");
     }
 
@@ -185,7 +207,8 @@ public class WalletService {
         private final Wallet wallet;
         private final CallbackUpdateWallet callback;
 
-        private List<String[]> listSourcePending;
+        private BlockUd currentBlock;
+        private List<String> listSourcePending;
         private List<Source> listSource;
         private List<Tx> listTx;
         private List<Tx> listUd;
@@ -198,6 +221,7 @@ public class WalletService {
             this.wallet = wallet;
             this.callback = callback;
 
+            this.currentBlock = null;
             this.listSource = new ArrayList<>();
             this.listSourcePending = new ArrayList<>();
             this.listTx = new ArrayList<>();
@@ -216,10 +240,20 @@ public class WalletService {
             });
         }
 
+        public void getCurrentBlock(){
+            BlockService.getCurrentBlock(context, wallet.getCurrency(), new CallbackBlock() {
+                @Override
+                public void methode(BlockUd blockUd) {
+                    currentBlock = blockUd;
+                    getMembers();
+                }
+            });
+        }
+
         public void getTxs(){
             TxService.getListTx(context, wallet, mapMember, new CallbackTx() {
                 @Override
-                public void methode(List<Tx> txList,List<String[]> lsp) {
+                public void methode(List<Tx> txList,List<String> lsp) {
                     listTx = txList;
                     listSourcePending = lsp;
                     getUds();
@@ -263,13 +297,13 @@ public class WalletService {
         }
 
         public void finish(){
-            callback.methode(wallet, listSource, listTx, listUd, listSourcePending, requirement,identity);
+            callback.methode(wallet, currentBlock, listSource, listTx, listUd, listSourcePending, requirement,identity);
         }
 
         @Override
         protected Void doInBackground(Void... message) {
             Log.d("Update wallet","-------START------");
-            getMembers();
+            getCurrentBlock();
             return null;
         }
     }

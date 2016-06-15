@@ -10,7 +10,10 @@ public class Tx implements Serializable{
     public long id;
     public Wallet wallet;
     public Currency currency;
-    private BigInteger amount;
+    private long amount;
+    private int base;
+    private long amountTimeOrigin;
+    private double amountRelatifOrigin;
     private String publicKey;
     private long time;
     private long blockNumber;
@@ -20,23 +23,14 @@ public class Tx implements Serializable{
     private long locktime;
     private String state;
     private String uid;
-    private BigInteger dividend;
     private Boolean isUd;
 
-    public Boolean getUd() {
-        return isUd;
+    public long getId() {
+        return id;
     }
 
-    public void setUd(Boolean ud) {
-        isUd = ud;
-    }
-
-    public Currency getCurrency() {
-        return currency;
-    }
-
-    public void setCurrency(Currency currency) {
-        this.currency = currency;
+    public void setId(long id) {
+        this.id = id;
     }
 
     public Wallet getWallet() {
@@ -47,76 +41,100 @@ public class Tx implements Serializable{
         this.wallet = wallet;
     }
 
-    public long getId() {
-        return id;
+    public Currency getCurrency() {
+        return currency;
     }
 
-    public void setId(long id) {
-        this.id = id;
+    public void setCurrency(Currency currency) {
+        this.currency = currency;
     }
 
-    public void setAmount(BigInteger amount) {
-        this.amount = amount;
-    }
-
-    public BigInteger getAmount() {
+    public long getAmount() {
         return amount;
     }
 
-    public void setPublicKey(String publicKey) {
-        this.publicKey = publicKey;
+    public void setAmount(long amount) {
+        this.amount = amount;
+    }
+
+    public int getBase() {
+        return base;
+    }
+
+    public void setBase(int base) {
+        this.base = base;
+    }
+
+    public long getAmountTimeOrigin() {
+        return amountTimeOrigin;
+    }
+
+    public void setAmountTimeOrigin(long amountTimeOrigin) {
+        this.amountTimeOrigin = amountTimeOrigin;
+    }
+
+    public double getAmountRelatifOrigin() {
+        return amountRelatifOrigin;
+    }
+
+    public void setAmountRelatifOrigin(double amountRelatifOrigin) {
+        this.amountRelatifOrigin = amountRelatifOrigin;
     }
 
     public String getPublicKey() {
         return publicKey;
     }
 
-    public void setTime(long time) {
-        this.time = time;
+    public void setPublicKey(String publicKey) {
+        this.publicKey = publicKey;
     }
 
     public long getTime() {
         return time;
     }
 
-    public void setBlockNumber(long blockNumber) {
-        this.blockNumber = blockNumber;
+    public void setTime(long time) {
+        this.time = time;
     }
 
     public long getBlockNumber() {
         return blockNumber;
     }
 
-    public void setComment(String comment) {
-        this.comment = comment;
+    public void setBlockNumber(long blockNumber) {
+        this.blockNumber = blockNumber;
     }
 
     public String getComment() {
         return comment;
     }
 
-    public void setEnc(boolean enc) {
-        this.enc = enc;
+    public void setComment(String comment) {
+        this.comment = comment;
     }
 
     public boolean isEnc() {
         return enc;
     }
 
-    public void setHash(String hash) {
-        this.hash = hash;
+    public void setEnc(boolean enc) {
+        this.enc = enc;
     }
 
     public String getHash() {
         return hash;
     }
 
-    public void setLocktime(long locktime) {
-        this.locktime = locktime;
+    public void setHash(String hash) {
+        this.hash = hash;
     }
 
     public long getLocktime() {
         return locktime;
+    }
+
+    public void setLocktime(long locktime) {
+        this.locktime = locktime;
     }
 
     public String getState() {
@@ -127,6 +145,22 @@ public class Tx implements Serializable{
         this.state = state;
     }
 
+    public String getUid() {
+        return uid;
+    }
+
+    public void setUid(String uid) {
+        this.uid = uid;
+    }
+
+    public Boolean getUd() {
+        return isUd;
+    }
+
+    public void setUd(Boolean ud) {
+        isUd = ud;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -135,22 +169,5 @@ public class Tx implements Serializable{
         Tx tx = (Tx) o;
         if (hash != null ? !hash.equals(tx.hash) : tx.hash != null) return false;
         return state != null ? state.equals(tx.state) : tx.state == null;
-
-    }
-
-    public void setUid(String uid) {
-        this.uid = uid;
-    }
-
-    public String getUid() {
-        return uid;
-    }
-
-    public void setDividend(BigInteger dividend) {
-        this.dividend = dividend;
-    }
-
-    public BigInteger getDividend() {
-        return dividend;
     }
 }

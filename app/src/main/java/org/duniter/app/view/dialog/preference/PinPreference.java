@@ -1,4 +1,4 @@
-package org.duniter.app.view.dialog;
+package org.duniter.app.view.dialog.preference;
 
 import android.app.AlertDialog;
 import android.content.Context;

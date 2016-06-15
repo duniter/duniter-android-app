@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.widget.TextView;
 
+import org.duniter.app.technical.AmountPair;
 import org.duniter.app.technical.format.Contantes;
 import org.duniter.app.technical.format.Formater;
 import org.duniter.app.technical.format.UnitCurrency;
@@ -23,106 +24,36 @@ public class Format {
     public static final boolean SIMPLE = true;
     public static final boolean LONG = false;
 
-    public static void initUnit(Context context, TextView textView, BigInteger quantitatif, long delay, BigInteger dividend, boolean isFirstAmount, String currencyName){
+    public static void initUnit(Context context, TextView textView, long quantitatif, int base, long delay, long dividend, int baseDividend, boolean isFirstAmount, String currencyName){
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         int decimal = preferences.getInt(Application.DECIMAL,DEFAULT_DECIMAL);
         int unit = isFirstAmount ?
                 Integer.parseInt(preferences.getString(Application.UNIT, String.valueOf(Application.UNIT_CLASSIC))):
                 Integer.parseInt(preferences.getString(Application.UNIT_DEFAULT, String.valueOf(Application.UNIT_DU)));
 
+        quantitatif = Format.convertBase(quantitatif,base,baseDividend);
+
         switch (unit){
             case Application.UNIT_CLASSIC:
                 textView.setText(Formater.quantitatifFormatter(quantitatif,currencyName));
                 break;
             case Application.UNIT_DU:
-                BigDecimal relatif = UnitCurrency.quantitatif_relatif(quantitatif,dividend);
-                textView.setText(Formater.relatifFormatter(context,decimal,relatif));
+                double amount = UnitCurrency.quantitatif_relatif(quantitatif,base,dividend,baseDividend);
+                textView.setText(Formater.relatifFormatter(context,decimal,amount));
                 break;
             case Application.UNIT_TIME:
-                long time = UnitCurrency.quantitatif_time(quantitatif,dividend,delay);
+                long time = UnitCurrency.quantitatif_time(quantitatif,base,dividend,baseDividend, delay);
                 textView.setText(Formater.timeFormatterV2(context,time));
                 break;
         }
     }
 
-    public static class Currency{
-
-//        public static void changeUnit(
-//                final Context context,
-//                final String currencyName,
-//                final BigInteger classiqueValue,
-//                final BigInteger mUd,
-//                final int delay,
-//                final TextView currentAmount,
-//                final TextView defaultAmount,
-//                final String dir){
-//
-//            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-//            preferences.registerOnSharedPreferenceChangeListener(new SharedPreferences.OnSharedPreferenceChangeListener() {
-//                public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
-//                    changeUnit(context,currencyName,classiqueValue,mUd,delay,currentAmount,defaultAmount,dir);
-//                }
-//            });
-//
-//            int unit = Integer.parseInt(preferences.getString(Application.UNIT, Application.UNIT_CLASSIC + ""));
-//            int defaultUnit = Integer.parseInt(preferences.getString(Application.UNIT_DEFAULT, Application.UNIT_DU + ""));
-//
-//            //        int unit = preferences.getInt(Application.UNIT, Application.UNIT_CLASSIC);
-//            //        int defaultUnit = preferences.getInt(Application.UNIT_DEFAULT, Application.UNIT_CLASSIC);
-//
-//            if(currentAmount!=null) {
-//                switch (unit) {
-//                    case Application.UNIT_CLASSIC:
-//                        currentAmount.setText(dir.concat(quantitativeFormatter(context, classiqueValue, currencyName)));
-////                        currentAmount.setOnLongClickListener(new View.OnLongClickListener() {
-////                            @Override
-////                            public boolean onLongClick(View v) {
-////                                Toast.makeText(context,(new DecimalFormat("#,###")).format(classiqueValue),Toast.LENGTH_SHORT).show();
-////                                return true;
-////                            }
-////                        });
-//                        break;
-//                    case Application.UNIT_DU:
-//                        currentAmount.setText(dir.concat(relativeFormatter(context,
-//                                quantitativeToRelative(context,classiqueValue,mUd))));
-//                        break;
-//                    case Application.UNIT_TIME:
-//                        BigDecimal timeValue = quantitativeToTime(context,classiqueValue,delay,mUd);
-//                        if (dir.equals("")) {
-//                            currentAmount.setText(Format.timeFormatter(context, timeValue));
-//                        } else {
-//                            currentAmount.setText(dir.concat("(").concat(timeFormatter(context, timeValue)).concat(")"));
-//                        }
-//                        break;
-//                }
-//            }
-//            if(defaultAmount!=null) {
-//                if (defaultUnit == unit) {
-//                    defaultAmount.setVisibility(View.GONE);
-//                } else {
-//                    defaultAmount.setVisibility(View.VISIBLE);
-//                    switch (defaultUnit) {
-//                        case Application.UNIT_CLASSIC:
-//                            defaultAmount.setText(quantitativeFormatter(context, classiqueValue, currencyName));
-////                        defaultAmount.setOnLongClickListener(new View.OnLongClickListener() {
-////                            @Override
-////                            public boolean onLongClick(View v) {
-////                                Toast.makeText(context, (new DecimalFormat("#,###")).format(classiqueValue), Toast.LENGTH_SHORT).show();
-////                                return true;
-////                            }
-////                        });
-//                            break;
-//                        case Application.UNIT_DU:
-//                            defaultAmount.setText(relativeFormatter(context, quantitativeToRelative(context, classiqueValue, mUd)));
-//                            break;
-//                        case Application.UNIT_TIME:
-//                            defaultAmount.setText(timeFormatter(context, quantitativeToTime(context, classiqueValue, delay, mUd)));
-//                            break;
-//                    }
-//                }
-//            }
-//        }
-
+    public static long convertBase(long value, int base, int newBase){
+        long result = value;
+        if (newBase!=base){
+            result = Double.valueOf((double) value * Math.pow(10, base - newBase)).longValue();
+        }
+        return result;
     }
 
     public static String minifyPubkey(String pubkey) {

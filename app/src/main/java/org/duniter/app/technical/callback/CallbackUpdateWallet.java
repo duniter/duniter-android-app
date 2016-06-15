@@ -2,6 +2,7 @@ package org.duniter.app.technical.callback;
 
 import java.util.List;
 
+import org.duniter.app.model.Entity.BlockUd;
 import org.duniter.app.model.Entity.Identity;
 import org.duniter.app.model.Entity.Requirement;
 import org.duniter.app.model.Entity.Source;
@@ -14,10 +15,11 @@ import org.duniter.app.model.Entity.Wallet;
 public interface CallbackUpdateWallet {
     void methode(
             Wallet wallet,
+            BlockUd currentBlock,
             List<Source> sources,
             List<Tx> listTx,
             List<Tx> listUd,
-            List<String[]> listSourcePending,
+            List<String> listSourcePending,
             Requirement requirement,
             Identity identity);
 }

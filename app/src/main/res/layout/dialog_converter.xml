@@ -26,6 +26,7 @@
                 android:layout_height="wrap_content"
                 android:inputType="numberSigned"
                 android:ems="10"
+                android:maxLength="18"
                 android:id="@+id/txt_coin"
                 android:selectAllOnFocus="true"
                 android:layout_gravity="center_horizontal"/>
@@ -81,6 +82,7 @@
                     android:layout_weight="0.6"
                     android:inputType="numberSigned"
                     android:id="@+id/txt_time"
+                    android:maxLength="18"
                     android:selectAllOnFocus="true"
                     android:layout_gravity="center_horizontal"/>
 

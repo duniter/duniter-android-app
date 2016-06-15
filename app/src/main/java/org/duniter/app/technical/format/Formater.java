@@ -47,9 +47,15 @@ public class Formater {
         PREFIX_VALUE.put(TRILLIARD," Z");   //Trilliard
     }
 
-    public static String quantitatifFormatter(BigInteger quantitatif, String currencyName){
+    public static String quantitatifFormatter(long quantitatif, String currencyName){
+        String formatClassic = "#,###";
+        DecimalFormat formatter = new DecimalFormat(formatClassic);
+        return formatter.format(quantitatif).concat(" ").concat(UnitCurrency.unitCurrency(currencyName));
+    }
+
+    public static String big_quantitatifFormatter(BigInteger quantitatif, String currencyName){
         BigInteger result;
-        String plus;
+        String plus = "";
         if(quantitatif.compareTo(TRILLIARD)>=1){
             result = quantitatif.divide(TRILLION);
             plus = PREFIX_VALUE.get(TRILLION);
@@ -80,6 +86,16 @@ public class Formater {
         String formatClassic = "#,###";
         DecimalFormat formatter = new DecimalFormat(formatClassic);
         return formatter.format(result).concat(plus).concat(" ").concat(UnitCurrency.unitCurrency(currencyName));
+    }
+
+    public static String big_relatifFormatter(Context context, int decimal, BigDecimal relatif){
+        String formatDu = ("%.").concat(String.valueOf(decimal)).concat("f");
+        String zero = "0,";
+        for(int i=0;i<decimal;i++){
+            zero = zero.concat("0");
+        }
+
+        return String.format(formatDu, relatif).concat(" ").concat(context.getResources().getString(R.string.ud));
     }
 
     public static String timeFormatterV2(Context context, long allMilli){
@@ -141,8 +157,7 @@ public class Formater {
         return result;
     }
 
-    public static String relatifFormatter(Context context, int decimal, BigDecimal relatif){
-        relatif = relatif.setScale(decimal,RoundingMode.HALF_EVEN);
+    public static String relatifFormatter(Context context, int decimal, double relatif){
         String formatDu = ("%.").concat(String.valueOf(decimal)).concat("f");
         String zero = "0,";
         for(int i=0;i<decimal;i++){

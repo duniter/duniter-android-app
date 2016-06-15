@@ -1,7 +1,6 @@
 package org.duniter.app.model.Entity;
 
 import java.io.Serializable;
-import java.math.BigInteger;
 
 /**
  * Created by naivalf27 on 04/04/16.
@@ -16,16 +15,19 @@ public class Wallet implements Serializable{
     private String privateKey;
     private long id;
     private long currencyId;
-    private BigInteger amount;
+    private long amount;
+    private int base;
     private boolean haveIdentity = false;
+    private long amountTime;
+    private long amountTimeOrigin;
 
     public Wallet(){
-        amount = BigInteger.ZERO;
+        amount = 0;
     }
 
     public Wallet(long id) {
         this.id = id;
-        amount = BigInteger.ZERO;
+        amount = 0;
     }
 
     public long getSyncBlock() {
@@ -106,12 +108,20 @@ public class Wallet implements Serializable{
         this.currencyId = currencyId;
     }
 
-    public BigInteger getAmount() {
+    public long getAmount() {
         return amount;
     }
 
-    public void setAmount(BigInteger amount) {
+    public void setAmount(long amount) {
         this.amount = amount;
+    }
+
+    public int getBase() {
+        return base;
+    }
+
+    public void setBase(int base) {
+        this.base = base;
     }
 
     public boolean getHaveIdentity() {
@@ -127,5 +137,21 @@ public class Wallet implements Serializable{
         final StringBuffer sb = new StringBuffer();
         sb.append(alias);
         return sb.toString();
+    }
+
+    public void setAmountTime(long amountTime) {
+        this.amountTime = amountTime;
+    }
+
+    public long getAmountTime() {
+        return amountTime;
+    }
+
+    public void setAmountTimeOrigin(long amountTimeOrigin) {
+        this.amountTimeOrigin = amountTimeOrigin;
+    }
+
+    public long getAmountTimeOrigin() {
+        return amountTimeOrigin;
     }
 }

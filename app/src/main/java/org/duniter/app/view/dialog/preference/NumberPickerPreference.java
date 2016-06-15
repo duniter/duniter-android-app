@@ -1,4 +1,4 @@
-package org.duniter.app.view.dialog;
+package org.duniter.app.view.dialog.preference;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -65,6 +65,8 @@ public class NumberPickerPreference extends DialogPreference {
                 setValue(newValue);
             }
         }
+        String val = String.valueOf(this.getValue());
+        this.setSummary(val);
     }
 
     @Override

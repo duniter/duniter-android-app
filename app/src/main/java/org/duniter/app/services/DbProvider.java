@@ -70,6 +70,9 @@ public class DbProvider extends ContentProvider {
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
 //        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        if (projection == null && selection!=null && selection.length()!=0 && selectionArgs==null && sortOrder==null){
+            return query(selection);
+        }
         int uriType = uriMatcher.match(uri);
         Cursor cursor;
         switch (uriType){
@@ -143,6 +146,16 @@ public class DbProvider extends ContentProvider {
         }else{
             cursor.setNotificationUri(getContext().getContentResolver(), uri);
             Log.d("DB QUERY","object code:"+uriType);
+            return cursor;
+        }
+    }
+
+    public Cursor query(String querySql){
+        Cursor cursor = db.rawQuery(querySql,null);
+        if (cursor == null){
+            throw new RuntimeException("ERROR query: "+querySql);
+        }else{
+            Log.d("DB QUERY SQL","object query: "+querySql);
             return cursor;
         }
     }

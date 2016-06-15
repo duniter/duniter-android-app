@@ -40,14 +40,18 @@ public class TxJson implements Serializable {
         return gson.fromJson(response, TxJson.class);
     }
 
-    public static List<String[]> fromTxGetSourcesPending(TxJson sourceJson){
-        List<String[]> result = new ArrayList<>();
+    public static List<String> fromTxGetSourcesPending(TxJson sourceJson){
+        List<String> result = new ArrayList<>();
         for (History.Elem e : sourceJson.history.sending){
             for (String i : e.inputs){
                 String type = i.substring(0,i.indexOf(":"));
                 String iden = i.substring(i.indexOf(":")+1,i.lastIndexOf(":"));
                 String num = i.substring(i.lastIndexOf(":"));
-                result.add(new String[]{type,iden,num});
+                if (type.equals("D")){
+                    result.add(num);
+                }else if(type.equals("T")){
+                    result.add(iden);
+                }
             }
         }
         return result;
@@ -57,11 +61,12 @@ public class TxJson implements Serializable {
         HashMap<String, Tx> txs = new HashMap<>();
         for (History.Elem e : sourceJson.history.sent){
             Tx tx = new Tx();
-            BigInteger amount = BigInteger.ZERO;
+            long amount = 0;
             for (History.Output o : e.outputs){
                 if (o.getPublicKey()!=null && !o.getPublicKey().equals(sourceJson.pubkey)){
                     tx.setPublicKey(o.getPublicKey());
-                    amount = amount.subtract(new BigInteger(o.amount));
+                    tx.setBase(o.base);
+                    amount -= o.amount;
                 }
             }
             if (tx.getPublicKey()==null){
@@ -87,11 +92,12 @@ public class TxJson implements Serializable {
         for (History.Elem e : sourceJson.history.received){
             if (!txs.containsKey(e.hash)){
                 Tx tx = new Tx();
-                BigInteger amount = BigInteger.ZERO;
+                long amount = 0;
                 for (History.Output o : e.outputs) {
                     if (o.getPublicKey() != null){
                         if (o.getPublicKey().equals(sourceJson.pubkey)){
-                            amount = amount.add(new BigInteger(o.amount));
+                            amount += o.amount;
+                            tx.setBase(o.base);
                         }
                     }
                 }
@@ -119,11 +125,12 @@ public class TxJson implements Serializable {
 
         for (History.Elem e : sourceJson.history.sending){
             Tx tx = new Tx();
-            BigInteger amount = BigInteger.ZERO;
+            long amount = 0;
             for (History.Output o : e.outputs){
                 if (o.getPublicKey()!=null && !o.getPublicKey().equals(sourceJson.pubkey)){
                     tx.setPublicKey(o.getPublicKey());
-                    amount = amount.subtract(new BigInteger(o.amount));
+                    amount -= o.amount;
+                    tx.setBase(o.base);
                 }
             }
             if (tx.getPublicKey()==null){
@@ -149,11 +156,12 @@ public class TxJson implements Serializable {
         for (History.Elem e : sourceJson.history.pending){
             if (!txs.containsKey(e.hash)){
                 Tx tx = new Tx();
-                BigInteger amount = BigInteger.ZERO;
+                long amount = 0;
                 for (History.Output o : e.outputs) {
                     if (o.getPublicKey() != null){
                         if (o.getPublicKey().equals(sourceJson.pubkey)){
-                            amount = amount.add(new BigInteger(o.amount));
+                            amount += o.amount;
+                            tx.setBase(o.base);
                         }
                     }
                 }
@@ -204,8 +212,8 @@ public class TxJson implements Serializable {
         }
 
         public static class Output{
-            public String amount;
-            public Long base;
+            public long amount;
+            public int base;
             public String conditions;
 
             public String getPublicKey(){
@@ -235,8 +243,8 @@ public class TxJson implements Serializable {
 
                 ArrayList<String> parts = new ArrayList<>(Arrays.asList(opt.split(":")));
                 Output output = new Output();
-                output.amount = parts.get(0);
-                output.base = Long.getLong(parts.get(1),0);
+                output.amount = Long.valueOf(parts.get(0));
+                output.base = Integer.valueOf(parts.get(1));
                 output.conditions = parts.get(2);
                 return output;
             }

@@ -6,6 +6,8 @@ import android.net.Uri;
 import android.provider.BaseColumns;
 import android.util.Log;
 
+import org.duniter.app.services.DbProvider;
+
 /**
  * Created by naivalf27 on 20/04/16.
  */
@@ -58,6 +60,11 @@ public abstract class AbstractSql<T> implements InterfaceSql<T>{
     @Override
     public Cursor query(String selection, String[] selectionArgs) {
         return query(selection,selectionArgs,null);
+    }
+
+    @Override
+    public Cursor query(String querySql) {
+        return query(querySql,null);
     }
 
     public int delete(long id) {

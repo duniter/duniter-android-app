@@ -5,10 +5,20 @@ import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.os.Environment;
 import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
+
+import com.opencsv.CSVWriter;
+
+import org.duniter.app.model.EntitySql.TxSql;
+import org.duniter.app.services.SqlService;
+
+import java.io.File;
+import java.io.FileWriter;
 
 public class Application extends android.app.Application{
 
@@ -58,14 +68,14 @@ public class Application extends android.app.Application{
         mContext = getApplicationContext();
         requestSync();
 
-        Thread.setDefaultUncaughtExceptionHandler (new Thread.UncaughtExceptionHandler()
-        {
-            @Override
-            public void uncaughtException (Thread thread, Throwable e)
-            {
-                handleUncaughtException (thread, e);
-            }
-        });
+//        Thread.setDefaultUncaughtExceptionHandler (new Thread.UncaughtExceptionHandler()
+//        {
+//            @Override
+//            public void uncaughtException (Thread thread, Throwable e)
+//            {
+//                handleUncaughtException (thread, e);
+//            }
+//        });
     }
 
     public void handleUncaughtException (Thread thread, Throwable e)
@@ -110,6 +120,41 @@ public class Application extends android.app.Application{
         if (view != null) {
             InputMethodManager imm = (InputMethodManager)activity.getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
+    }
+
+    public static void exportDb() {
+        File exportDir = new File(Environment.getExternalStorageDirectory(), "");
+        if (!exportDir.exists())
+        {
+            exportDir.mkdirs();
+        }
+
+        File file = new File(exportDir, "csvname.csv");
+        try
+        {
+            file.createNewFile();
+            CSVWriter csvWrite = new CSVWriter(new FileWriter(file));
+            String request = "SELECT * FROM "+ TxSql.TxTable.TABLE_NAME;
+            Cursor cursor = SqlService.getCurrencySql(getContext()).query(request);
+            csvWrite.writeNext(cursor.getColumnNames());
+            String[] columnNames = null;
+            while(cursor.moveToNext())
+            {
+                //Which column you want to exprort
+                columnNames = columnNames==null ? cursor.getColumnNames() : columnNames;
+                String[] arrStr = new String[columnNames.length];
+                for (int i=0;i<columnNames.length;i++){
+                    arrStr[i] = cursor.getString(cursor.getColumnIndex(columnNames[i]));
+                }
+                csvWrite.writeNext(arrStr);
+            }
+            csvWrite.close();
+            cursor.close();
+        }
+        catch(Exception sqlEx)
+        {
+            Log.e("MainActivity", sqlEx.getMessage(), sqlEx);
         }
     }
 }

@@ -45,11 +45,12 @@ public class ConverterDialog extends DialogFragment{
 
     private EditText txt_time;
 
-    private static BigInteger dividend;
+    private static long dividend;
 
     private static int delay;
     private int unit;
     private int decimal;
+    private static int base;
 
     private TextWatcher for_coin, for_du;
     private TextWatcher for_time;
@@ -58,9 +59,10 @@ public class ConverterDialog extends DialogFragment{
     private TextView time_converted;
     private static String currencyName;
 
-    public static ConverterDialog newInstance(BigInteger _dividend, int _delay, EditText _mAmount, Spinner _spinner,String _name) {
+    public static ConverterDialog newInstance(long _dividend, int _delay, int _base, EditText _mAmount, Spinner _spinner,String _name) {
         dividend = _dividend;
         delay = _delay;
+        base = _base;
         mAmount = _mAmount;
         mSpinner = _spinner;
         currencyName = _name;
@@ -154,33 +156,31 @@ public class ConverterDialog extends DialogFragment{
     }
 
     private void majValue(String value,int unit){
-        BigInteger quantitatif;
+        long quantitatif;
         String valueQuantitatif;
-        BigDecimal relatif;
+        double relatif;
         String valueRelatif;
         long time;
         removeTextWatcher();
         switch (unit){
             case Application.UNIT_CLASSIC:
-                quantitatif = new BigInteger(value);
+                quantitatif = Long.valueOf(value);
 
-                relatif = UnitCurrency.quantitatif_relatif(quantitatif, dividend);
-                relatif = relatif.setScale(decimal, RoundingMode.HALF_EVEN);
-                valueRelatif = relatif.toString();
-                txt_du.setText(valueRelatif);
+                relatif = UnitCurrency.quantitatif_relatif(quantitatif,base, dividend,base);
+                txt_du.setText(Formater.relatifFormatter(getActivity(),decimal,relatif));
 
-                time = UnitCurrency.quantitatif_time(quantitatif, dividend,delay);
+                time = UnitCurrency.quantitatif_time(quantitatif, base,dividend,base,delay);
                 time_converted.setText(Formater.timeFormatterV2(getActivity(),time));
                 txt_time.setText(String.valueOf(convertTime(time)));
                 break;
             case Application.UNIT_DU:
-                relatif = new BigDecimal(value);
+                relatif = Double.valueOf(value);
 
-                quantitatif = UnitCurrency.relatif_quantitatif(relatif,dividend);
-                valueQuantitatif = quantitatif.toString();
-                txt_coin.setText(valueQuantitatif);
+                quantitatif = UnitCurrency.relatif_quantitatif(relatif,base,dividend,base).quantitatif;
+//                valueQuantitatif = quantitatif.toString();
+                txt_coin.setText(String.valueOf(quantitatif));
 
-                time = UnitCurrency.quantitatif_time(quantitatif, dividend,delay);
+                time = UnitCurrency.quantitatif_time(quantitatif,base, dividend,base,delay);
                 time_converted.setText(Formater.timeFormatterV2(getActivity(),time));
                 txt_time.setText(String.valueOf(convertTime(time)));
                 break;
@@ -188,14 +188,12 @@ public class ConverterDialog extends DialogFragment{
                 time = Long.valueOf(value);
                 time_converted.setText(Formater.timeFormatterV2(getActivity(),time));
 
-                quantitatif = UnitCurrency.time_quantitatif(time,dividend,delay);
-                valueQuantitatif = quantitatif.toString();
-                txt_coin.setText(valueQuantitatif);
+                quantitatif = UnitCurrency.time_quantitatif(time,dividend,base,delay).quantitatif;
+//                valueQuantitatif = quantitatif.toString();
+                txt_coin.setText(String.valueOf(quantitatif));
 
-                relatif = UnitCurrency.quantitatif_relatif(quantitatif, dividend);
-                relatif = relatif.setScale(decimal, RoundingMode.HALF_EVEN);
-                valueRelatif = relatif.toString();
-                txt_du.setText(valueRelatif);
+                relatif = UnitCurrency.quantitatif_relatif(quantitatif,base, dividend,base);
+                txt_du.setText(Formater.relatifFormatter(getActivity(),decimal,relatif));
                 break;
         }
         addTextWatcher();

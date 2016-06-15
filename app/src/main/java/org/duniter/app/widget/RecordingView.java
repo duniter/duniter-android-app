@@ -81,6 +81,7 @@ public class RecordingView {
                 Wallet wallet = new Wallet();
                 wallet.setCurrency(currency);
                 wallet.setSalt(mSalt.getText().toString());
+                wallet.setBase(0);
                 wallet.setAlias(mUid.getText().toString());
                 wallet.setPublicKey(Base58.encode(keyPair.getPubKey()));
                 wallet.setPrivateKey(Base58.encode(keyPair.getSecKey()));

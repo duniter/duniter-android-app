@@ -1,7 +1,9 @@
 package org.duniter.app.view.wallet.adapter;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,9 +16,12 @@ import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
+import org.duniter.app.Application;
 import org.duniter.app.Format;
 import org.duniter.app.R;
 import org.duniter.app.model.EntitySql.view.ViewWalletAdapter;
+import org.duniter.app.model.EntitySql.view.ViewWalletIdentityAdapter;
+import org.duniter.app.technical.format.Formater;
 import org.duniter.app.view.wallet.WalletListFragment;
 
 
@@ -104,37 +109,6 @@ public class WalletCursorAdapter extends CursorAdapter {
         return mCursor.getLong(mCursor.getColumnIndex(ViewWalletAdapter._ID));
     }
 
-    public boolean dowloadFinish(int position){
-        int nbSec = 0;
-        if(mSectionPosition.size()>1) {
-            for (Integer i : mSectionPosition.keySet()) {
-                if (position > i) {
-                    nbSec += 1;
-                }
-            }
-        }
-        position -= nbSec;
-        int dividendIndex = mCursor.getColumnIndex(ViewWalletAdapter.LAST_UD);
-        int dtIndex = mCursor.getColumnIndex(ViewWalletAdapter.DT);
-        int amountIndex = mCursor.getColumnIndex(ViewWalletAdapter.AMOUNT);
-        mCursor.moveToPosition(position);
-        return !(mCursor.isNull(amountIndex) || mCursor.isNull(dividendIndex) || mCursor.isNull(dtIndex));
-    }
-
-    public Long getIdIdentity(int position){
-        int nbSec = 0;
-        if(mSectionPosition.size()>1) {
-            for (Integer i : mSectionPosition.keySet()) {
-                if (position > i) {
-                    nbSec += 1;
-                }
-            }
-        }
-        position -= nbSec;
-        mCursor.moveToPosition(position);
-        return mCursor.getLong(mCursor.getColumnIndex(ViewWalletAdapter.IDENTITY_ID));
-    }
-
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
         LayoutInflater inflater = (LayoutInflater) context
@@ -158,10 +132,14 @@ public class WalletCursorAdapter extends CursorAdapter {
         int idIdentityIndex = cursor.getColumnIndex(ViewWalletAdapter.IDENTITY_ID);
         int publicKeyIndex = cursor.getColumnIndex(ViewWalletAdapter.PUBLIC_KEY);
         int currencyNameIndex = cursor.getColumnIndex(ViewWalletAdapter.CURRENCY_NAME);
-        int dividendIndex = cursor.getColumnIndex(ViewWalletAdapter.LAST_UD);
         int dtIndex = cursor.getColumnIndex(ViewWalletAdapter.DT);
         int amountIndex = cursor.getColumnIndex(ViewWalletAdapter.AMOUNT);
+        int baseIndex = cursor.getColumnIndex(ViewWalletAdapter.BASE);
+        int dividendIndex = cursor.getColumnIndex(ViewWalletAdapter.CURRENT_UD);
+        int baseDividendIndex = cursor.getColumnIndex(ViewWalletAdapter.BASE_CURRENT_UD);
         int aliasIndex = cursor.getColumnIndex(ViewWalletAdapter.ALIAS);
+        int amountTimeIndex = cursor.getColumnIndex(ViewWalletAdapter.AMOUNT_TIME);
+        int amountTimeOriginIndex = cursor.getColumnIndex(ViewWalletIdentityAdapter.AMOUNT_TIME_ORIGIN);
 
         if(cursor.isNull(idIdentityIndex)){
             holder.is_member.setVisibility(View.GONE);
@@ -178,12 +156,38 @@ public class WalletCursorAdapter extends CursorAdapter {
             holder.secondAmount.setVisibility(View.GONE);
         }else{
             String currencyName = cursor.getString(currencyNameIndex);
-            BigInteger amount = new BigInteger(cursor.getString(amountIndex));
-            BigInteger dividend = new BigInteger(cursor.getString(dividendIndex));
-            Long delay = cursor.getLong(dtIndex);
+            long amount = cursor.getLong(amountIndex);
+            int base = cursor.getInt(baseIndex);
 
-            Format.initUnit(context,holder.primaryAmount,amount,delay,dividend,true,currencyName);
-            Format.initUnit(context,holder.secondAmount,amount,delay,dividend,false,currencyName);
+            long dividend = cursor.getLong(dividendIndex);
+            int baseDividend = cursor.getInt(baseDividendIndex);
+
+            long amountTime = cursor.getLong(amountTimeIndex);
+            long amountTimeOrigin =cursor.getLong(amountTimeOriginIndex);
+            int delay = cursor.getInt(dtIndex);
+
+
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+
+            boolean useOblivion = preferences.getBoolean(Application.USE_OBLIVION,true);
+
+            int firstUnit = Integer.parseInt(preferences.getString(Application.UNIT, String.valueOf(Application.UNIT_CLASSIC)));
+            int secondUnit = Integer.parseInt(preferences.getString(Application.UNIT_DEFAULT, String.valueOf(Application.UNIT_DU)));
+
+            if (firstUnit == Application.UNIT_TIME){
+                holder.primaryAmount.setText(Formater.timeFormatterV2(context,useOblivion ? amountTime : amountTimeOrigin));
+            }else{
+                Format.initUnit(context,holder.primaryAmount,amount,base,delay,dividend,baseDividend,true,currencyName);
+            }
+
+            if (secondUnit == Application.UNIT_TIME){
+                holder.secondAmount.setText(Formater.timeFormatterV2(context,useOblivion ? amountTime : amountTimeOrigin));
+            }else{
+                Format.initUnit(context,holder.secondAmount,amount,base,delay,dividend,baseDividend,false,currencyName);
+            }
+
+//            Format.initUnit(context,holder.primaryAmount,amount,base,delay,dividend,baseDividend,true,currencyName);
+//            Format.initUnit(context,holder.secondAmount,amount,base,delay,dividend,baseDividend,false,currencyName);
 //            Format.Currency.changeUnit(
 //                    context,
 //                    currencyName,
