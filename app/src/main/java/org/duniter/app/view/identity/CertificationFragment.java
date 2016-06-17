@@ -1,9 +1,11 @@
 package org.duniter.app.view.identity;
 
+import android.app.AlertDialog;
 import android.app.FragmentManager;
 import android.app.ListFragment;
 import android.app.LoaderManager;
 import android.content.CursorLoader;
+import android.content.DialogInterface;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -23,6 +25,7 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.duniter.app.Application;
 import org.duniter.app.R;
@@ -31,6 +34,7 @@ import org.duniter.app.model.Entity.Certification;
 import org.duniter.app.model.Entity.Contact;
 import org.duniter.app.model.Entity.Currency;
 import org.duniter.app.model.Entity.Identity;
+import org.duniter.app.model.Entity.Wallet;
 import org.duniter.app.model.EntityServices.IdentityService;
 import org.duniter.app.model.EntitySql.view.ViewCertificationAdapter;
 import org.duniter.app.services.SqlService;
@@ -42,31 +46,32 @@ import org.duniter.app.view.identity.adapter.CertificationCursorAdapter;
 import org.duniter.app.view.dialog.ListIdentityDialogFragment;
 
 public class CertificationFragment extends ListFragment
-        implements SearchView.OnQueryTextListener,
-        LoaderManager.LoaderCallbacks<Cursor>,
+        implements LoaderManager.LoaderCallbacks<Cursor>,
         SwipeRefreshLayout.OnRefreshListener{
 
     private ProgressBar                progress;
     private SwipeRefreshLayout mSwipeLayout;
     private String                     publicKey;
     private Long                       identityId;
+    private Long                       walletId;
     private Long                       currencyId;
     private Currency currency;
     private Contact contact;
     private CertificationBaseAdapter   certificationBaseAdapter;
     private CertificationCursorAdapter certificationCursorAdapter;
     private Identity identitySelected;
-    private Cursor mCursor;
+    private ImageButton certifyButton;
+
+    private List<String> certifier;
+    private Map<String,Identity> identities;
+
+    private View.OnClickListener clickCertificationAccepted;
+    private View.OnClickListener clickCertificationRefused;
 
     static public CertificationFragment newInstance(Bundle args) {
         CertificationFragment fragment = new CertificationFragment();
         fragment.setArguments(args);
         return fragment;
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
     }
 
     @Override
@@ -95,6 +100,9 @@ public class CertificationFragment extends ListFragment
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         setHasOptionsMenu(true);
+
+        getActivity().setTitle(getString(R.string.certification_received));
+
         mSwipeLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_layout);
         mSwipeLayout.setOnRefreshListener(this);
         TextView emptyView = (TextView) view.findViewById(android.R.id.empty);
@@ -110,95 +118,59 @@ public class CertificationFragment extends ListFragment
         contact = (Contact) getArguments().getSerializable(Application.CONTACT);
         currencyId = getArguments().getLong(Application.CURRENCY_ID);
         currency = SqlService.getCurrencySql(getActivity()).getById(currencyId);
+        identityId = getArguments().getLong(Application.IDENTITY_ID);
+        walletId = getArguments().getLong(Application.WALLET_ID);
 
-        if(identityId==null) {
+        if(identityId==0) {
+            identities = SqlService.getIdentitySql(getActivity()).getMapByCurrency(currencyId);
             certificationBaseAdapter = new CertificationBaseAdapter(getActivity(), new ArrayList<Certification>(), currency);
             setListAdapter(certificationBaseAdapter);
         }else{
+            identities = SqlService.getIdentitySql(getActivity()).getMapByCurrencyWithoutId(currencyId,walletId);
             certificationCursorAdapter = new CertificationCursorAdapter(getActivity());
             setListAdapter(certificationCursorAdapter);
         }
-        ImageButton certifyButton = (ImageButton) view.findViewById(R.id.certify_button);
-        certifyButton.setOnClickListener(new View.OnClickListener() {
+
+        clickCertificationAccepted = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 showListWallet();
             }
-        });
+        };
 
-        if(identityId !=null){
-            getLoaderManager().initLoader(0, getArguments(), this);
-        }
+        clickCertificationRefused = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showMessage();
+            }
+        };
+
+
+        certifyButton = (ImageButton) view.findViewById(R.id.certify_button);
+
         onRefresh();
-    }
-
-    private void majValues(List<Certification> certificationList) {
-        if(identityId == null){
-            certificationBaseAdapter.swapValues(certificationList);
-        }else {
-            SqlService.getCertificationSql(getActivity()).insertList(certificationList);
-            getLoaderManager().initLoader(0, getArguments(), this);
-        }
-    }
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.toolbar_contact_list, menu);
-    }
-
-    @Override
-    public void onPrepareOptionsMenu(Menu menu) {
-//        final MenuItem searchItem = menu.findItem(R.id.action_lookup);
-
-//        String txt = getArguments().getString(TEXT_SEARCH,"");
-//        boolean openSearch = getArguments().getBoolean(OPEN_SEARCH,false);
-
-//        searchView = (SearchView)searchItem.getActionView();
-//        searchView.setOnQueryTextListener(this);
-//
-//        if(openSearch){
-//            searchView.setIconified(false);
-//            searchView.requestFocus();
-//            if(!txt.equals("")){
-//                textQuery = txt;
-//            }
-//        }
-//
-//        searchView.setQuery(textQuery, true);
-//        searchView.clearFocus();
-//        if(!textQuery.equals("") || !getArguments().getBoolean(SEE_CONTACT)){
-//            searchView.setIconified(false);
-//            searchView.requestFocus();
-//        }
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-
-        switch (item.getItemId()) {
-            case R.id.action_lookup:
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
     }
 
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         super.onListItemClick(l, v, position, id);
         Certification certif;
-        if(identityId == null){
-            certif = (Certification) l.getItemAtPosition(position);
-        }else{
-            Cursor data = (Cursor)getListAdapter().getItem(position);
-            certif = SqlService.getCertificationSql(getActivity()).fromCursor(data);
-        }
-
         Contact contact = new Contact();
         contact.setCurrency(currency);
-        contact.setUid(certif.getUid());
-        contact.setPublicKey(certif.getPublicKey());
-        contact.setAlias("");
-        contact.setContact(false);
+        if(identityId == 0){
+            certif = (Certification) l.getItemAtPosition(position);
+            contact.setUid(certif.getUid());
+            contact.setPublicKey(certif.getPublicKey());
+            contact.setAlias("");
+            contact.setContact(false);
+        }else{
+            Cursor data = (Cursor)getListAdapter().getItem(position);
+            contact.setUid(data.getString(data.getColumnIndex(ViewCertificationAdapter.UID)));
+            contact.setPublicKey(data.getString(data.getColumnIndex(ViewCertificationAdapter.PUBLIC_KEY)));
+            String alias = data.getString(data.getColumnIndex(ViewCertificationAdapter.ALIAS));
+            contact.setAlias(alias!=null ? alias : "");
+            contact.setContact(alias!=null);
+        }
 
         if(getActivity() instanceof MainActivity){
             Bundle args = new Bundle();
@@ -208,27 +180,29 @@ public class CertificationFragment extends ListFragment
     }
 
     @Override
-    public boolean onQueryTextSubmit(String s) {
-        return false;
-    }
-
-    @Override
-    public boolean onQueryTextChange(String s) {
-        return true;
-    }
-
-    @Override
     public void onRefresh() {
         String search = publicKey!=null? publicKey : contact.getPublicKey();
-        IdentityService.certiferOf(getActivity(), currency, search, new CallbackCertify() {
-            @Override
-            public void methode(List<Certification> certificationList) {
-                majValues(certificationList);
-            }
-        });
+        if (identityId==0) {
+            IdentityService.certiferOf(getActivity(), currency, search, new CallbackCertify() {
+                @Override
+                public void methode(List<Certification> certificationList) {
+                    certificationBaseAdapter.swapValues(certificationList);
+                    mSwipeLayout.setRefreshing(false);
+                    certifier = new ArrayList<String>();
+                    for (Certification c : certificationList){
+                        certifier.add(c.getPublicKey());
+                    }
+                    showButtonCertify();
+                }
+            });
+        }else{
+            getLoaderManager().restartLoader(0, getArguments(), this);
+            showButtonCertify();
+        }
     }
 
     private void showListWallet(){
+        final CertificationFragment f = this;
         FragmentManager manager = getFragmentManager();
 
         ListIdentityDialogFragment dialog = ListIdentityDialogFragment.newInstance(new ListIdentityDialogFragment.Callback() {
@@ -236,20 +210,36 @@ public class CertificationFragment extends ListFragment
             public void methode(Identity identity) {
                 identitySelected = identity;
                 identitySelected.setCurrency(currency);
-                IdentityService.certifyIdentity(getActivity(), identity, contact, new CallbackIdentity() {
+                //TODO password
+                Wallet wallet = SqlService.getWalletSql(getActivity()).getById(identitySelected.getWallet().getId());
+                identitySelected.setWallet(wallet);
+                IdentityService.certifyIdentity(getActivity(), identitySelected, contact, new CallbackIdentity() {
                     @Override
                     public void methode(Identity identity) {
-                        onRefresh();
+                        f.onRefresh();
                     }
                 });
             }
-        },currencyId);
+        },currencyId,new ArrayList<>(identities.values()));
         dialog.show(manager, "dialog");
+    }
+
+    private void showMessage(){
+        new AlertDialog.Builder(getActivity())
+                .setTitle(getString(R.string.warning))
+                .setMessage(getString(R.string.already_certified))
+                .setNeutralButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+
+                    }
+                })
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .show();
     }
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        if (identityId != null) {
+        if (identityId != 0) {
             String selection = ViewCertificationAdapter.IDENTITY_ID + "=? AND " +
                     ViewCertificationAdapter.TYPE + "=?";
             String[] selectionArgs = new String[]{String.valueOf(identityId), CertificationType.OF.name()};
@@ -261,11 +251,33 @@ public class CertificationFragment extends ListFragment
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        mCursor = data;
         certificationCursorAdapter.swapCursor(data);
+        mSwipeLayout.setRefreshing(false);
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
+    }
+
+    private void showButtonCertify(){
+        if (identityId == 0 && walletId == 0){
+            if (certifier!=null){
+                for (String key : certifier){
+                    if (identities.containsKey(key)){
+                        identities.remove(key);
+                    }
+                }
+            }
+        }
+        if (identities.size()==0){
+            if (walletId != 0){
+                certifyButton.setVisibility(View.GONE);
+            }else{
+                certifyButton.setVisibility(View.VISIBLE);
+            }
+            certifyButton.setOnClickListener(clickCertificationRefused);
+        }else{
+            certifyButton.setOnClickListener(clickCertificationAccepted);
+        }
     }
 }

@@ -102,7 +102,7 @@ public class TxCursorAdapter extends CursorAdapter {
         boolean isUd = Boolean.valueOf(cursor.getString(isUdIndex));
         if (isUd){
             holder.publicKey.setText("DU");
-            holder.icon.setImageResource(R.drawable.ic_redeem_primary_18dp);
+            holder.icon.setImageResource(R.drawable.ic_input_primary_18dp);
         }else{
             if (uid == null || uid.equals("")){
                 holder.publicKey.setText(Format.minifyPubkey(publicKey));

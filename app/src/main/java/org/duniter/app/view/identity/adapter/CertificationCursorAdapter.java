@@ -44,13 +44,20 @@ public class CertificationCursorAdapter extends CursorAdapter {
         ViewHolder viewHolder = (ViewHolder) view.getTag();
 
         int publicKeyIndex = data.getColumnIndex(ViewCertificationAdapter.PUBLIC_KEY);
+        int aliasIndex = data.getColumnIndex(ViewCertificationAdapter.ALIAS);
         int uidIndex = data.getColumnIndex(ViewCertificationAdapter.UID);
         int dateIndex = data.getColumnIndex(ViewCertificationAdapter.MEDIAN_TIME);
         int sigValidityIndex = data.getColumnIndex(ViewCertificationAdapter.SIG_VALIDITY);
         int numberIndex = data.getColumnIndex(ViewCertificationAdapter.BLOCK_NUMBER);
 
+        String alias = data.getString(aliasIndex);
+        alias = alias != null ? alias : "";
+        String uid = data.getString(uidIndex);
+
+        String name = alias.equals(uid) ? alias : alias.length()!=0 ? alias+" ("+uid+")" : uid;
+
         viewHolder.member_public_key.setText(Format.minifyPubkey(data.getString(publicKeyIndex)));
-        viewHolder.member_uid.setText(data.getString(uidIndex));
+        viewHolder.member_uid.setText(name);
 
         long time = (data.getLong(dateIndex) + data.getLong(sigValidityIndex))*(long)1000;
 

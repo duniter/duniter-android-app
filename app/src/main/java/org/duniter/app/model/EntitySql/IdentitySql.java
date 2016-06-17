@@ -7,7 +7,9 @@ import android.net.Uri;
 import android.provider.BaseColumns;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.duniter.app.model.Entity.Currency;
 import org.duniter.app.model.Entity.Identity;
@@ -36,6 +38,32 @@ public class IdentitySql extends AbstractSql<Identity> {
         }
         cursor.close();
         return identity;
+    }
+
+    public Map<String,Identity> getMapByCurrency(long currencyId) {
+        Map<String,Identity> identities = new HashMap<>();
+        Cursor cursor = query(IdentityTable.CURRENCY_ID+"=?",new String[]{String.valueOf(currencyId)});
+        if (cursor.moveToFirst()){
+            do {
+                Identity i = fromCursor(cursor);
+                identities.put(i.getPublicKey(),i);
+            }while (cursor.moveToNext());
+        }
+        cursor.close();
+        return identities;
+    }
+
+    public Map<String,Identity> getMapByCurrencyWithoutId(long currencyId,long walletId) {
+        Map<String,Identity> identities = new HashMap<>();
+        Cursor cursor = query(IdentityTable.CURRENCY_ID+"=? AND "+IdentityTable.WALLET_ID+"!=?",new String[]{String.valueOf(currencyId),String.valueOf(walletId)});
+        if (cursor.moveToFirst()){
+            do {
+                Identity i = fromCursor(cursor);
+                identities.put(i.getPublicKey(),i);
+            }while (cursor.moveToNext());
+        }
+        cursor.close();
+        return identities;
     }
 
     public List<Identity> getAllIdentity() {

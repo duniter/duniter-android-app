@@ -9,14 +9,14 @@
     <org.duniter.app.view.dialog.preference.ListPreference
         android:title="@string/first_currency_unit"
         android:key="unit"
-        android:defaultValue="0"
+        android:defaultValue="1"
         android:entries="@array/list_unit"
         android:entryValues="@array/list_unit_value" />
 
     <org.duniter.app.view.dialog.preference.ListPreference
         android:title="@string/second_currency_unit"
         android:key="default_unit"
-        android:defaultValue="1"
+        android:defaultValue="0"
         android:entries="@array/list_unit"
         android:entryValues="@array/list_unit_value" />
 

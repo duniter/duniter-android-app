@@ -3,7 +3,10 @@ package org.duniter.app.model.EntitySql.view;
 import android.net.Uri;
 import android.provider.BaseColumns;
 
+import org.duniter.app.model.Entity.Certification;
+import org.duniter.app.model.Entity.Contact;
 import org.duniter.app.model.EntitySql.CertificationSql.CertificationTable;
+import org.duniter.app.model.EntitySql.ContactSql.ContactTable;
 import org.duniter.app.model.EntitySql.CurrencySql.CurrencyTable;
 import org.duniter.app.model.EntitySql.IdentitySql.IdentityTable;
 
@@ -26,6 +29,8 @@ public class ViewCertificationAdapter implements BaseColumns, ViewInterface {
     public static final String SIG_VALIDITY = "sig_validity";
     public static final String BLOCK_NUMBER = "block_number";
 
+    public static final String ALIAS = "alias";
+
     public static String getCreation() {
         return "CREATE VIEW " + VIEW_NAME +
                 " AS SELECT " +
@@ -37,12 +42,19 @@ public class ViewCertificationAdapter implements BaseColumns, ViewInterface {
                 CertificationTable.TABLE_NAME + DOT + CertificationTable.IDENTITY_ID + AS + IDENTITY_ID + COMMA +
                 CertificationTable.TABLE_NAME + DOT + CertificationTable.TYPE + AS + TYPE + COMMA +
 
+                ContactTable.TABLE_NAME + DOT + ContactTable.ALIAS + AS + ALIAS + COMMA +
+
                 CurrencyTable.TABLE_NAME + DOT + CurrencyTable.SIGVALIDITY + AS + SIG_VALIDITY +
 
                 FROM + CertificationTable.TABLE_NAME +
 
                 LEFT_JOIN + IdentityTable.TABLE_NAME +
                 ON + IdentityTable.TABLE_NAME + DOT + IdentityTable._ID + "=" + CertificationTable.TABLE_NAME + DOT + CertificationTable.IDENTITY_ID +
+
+                LEFT_JOIN + ContactTable.TABLE_NAME +
+                ON + ContactTable.TABLE_NAME + DOT + ContactTable.PUBLIC_KEY + "=" + CertificationTable.TABLE_NAME + DOT + CertificationTable.PUBLIC_KEY +
+                AND + ContactTable.TABLE_NAME + DOT + ContactTable.UID + "=" + CertificationTable.TABLE_NAME + DOT + CertificationTable.UID +
+                AND + ContactTable.TABLE_NAME + DOT + ContactTable.CURRENCY_ID + "=" + IdentityTable.TABLE_NAME + DOT + IdentityTable.CURRENCY_ID +
 
                 LEFT_JOIN + CurrencyTable.TABLE_NAME +
                 ON + CurrencyTable.TABLE_NAME + DOT + CurrencyTable._ID + "=" + IdentityTable.TABLE_NAME + DOT + IdentityTable.CURRENCY_ID;

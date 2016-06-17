@@ -126,10 +126,10 @@ public class TxSql extends AbstractSql<Tx> {
                 TxTable.ENC + TEXT + COMMA +
                 TxTable.HASH + TEXT + COMMA +
                 TxTable.LOCKTIME + INTEGER + NOTNULL + " DEFAULT 0" + COMMA +
-                "FOREIGN KEY (" + TxTable.CURRENCY_ID + ") REFERENCES " +
-                CurrencySql.CurrencyTable.TABLE_NAME + "(" + CurrencySql.CurrencyTable._ID + ") ON DELETE CASCADE" + COMMA +
                 "FOREIGN KEY (" + TxTable.WALLET_ID + ") REFERENCES " +
                 WalletSql.WalletTable.TABLE_NAME + "(" + WalletSql.WalletTable._ID + ") ON DELETE CASCADE" + COMMA +
+                "FOREIGN KEY (" + TxTable.CURRENCY_ID + ") REFERENCES " +
+                CurrencySql.CurrencyTable.TABLE_NAME + "(" + CurrencySql.CurrencyTable._ID + ") ON DELETE CASCADE" + COMMA +
                 UNIQUE + "(" + TxTable.HASH + COMMA + TxTable.WALLET_ID + COMMA + TxTable.BLOCK_NUMBER + COMMA + TxTable.AMOUNT + ")" +
                 ")";
     }

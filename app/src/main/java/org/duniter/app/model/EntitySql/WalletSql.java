@@ -86,9 +86,10 @@ public class WalletSql extends AbstractSql<Wallet> {
                 WalletTable.PRIVATE_KEY + TEXT + COMMA +
                 WalletTable.ALIAS + TEXT + COMMA +
                 WalletTable.AMOUNT + INTEGER + NOTNULL + COMMA +
+                WalletTable.AMOUNT_WITHOUT_UD + INTEGER + NOTNULL + COMMA +
                 WalletTable.BASE + INTEGER + NOTNULL + COMMA +
-                WalletTable.AMOUNT_TIME + INTEGER + NOTNULL + COMMA +
-                WalletTable.AMOUNT_TIME_ORIGIN + INTEGER + NOTNULL + COMMA +
+                WalletTable.AMOUNT_TIME_WITH_OBLIVION + INTEGER + NOTNULL + COMMA +
+                WalletTable.AMOUNT_TIME_WITHOUT_OBLIVION + INTEGER + NOTNULL + COMMA +
                 WalletTable.SYNC_BLOCK + INTEGER + NOTNULL + " DEFAULT 0 " + COMMA +
                 "FOREIGN KEY (" + WalletTable.CURRENCY_ID + ") REFERENCES " +
                 CurrencySql.CurrencyTable.TABLE_NAME + "(" + CurrencySql.CurrencyTable._ID + ") ON DELETE CASCADE" + COMMA +
@@ -108,8 +109,9 @@ public class WalletSql extends AbstractSql<Wallet> {
         int aliasIndex = cursor.getColumnIndex(WalletTable.ALIAS);
         int syncBlockIndex = cursor.getColumnIndex(WalletTable.SYNC_BLOCK);
         int amountIndex = cursor.getColumnIndex(WalletTable.AMOUNT);
-        int amountTimeIndex = cursor.getColumnIndex(WalletTable.AMOUNT_TIME);
-        int amountTimeOblivionIndex = cursor.getColumnIndex(WalletTable.AMOUNT_TIME_ORIGIN);
+        int amountWithoutUdIndex = cursor.getColumnIndex(WalletTable.AMOUNT_WITHOUT_UD);
+        int amountTimeWithOblivion = cursor.getColumnIndex(WalletTable.AMOUNT_TIME_WITH_OBLIVION);
+        int amountTimeWithoutOblivion = cursor.getColumnIndex(WalletTable.AMOUNT_TIME_WITHOUT_OBLIVION);
 
         Wallet wallet = new Wallet();
         wallet.setId(cursor.getLong(idIndex));
@@ -121,8 +123,9 @@ public class WalletSql extends AbstractSql<Wallet> {
         wallet.setAlias(cursor.getString(aliasIndex));
         wallet.setSyncBlock(cursor.getLong(syncBlockIndex));
         wallet.setAmount(cursor.getLong(amountIndex));
-        wallet.setAmountTime(cursor.getLong(amountTimeIndex));
-        wallet.setAmountTimeOrigin(cursor.getLong(amountTimeOblivionIndex));
+        wallet.setAmountWithoutUd(cursor.getLong(amountWithoutUdIndex));
+        wallet.setAmountTimeWithOblivion(cursor.getLong(amountTimeWithOblivion));
+        wallet.setAmountTimeWithoutOblivion(cursor.getLong(amountTimeWithoutOblivion));
 
         return wallet;
     }
@@ -138,9 +141,10 @@ public class WalletSql extends AbstractSql<Wallet> {
         values.put(WalletTable.PRIVATE_KEY, entity.getPrivateKey());
         values.put(WalletTable.SYNC_BLOCK, entity.getSyncBlock());
         values.put(WalletTable.AMOUNT, entity.getAmount());
+        values.put(WalletTable.AMOUNT_WITHOUT_UD, entity.getAmountWithoutUd());
         values.put(WalletTable.BASE, entity.getBase());
-        values.put(WalletTable.AMOUNT_TIME, entity.getAmountTime());
-        values.put(WalletTable.AMOUNT_TIME_ORIGIN, entity.getAmountTimeOrigin());
+        values.put(WalletTable.AMOUNT_TIME_WITH_OBLIVION, entity.getAmountTimeWithOblivion());
+        values.put(WalletTable.AMOUNT_TIME_WITHOUT_OBLIVION, entity.getAmountTimeWithoutOblivion());
         return values;
     }
 
@@ -155,8 +159,9 @@ public class WalletSql extends AbstractSql<Wallet> {
         public static final String ALIAS = "alias";
         public static final String SYNC_BLOCK = "sync_block";
         public static final String AMOUNT = "amount";
+        public static final String AMOUNT_WITHOUT_UD = "amount_without_ud";
         public static final String BASE = "base";
-        public static final String AMOUNT_TIME = "amount_time";
-        public static final String AMOUNT_TIME_ORIGIN = "amount_time_origin";
+        public static final String AMOUNT_TIME_WITH_OBLIVION = "amount_time_with_oblivion";
+        public static final String AMOUNT_TIME_WITHOUT_OBLIVION= "amount_time_without_oblivion";
     }
 }

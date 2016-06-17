@@ -18,8 +18,9 @@ public class Wallet implements Serializable{
     private long amount;
     private int base;
     private boolean haveIdentity = false;
-    private long amountTime;
-    private long amountTimeOrigin;
+    private long amountWithoutUd;
+    private long amountTimeWithOblivion;
+    private long amountTimeWithoutOblivion;
 
     public Wallet(){
         amount = 0;
@@ -139,19 +140,27 @@ public class Wallet implements Serializable{
         return sb.toString();
     }
 
-    public void setAmountTime(long amountTime) {
-        this.amountTime = amountTime;
+    public void setAmountWithoutUd(long amountWithoutUd) {
+        this.amountWithoutUd = amountWithoutUd;
     }
 
-    public long getAmountTime() {
-        return amountTime;
+    public long getAmountWithoutUd() {
+        return amountWithoutUd;
     }
 
-    public void setAmountTimeOrigin(long amountTimeOrigin) {
-        this.amountTimeOrigin = amountTimeOrigin;
+    public void setAmountTimeWithOblivion(long amountTimeWithOblivion) {
+        this.amountTimeWithOblivion = amountTimeWithOblivion;
     }
 
-    public long getAmountTimeOrigin() {
-        return amountTimeOrigin;
+    public long getAmountTimeWithOblivion() {
+        return amountTimeWithOblivion;
+    }
+
+    public void setAmountTimeWithoutOblivion(long amountTimeWithoutOblivion) {
+        this.amountTimeWithoutOblivion = amountTimeWithoutOblivion;
+    }
+
+    public long getAmountTimeWithoutOblivion() {
+        return amountTimeWithoutOblivion;
     }
 }

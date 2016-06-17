@@ -138,8 +138,8 @@ public class WalletCursorAdapter extends CursorAdapter {
         int dividendIndex = cursor.getColumnIndex(ViewWalletAdapter.CURRENT_UD);
         int baseDividendIndex = cursor.getColumnIndex(ViewWalletAdapter.BASE_CURRENT_UD);
         int aliasIndex = cursor.getColumnIndex(ViewWalletAdapter.ALIAS);
-        int amountTimeIndex = cursor.getColumnIndex(ViewWalletAdapter.AMOUNT_TIME);
-        int amountTimeOriginIndex = cursor.getColumnIndex(ViewWalletIdentityAdapter.AMOUNT_TIME_ORIGIN);
+        int amountTimeWithOblivionIndex = cursor.getColumnIndex(ViewWalletAdapter.AMOUNT_TIME_WITH_OBLIVION);
+        int amountTimeWithoutOblivionIndex = cursor.getColumnIndex(ViewWalletAdapter.AMOUNT_TIME_WITHOUT_OBLIVION);
 
         if(cursor.isNull(idIdentityIndex)){
             holder.is_member.setVisibility(View.GONE);
@@ -162,8 +162,8 @@ public class WalletCursorAdapter extends CursorAdapter {
             long dividend = cursor.getLong(dividendIndex);
             int baseDividend = cursor.getInt(baseDividendIndex);
 
-            long amountTime = cursor.getLong(amountTimeIndex);
-            long amountTimeOrigin =cursor.getLong(amountTimeOriginIndex);
+            long amountTimeWithOblivion = cursor.getLong(amountTimeWithOblivionIndex);
+            long amountTimeWithoutOblivion =cursor.getLong(amountTimeWithoutOblivionIndex);
             int delay = cursor.getInt(dtIndex);
 
 
@@ -175,13 +175,13 @@ public class WalletCursorAdapter extends CursorAdapter {
             int secondUnit = Integer.parseInt(preferences.getString(Application.UNIT_DEFAULT, String.valueOf(Application.UNIT_DU)));
 
             if (firstUnit == Application.UNIT_TIME){
-                holder.primaryAmount.setText(Formater.timeFormatterV2(context,useOblivion ? amountTime : amountTimeOrigin));
+                holder.primaryAmount.setText(Formater.timeFormatterV2(context,useOblivion ? amountTimeWithOblivion : amountTimeWithoutOblivion));
             }else{
                 Format.initUnit(context,holder.primaryAmount,amount,base,delay,dividend,baseDividend,true,currencyName);
             }
 
             if (secondUnit == Application.UNIT_TIME){
-                holder.secondAmount.setText(Formater.timeFormatterV2(context,useOblivion ? amountTime : amountTimeOrigin));
+                holder.secondAmount.setText(Formater.timeFormatterV2(context,useOblivion ? amountTimeWithOblivion : amountTimeWithoutOblivion));
             }else{
                 Format.initUnit(context,holder.secondAmount,amount,base,delay,dividend,baseDividend,false,currencyName);
             }

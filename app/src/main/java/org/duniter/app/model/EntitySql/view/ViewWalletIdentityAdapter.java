@@ -23,8 +23,8 @@ public class ViewWalletIdentityAdapter implements BaseColumns, ViewInterface {
     public static final String PUBLIC_KEY = "public_key";
     public static final String AMOUNT = "amount";
     public static final String BASE = "base";
-    public static final String AMOUNT_TIME = "amount_time";
-    public static final String AMOUNT_TIME_ORIGIN = "amount_time_origin";
+    public static final String AMOUNT_TIME_WITH_OBLIVION = "amount_time_with_oblivion";
+    public static final String AMOUNT_TIME_WITHOUT_OBLIVION = "amount_time_without_oblivion";
     public static final String ALIAS = "alias";
     public static final String CURRENCY_NAME = "currency_name";
     public static final String SIG_NEED_QTY = "sig_need_qty";
@@ -47,8 +47,8 @@ public class ViewWalletIdentityAdapter implements BaseColumns, ViewInterface {
                 WalletTable.TABLE_NAME + DOT + WalletTable.AMOUNT + AS + AMOUNT + COMMA +
                 WalletTable.TABLE_NAME + DOT + WalletTable.BASE + AS + BASE + COMMA +
                 WalletTable.TABLE_NAME + DOT + WalletTable.ALIAS + AS + ALIAS + COMMA +
-                WalletTable.TABLE_NAME + DOT + WalletTable.AMOUNT_TIME + AS + AMOUNT_TIME + COMMA +
-                WalletTable.TABLE_NAME + DOT + WalletTable.AMOUNT_TIME_ORIGIN + AS + AMOUNT_TIME_ORIGIN + COMMA +
+                WalletTable.TABLE_NAME + DOT + WalletTable.AMOUNT_TIME_WITH_OBLIVION + AS + AMOUNT_TIME_WITH_OBLIVION + COMMA +
+                WalletTable.TABLE_NAME + DOT + WalletTable.AMOUNT_TIME_WITHOUT_OBLIVION + AS + AMOUNT_TIME_WITHOUT_OBLIVION + COMMA +
 
                 CurrencyTable.TABLE_NAME + DOT + CurrencyTable._ID + AS + CURRENCY_ID + COMMA +
                 CurrencyTable.TABLE_NAME + DOT + CurrencyTable.NAME + AS + CURRENCY_NAME + COMMA +

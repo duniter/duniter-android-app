@@ -22,12 +22,14 @@ import org.duniter.app.Application;
 import org.duniter.app.Format;
 import org.duniter.app.R;
 import org.duniter.app.model.Entity.BlockUd;
+import org.duniter.app.model.Entity.Certification;
 import org.duniter.app.model.Entity.Currency;
 import org.duniter.app.model.Entity.Identity;
 import org.duniter.app.model.Entity.Requirement;
 import org.duniter.app.model.Entity.Source;
 import org.duniter.app.model.Entity.Tx;
 import org.duniter.app.model.Entity.Wallet;
+import org.duniter.app.model.EntitySql.CertificationSql;
 import org.duniter.app.model.EntitySql.SourceSql;
 import org.duniter.app.model.EntitySql.TxSql;
 import org.duniter.app.model.EntityWeb.TxWeb;
@@ -37,6 +39,7 @@ import org.duniter.app.services.WebService;
 import org.duniter.app.technical.AmountPair;
 import org.duniter.app.technical.callback.Callback;
 import org.duniter.app.technical.callback.CallbackBlock;
+import org.duniter.app.technical.callback.CallbackCertify;
 import org.duniter.app.technical.callback.CallbackMap;
 import org.duniter.app.technical.callback.CallbackRequirement;
 import org.duniter.app.technical.callback.CallbackSource;
@@ -58,8 +61,8 @@ public class WalletService {
         if (forced || (currentTime >= (lastTime+fiveMin))){
             Updater updater = new Updater(context, wallet, new CallbackUpdateWallet() {
                 @Override
-                public void methode(Wallet wallet, BlockUd currentBlock, List<Source> listSources, List<Tx> listTx,List<Tx> listUd,List<String> listSourcePending, Requirement requirement, Identity identity) {
-                    insert(context, wallet, identity, currentBlock, listSources, listTx,listUd,listSourcePending, requirement);
+                public void methode(Wallet wallet, BlockUd currentBlock, List<Source> listSources, List<Tx> listTx,List<Tx> listUd,List<String> listSourcePending, Requirement requirement,List<Certification> certifications, Identity identity) {
+                    insert(context, wallet, identity, currentBlock, listSources, listTx,listUd,listSourcePending, requirement,certifications);
                     preferences.edit().putLong(Application.LAST_UPDATE,currentTime).apply();
                     if (callback != null) {
                         callback.methode();
@@ -78,10 +81,10 @@ public class WalletService {
                               List<Tx> listTx,
                               List<Tx> listUd,
                               List<String> listSourcePending,
-                              Requirement requirement){
+                              Requirement requirement,
+                              List<Certification> certifications){
 
         long amount = 0;
-        long amountTimeOblivion = 0;
         int base = currentBlock.getBase();
 
         Currency currency = wallet.getCurrency();
@@ -120,13 +123,13 @@ public class WalletService {
         for (Tx tx : listPending) {
             if (!listTx.contains(tx)) {
                 txSql.delete(tx.getId());
-            }else{
-                amount += Format.convertBase(tx.getAmount(),tx.getBase(),base);
-                amountTimeOblivion += Format.convertBase(tx.getAmount(),tx.getBase(),base);
             }
         }
 
         for (Tx tx : listTx) {
+            if (tx.getState().equals("PENDING")){
+                amount += Format.convertBase(tx.getAmount(),tx.getBase(),base);
+            }
             if (!listValid.containsKey(tx.getHash())) {
                 int i = 0;
                 long dividend;
@@ -145,11 +148,13 @@ public class WalletService {
                 tx.setAmountRelatifOrigin(UnitCurrency.quantitatif_relatif(tx.getAmount(),tx.getBase(),dividend,b));
                 txSql.insert(tx);
             }
-            amountTimeOblivion += Format.convertBase(tx.getAmount(),tx.getBase(),base);
         }
+
+        long amountUd = 0;
 
         Map<Long, Tx> listUdSql = txSql.getUdMap(wallet.getId());
         for (Tx tx:listUd){
+            amountUd += Format.convertBase(tx.getAmount(),tx.getBase(),base);
             if (!listUdSql.containsKey(tx.getBlockNumber())){
                 tx.setAmountTimeOrigin(UnitCurrency.quantitatif_time(tx.getAmount(),tx.getBase(),tx.getAmount(),tx.getBase(),currency.getDt()));
                 tx.setAmountRelatifOrigin(UnitCurrency.quantitatif_relatif(tx.getAmount(),tx.getBase(),tx.getAmount(),tx.getBase()));
@@ -157,12 +162,31 @@ public class WalletService {
             }
         }
 
-        if (identity != null && requirement != null) {
-            requirement.setIdentity(identity);
-            SqlService.getRequirementSql(context).insert(requirement);
-            if (identity.getSelfBlockUid() == null) {
-                identity.setSelfBlockUid(requirement.getSelfBlockUid());
-                SqlService.getIdentitySql(context).update(identity, identity.getId());
+        if (identity != null){
+            if (requirement != null){
+                requirement.setIdentity(identity);
+                SqlService.getRequirementSql(context).insert(requirement);
+                if (identity.getSelfBlockUid() == null) {
+                    identity.setSelfBlockUid(requirement.getSelfBlockUid());
+                    SqlService.getIdentitySql(context).update(identity, identity.getId());
+                }
+            }
+            if (certifications != null && certifications.size()!=0){
+                CertificationSql certificationSql = SqlService.getCertificationSql(context);
+                List<Certification> certifSql = certificationSql.getByIdentity(identity.getId());
+
+                for (Certification c : certifications){
+                    if (!certifSql.contains(c)){
+                        c.setIdentity(identity);
+                        certificationSql.insert(c);
+                    }
+                }
+
+                for (Certification c : certifSql){
+                    if (!certifications.contains(c)){
+                        certificationSql.delete(c.getId());
+                    }
+                }
             }
         }
 
@@ -170,13 +194,15 @@ public class WalletService {
 
         dividend = Format.convertBase(dividend,mapBlock.get(numbers.get(numbers.size()-1)).getBase(),base);
 
-        long walletTimeOblivion = Double.valueOf(((double)amountTimeOblivion/(double)dividend)*((double)(currency.getDt()*1000L))).longValue();
-        long walletTime = txSql.getWalletTime(wallet.getId());
+        long walletAmountWithoutOblivion = txSql.getWalletTime(wallet.getId());
+
+        long walletAmountWithOblivion = Double.valueOf(((double)(amount-amountUd)/dividend)*86000000).longValue();
 
         wallet.setBase(base);
         wallet.setAmount(amount);
-        wallet.setAmountTime(walletTime);
-        wallet.setAmountTimeOrigin(walletTimeOblivion);
+        wallet.setAmountWithoutUd(amount-amountUd);
+        wallet.setAmountTimeWithOblivion(walletAmountWithOblivion);
+        wallet.setAmountTimeWithoutOblivion(walletAmountWithoutOblivion);
         SqlService.getWalletSql(context).update(wallet, wallet.getId());
         Log.d("Update wallet","-------FINISH------");
     }
@@ -212,6 +238,7 @@ public class WalletService {
         private List<Source> listSource;
         private List<Tx> listTx;
         private List<Tx> listUd;
+        private List<Certification> certifications;
         private Map<String,String> mapMember;
         private Identity identity;
         private Requirement requirement;
@@ -288,7 +315,7 @@ public class WalletService {
                     @Override
                     public void methode(Requirement r) {
                         requirement = r;
-                        finish();
+                        getCertificationsOf();
                     }
                 });
             }else{
@@ -296,8 +323,28 @@ public class WalletService {
             }
         }
 
+        public void getCertificationsOf(){
+            IdentityService.certiferOf(context, wallet.getCurrency(), wallet.getPublicKey(), new CallbackCertify() {
+                @Override
+                public void methode(List<Certification> certificationList) {
+                    certifications = certificationList;
+                    getCertificationsBy();
+                }
+            });
+        }
+
+        public void getCertificationsBy(){
+            IdentityService.certifedBy(context, wallet.getCurrency(), wallet.getPublicKey(), new CallbackCertify() {
+                @Override
+                public void methode(List<Certification> certificationList) {
+                    certifications.addAll(certificationList);
+                    finish();
+                }
+            });
+        }
+
         public void finish(){
-            callback.methode(wallet, currentBlock, listSource, listTx, listUd, listSourcePending, requirement,identity);
+            callback.methode(wallet, currentBlock, listSource, listTx, listUd, listSourcePending, requirement,certifications,identity);
         }
 
         @Override

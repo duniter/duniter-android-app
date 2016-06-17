@@ -113,8 +113,11 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
                 R.string.open_drawer, R.string.close_drawer);
 
         long currencyId = getIntent().getExtras().getLong(Application.CURRENCY_ID);
-
-        currency = SqlService.getCurrencySql(this).getById(currencyId);
+        if (currencyId==0){
+            currency = SqlService.getCurrencySql(this).getAllCurrency().get(0);
+        }else{
+            currency = SqlService.getCurrencySql(this).getById(currencyId);
+        }
 
         CurrencyService.updateCurrency(this, currency, null);
 
@@ -176,7 +179,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         drawerSettingsView.setOnClickListener(this);
         drawerCreditView.setOnClickListener(this);
 
-        if (false) {
+        if (true) {
             drawerPeersView.setVisibility(View.VISIBLE);
             drawerPeersView.setOnClickListener(this);
 

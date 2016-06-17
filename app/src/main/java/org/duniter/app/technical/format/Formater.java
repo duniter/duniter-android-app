@@ -100,7 +100,9 @@ public class Formater {
 
     public static String timeFormatterV2(Context context, long allMilli){
         String result = "";
+        String plus = "";
         if (allMilli<0){
+            plus = "-";
             allMilli = allMilli* (-1);
         }
 
@@ -154,7 +156,7 @@ public class Formater {
             }
         }
 
-        return result;
+        return plus + result;
     }
 
     public static String relatifFormatter(Context context, int decimal, double relatif){

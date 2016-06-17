@@ -29,8 +29,8 @@ public class ViewWalletAdapter implements BaseColumns, ViewInterface {
     public static final String IDENTITY_ID = "identity_id";
     public static final String CURRENT_UD = "current_ud";
     public static final String BASE_CURRENT_UD = "base_current_ud";
-    public static final String AMOUNT_TIME = "amount_time";
-    public static final String AMOUNT_TIME_ORIGIN = "amount_time_origin";
+    public static final String AMOUNT_TIME_WITH_OBLIVION = "amount_time_with_oblivion";
+    public static final String AMOUNT_TIME_WITHOUT_OBLIVION = "amount_time_without_oblivion";
 
     public static String getCreation() {
         return "CREATE VIEW " + VIEW_NAME +
@@ -40,8 +40,8 @@ public class ViewWalletAdapter implements BaseColumns, ViewInterface {
                 WalletTable.TABLE_NAME + DOT + WalletTable.AMOUNT + AS + AMOUNT + COMMA +
                 WalletTable.TABLE_NAME + DOT + WalletTable.BASE + AS + BASE + COMMA +
                 WalletTable.TABLE_NAME + DOT + WalletTable.ALIAS + AS + ALIAS + COMMA +
-                WalletTable.TABLE_NAME + DOT + WalletTable.AMOUNT_TIME + AS + AMOUNT_TIME + COMMA +
-                WalletTable.TABLE_NAME + DOT + WalletTable.AMOUNT_TIME_ORIGIN + AS + AMOUNT_TIME_ORIGIN + COMMA +
+                WalletTable.TABLE_NAME + DOT + WalletTable.AMOUNT_TIME_WITH_OBLIVION + AS + AMOUNT_TIME_WITH_OBLIVION + COMMA +
+                WalletTable.TABLE_NAME + DOT + WalletTable.AMOUNT_TIME_WITHOUT_OBLIVION + AS + AMOUNT_TIME_WITHOUT_OBLIVION + COMMA +
 
                 CurrencyTable.TABLE_NAME + DOT + CurrencyTable._ID + AS + CURRENCY_ID + COMMA +
                 CurrencyTable.TABLE_NAME + DOT + CurrencyTable.NAME + AS + CURRENCY_NAME + COMMA +

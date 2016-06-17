@@ -1,6 +1,7 @@
 package org.duniter.app.view.identity;
 
 import android.app.AlertDialog;
+import android.app.Fragment;
 import android.app.ListFragment;
 import android.app.LoaderManager;
 import android.content.ContentValues;
@@ -128,14 +129,6 @@ public class IdentityFragment extends ListFragment
 
         currency = contact.getCurrency();
 
-        if (!contact.isContact()) {
-            String val = SqlService.getContactSql(getActivity()).isContact(contact.getUid(),contact.getPublicKey(),contact.getCurrency().getId());
-            if (val != null){
-                contact.setContact(true);
-                contact.setAlias(val);
-            }
-        }
-
         if (currency.getSigQty()==null){
             currency = SqlService.getCurrencySql(getActivity()).getById(currency.getId());
             contact.setCurrency(currency);
@@ -143,8 +136,6 @@ public class IdentityFragment extends ListFragment
 
         listWallet = SqlService.getWalletSql(getActivity()).getByCurrency(currency);
 
-        String nom = contact.getAlias().equals("") ? contact.getUid() : contact.getAlias()+" ("+contact.getUid()+")";
-        alias.setText(nom);
         publicKey.setText(Format.minifyPubkey(contact.getPublicKey()));
 
         spinnerAdapter = new SpinnerWalletArrayAdapter(getActivity(),listWallet);
@@ -153,12 +144,6 @@ public class IdentityFragment extends ListFragment
 
         txCursorAdapter = new TxCursorAdapter(getActivity(), null);
         setListAdapter(txCursorAdapter);
-
-        if(contact.isContact()){
-            contactButton.setVisibility(View.GONE);
-        }else{
-            contactButton.setVisibility(View.VISIBLE);
-        }
 
         updateContact();
     }
@@ -181,6 +166,27 @@ public class IdentityFragment extends ListFragment
     }
 
     private void updateContact(){
+        if (!contact.isContact()) {
+            String val = SqlService.getContactSql(getActivity()).isContact(contact.getUid(),contact.getPublicKey(),contact.getCurrency().getId());
+            if (val != null){
+                contact.setContact(true);
+                contact.setAlias(val);
+            }
+        }
+
+        String nom = contact.getAlias().equals(contact.getUid()) ?
+                contact.getAlias() :
+                contact.getAlias().length()!=0 ?
+                        contact.getAlias()+" ("+contact.getUid()+")" :
+                        contact.getUid();
+
+        alias.setText(nom);
+        if(contact.isContact()){
+            contactButton.setVisibility(View.GONE);
+        }else{
+            contactButton.setVisibility(View.VISIBLE);
+        }
+
         IdentityService.getRequirements(getActivity(), currency, contact.getPublicKey(), new CallbackRequirement() {
             @Override
             public void methode(Requirement req) {
@@ -201,12 +207,17 @@ public class IdentityFragment extends ListFragment
         IdentityService.getIdentity(getActivity(), currency, contact.getPublicKey(), new CallbackLookup() {
             @Override
             public void methode(List<Contact> contactList) {
-                contact = contactList.get(0);
+                if (contactList.size()>0) {
+                    contact = contactList.get(0);
+                }
             }
         });
     }
 
     private void updateRequirements(int currencySigQty, long nbRequirements, long membership){
+        if (!this.isAdded()){
+            return;
+        }
         if(currencySigQty>nbRequirements || membership<=0){
             textCertification.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_certification_red, 0, 0);
             textCertification.setTextColor(getResources().getColor(R.color.red));
@@ -265,6 +276,7 @@ public class IdentityFragment extends ListFragment
     }
 
     public void askContactInPhone(final String name, final String uid, final String pubKey, final Currency currency){
+        final Fragment f = this;
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
         alertDialogBuilder.setTitle("Contact");
         alertDialogBuilder
@@ -279,6 +291,8 @@ public class IdentityFragment extends ListFragment
                 .setNegativeButton("No", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         dialog.cancel();
+                        contact.setContact(true);
+                        f.onResume();
                     }
                 });
         AlertDialog alertDialog = alertDialogBuilder.create();
@@ -340,7 +354,7 @@ public class IdentityFragment extends ListFragment
     }
 
     private void changeWalletSelected(){
-        getLoaderManager().initLoader(1, getArguments(), this);
+        getLoaderManager().restartLoader(1, getArguments(), this);
     }
 
     @Override
@@ -375,6 +389,7 @@ public class IdentityFragment extends ListFragment
                 break;
             case R.id.contact_button:
                 clickContact();
+                break;
             default:
                 clickDefault();
                 break;

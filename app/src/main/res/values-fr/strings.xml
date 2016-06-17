@@ -34,7 +34,7 @@
     <string name="amount_dot">Montant : </string>
     <string name="UD">UD</string>
     <string name="universal_dividende">Dividende universel</string>
-    <string name="mutual_credit">Crédit mutuel</string>
+    <string name="mutual_credit">Crédit mutuel temps</string>
     <string name="unit_coins_label">Coins</string>
     <string name="wallet">Portefeuille</string>
     <string name="comment_hint">Commentaire</string>
@@ -300,7 +300,7 @@
     <string-array name="list_unit">
         <item>Monnaie principale</item>
         <item>Dividende Universel</item>
-        <item>Crédit mutuel</item>
+        <item>Crédit mutuel temps</item>
     </string-array>
 
     <string-array name="list_unit_value">
@@ -343,11 +343,11 @@
     <string name="rules_value_minutes_and_seconds">%1$.0f min %2$d s (%3$d s)</string>
     <string name="rules_sig_delay">Délai minimum entre 2 certiciations identiques (même clés)</string>
     <string name="rules_sig_validity">Durée maximale d\'une certiciation valide</string>
-    <string name="rules_sig_qty">Quantité minimum de certificiations pour devenir membre de la toile de confiance</string>
-    <string name="rules_sig_qty_value">%d certificiations</string>
-    <string name="rules_sig_woT">Quantité minimum de certification valide pour faire partie de la toile de confiancepar rapport au règle de distance</string>
+    <string name="rules_sig_qty">Quantité minimum de certifications pour devenir membre de la toile de confiance</string>
+    <string name="rules_sig_qty_value">%d certifications</string>
+    <string name="rules_sig_woT">Quantité minimum de certification(s) valide(s) pour faire partie de la toile de confiance par rapport aux règles de distance</string>
     <string name="rules_ms_validity">Durée maximale de participation à la toile de confiance (sans renouvellement)</string>
-    <string name="rules_step_max">Distance maximale entre chaque member de la toile de confiance et un postulant</string>
+    <string name="rules_step_max">Distance maximale entre chaque membre de la toile de confiance et un postulant</string>
     <string name="rules_median_time_blocks">Nombre de blocs utilisés pour calculer le temps médian.</string>
     <string name="rules_median_time_blocks_value">%d blocs</string>
     <string name="rules_avg_gen_time">Temps moyen entre deux écritures de blocs (temps espéré)</string>
@@ -355,7 +355,7 @@
     <string name="rules_dt_diff_eval_value">%d blocs</string>
     <string name="rules_blocks_rot">Nombre de blocs à contrôler pour le calcul de la difficulté personnelle</string>
     <string name="rules_blocks_rot_value">%d blocs</string>
-    <string name="rules_percent_rot">Le pourcentage des éditions précédentes, pour atteindre la difficulté personnalisé</string>
+    <string name="rules_percent_rot">Le pourcentage des éditions précédentes, pour atteindre la difficulté personnalisée</string>
     <string name="rules_percent_rot_value">%.0f %%</string>
     <string name="converter">Convertisseur de monnaies</string>
 
@@ -365,7 +365,7 @@
     <string name="find_by">Rechercher par :</string>
     <string name="select_identity">Sélectionnez une identité</string>
     <string name="no_result_publickey">Pas de certification pour cette clé publique</string>
-    <string name="no_wallet_selected">Aucun portefeuille sélectionnés</string>
+    <string name="no_wallet_selected">Aucun portefeuille sélectionné</string>
     <string name="transfer_of">Transfert de %s</string>
     <string name="reference">Référence</string>
     <string name="with_identity">Avec Identité</string>
@@ -414,14 +414,14 @@
     <string name="number_digit">Nombre de décimales</string>
     <string name="protocol_version">Version du protocole</string>
     <string name="application_version">Version de l\'application</string>
-    <string name="self_send">Identification envoyé</string>
-    <string name="self_not_send">L\'identification n\'a pas été envoyé</string>
-    <string name="tx_send">Transaction envoyé</string>
-    <string name="tx_not_send">La transaction n\'a pas été envoyé</string>
-    <string name="join_send">Adhésion envoyé</string>
-    <string name="certify_send">Certification envoyé</string>
-    <string name="join_not_send">L\'adhésion n\'a pas été envoyé</string>
-    <string name="certify_not_send">La certification n\'a pas été envoyé</string>
+    <string name="self_send">Identification envoyée</string>
+    <string name="self_not_send">L\'identification n\'a pas été envoyée</string>
+    <string name="tx_send">Transaction envoyée</string>
+    <string name="tx_not_send">La transaction n\'a pas été envoyée</string>
+    <string name="join_send">Adhésion envoyée</string>
+    <string name="certify_send">Certification envoyée</string>
+    <string name="join_not_send">L\'adhésion n\'a pas été envoyée</string>
+    <string name="certify_not_send">La certification n\'a pas été envoyée</string>
     <string name="block">Block:</string>
     <string name="currency_probleme">Il y a un probleme avec la monnaie, s\'il vous plait contactez un administrateur.</string>
     <string name="self_at">Self au block </string>
@@ -476,5 +476,9 @@
     <string name="display_dividend_received">Afficher les dividendes universels reçus</string>
     <string name="display_dividend">Afficher les DU</string>
     <string name="time_sync">Délai de synchronisation</string>
+    <string name="certification_received">Certifications reçus</string>
+    <string name="warning">Attention</string>
+    <string name="already_certified">Vous avez déjà certifé cette identité avec toutes vos identités disponibles.</string>
+    <string name="unreachable_node">Noeud non joignable.</string>
 
 </resources>

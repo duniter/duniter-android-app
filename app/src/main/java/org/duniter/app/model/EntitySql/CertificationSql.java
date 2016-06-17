@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.provider.BaseColumns;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.duniter.app.model.Entity.Certification;
@@ -26,10 +27,25 @@ public class CertificationSql extends AbstractSql<Certification> {
         super(context,URI);
     }
 
-    public void insertList(List<Certification> certificationList){
+    public void insertList(List<Certification> certificationList,Long identityId){
         for (Certification certification : certificationList){
+            if (identityId!=null){
+                certification.setIdentity(new Identity(identityId));
+            }
             insert(certification);
         }
+    }
+
+    public List<Certification> getByIdentity(long identityId) {
+        List<Certification> result = new ArrayList<>();
+        Cursor cursor =query(CertificationTable.IDENTITY_ID + "=?",new String[]{String.valueOf(identityId)});
+        if (cursor.moveToFirst()){
+            do {
+               result.add(fromCursor(cursor));
+            }while (cursor.moveToNext());
+        }
+        cursor.close();
+        return result;
     }
 
 
@@ -52,7 +68,7 @@ public class CertificationSql extends AbstractSql<Certification> {
                 CertificationTable.IS_WRITTEN + TEXT + NOTNULL + COMMA +
                 CertificationTable.HASH + TEXT + COMMA +
                 "FOREIGN KEY (" + CertificationTable.IDENTITY_ID + ") REFERENCES " +
-                IdentitySql.IdentityTable.TABLE_NAME + "(" + IdentitySql.IdentityTable._ID + ")" + COMMA +
+                IdentitySql.IdentityTable.TABLE_NAME + "(" + IdentitySql.IdentityTable._ID + ") ON DELETE CASCADE" + COMMA +
                 UNIQUE + "(" + CertificationTable.IDENTITY_ID + COMMA + CertificationTable.HASH + ")" +
                 ")";
     }

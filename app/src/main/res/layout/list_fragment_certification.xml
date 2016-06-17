@@ -50,6 +50,6 @@
         android:background="@drawable/shape_circle_accent"
         android:contentDescription="@string/certify"
         android:elevation="4dp"
-        android:src="@drawable/ic_certification_white" />
+        android:src="@drawable/ic_certification_add_white_36dp" />
 
 </RelativeLayout>

@@ -16,11 +16,11 @@ import org.duniter.app.services.SqlService;
 /**
  * Created by naivalf27 on 03/05/16.
  */
-public class IdentitySimpleAdapter extends CursorAdapter {
+public class IdentityCursorAdapter extends CursorAdapter {
 
     public Context context;
 
-    public IdentitySimpleAdapter(Context context, Cursor c) {
+    public IdentityCursorAdapter(Context context, Cursor c) {
         super(context, c,0);
         this.context = context;
     }

@@ -469,6 +469,7 @@ public class TransferActivity extends ActionBarActivity implements View.OnClickL
             noDataWallet.setVisibility(View.VISIBLE);
         }else {
             dataWallet.setVisibility(View.VISIBLE);
+            noDataWallet.setVisibility(View.GONE);
 
 //            dividend = currency.getLastUdBlock().getDividend();
             long delay = currency.getDt();
@@ -552,7 +553,7 @@ public class TransferActivity extends ActionBarActivity implements View.OnClickL
 
         if (currency!=null && currency.getName()!=null) {
             setTitle(getResources().getString(R.string.transfer_of, currency.getName()));
-        }else if(currency.getName() == null){
+        }else if(currency==null || currency.getName() == null){
             currency = SqlService.getCurrencySql(this).getById(
                     contactSelected == null ?
                             walletSelected.getCurrency().getId() :

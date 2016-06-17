@@ -23,6 +23,7 @@ import org.duniter.app.model.EntityJson.BlockchainParameterJson;
 import org.duniter.app.model.Entity.Currency;
 import org.duniter.app.model.Entity.Endpoint;
 import org.duniter.app.model.EntityJson.NetworkPeeringJson;
+import org.duniter.app.model.EntitySql.CurrencySql;
 import org.duniter.app.model.EntityWeb.BlockChainParameterWeb;
 import org.duniter.app.model.EntityWeb.NetworkPeeringWeb;
 import org.duniter.app.services.SqlService;
@@ -198,7 +199,7 @@ public class SelectorCurrencyView {
                     fetchBlockchainParameter(address, port, peering,callback);
                 }else{
                     Log.d("NetWorkPeering", "error code :"+code);
-                    Toast.makeText(mContext,mContext.getString(R.string.currency_probleme),Toast.LENGTH_LONG).show();
+                    Toast.makeText(mContext,mContext.getString(R.string.unreachable_node),Toast.LENGTH_LONG).show();
                     if (callback != null) {
                         callback.methode(false);
                     }
@@ -232,27 +233,34 @@ public class SelectorCurrencyView {
     }
 
     private void createCurrency(BlockchainParameterJson parameter, NetworkPeeringJson peering) {
-        Currency currency = new Currency();
-        currency.setName(parameter.currency);
-        currency.setC(parameter.c);
-        currency.setDt(parameter.dt);
-        currency.setUd0(parameter.ud0);
-        currency.setSigPeriod(parameter.sigPeriod);
-        currency.setSigStock(parameter.sigStock);
-        currency.setSigWindow(parameter.sigWindow);
-        currency.setSigValidity(parameter.sigValidity);
-        currency.setSigQty(parameter.sigQty);
-        currency.setIdtyWindow(parameter.idtyWindow);
-        currency.setMsWindow(parameter.msWindow);
-        currency.setXpercent(parameter.xpercent);
-        currency.setMsValidity(parameter.msValidity);
-        currency.setStepMax(parameter.stepMax);
-        currency.setMedianTimeBlocks(parameter.medianTimeBlocks);
-        currency.setAvgGenTime(parameter.avgGenTime);
-        currency.setDtDiffEval(parameter.dtDiffEval);
-        currency.setBlocksRot(parameter.blocksRot);
-        currency.setPercentRot(parameter.percentRot);
-        currency.setId(SqlService.getCurrencySql(mContext).insert(currency));
+
+        CurrencySql currencySql = SqlService.getCurrencySql(mContext);
+
+        Currency currency = currencySql.getByName(parameter.currency);
+
+        if (currency==null) {
+            currency = new Currency();
+            currency.setName(parameter.currency);
+            currency.setC(parameter.c);
+            currency.setDt(parameter.dt);
+            currency.setUd0(parameter.ud0);
+            currency.setSigPeriod(parameter.sigPeriod);
+            currency.setSigStock(parameter.sigStock);
+            currency.setSigWindow(parameter.sigWindow);
+            currency.setSigValidity(parameter.sigValidity);
+            currency.setSigQty(parameter.sigQty);
+            currency.setIdtyWindow(parameter.idtyWindow);
+            currency.setMsWindow(parameter.msWindow);
+            currency.setXpercent(parameter.xpercent);
+            currency.setMsValidity(parameter.msValidity);
+            currency.setStepMax(parameter.stepMax);
+            currency.setMedianTimeBlocks(parameter.medianTimeBlocks);
+            currency.setAvgGenTime(parameter.avgGenTime);
+            currency.setDtDiffEval(parameter.dtDiffEval);
+            currency.setBlocksRot(parameter.blocksRot);
+            currency.setPercentRot(parameter.percentRot);
+            currency.setId(currencySql.insert(currency));
+        }
 
         for(NetworkPeeringJson.Endpoint e : peering.endpoints){
             Endpoint endpoint = new Endpoint();

@@ -105,4 +105,24 @@ public class Certification implements Serializable{
     public void setType(String type) {
         this.type = type;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Certification that = (Certification) o;
+
+        if (isMember != that.isMember) return false;
+        if (wasMember != that.wasMember) return false;
+        if (blockNumber != that.blockNumber) return false;
+        if (medianTime != that.medianTime) return false;
+        if (written != that.written) return false;
+        if (publicKey != null ? !publicKey.equals(that.publicKey) : that.publicKey != null)
+            return false;
+        if (uid != null ? !uid.equals(that.uid) : that.uid != null) return false;
+        if (hash != null ? !hash.equals(that.hash) : that.hash != null) return false;
+        return type != null ? type.equals(that.type) : that.type == null;
+
+    }
 }

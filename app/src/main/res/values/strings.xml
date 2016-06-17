@@ -34,7 +34,7 @@
     <string name="amount_dot">Amount : </string>
     <string name="UD">UD</string>
     <string name="universal_dividende">Universal dividende</string>
-    <string name="mutual_credit">Mutual Credit</string>
+    <string name="mutual_credit">Mutual Credit Time</string>
     <string name="unit_coins_label">coins</string>
     <string name="wallet">Wallet</string>
     <string name="comment_hint">Comment</string>
@@ -305,7 +305,7 @@
     <string-array name="list_unit">
         <item>Currency principal</item>
         <item>Universal Dividende</item>
-        <item>Mutual Credit</item>
+        <item>Mutual Credit Time</item>
     </string-array>
 
     <string-array name="list_time_sync">
@@ -475,6 +475,10 @@
     <string name="display_dividend_received">Display unviersals dividends received</string>
     <string name="display_dividend">Display UD</string>
     <string name="time_sync">Time synchronization</string>
+    <string name="certification_received">Certifications received</string>
+    <string name="warning">Warning</string>
+    <string name="already_certified">You already certifed this identity with all your available identities.</string>
+    <string name="unreachable_node">Node unreachable.</string>
 
 
     <string-array name="node" translatable="false">

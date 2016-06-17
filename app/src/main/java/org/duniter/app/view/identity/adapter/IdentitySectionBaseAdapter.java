@@ -98,14 +98,18 @@ public class IdentitySectionBaseAdapter extends BaseAdapter {
     }
 
     public void bindView(View view, Contact item) {
-        if(item.getAlias()==null || item.getAlias().equals("")){
+        String alias = item.getAlias()!=null ? item.getAlias() : "";
+        String uid = item.getUid();
+
+        if (alias.equals(uid) || alias.length()==0){
             ((TextView) view.findViewById(R.id.other_name)).setVisibility(View.GONE);
-            ((TextView) view.findViewById(R.id.name)).setText(item.getUid());
+            ((TextView) view.findViewById(R.id.name)).setText(uid);
         }else{
             ((TextView) view.findViewById(R.id.other_name)).setVisibility(View.VISIBLE);
             ((TextView) view.findViewById(R.id.name)).setText(item.getAlias());
             ((TextView) view.findViewById(R.id.other_name)).setText("(".concat(item.getUid()).concat(")"));
         }
+
         ((TextView) view.findViewById(R.id.public_key)).setText(Format.minifyPubkey(item.getPublicKey()));
         ((TextView) view.findViewById(R.id.currency)).setText(item.getCurrency().getName());
     }

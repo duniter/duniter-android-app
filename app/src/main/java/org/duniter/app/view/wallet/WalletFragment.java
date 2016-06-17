@@ -348,6 +348,7 @@ public class WalletFragment extends ListFragment
                 Bundle args = new Bundle();
                 args.putString(Application.PUBLIC_KEY, publicKey);
                 args.putLong(Application.IDENTITY_ID, identityId);
+                args.putLong(Application.WALLET_ID,walletId);
                 args.putLong(Application.CURRENCY_ID, currencyId);
                 ((MainActivity) getActivity()).setCurrentFragment(CertificationFragment.newInstance(args));
             }
@@ -425,8 +426,8 @@ public class WalletFragment extends ListFragment
         int dtIndex = cursor.getColumnIndex(ViewWalletIdentityAdapter.DT);
         int amountIndex = cursor.getColumnIndex(ViewWalletIdentityAdapter.AMOUNT);
         int baseIndex = cursor.getColumnIndex(ViewWalletIdentityAdapter.BASE);
-        int amountTimeIndex = cursor.getColumnIndex(ViewWalletIdentityAdapter.AMOUNT_TIME);
-        int amountTimeOriginIndex = cursor.getColumnIndex(ViewWalletIdentityAdapter.AMOUNT_TIME_ORIGIN);
+        int amountTimeWithOblivionIndex = cursor.getColumnIndex(ViewWalletIdentityAdapter.AMOUNT_TIME_WITH_OBLIVION);
+        int amountTimeWithoutOblivionIndex = cursor.getColumnIndex(ViewWalletIdentityAdapter.AMOUNT_TIME_WITHOUT_OBLIVION);
 
         int aliasIndex = cursor.getColumnIndex(ViewWalletIdentityAdapter.ALIAS);
         int sigQtyIndex = cursor.getColumnIndex(ViewWalletIdentityAdapter.SIG_NEED_QTY);
@@ -464,8 +465,8 @@ public class WalletFragment extends ListFragment
         long dividend = cursor.getLong(dividendIndex);
         int baseDividend = cursor.getInt(baseDividendIndex);
 
-        long amountTime = cursor.getLong(amountTimeIndex);
-        long amountTimeOrigin =cursor.getLong(amountTimeOriginIndex);
+        long amountTimeWithOblivion = cursor.getLong(amountTimeWithOblivionIndex);
+        long amountTimeWithoutOblivion =cursor.getLong(amountTimeWithoutOblivionIndex);
         int delay = cursor.getInt(dtIndex);
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
@@ -476,13 +477,13 @@ public class WalletFragment extends ListFragment
         int secondUnit = Integer.parseInt(preferences.getString(Application.UNIT_DEFAULT, String.valueOf(Application.UNIT_DU)));
 
         if (firstUnit == Application.UNIT_TIME){
-            firstAmount.setText(Formater.timeFormatterV2(getActivity(),useOblivion ? amountTime : amountTimeOrigin));
+            firstAmount.setText(Formater.timeFormatterV2(getActivity(),useOblivion ? amountTimeWithOblivion : amountTimeWithoutOblivion));
         }else{
             Format.initUnit(getActivity(),firstAmount,amount,base,delay,dividend,baseDividend,true,currencyName);
         }
 
         if (secondUnit == Application.UNIT_TIME){
-            secondAmount.setText(Formater.timeFormatterV2(getActivity(),useOblivion ? amountTime : amountTimeOrigin));
+            secondAmount.setText(Formater.timeFormatterV2(getActivity(),useOblivion ? amountTimeWithOblivion : amountTimeWithoutOblivion));
         }else{
             Format.initUnit(getActivity(),secondAmount,amount,base,delay,dividend,baseDividend,false,currencyName);
         }

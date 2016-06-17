@@ -16,6 +16,7 @@ import com.opencsv.CSVWriter;
 
 import org.duniter.app.model.EntitySql.TxSql;
 import org.duniter.app.services.SqlService;
+import org.duniter.app.view.MainActivity;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -89,12 +90,19 @@ public class Application extends android.app.Application{
             }
         }
         Log.e("FATAL",ms+"\n");
-        Intent intent = new Intent ();
-        intent.setAction ("org.duniter.app.SEND_LOG");
-        intent.setFlags (Intent.FLAG_ACTIVITY_NEW_TASK); // required when starting from Application
-        startActivity (intent);
 
-        System.exit(1);// kill off the crashed app
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.putExtra(Application.CURRENCY_ID, 0);
+        intent.setFlags (Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+
+
+//        Intent intent = new Intent ();
+//        intent.setAction ("org.duniter.app.SEND_LOG");
+//        intent.setFlags (Intent.FLAG_ACTIVITY_NEW_TASK); // required when starting from Application
+//        startActivity (intent);
+//
+//        System.exit(1);// kill off the crashed app
     }
 
     public static Context getContext() {
@@ -136,7 +144,7 @@ public class Application extends android.app.Application{
             file.createNewFile();
             CSVWriter csvWrite = new CSVWriter(new FileWriter(file));
             String request = "SELECT * FROM "+ TxSql.TxTable.TABLE_NAME;
-            Cursor cursor = SqlService.getCurrencySql(getContext()).query(request);
+            Cursor cursor = SqlService.getTxSql(getContext()).query(null,null,TxSql.TxTable.TIME + " ASC");
             csvWrite.writeNext(cursor.getColumnNames());
             String[] columnNames = null;
             while(cursor.moveToNext())
@@ -156,5 +164,6 @@ public class Application extends android.app.Application{
         {
             Log.e("MainActivity", sqlEx.getMessage(), sqlEx);
         }
+        Toast.makeText(getContext(),"export finish",Toast.LENGTH_LONG).show();
     }
 }

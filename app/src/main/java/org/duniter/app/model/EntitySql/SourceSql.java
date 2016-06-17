@@ -58,10 +58,10 @@ public class SourceSql extends AbstractSql<Source> {
                 SourceTable.IDENTIFIER + TEXT + COMMA +
                 SourceTable.NOFFSET + INTEGER + COMMA +
                 SourceTable.TYPE + TEXT + NOTNULL + COMMA +
-                "FOREIGN KEY (" + SourceTable.CURRENCY_ID + ") REFERENCES " +
-                CurrencySql.CurrencyTable.TABLE_NAME + "(" + CurrencySql.CurrencyTable._ID + ") ON DELETE CASCADE" + COMMA +
                 "FOREIGN KEY (" + SourceTable.WALLET_ID + ") REFERENCES " +
-                WalletSql.WalletTable.TABLE_NAME + "(" + WalletSql.WalletTable._ID + ") ON DELETE CASCADE" +
+                WalletSql.WalletTable.TABLE_NAME + "(" + WalletSql.WalletTable._ID + ") ON DELETE CASCADE" + COMMA +
+                "FOREIGN KEY (" + SourceTable.CURRENCY_ID + ") REFERENCES " +
+                CurrencySql.CurrencyTable.TABLE_NAME + "(" + CurrencySql.CurrencyTable._ID + ") ON DELETE CASCADE" +
                 ")";
     }
 

@@ -16,6 +16,8 @@ import android.view.View;
 import android.view.Window;
 import android.widget.Button;
 
+import org.duniter.app.view.MainActivity;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -40,6 +42,7 @@ public class SendLog extends Activity implements View.OnClickListener {
         Button no = (Button) findViewById(R.id.no);
         no.setOnClickListener(this);
         if (((Application)getApplication()).getHasSendLog()){
+//            onBackPressed();
             finish();
         }
     }
@@ -53,13 +56,33 @@ public class SendLog extends Activity implements View.OnClickListener {
             case R.id.yes :
                 sendLogFile();
                 ((Application)getApplication()).setHas_send_log(true);
-                finish();
+//                finish();
+//                onBackPressed();
                 break;
             case R.id.no :
                 ((Application)getApplication()).setHas_send_log(true);
-                finish();
+                restartApp();
+//                finish();
+//                onBackPressed();
                 break;
         }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 123456789) {
+            if (resultCode == RESULT_CANCELED) {
+                restartApp();
+            }
+        }
+    }
+
+    private void restartApp(){
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.putExtra(Application.CURRENCY_ID, 0);
+        startActivity(intent);
+        finish();
     }
 
     private void sendLogFile ()
@@ -75,9 +98,9 @@ public class SendLog extends Activity implements View.OnClickListener {
         intent.putExtra (Intent.EXTRA_EMAIL, new String[] {"applog@tccp.fr"});
         intent.putExtra (Intent.EXTRA_SUBJECT, "Duniter App : log file");
         intent.putExtra (Intent.EXTRA_STREAM, Uri.parse ("file://" + fullName));
-        intent.putExtra (Intent.EXTRA_TEXT, "Log file attached."); // do this so some email clients don't complain about empty body.
-        startActivity (intent);
-        onDestroy();
+        intent.putExtra (Intent.EXTRA_TEXT, "Log file attached.");// do this so some email clients don't complain about empty body.
+        intent.putExtra("finishActivityOnSaveCompleted", true);
+        startActivityForResult(intent,123456789);
     }
 
     private String extractLogToFile()

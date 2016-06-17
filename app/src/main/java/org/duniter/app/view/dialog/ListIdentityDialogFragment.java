@@ -19,24 +19,30 @@ import android.widget.Toast;
 import org.duniter.app.R;
 import org.duniter.app.model.Entity.Identity;
 import org.duniter.app.model.EntitySql.IdentitySql;
-import org.duniter.app.view.dialog.adapter.IdentitySimpleAdapter;
+import org.duniter.app.view.dialog.adapter.IdentityArrayAdapter;
+import org.duniter.app.view.dialog.adapter.IdentityCursorAdapter;
+
+import java.util.List;
 
 /**
  * Created by naivalf27 on 12/02/16.
  */
 public class ListIdentityDialogFragment extends DialogFragment implements
-        AdapterView.OnItemClickListener,
-        LoaderManager.LoaderCallbacks<Cursor>{
+        AdapterView.OnItemClickListener{
 
     ListView mylist;
     static Callback callback;
     TextView empty;
-    IdentitySimpleAdapter identitySimpleAdapter;
+    IdentityCursorAdapter identityCursorAdapter;
+    IdentityArrayAdapter identityArrayAdapter;
     static long currencyId;
 
-    public static ListIdentityDialogFragment newInstance(Callback _callback, long _currencyId) {
+    static List<Identity> identities;
+
+    public static ListIdentityDialogFragment newInstance(Callback _callback, long _currencyId, List<Identity> _identities) {
         callback = _callback;
         currencyId = _currencyId;
+        identities = _identities;
         Bundle args = new Bundle();
 
         ListIdentityDialogFragment fragment = new ListIdentityDialogFragment();
@@ -59,15 +65,17 @@ public class ListIdentityDialogFragment extends DialogFragment implements
         builder.setTitle(getString(R.string.choose_wallet));
 
         mylist = (ListView) view.findViewById(R.id.list_item);
-        empty = (TextView) view.findViewById(R.id.empty);
-        empty.setText(getString(R.string.must_be_member));
+//        empty = (TextView) view.findViewById(R.id.empty);
+//        empty.setText(getString(R.string.must_be_member));
 
-        identitySimpleAdapter = new IdentitySimpleAdapter(getActivity(), null);
+//        identityCursorAdapter = new IdentityCursorAdapter(getActivity(), null);
+        identityArrayAdapter = new IdentityArrayAdapter(getActivity(), identities);
 
-        mylist.setAdapter(identitySimpleAdapter);
+//        mylist.setAdapter(identityCursorAdapter);
+        mylist.setAdapter(identityArrayAdapter);
         mylist.setOnItemClickListener(this);
 
-        empty.setVisibility(View.VISIBLE);
+//        empty.setVisibility(View.VISIBLE);
 
         builder.setNeutralButton(R.string.help, new DialogInterface.OnClickListener() {
             @Override
@@ -82,7 +90,7 @@ public class ListIdentityDialogFragment extends DialogFragment implements
             }
         });
 
-        getLoaderManager().initLoader(0, getArguments(), this);
+//        getLoaderManager().initLoader(0, getArguments(), this);
 
         view.clearFocus();
         return builder.create();
@@ -92,32 +100,32 @@ public class ListIdentityDialogFragment extends DialogFragment implements
     public void onItemClick(AdapterView<?> parent, View view, int position,
                             long id) {
         dismiss();
-        callback.methode(identitySimpleAdapter.getItem(position));
+        callback.methode(identityArrayAdapter.getItem(position));
     }
 
-    @Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new CursorLoader(
-                getActivity(),
-                IdentitySql.URI,
-                null,
-                IdentitySql.IdentityTable.CURRENCY_ID+"=?",
-                new String[]{String.valueOf(currencyId)},null);
-    }
-
-    @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        if (data.getCount()>0) {
-            empty.setVisibility(View.GONE);
-        }
-        //data.close();
-        identitySimpleAdapter.swapCursor(data);
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-
-    }
+//    @Override
+//    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+//        return new CursorLoader(
+//                getActivity(),
+//                IdentitySql.URI,
+//                null,
+//                IdentitySql.IdentityTable.CURRENCY_ID+"=?",
+//                new String[]{String.valueOf(currencyId)},null);
+//    }
+//
+//    @Override
+//    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+//        if (data.getCount()>0) {
+//            empty.setVisibility(View.GONE);
+//        }
+//        //data.close();
+//        identityCursorAdapter.swapCursor(data);
+//    }
+//
+//    @Override
+//    public void onLoaderReset(Loader<Cursor> loader) {
+//
+//    }
 
     public interface Callback {
         void methode(Identity identity);
