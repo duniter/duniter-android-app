@@ -30,6 +30,26 @@ public class CertificationCursorAdapter extends CursorAdapter {
         mCursor = null;
     }
 
+    public View getView(int position, View convertView, ViewGroup parent) {
+        View v;
+        if (position == 0) {
+            v = newSectionView(mContext, parent);
+            bindSectionView(v, mContext, mContext.getString(R.string.certification_received));
+        } else{
+            if (!mCursor.moveToPosition(position - 1)) {
+                throw new IllegalStateException("couldn't move cursor to position " + position);
+            }
+            v = newView(mContext, mCursor, parent);
+            bindView(v, mContext, mCursor);
+        }
+        return v;
+    }
+
+    @Override
+    public Object getItem(int position) {
+        return super.getItem(position-1);
+    }
+
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -78,6 +98,23 @@ public class CertificationCursorAdapter extends CursorAdapter {
         }
         viewHolder.date.setBackgroundResource(drawable);
 
+    }
+
+    @Override
+    public int getCount() {
+        return super.getCount()>0 ? super.getCount()+1 : 0;
+    }
+
+
+    public View newSectionView(Context context, ViewGroup parent) {
+        LayoutInflater inflater = (LayoutInflater) context
+                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+        return inflater.inflate(R.layout.list_item_section_separator, parent, false);
+    }
+
+    public void bindSectionView(View v, Context context, String section) {
+        ((TextView) v.findViewById(R.id.section_name)).setText(section);
     }
 
     @Override

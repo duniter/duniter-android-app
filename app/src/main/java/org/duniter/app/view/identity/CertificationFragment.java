@@ -50,10 +50,12 @@ public class CertificationFragment extends ListFragment
         SwipeRefreshLayout.OnRefreshListener{
 
     private ProgressBar                progress;
+    private TextView                   emptyView;
     private SwipeRefreshLayout mSwipeLayout;
     private String                     publicKey;
     private Long                       identityId;
     private Long                       walletId;
+    private String                     walletName;
     private Long                       currencyId;
     private Currency currency;
     private Contact contact;
@@ -101,11 +103,9 @@ public class CertificationFragment extends ListFragment
         super.onViewCreated(view, savedInstanceState);
         setHasOptionsMenu(true);
 
-        getActivity().setTitle(getString(R.string.certification_received));
-
         mSwipeLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_layout);
         mSwipeLayout.setOnRefreshListener(this);
-        TextView emptyView = (TextView) view.findViewById(android.R.id.empty);
+        emptyView = (TextView) view.findViewById(android.R.id.empty);
         emptyView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -120,12 +120,15 @@ public class CertificationFragment extends ListFragment
         currency = SqlService.getCurrencySql(getActivity()).getById(currencyId);
         identityId = getArguments().getLong(Application.IDENTITY_ID);
         walletId = getArguments().getLong(Application.WALLET_ID);
+        walletName = getArguments().getString(Application.WALLET_NAME);
 
         if(identityId==0) {
+            getActivity().setTitle(contact.getUid());
             identities = SqlService.getIdentitySql(getActivity()).getMapByCurrency(currencyId);
             certificationBaseAdapter = new CertificationBaseAdapter(getActivity(), new ArrayList<Certification>(), currency);
             setListAdapter(certificationBaseAdapter);
         }else{
+            getActivity().setTitle(walletName);
             identities = SqlService.getIdentitySql(getActivity()).getMapByCurrencyWithoutId(currencyId,walletId);
             certificationCursorAdapter = new CertificationCursorAdapter(getActivity());
             setListAdapter(certificationCursorAdapter);
@@ -187,6 +190,7 @@ public class CertificationFragment extends ListFragment
                 @Override
                 public void methode(List<Certification> certificationList) {
                     certificationBaseAdapter.swapValues(certificationList);
+                    progress.setVisibility(View.GONE);
                     mSwipeLayout.setRefreshing(false);
                     certifier = new ArrayList<String>();
                     for (Certification c : certificationList){
@@ -253,6 +257,7 @@ public class CertificationFragment extends ListFragment
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         certificationCursorAdapter.swapCursor(data);
         mSwipeLayout.setRefreshing(false);
+        progress.setVisibility(View.GONE);
     }
 
     @Override

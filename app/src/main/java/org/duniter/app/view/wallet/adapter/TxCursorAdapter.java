@@ -138,10 +138,10 @@ public class TxCursorAdapter extends CursorAdapter {
         long delay = cursor.getLong(dtIndex);
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        int decimal = preferences.getInt(Application.DECIMAL,2);
+        int decimal = preferences.getInt(Application.DECIMAL,4);
 
-        int firstUnit = Integer.parseInt(preferences.getString(Application.UNIT, String.valueOf(Application.UNIT_CLASSIC)));
-        int secondUnit = Integer.parseInt(preferences.getString(Application.UNIT_DEFAULT, String.valueOf(Application.UNIT_DU)));
+        int firstUnit = Integer.parseInt(preferences.getString(Application.UNIT, String.valueOf(Application.UNIT_DU)));
+        int secondUnit = Integer.parseInt(preferences.getString(Application.UNIT_DEFAULT, String.valueOf(Application.UNIT_CLASSIC)));
 
         if (!useOblivion){
             amount = Format.convertBase(amount,base,baseDividend);

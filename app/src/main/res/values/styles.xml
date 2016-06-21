@@ -1,5 +1,7 @@
 <resources>
     <integer name="fragment_animation_time">350</integer>
+    <integer name="card_flip_time_full">350</integer>
+    <integer name="card_flip_time_half">175</integer>
     <!-- Base application theme. -->
 
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar" />

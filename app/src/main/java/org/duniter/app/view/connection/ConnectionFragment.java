@@ -155,7 +155,7 @@ public class ConnectionFragment extends Fragment implements View.OnClickListener
     public void onFinishFragment(){
         //Application.requestSync();
         if(getActivity() instanceof ConnectionActivity){
-            ((ConnectionActivity) getActivity()).setCurrency(currency);
+            ((ConnectionActivity) getActivity()).setCurrency(currency.getId());
         }
     }
 }

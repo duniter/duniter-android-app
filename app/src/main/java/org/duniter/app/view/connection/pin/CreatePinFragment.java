@@ -17,10 +17,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.duniter.app.view.connection.FirstConnectionActivity;
+import org.duniter.app.view.connection.PinActivity;
 import org.duniter.app.R;
 
-public class FirstPinFragment extends Fragment implements View.OnClickListener {
+public class CreatePinFragment extends Fragment implements View.OnClickListener {
 
     private String code1;
     private String code2;
@@ -29,8 +29,8 @@ public class FirstPinFragment extends Fragment implements View.OnClickListener {
 
     private ViewHolder holder;
 
-    public static FirstPinFragment newInstance() {
-        FirstPinFragment fragment = new FirstPinFragment();
+    public static CreatePinFragment newInstance() {
+        CreatePinFragment fragment = new CreatePinFragment();
         fragment.setArguments(new Bundle());
         return fragment;
     }
@@ -59,7 +59,8 @@ public class FirstPinFragment extends Fragment implements View.OnClickListener {
 
         try {
             PackageInfo pInfo = getActivity().getPackageManager().getPackageInfo(getActivity().getPackageName(), 0);
-            ((TextView)view.findViewById(R.id.version)).setText("v"+pInfo.versionName);
+            String versionName = "v"+pInfo.versionName;
+            ((TextView)view.findViewById(R.id.version)).setText(versionName);
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
         }
@@ -202,8 +203,8 @@ public class FirstPinFragment extends Fragment implements View.OnClickListener {
             remove();
             this.holder.actual_context.setText(getString(R.string.tap_pin_code));
         } else {
-            if(getActivity() instanceof FirstConnectionActivity){
-                ((FirstConnectionActivity) getActivity()).setPin(code1);
+            if(getActivity() instanceof PinActivity){
+                ((PinActivity) getActivity()).setPin(code1);
             }
         }
     }
@@ -215,10 +216,6 @@ public class FirstPinFragment extends Fragment implements View.OnClickListener {
                 connection();
                 break;
         }
-    }
-
-    public interface FinishAction {
-        void finishFirstPinConnection();
     }
 
     public static class ViewHolder {

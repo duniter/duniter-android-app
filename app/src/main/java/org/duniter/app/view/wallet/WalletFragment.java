@@ -349,6 +349,7 @@ public class WalletFragment extends ListFragment
                 args.putString(Application.PUBLIC_KEY, publicKey);
                 args.putLong(Application.IDENTITY_ID, identityId);
                 args.putLong(Application.WALLET_ID,walletId);
+                args.putString(Application.WALLET_NAME,alias.getText().toString());
                 args.putLong(Application.CURRENCY_ID, currencyId);
                 ((MainActivity) getActivity()).setCurrentFragment(CertificationFragment.newInstance(args));
             }
@@ -473,8 +474,8 @@ public class WalletFragment extends ListFragment
 
         boolean useOblivion = preferences.getBoolean(Application.USE_OBLIVION,true);
 
-        int firstUnit = Integer.parseInt(preferences.getString(Application.UNIT, String.valueOf(Application.UNIT_CLASSIC)));
-        int secondUnit = Integer.parseInt(preferences.getString(Application.UNIT_DEFAULT, String.valueOf(Application.UNIT_DU)));
+        int firstUnit = Integer.parseInt(preferences.getString(Application.UNIT, String.valueOf(Application.UNIT_DU)));
+        int secondUnit = Integer.parseInt(preferences.getString(Application.UNIT_DEFAULT, String.valueOf(Application.UNIT_CLASSIC)));
 
         if (firstUnit == Application.UNIT_TIME){
             firstAmount.setText(Formater.timeFormatterV2(getActivity(),useOblivion ? amountTimeWithOblivion : amountTimeWithoutOblivion));

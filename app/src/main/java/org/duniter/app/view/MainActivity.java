@@ -11,7 +11,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -47,6 +46,7 @@ import org.duniter.app.technical.callback.CallbackBlock;
 import org.duniter.app.technical.callback.CallbackLookup;
 import org.duniter.app.technical.format.Contantes;
 import org.duniter.app.view.currency.RulesBisFragment;
+import org.duniter.app.view.identity.CertificationFragment;
 import org.duniter.app.view.identity.IdentityFragment;
 import org.duniter.app.view.identity.IdentityListFragment;
 import org.duniter.app.view.currency.BlockListFragment;
@@ -92,6 +92,8 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
             Log.w("setSupportActionBar", t.getMessage());
         }
 
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+
         findViewById(R.id.deconnection).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -112,7 +114,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         mToggle = new ActionBarDrawerToggle(this, mDrawerLayout,
                 R.string.open_drawer, R.string.close_drawer);
 
-        long currencyId = getIntent().getExtras().getLong(Application.CURRENCY_ID);
+        long currencyId = preferences.getLong(Application.CURRENCY_ID,0);
         if (currencyId==0){
             currency = SqlService.getCurrencySql(this).getAllCurrency().get(0);
         }else{
@@ -128,7 +130,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         if(currentFragment == null){
             setCurrentFragment(WalletListFragment.newInstance(currency, true));
         }else{
-            displayFragment(currentFragment);
+            displayFragment(currentFragment,false);
         }
 
 //        if (savedInstanceState == null){
@@ -136,7 +138,6 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 //        }
         updateDrawer();
 
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         preferences.registerOnSharedPreferenceChangeListener(new SharedPreferences.OnSharedPreferenceChangeListener() {
             public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
                 switch (key){
@@ -179,7 +180,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         drawerSettingsView.setOnClickListener(this);
         drawerCreditView.setOnClickListener(this);
 
-        if (true) {
+        if (false) {
             drawerPeersView.setVisibility(View.VISIBLE);
             drawerPeersView.setOnClickListener(this);
 
@@ -277,7 +278,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
             listFragment.remove(listFragment.size()-1);
             currentFragment = listFragment.get(listFragment.size()-1);
             activeDrawer();
-            displayFragment(currentFragment);
+            displayFragment(currentFragment,true);
         }
     }
 
@@ -497,7 +498,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         currentFragment = fragment;
         activeDrawer();
         addFragment();
-        displayFragment(currentFragment);
+        displayFragment(currentFragment,false);
     }
 
 //    private void displayListCurrencyFragment(){
@@ -518,21 +519,52 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         }
     }
 
-    private void displayFragment(Fragment fragment){
+    private void displayFragment(Fragment fragment,boolean isBack){
         FragmentManager fragmentManager = getFragmentManager();
 
-        fragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
-        fragmentManager.beginTransaction()
-                .setCustomAnimations(
-                        R.animator.delayed_fade_in,
-                        R.animator.fade_out,
-                        R.animator.delayed_fade_in,
-                        R.animator.fade_out)
-                .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
-                .addToBackStack(fragment.getClass().getSimpleName())
-                .commit();
+        int[] anim = new int[4];
+
+        if(fragment instanceof CertificationFragment){
+            anim[0] = R.animator.slide_in_up;
+            anim[1] = R.animator.none_out;
+            anim[2] = R.animator.none_in;
+            anim[3] = R.animator.slide_out_up;
+        }else{
+            anim[0] = R.animator.slide_in_right;
+            anim[1] = R.animator.slide_out_left;
+            anim[2] = R.animator.slide_in_left;
+            anim[3] = R.animator.slide_out_right;
+        }
+
+        if (isBack){
+            fragmentManager.popBackStack();
+        }else{
+            fragmentManager.beginTransaction()
+                    .setCustomAnimations(
+                            anim[0],
+                            anim[1],
+                            anim[2],
+                            anim[3])
+                    .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
+                    .addToBackStack(fragment.getClass().getSimpleName())
+                    .commit();
+            closeDrawer();
+        }
+
+
+//        .setCustomAnimations(
+//                isBack ? anim[0] : anim[1],
+//                isBack ? anim[2] : anim[3],
+//                isBack ? anim[4] : anim[5],
+//                isBack ? anim[6] : anim[7])
+
+//        fragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+//        fragmentManager.beginTransaction()
+//                .addToBackStack(fragment.getClass().getSimpleName())
+//                .replace(R.id.frame_content, fragment, fragment.getClass().getSimpleName())
+//                .commit();
         // close the drawer
-        closeDrawer();
+
     }
 
     private void addFragment(){

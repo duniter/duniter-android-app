@@ -1,6 +1,7 @@
 package org.duniter.app.model.EntityServices;
 
 import android.content.Context;
+import android.database.sqlite.SQLiteConstraintException;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -37,7 +38,11 @@ public class CurrencyService {
     public static void insertBlock(Context context, List<BlockUd> list){
         BlockUdSql blockSql = SqlService.getBlockSql(context);
         for (BlockUd block:list){
-            blockSql.insert(block);
+            try {
+                blockSql.insert(block);
+            }catch (SQLiteConstraintException e){
+                //TODO générer le fork
+            }
         }
     }
 

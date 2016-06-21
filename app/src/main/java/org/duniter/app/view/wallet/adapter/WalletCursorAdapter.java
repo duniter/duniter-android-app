@@ -171,8 +171,8 @@ public class WalletCursorAdapter extends CursorAdapter {
 
             boolean useOblivion = preferences.getBoolean(Application.USE_OBLIVION,true);
 
-            int firstUnit = Integer.parseInt(preferences.getString(Application.UNIT, String.valueOf(Application.UNIT_CLASSIC)));
-            int secondUnit = Integer.parseInt(preferences.getString(Application.UNIT_DEFAULT, String.valueOf(Application.UNIT_DU)));
+            int firstUnit = Integer.parseInt(preferences.getString(Application.UNIT, String.valueOf(Application.UNIT_DU)));
+            int secondUnit = Integer.parseInt(preferences.getString(Application.UNIT_DEFAULT, String.valueOf(Application.UNIT_CLASSIC)));
 
             if (firstUnit == Application.UNIT_TIME){
                 holder.primaryAmount.setText(Formater.timeFormatterV2(context,useOblivion ? amountTimeWithOblivion : amountTimeWithoutOblivion));

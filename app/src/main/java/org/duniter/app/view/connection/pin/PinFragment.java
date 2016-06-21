@@ -22,6 +22,7 @@ import java.util.List;
 import org.duniter.app.Application;
 import org.duniter.app.R;
 import org.duniter.app.view.connection.ConnectionActivity;
+import org.duniter.app.view.connection.PinActivity;
 
 public class PinFragment extends Fragment{
 
@@ -60,7 +61,8 @@ public class PinFragment extends Fragment{
 
         try {
             PackageInfo pInfo = getActivity().getPackageManager().getPackageInfo(getActivity().getPackageName(), 0);
-            ((TextView)view.findViewById(R.id.version)).setText("v"+pInfo.versionName);
+            String versionName = "v"+pInfo.versionName;
+            ((TextView)view.findViewById(R.id.version)).setText(versionName);
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
         }
@@ -191,14 +193,10 @@ public class PinFragment extends Fragment{
             Toast.makeText(getActivity(), getString(R.string.pin_dont_valid), Toast.LENGTH_SHORT).show();
             remove();
         } else {
-            if(getActivity() instanceof ConnectionActivity){
-                ((ConnectionActivity) getActivity()).nextFragment();
+            if(getActivity() instanceof PinActivity){
+                ((PinActivity) getActivity()).setPin(pin);
             }
         }
-    }
-
-    public interface FinishAction {
-        void finishPinConnection();
     }
 
     public static class ViewHolder {

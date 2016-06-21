@@ -24,14 +24,14 @@ import java.io.FileWriter;
 public class Application extends android.app.Application{
 
     public static final int ACTIVITY_CONNECTION = 1;
-    public static final int ACTIVITY_FIRST_CONNECTION = 2;
+    public static final int ACTIVITY_PIN = 3;
 
     public static final String LAST_UPDATE ="last_update";
 
     public static final String CURRENCY_ID = "currency_id";
     public static final String CONNECTED = "connected";
     public static final long LONG_NULL = -999;
-    public static final String FIRST_CONNECTION = "first_connection";
+    public static final String HAVE_CURRENCY = "first_connection";
     public static final String PIN = "pin";
     public static final int PROTOCOLE_VERSION = 2;
     public static final String DECIMAL = "decimal";
@@ -49,6 +49,8 @@ public class Application extends android.app.Application{
     public static final String USE_OBLIVION = "use_oblivion";
     public static final String DISPLAY_DU = "display_du";
     public static final String DELAY_SYNC = "delay_sync";
+    public static final String WALLET_NAME = "wallet_name";
+    public static final String ETAPE = "etape";
 
 
     private static Context      mContext;
@@ -69,14 +71,14 @@ public class Application extends android.app.Application{
         mContext = getApplicationContext();
         requestSync();
 
-//        Thread.setDefaultUncaughtExceptionHandler (new Thread.UncaughtExceptionHandler()
-//        {
-//            @Override
-//            public void uncaughtException (Thread thread, Throwable e)
-//            {
-//                handleUncaughtException (thread, e);
-//            }
-//        });
+        Thread.setDefaultUncaughtExceptionHandler (new Thread.UncaughtExceptionHandler()
+        {
+            @Override
+            public void uncaughtException (Thread thread, Throwable e)
+            {
+                handleUncaughtException (thread, e);
+            }
+        });
     }
 
     public void handleUncaughtException (Thread thread, Throwable e)
@@ -91,18 +93,12 @@ public class Application extends android.app.Application{
         }
         Log.e("FATAL",ms+"\n");
 
-        Intent intent = new Intent(this, MainActivity.class);
-        intent.putExtra(Application.CURRENCY_ID, 0);
-        intent.setFlags (Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
+        Intent intent = new Intent ();
+        intent.setAction ("org.duniter.app.SEND_LOG");
+        intent.setFlags (Intent.FLAG_ACTIVITY_NEW_TASK); // required when starting from Application
+        startActivity (intent);
 
-
-//        Intent intent = new Intent ();
-//        intent.setAction ("org.duniter.app.SEND_LOG");
-//        intent.setFlags (Intent.FLAG_ACTIVITY_NEW_TASK); // required when starting from Application
-//        startActivity (intent);
-//
-//        System.exit(1);// kill off the crashed app
+        System.exit(1);// kill off the crashed app
     }
 
     public static Context getContext() {

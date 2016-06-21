@@ -39,13 +39,12 @@ public class CertificationBaseAdapter extends BaseAdapter {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         View v;
-        if (mSectionPosition.containsKey(position)) {
+        if (position == 0) {
             v = newSectionView(mContext, parent);
-            bindSectionView(v, mSectionPosition.get(position));
+            bindSectionView(v, mContext.getString(R.string.certification_received));
         } else{
-            int total = this.certificationList.size();
             v = newView(mContext, parent);
-            bindView(v, this.certificationList.get(position));
+            bindView(v, this.certificationList.get(position-1));
         }
 
         return v;
@@ -104,12 +103,12 @@ public class CertificationBaseAdapter extends BaseAdapter {
 
     @Override
     public int getCount() {
-        return this.certificationList.size();
+        return this.certificationList.size()>0 ? this.certificationList.size()+1 : 0;
     }
 
     @Override
     public Certification getItem(int position) {
-        return this.certificationList.get(position);
+        return this.certificationList.get(position-1);
     }
 
     @Override

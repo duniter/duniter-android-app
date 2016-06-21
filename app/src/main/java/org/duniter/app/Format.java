@@ -20,16 +20,15 @@ import java.util.Map;
  */
 public class Format {
     //USE DATE for time formater
-    public static final int DEFAULT_DECIMAL = 2;
     public static final boolean SIMPLE = true;
     public static final boolean LONG = false;
 
     public static void initUnit(Context context, TextView textView, long quantitatif, int base, long delay, long dividend, int baseDividend, boolean isFirstAmount, String currencyName){
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        int decimal = preferences.getInt(Application.DECIMAL,DEFAULT_DECIMAL);
+        int decimal = preferences.getInt(Application.DECIMAL,4);
         int unit = isFirstAmount ?
-                Integer.parseInt(preferences.getString(Application.UNIT, String.valueOf(Application.UNIT_CLASSIC))):
-                Integer.parseInt(preferences.getString(Application.UNIT_DEFAULT, String.valueOf(Application.UNIT_DU)));
+                Integer.parseInt(preferences.getString(Application.UNIT, String.valueOf(Application.UNIT_DU))):
+                Integer.parseInt(preferences.getString(Application.UNIT_DEFAULT, String.valueOf(Application.UNIT_CLASSIC)));
 
         quantitatif = Format.convertBase(quantitatif,base,baseDividend);
 

@@ -10,12 +10,11 @@ import android.preference.PreferenceManager;
 
 import org.duniter.app.Application;
 import org.duniter.app.R;
-import org.duniter.app.model.Entity.Currency;
 import org.duniter.app.view.InitActivity;
+import org.duniter.app.view.connection.pin.CreatePinFragment;
 import org.duniter.app.view.connection.pin.PinFragment;
 
-
-public class ConnectionActivity extends Activity {
+public class PinActivity extends Activity {
 
     int etapeCurrent;
 
@@ -23,22 +22,17 @@ public class ConnectionActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_connection);
+
+        Fragment fragment = null;
+
         etapeCurrent = getIntent().getIntExtra(Application.ETAPE,InitActivity.ETAPE_0);
-
-        Fragment fragment;
-
-        switch (etapeCurrent) {
-            case InitActivity.ETAPE_1_1:
-                fragment = ChooseInitFragment.newInstance();
+        switch (etapeCurrent){
+            case InitActivity.ETAPE_1_2:
+            case InitActivity.ETAPE_2_2:
+                fragment = PinFragment.newInstance();
                 break;
-            case InitActivity.ETAPE_3_1:
-                fragment = InscriptionFragment.newInstance();
-                break;
-            case InitActivity.ETAPE_3_2:
-                fragment = ConnectionFragment.newInstance();
-                break;
-            default:
-                fragment = null;
+            case InitActivity.ETAPE_2_1:
+                fragment = CreatePinFragment.newInstance();
                 break;
         }
         displayFragment(fragment);
@@ -50,19 +44,11 @@ public class ConnectionActivity extends Activity {
         finish();
     }
 
-    public void nextEtape(int etape){
-        Intent intent = new Intent(this,InitActivity.class);
-        intent.putExtra(InitActivity.FUTUR_ETAPE,etape);
+    public void setPin(String pin){
+        Intent intent = new Intent(PinActivity.this, InitActivity.class);
+        intent.putExtra(InitActivity.PIN, pin);
         intent.putExtra(Application.ETAPE,etapeCurrent);
-        setResult(RESULT_OK,intent);
-        finish();
-    }
-
-    public void setCurrency(long currencyId){
-        Intent intent = new Intent(ConnectionActivity.this, InitActivity.class);
-        intent.putExtra(Application.CURRENCY_ID,currencyId);
-        intent.putExtra(Application.ETAPE,etapeCurrent);
-        setResult(RESULT_OK,intent);
+        setResult(RESULT_OK, intent);
         finish();
     }
 
@@ -78,5 +64,4 @@ public class ConnectionActivity extends Activity {
                 .addToBackStack(fragment.getClass().getSimpleName())
                 .commit();
     }
-
 }

@@ -172,7 +172,7 @@ public class InscriptionFragment extends Fragment implements View.OnClickListene
     public void onFinishFragment(){
         Application.requestSync();
         if(getActivity() instanceof ConnectionActivity){
-            ((ConnectionActivity) getActivity()).setCurrency(currency);
+            ((ConnectionActivity) getActivity()).setCurrency(currency.getId());
         }
     }
 }

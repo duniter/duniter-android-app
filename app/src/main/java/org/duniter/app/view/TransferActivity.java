@@ -114,7 +114,7 @@ public class TransferActivity extends ActionBarActivity implements View.OnClickL
 
         setContentView(R.layout.activity_transfer);
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        unit = Integer.parseInt(preferences.getString(Application.UNIT, Application.UNIT_CLASSIC + ""));
+        unit = Integer.parseInt(preferences.getString(Application.UNIT, Application.UNIT_DU + ""));
         defaultUnit = Integer.parseInt(preferences.getString(Application.UNIT_DEFAULT, Application.UNIT_CLASSIC + ""));
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -244,44 +244,6 @@ public class TransferActivity extends ActionBarActivity implements View.OnClickL
                         new PartialRegexInputFilter(Contantes.COMMENT_REGEX)
                 }
         );
-//        mComment.addTextChangedListener(
-//                new TextWatcher(){
-//
-//                    @Override
-//                    public void afterTextChanged(Editable s) {
-//                        String value  = s.toString();
-//                        if(value.matches(regex))
-//                            txt.setTextColor(Color.BLACK);
-//                        else
-//                            txt.setTextColor(Color.RED);
-//                    }
-//
-//                    @Override
-//                    public void beforeTextChanged(CharSequence s, int start,
-//                                                  int count, int after) {}
-//
-//                    @Override
-//                    public void onTextChanged(CharSequence s, int start,
-//                                              int before, int count) {}
-//
-//                }
-//        );
-
-
-
-//        InputFilter filter = new InputFilter() {
-//            public CharSequence filter(CharSequence source, int start, int end,
-//                                       Spanned dest, int dstart, int dend) {
-//                char[] chars = {'\'','"'};
-//                for (int i = start; i < end; i++) {
-//                    if (new String(chars).contains(String.valueOf(source.charAt(i)))) {
-//                        return "";
-//                    }
-//                }
-//                return null;
-//            }
-//        };
-//        mComment.setFilters(new InputFilter[] { filter });
     }
 
     private void majDefaultAmount(){
@@ -291,6 +253,9 @@ public class TransferActivity extends ActionBarActivity implements View.OnClickL
         }
         if(val.substring(0,1).equals(".")){
             val="0"+val;
+        }
+        if(val.substring(val.length()-1,val.length()).equals(".")){
+            val=val+"0";
         }
         if(unit!=defaultUnit) {
             AmountPair pair;
@@ -302,7 +267,7 @@ public class TransferActivity extends ActionBarActivity implements View.OnClickL
                     base = walletSelected.getBase();
                     break;
                 case Application.UNIT_DU:
-                    pair = UnitCurrency.relatif_quantitatif(Long.valueOf(val),walletSelected.getBase(), dividend, baseDividend);
+                    pair = UnitCurrency.relatif_quantitatif(Double.valueOf(val),walletSelected.getBase(), dividend, baseDividend);
                     quantitative = pair.quantitatif;
                     base = pair.base;
                     break;
@@ -314,16 +279,6 @@ public class TransferActivity extends ActionBarActivity implements View.OnClickL
                     break;
             }
             Format.initUnit(this,defaultAmount,quantitative,base,dt,dividend,baseDividend,false,currency.getName());
-
-//            Format.Currency.changeUnit(
-//                    this,
-//                    currency.getName(),
-//                    quantitative,
-//                    dividend,
-//                    dt,
-//                    null,
-//                    defaultAmount,
-//                    "");
         }
     }
 
@@ -470,21 +425,10 @@ public class TransferActivity extends ActionBarActivity implements View.OnClickL
         }else {
             dataWallet.setVisibility(View.VISIBLE);
             noDataWallet.setVisibility(View.GONE);
-
-//            dividend = currency.getLastUdBlock().getDividend();
             long delay = currency.getDt();
 
             Format.initUnit(this,mWalletAmount,walletSelected.getAmount(),walletSelected.getBase(),delay,dividend,baseDividend,true,currency.getName());
             Format.initUnit(this,mWalletDefaultAmount,walletSelected.getAmount(),walletSelected.getBase(),delay,dividend,baseDividend,false,currency.getName());
-
-//            Format.Currency.changeUnit(
-//                    this,
-//                    currency.getName(),
-//                    walletSelected.getAmount(),
-//                    dividend,
-//                    delay.intValue(),
-//                    mWalletAmount,
-//                    mWalletDefaultAmount, "");
 
             mWalletAlias.setText(walletSelected.getAlias());
 

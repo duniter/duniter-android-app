@@ -11,11 +11,12 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import org.duniter.app.R;
+import org.duniter.app.view.InitActivity;
 
-public class InitFragment extends Fragment implements View.OnClickListener {
+public class ChooseInitFragment extends Fragment implements View.OnClickListener {
 
-    public static InitFragment newInstance() {
-        InitFragment fragment = new InitFragment();
+    public static ChooseInitFragment newInstance() {
+        ChooseInitFragment fragment = new ChooseInitFragment();
         fragment.setArguments(new Bundle());
         return fragment;
     }
@@ -44,7 +45,8 @@ public class InitFragment extends Fragment implements View.OnClickListener {
 
         try {
             PackageInfo pInfo = getActivity().getPackageManager().getPackageInfo(getActivity().getPackageName(), 0);
-            ((TextView)view.findViewById(R.id.version)).setText("v"+pInfo.versionName);
+            String versionName = "v"+pInfo.versionName;
+            ((TextView)view.findViewById(R.id.version)).setText(versionName);
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
         }
@@ -55,20 +57,17 @@ public class InitFragment extends Fragment implements View.OnClickListener {
 
     @Override
     public void onClick(View v) {
-        if(getActivity() instanceof FirstConnectionActivity) {
-            int next;
-            switch (v.getId()) {
-                case R.id.bt_connection:
-                    next = ConnectionActivity.CONNECTION;
-                    break;
-                case R.id.bt_inscription:
-                    next = ConnectionActivity.INSCRIPTION;
-                    break;
-                default:
-                    next = ConnectionActivity.INSCRIPTION;
-                    break;
-            }
-            ((FirstConnectionActivity) getActivity()).setNext(next);
+        int next = 0;
+        switch (v.getId()) {
+            case R.id.bt_connection:
+                next = InitActivity.ETAPE_3_2;
+                break;
+            case R.id.bt_inscription:
+                next = InitActivity.ETAPE_3_1;
+                break;
+        }
+        if(getActivity() instanceof ConnectionActivity) {
+            ((ConnectionActivity) getActivity()).nextEtape(next);
         }
     }
 }

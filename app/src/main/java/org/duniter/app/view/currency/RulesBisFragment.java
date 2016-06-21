@@ -82,7 +82,7 @@ public class RulesBisFragment extends Fragment implements
     }
 
     private void initDu(){
-        int decimal = PreferenceManager.getDefaultSharedPreferences(getActivity()).getInt(Application.DECIMAL, 2);
+        int decimal = PreferenceManager.getDefaultSharedPreferences(getActivity()).getInt(Application.DECIMAL, 4);
 
         BigInteger mass = currentBlock.getMonetaryMass();
         BigInteger massMember = currentBlock.getMonetaryMass().divide(new BigInteger(String.valueOf(currentBlock.getMembersCount())));

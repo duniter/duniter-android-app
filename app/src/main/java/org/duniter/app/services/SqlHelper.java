@@ -55,6 +55,11 @@ public class SqlHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        db.execSQL("DROP VIEW IF EXISTS " + ViewWalletAdapter.VIEW_NAME);
+        db.execSQL("DROP VIEW IF EXISTS " + ViewWalletIdentityAdapter.VIEW_NAME);
+        db.execSQL("DROP VIEW IF EXISTS " + ViewCertificationAdapter.VIEW_NAME);
+        db.execSQL("DROP VIEW IF EXISTS " + ViewTxAdapter.VIEW_NAME);
+
         db.execSQL("DROP TABLE IF EXISTS " + CurrencySql.CurrencyTable.TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + BlockUdSql.BlockTable.TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + WalletSql.WalletTable.TABLE_NAME);
@@ -68,6 +73,8 @@ public class SqlHelper extends SQLiteOpenHelper {
 
         db.execSQL("DROP TABLE IF EXISTS " + PeerSql.PeerTable.TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + EndpointSql.EndpointTable.TABLE_NAME);
+
+        onCreate(db);
     }
 
     @Override

@@ -86,8 +86,8 @@ public class ConverterDialog extends DialogFragment{
         final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        decimal = preferences.getInt(Application.DECIMAL,2);
-        unit = Integer.parseInt(preferences.getString(Application.UNIT, Application.UNIT_CLASSIC + ""));
+        decimal = preferences.getInt(Application.DECIMAL,4);
+        unit = Integer.parseInt(preferences.getString(Application.UNIT, Application.UNIT_DU + ""));
 
         LayoutInflater inflater = getActivity().getLayoutInflater();
         final View view = inflater.inflate(R.layout.dialog_converter, null);
