@@ -2,14 +2,14 @@ package org.duniter.app.model.EntitySql.base;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteConstraintException;
 import android.net.Uri;
 import android.provider.BaseColumns;
 import android.util.Log;
 
-import org.duniter.app.services.DbProvider;
-
 /**
- * Created by naivalf27 on 20/04/16.
+ * Created by Naivalf27 on 20/04/16.
+ * @param <T> Class of Object
  */
 public abstract class AbstractSql<T> implements InterfaceSql<T>{
 
@@ -48,8 +48,13 @@ public abstract class AbstractSql<T> implements InterfaceSql<T>{
 
     @Override
     public long insert(T entity) {
-        Uri uri = context.getContentResolver().insert(this.uri,toContentValues(entity));
-        return getId(uri);
+        try {
+            Uri uri = context.getContentResolver().insert(this.uri, toContentValues(entity));
+            return getId(uri);
+        }catch (SQLiteConstraintException e){
+            Log.d("SQLiteConstraintExcep","error insert in :"+this.uri.toString());
+        }
+        return 0;
     }
 
     @Override
@@ -86,5 +91,4 @@ public abstract class AbstractSql<T> implements InterfaceSql<T>{
     public static final String NOTNULL = " NOT NULL ";
     public static final String COMMA   = ", ";
     public static final String AS      = " AS ";
-    public static final String DOT     = ".";
 }

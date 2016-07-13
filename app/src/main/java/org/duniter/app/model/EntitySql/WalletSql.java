@@ -57,6 +57,16 @@ public class WalletSql extends AbstractSql<Wallet> {
         return result;
     }
 
+    public long getIfAlone(long currencyId) {
+        long result = -1;
+        Cursor cursor = query(WalletTable.CURRENCY_ID + "=?",new String[]{String.valueOf(currencyId)});
+        if (cursor.getCount() == 1 && cursor.moveToFirst()){
+            result = cursor.getLong(cursor.getColumnIndex(WalletTable._ID));
+        }
+        cursor.close();
+        return result;
+    }
+
     public List<Wallet> getIfIdentity() {
         List<Wallet> result = new ArrayList<>();
         Cursor cursor = query(WalletTable.HAVE_IDENTITY + "=?",new String[]{"true"});
@@ -109,6 +119,7 @@ public class WalletSql extends AbstractSql<Wallet> {
         int aliasIndex = cursor.getColumnIndex(WalletTable.ALIAS);
         int syncBlockIndex = cursor.getColumnIndex(WalletTable.SYNC_BLOCK);
         int amountIndex = cursor.getColumnIndex(WalletTable.AMOUNT);
+        int amountBaseIndex = cursor.getColumnIndex(WalletTable.BASE);
         int amountWithoutUdIndex = cursor.getColumnIndex(WalletTable.AMOUNT_WITHOUT_UD);
         int amountTimeWithOblivion = cursor.getColumnIndex(WalletTable.AMOUNT_TIME_WITH_OBLIVION);
         int amountTimeWithoutOblivion = cursor.getColumnIndex(WalletTable.AMOUNT_TIME_WITHOUT_OBLIVION);
@@ -123,6 +134,7 @@ public class WalletSql extends AbstractSql<Wallet> {
         wallet.setAlias(cursor.getString(aliasIndex));
         wallet.setSyncBlock(cursor.getLong(syncBlockIndex));
         wallet.setAmount(cursor.getLong(amountIndex));
+        wallet.setBase(cursor.getInt(amountBaseIndex));
         wallet.setAmountWithoutUd(cursor.getLong(amountWithoutUdIndex));
         wallet.setAmountTimeWithOblivion(cursor.getLong(amountTimeWithOblivion));
         wallet.setAmountTimeWithoutOblivion(cursor.getLong(amountTimeWithoutOblivion));

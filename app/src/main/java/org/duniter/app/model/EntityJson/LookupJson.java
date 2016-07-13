@@ -2,6 +2,7 @@ package org.duniter.app.model.EntityJson;
 
 import com.google.gson.Gson;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,7 +12,7 @@ import org.duniter.app.model.Entity.Currency;
 /**
  * Created by naivalf27 on 04/04/16.
  */
-public final class LookupJson {
+public final class LookupJson implements Serializable{
     public Boolean partial;
     public Result[] results;
 

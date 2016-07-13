@@ -41,6 +41,7 @@ import org.duniter.app.services.SqlService;
 import org.duniter.app.technical.callback.CallbackCertify;
 import org.duniter.app.technical.callback.CallbackIdentity;
 import org.duniter.app.view.MainActivity;
+import org.duniter.app.view.dialog.ConfirmCertifyDialogFragment;
 import org.duniter.app.view.identity.adapter.CertificationBaseAdapter;
 import org.duniter.app.view.identity.adapter.CertificationCursorAdapter;
 import org.duniter.app.view.dialog.ListIdentityDialogFragment;
@@ -134,10 +135,18 @@ public class CertificationFragment extends ListFragment
             setListAdapter(certificationCursorAdapter);
         }
 
+        final ConfirmCertifyDialogFragment ccdf = ConfirmCertifyDialogFragment.newInstance(new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+                showListWallet();
+            }
+        });
+
         clickCertificationAccepted = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showListWallet();
+                ccdf.show(getFragmentManager(),"confirm_certification");
             }
         };
 

@@ -6,6 +6,7 @@ import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
+import org.apache.commons.collections.map.HashedMap;
 import org.duniter.app.enumeration.TxState;
 import org.duniter.app.model.Entity.Tx;
 import org.duniter.app.model.Entity.Wallet;
@@ -29,9 +30,12 @@ public class UdJson implements Serializable {
     public String pubkey;
     public History history;
 
-    public static List<Tx> fromTx(String json, Wallet wallet){
+    public static Map<Integer,List<Tx>> fromTx(String json, Wallet wallet){
         Gson gson = new Gson();
         UdJson udJson =  gson.fromJson(json, UdJson.class);
+        int base = 0;
+
+        Map<Integer,List<Tx>> map = new HashMap<>();
 
         List<Tx> result = new ArrayList<>();
         for (History.Elem e : udJson.history.history){
@@ -40,6 +44,7 @@ public class UdJson implements Serializable {
             tx.setUid("");
             tx.setAmount(e.amount);
             tx.setBase(e.base);
+            base = base>=e.base ?base : e.base;
             tx.setCurrency(wallet.getCurrency());
             tx.setWallet(wallet);
             tx.setState(TxState.VALID.name());
@@ -51,7 +56,9 @@ public class UdJson implements Serializable {
             result.add(tx);
         }
 
-        return result;
+        map.put(base,result);
+
+        return map;
     }
 
     public static class History{

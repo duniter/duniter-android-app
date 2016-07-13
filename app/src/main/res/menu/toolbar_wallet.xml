@@ -36,6 +36,12 @@
         ucoin:showAsAction="never|withText"
         android:visible="false"/>
 
+    <item
+        android:id="@+id/action_change"
+        android:title="change"
+        ucoin:showAsAction="never|withText"
+        android:visible="true"/>
+
 </menu>
 
 

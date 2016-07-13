@@ -480,5 +480,12 @@
     <string name="warning">Attention</string>
     <string name="already_certified">Vous avez déjà certifé cette identité avec toutes vos identités disponibles.</string>
     <string name="unreachable_node">Noeud non joignable.</string>
+    <string name="download_wallet_data">Téléchargement des données du portefeuille ...</string>
+    <string name="security_warning">Avertissement de sécurité</string>
+    <string name="message_confirm_certification_1">Ne pas certifier un compte si vous pensez que:</string>
+    <string name="message_confirm_certification_2">1.) il ne correspond pas à une personne physique vivante.</string>
+    <string name="message_confirm_certification_3">2.) son propriétaire possède un autre compte déjà certifié.</string>
+    <string name="message_confirm_certification_4">3.) son propriétaire viole (volontairement ou non) la règle 1 ou 2 (par exemple en certifiant des comptes factices ou en double).</string>
+    <string name="message_confirm_certification_5">Etes-vous sûr de vouloir néanmoins certifier cette identité ?</string>
 
 </resources>

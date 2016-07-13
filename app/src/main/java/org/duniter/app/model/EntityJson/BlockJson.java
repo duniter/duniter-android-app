@@ -2,6 +2,7 @@ package org.duniter.app.model.EntityJson;
 
 import com.google.gson.Gson;
 
+import java.io.Serializable;
 import java.math.BigInteger;
 
 import org.duniter.app.model.Entity.BlockUd;
@@ -9,7 +10,7 @@ import org.duniter.app.model.Entity.BlockUd;
 /**
  * Created by naivalf27 on 04/04/16.
  */
-public final class BlockJson {
+public final class BlockJson implements Serializable{
     public long version;
     public long nonce;
     public long number;

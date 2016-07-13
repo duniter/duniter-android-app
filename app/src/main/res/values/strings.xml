@@ -479,6 +479,13 @@
     <string name="warning">Warning</string>
     <string name="already_certified">You already certifed this identity with all your available identities.</string>
     <string name="unreachable_node">Node unreachable.</string>
+    <string name="download_wallet_data">Downloading wallet data ...</string>
+    <string name="security_warning">Security warning</string>
+    <string name="message_confirm_certification_1">Don\'t certify an account if you believe that:</string>
+    <string name="message_confirm_certification_2">1.) the issuers identity might be faked.</string>
+    <string name="message_confirm_certification_3">2.) the issuer already has another certified account.</string>
+    <string name="message_confirm_certification_4">3.) the issuer purposely or carelessly violates rule 1 or 2 (he certifies faked or double accounts).</string>
+    <string name="message_confirm_certification_5">Are you sure you want to certify this identity ?</string>
 
 
     <string-array name="node" translatable="false">

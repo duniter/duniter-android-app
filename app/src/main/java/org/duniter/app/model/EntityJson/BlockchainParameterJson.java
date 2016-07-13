@@ -29,7 +29,7 @@ public class BlockchainParameterJson implements Serializable {
     public Long blocksRot;
     public Float percentRot;
 
-    public static org.duniter.app.model.EntityJson.BlockchainParameterJson fromJson(String response) {
+    public static BlockchainParameterJson fromJson(String response) {
         Gson gson = new Gson();
         return gson.fromJson(response, BlockchainParameterJson.class);
     }

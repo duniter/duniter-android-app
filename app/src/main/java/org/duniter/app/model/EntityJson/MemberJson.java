@@ -2,13 +2,14 @@ package org.duniter.app.model.EntityJson;
 
 import com.google.gson.Gson;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * Created by naivalf27 on 04/04/16.
  */
-public final class MemberJson {
+public final class MemberJson implements Serializable{
     public Result[] results;
 
     public static Map<String,String> fromJson(String response){

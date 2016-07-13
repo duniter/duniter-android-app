@@ -21,6 +21,7 @@ import java.util.Map;
 import org.duniter.app.Application;
 import org.duniter.app.Format;
 import org.duniter.app.R;
+import org.duniter.app.enumeration.TxState;
 import org.duniter.app.model.Entity.BlockUd;
 import org.duniter.app.model.Entity.Certification;
 import org.duniter.app.model.Entity.Currency;
@@ -46,7 +47,11 @@ import org.duniter.app.technical.callback.CallbackSource;
 import org.duniter.app.technical.callback.CallbackTx;
 import org.duniter.app.technical.callback.CallbackUdReceived;
 import org.duniter.app.technical.callback.CallbackUpdateWallet;
+import org.duniter.app.technical.crypto.AddressFormatException;
+import org.duniter.app.technical.crypto.ServiceLocator;
 import org.duniter.app.technical.format.UnitCurrency;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Created by naivalf27 on 27/04/16.
@@ -61,8 +66,8 @@ public class WalletService {
         if (forced || (currentTime >= (lastTime+fiveMin))){
             Updater updater = new Updater(context, wallet, new CallbackUpdateWallet() {
                 @Override
-                public void methode(Wallet wallet, BlockUd currentBlock, List<Source> listSources, List<Tx> listTx,List<Tx> listUd,List<String> listSourcePending, Requirement requirement,List<Certification> certifications, Identity identity) {
-                    insert(context, wallet, identity, currentBlock, listSources, listTx,listUd,listSourcePending, requirement,certifications);
+                public void methode(Wallet wallet, BlockUd currentBlock, int base, List<Source> listSources, List<Tx> listTx,List<Tx> listUd,List<String> listSourcePending, Requirement requirement,List<Certification> certifications, Identity identity) {
+                    insert(context, wallet, identity, currentBlock, base, listSources, listTx,listUd,listSourcePending, requirement,certifications);
                     preferences.edit().putLong(Application.LAST_UPDATE,currentTime).apply();
                     if (callback != null) {
                         callback.methode();
@@ -77,6 +82,7 @@ public class WalletService {
                               Wallet wallet,
                               Identity identity,
                               BlockUd currentBlock,
+                              int _base,
                               List<Source> listSource,
                               List<Tx> listTx,
                               List<Tx> listUd,
@@ -85,7 +91,7 @@ public class WalletService {
                               List<Certification> certifications){
 
         long amount = 0;
-        int base = currentBlock.getBase();
+        int base = _base;
 
         Currency currency = wallet.getCurrency();
         if (currency.getDt()==null || currency.getDt()==0){
@@ -113,7 +119,6 @@ public class WalletService {
         }
 
         TxSql txSql = SqlService.getTxSql(context);
-        //TODO revoir le calcul du montant et chnage l'oubli
         Map<Long,BlockUd> mapBlock = SqlService.getBlockSql(context).getMapByNumber(wallet.getCurrency().getId());
         List<Long> numbers = new ArrayList<>(mapBlock.keySet());
         Collections.sort(numbers);
@@ -227,6 +232,109 @@ public class WalletService {
         });
     }
 
+    public static void testTx(final Context context, Wallet wallet, Currency currency){
+        List<Source> sourcesBaseMin = SqlService.getSourceSql(context).getByWallet(wallet.getId());
+
+        TxDoc txDoc = new TxDoc(currency, "");
+        txDoc.addIssuer(wallet.getPublicKey());
+
+        for (int i=0;i < sourcesBaseMin.size();i++) {
+            Source source = sourcesBaseMin.get(i);
+            if ((source.getNoffset()==16487) || (source.getNoffset()==10) || (source.getNoffset()==9)) {
+                txDoc.addInput(source.getType(), source.getIdentifier(), source.getNoffset());
+            }
+        }
+        txDoc.addUnlock(0, "0");
+        txDoc.addUnlock(1, "0");
+        txDoc.addUnlock(3, "0");
+
+        txDoc.addOutput(56, 0, wallet.getPublicKey());
+        txDoc.addOutput(2783170, 1, wallet.getPublicKey());
+
+        boolean signed = false;
+        //todo prompt for password
+        try {
+            signed = txDoc.sign(wallet.getPrivateKey());
+        } catch (AddressFormatException e) {
+            e.printStackTrace();
+        }
+        if (signed) {
+            WalletService.payed(context, currency, txDoc, new WebService.WebServiceInterface() {
+                @Override
+                public void getDataFinished(int code, String response) {
+                    if (code == 200){
+                        Log.d("CHANGE","change to base up OK");
+                    }else{
+                        Log.d("CHANGE",response);
+                    }
+                }
+            });
+        }
+    }
+
+    public static void manageBaseTx(final Context context, Wallet wallet,Currency currency){
+
+        List<Source> sourcesBaseMin = SqlService.getSourceSql(context).getMinBaseSourceByWallet(wallet);
+        TxDoc txDoc = new TxDoc(currency, "");
+        txDoc.addIssuer(wallet.getPublicKey());
+
+        long totalAmount = 0;
+        for (int i=0;i < sourcesBaseMin.size();i++) {
+            Source source = sourcesBaseMin.get(i);
+            txDoc.addInput(source.getType(),source.getIdentifier(),source.getNoffset());
+            txDoc.addUnlock(i,"0");
+            totalAmount += source.getAmount();
+        }
+
+        int nbSource = SqlService.getSourceSql(context).getByWallet(wallet.getId()).size() - sourcesBaseMin.size();
+
+        int divize = nbSource>=10 ? 1 : 10-nbSource;
+
+        long unitAmount = totalAmount/divize;
+        long firstRest = totalAmount%divize;
+
+        long utilAmount = unitAmount/10*10;
+
+        firstRest += divize*(unitAmount - utilAmount);
+
+        long dizRest = (firstRest/10*10);
+        long unitRest = firstRest - dizRest;
+
+        long distrib = divize;
+
+        long change = 0;
+
+        for (int i=1; i<=divize;i++){
+            change += 10*i;
+            long a = utilAmount - 10*i;
+            if (i==divize){
+                a += dizRest + change;
+            }
+            txDoc.addOutput(a, wallet.getBase() - 1, wallet.getPublicKey());
+        }
+        txDoc.addOutput(unitRest,wallet.getBase()-1,wallet.getPublicKey());
+
+        boolean signed = false;
+        //todo prompt for password
+        try {
+            signed = txDoc.sign(wallet.getPrivateKey());
+        } catch (AddressFormatException e) {
+            e.printStackTrace();
+        }
+        if (signed) {
+            WalletService.payed(context, currency, txDoc, new WebService.WebServiceInterface() {
+                @Override
+                public void getDataFinished(int code, String response) {
+                    if (code == 200){
+                        Log.d("CHANGE","change to base up OK");
+                    }else{
+                        Log.d("CHANGE",response);
+                    }
+                }
+            });
+        }
+    }
+
     private static class Updater extends AsyncTask<Void, Void, Void> {
 
         private final Context context;
@@ -238,6 +346,7 @@ public class WalletService {
         private List<Source> listSource;
         private List<Tx> listTx;
         private List<Tx> listUd;
+        private int base;
         private List<Certification> certifications;
         private Map<String,String> mapMember;
         private Identity identity;
@@ -252,6 +361,7 @@ public class WalletService {
             this.listSource = new ArrayList<>();
             this.listSourcePending = new ArrayList<>();
             this.listTx = new ArrayList<>();
+            this.base = 0;
             this.mapMember=new HashMap<>();
             this.requirement = null;
             this.identity = null;
@@ -291,8 +401,9 @@ public class WalletService {
         public void getUds(){
             TxService.getListUd(context, wallet, new CallbackUdReceived() {
                 @Override
-                public void methode(List<Tx> txList) {
+                public void methode(List<Tx> txList,int b) {
                     listUd = txList;
+                    base = b;
                     getRequirements();
                 }
             });
@@ -344,7 +455,7 @@ public class WalletService {
         }
 
         public void finish(){
-            callback.methode(wallet, currentBlock, listSource, listTx, listUd, listSourcePending, requirement,certifications,identity);
+            callback.methode(wallet, currentBlock, base,listSource, listTx, listUd, listSourcePending, requirement,certifications,identity);
         }
 
         @Override

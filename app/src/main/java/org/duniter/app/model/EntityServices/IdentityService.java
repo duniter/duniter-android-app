@@ -135,6 +135,10 @@ public class IdentityService {
                     if (callback!=null){
                         callback.methode(certificationList);
                     }
+                }else if(code == 404){
+                    if (callback!=null){
+                        callback.methode(new ArrayList<Certification>());
+                    }
                 }else{
                     Log.d("Certifer Of","error code:"+code);
                 }
@@ -152,6 +156,10 @@ public class IdentityService {
                     List<Certification> certificationList = CertifyJson.fromCertify(certifyJson, CertificationType.BY);
                     if (callback!=null){
                         callback.methode(certificationList);
+                    }
+                }else if(code == 404){
+                    if (callback!=null){
+                        callback.methode(new ArrayList<Certification>());
                     }
                 }else{
                     Log.d("Certifed By","error code:"+code);

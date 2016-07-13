@@ -10,8 +10,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,23 +31,16 @@ public class InfoDialogFragment extends DialogFragment implements AdapterView.On
 
     private static boolean isWallet;
     private static Currency currency;
-    private static List<String> list;
     private static int number;
-
-//    private TextView text;
-    private ListView listview;
-    private ProgressBar progressBar;
-    private TextView date;
     private AlertDialog alert;
 
 
-    public static InfoDialogFragment newInstance(boolean _isWallet, Currency _currency, List<String> _list, int _number) {
+    public static InfoDialogFragment newInstance(boolean _isWallet, Currency _currency, Bundle bundle, int _number) {
         InfoDialogFragment fragment = new InfoDialogFragment();
         isWallet = _isWallet;
         currency = _currency;
-        list = _list;
         number = _number;
-        fragment.setArguments(new Bundle());
+        fragment.setArguments(bundle);
         return fragment;
     }
 
@@ -54,29 +49,72 @@ public class InfoDialogFragment extends DialogFragment implements AdapterView.On
         final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
         LayoutInflater inflater = getActivity().getLayoutInflater();
-        int layout = isWallet ? R.layout.dialog_fragment_info : R.layout.dialog_fragment_info_contact;
-        final View view = inflater.inflate(layout, null);
+        final View view = inflater.inflate(R.layout.dialog_fragment_info, null);
+        final ViewHolder holder = new ViewHolder(view);
+        if (!isWallet) {
+            holder.messages.setVisibility(View.GONE);
+        } else {
+            Bundle args = getArguments();
+            boolean needSelf = args.getBoolean("needSelf");
+            boolean needMembership = args.getBoolean("needMembership");
+            boolean willNeedMembership = args.getBoolean("willNeedMembership");
+            boolean needRenew = args.getBoolean("needRenew");
+            int willNeedCertifications = args.getInt("willNeedCertifications");
+
+
+
+
+            holder.messages.setVisibility(View.VISIBLE);
+
+            holder.warning_wallet_self.setVisibility(needSelf ? View.VISIBLE : View.GONE);
+            holder.warning_wallet_membership.setVisibility(
+                    needMembership && !willNeedMembership ?
+                            View.VISIBLE :
+                            View.GONE
+            );
+            holder.warning_wallet_load_membership.setVisibility(
+                    willNeedMembership ?
+                            View.VISIBLE :
+                            View.GONE
+            );
+            holder.warning_wallet_renew.setVisibility(
+                    needRenew ?
+                            View.VISIBLE :
+                            View.GONE
+            );
+            holder.warning_wallet_certification.setVisibility(
+                    willNeedCertifications>0 ?
+                            View.VISIBLE :
+                            View.GONE
+            );
+
+            if (willNeedCertifications==1){
+                holder.txt_warning_wallet_certification.setText(getString(R.string.warning_wallet_certification));
+            }else{
+                holder.txt_warning_wallet_certification.setText(
+                        String.format(getString(R.string.warning_wallet_certifications),String.valueOf(willNeedCertifications))
+                );
+            }
+            boolean haveMessage = (needSelf ||
+                    (needMembership && !willNeedMembership) ||
+                    (willNeedMembership) ||
+                    (needRenew) ||
+                    (willNeedCertifications>0)
+                    );
+
+            holder.no_message.setVisibility(haveMessage ? View.GONE : View.VISIBLE);
+
+        }
         builder.setView(view);
         builder.setTitle(getString(R.string.information));
         builder.setIcon(R.drawable.ic_info);
 
-        if (isWallet) {
-            listview = (ListView) view.findViewById(R.id.list);
-            listview.setOnItemClickListener(this);
-
-            ArrayAdapter adapter = new ArrayAdapter(getActivity(), android.R.layout.simple_list_item_1, list);
-            listview.setAdapter(adapter);
-        }
-
-        progressBar = (ProgressBar) view.findViewById(R.id.progressBar);
-        date = (TextView) view.findViewById(R.id.date);
-
         BlockService.getBlock(getActivity(), currency, number, new CallbackBlock() {
             @Override
             public void methode(BlockUd blockUd) {
-                date.setText(new SimpleDateFormat("dd MMM yyyy").format(new Date(blockUd.getMedianTime()*1000)));
-                progressBar.setVisibility(View.GONE);
-                date.setVisibility(View.VISIBLE);
+                holder.date.setText(new SimpleDateFormat("dd MMM yyyy").format(new Date(blockUd.getMedianTime() * 1000)));
+                holder.progressBar.setVisibility(View.GONE);
+                holder.date.setVisibility(View.VISIBLE);
             }
         });
 
@@ -92,33 +130,64 @@ public class InfoDialogFragment extends DialogFragment implements AdapterView.On
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        String text = findAction(((TextView)view).getText().toString());
-        if (text.length()!=0) {
+        String text = findAction(((TextView) view).getText().toString());
+        if (text.length() != 0) {
             Toast.makeText(getActivity(), text, Toast.LENGTH_LONG).show();
         }
     }
 
-    private String findAction(String text){
+    private String findAction(String text) {
         String result;
         Resources res = getActivity().getResources();
-        if (text.equals(res.getString(R.string.warning_wallet_self))){
+        if (text.equals(res.getString(R.string.warning_wallet_self))) {
             result = res.getString(R.string.warning_info_wallet_self);
 
-        }else if (text.equals(res.getString(R.string.warning_wallet_membership))){
+        } else if (text.equals(res.getString(R.string.warning_wallet_membership))) {
             result = res.getString(R.string.warning_info_wallet_membership);
 
-        }else if (text.equals(res.getString(R.string.warning_wallet_load_membership))){
+        } else if (text.equals(res.getString(R.string.warning_wallet_load_membership))) {
             result = res.getString(R.string.warning_info_wallet_load_membership);
 
-        }else if (text.equals(res.getString(R.string.warning_wallet_renew))){
+        } else if (text.equals(res.getString(R.string.warning_wallet_renew))) {
             result = res.getString(R.string.warning_info_wallet_renew);
 
-        }else if (text.equals(res.getString(R.string.not_important_message))){
+        } else if (text.equals(res.getString(R.string.not_important_message))) {
             result = "";
-        }else {
+        } else {
             result = res.getString(R.string.warning_info_wallet_certification);
         }
         return result;
+    }
+
+    public static class ViewHolder {
+        public View rootView;
+        public LinearLayout warning_wallet_self;
+        public LinearLayout warning_wallet_membership;
+        public LinearLayout warning_wallet_load_membership;
+        public LinearLayout warning_wallet_renew;
+        public TextView txt_warning_wallet_certification;
+        public LinearLayout warning_wallet_certification;
+        public LinearLayout no_message;
+        public LinearLayout messages;
+        public TextView date;
+        public ProgressBar progressBar;
+        public RelativeLayout linearLayout;
+
+        public ViewHolder(View rootView) {
+            this.rootView = rootView;
+            this.warning_wallet_self = (LinearLayout) rootView.findViewById(R.id.warning_wallet_self);
+            this.warning_wallet_membership = (LinearLayout) rootView.findViewById(R.id.warning_wallet_membership);
+            this.warning_wallet_load_membership = (LinearLayout) rootView.findViewById(R.id.warning_wallet_load_membership);
+            this.warning_wallet_renew = (LinearLayout) rootView.findViewById(R.id.warning_wallet_renew);
+            this.txt_warning_wallet_certification = (TextView) rootView.findViewById(R.id.txt_warning_wallet_certification);
+            this.warning_wallet_certification = (LinearLayout) rootView.findViewById(R.id.warning_wallet_certification);
+            this.no_message = (LinearLayout) rootView.findViewById(R.id.no_message);
+            this.messages = (LinearLayout) rootView.findViewById(R.id.messages);
+            this.date = (TextView) rootView.findViewById(R.id.date);
+            this.progressBar = (ProgressBar) rootView.findViewById(R.id.progressBar);
+            this.linearLayout = (RelativeLayout) rootView.findViewById(R.id.linearLayout);
+        }
+
     }
 }
 

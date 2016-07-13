@@ -5,6 +5,6 @@
     <string name="AUTHORITY" translatable="false">org.duniter.app.services.dbprovider</string>
     <string name="DBNAME" translatable="false">duniter.db</string>
     <string name="CONTENT_URI" translatable="false">content://org.duniter.app.services.dbprovider</string>
-    <integer name="DBVERSION" translatable="false">2</integer>
+    <integer name="DBVERSION" translatable="false">3</integer>
 
 </resources>

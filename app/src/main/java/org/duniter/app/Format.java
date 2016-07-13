@@ -109,33 +109,6 @@ public class Format {
         return result;
     }
 
-    public static String expo(String str){
-        String result ="";
-        int dot = 0;
-        int e = 0;
-        if(str.contains("e+")){
-            dot = str.indexOf(".");
-            e = str.indexOf("e+");
-            result = str.substring(0,dot);
-            String bt = str.substring(dot+1,e);
-            int val = Integer.parseInt(str.substring(e+2,str.length()));
-            for(int i=0;i<val;i++){
-                if(i>=bt.length()){
-                    result+="0";
-                }else {
-                    result += bt.charAt(i);
-                }
-            }
-        }else{
-            if(str.contains(".")){
-                result = str.substring(0,str.indexOf("."));
-            }else {
-                result = str;
-            }
-        }
-        return result;
-    }
-
     public static String isNull(String txt){
         return (txt==null || txt.isEmpty()) ? "" : txt;
     }

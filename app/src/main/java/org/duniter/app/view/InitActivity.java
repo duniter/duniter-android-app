@@ -9,6 +9,7 @@ import android.preference.PreferenceManager;
 
 import org.duniter.app.Application;
 import org.duniter.app.model.EntitySql.CurrencySql;
+import org.duniter.app.services.ContactService;
 import org.duniter.app.services.SqlService;
 import org.duniter.app.view.connection.ConnectionActivity;
 import org.duniter.app.view.connection.PinActivity;
@@ -113,6 +114,8 @@ public class InitActivity extends Activity {
     }
 
     private void launchMainActivity(){
+        ContactService contactService = new ContactService(this);
+        contactService.execute(getContentResolver());
         preferences.edit().putInt(Application.ETAPE,ETAPE_0).apply();
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);

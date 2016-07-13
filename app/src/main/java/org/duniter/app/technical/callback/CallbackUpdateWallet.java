@@ -17,6 +17,7 @@ public interface CallbackUpdateWallet {
     void methode(
             Wallet wallet,
             BlockUd currentBlock,
+            int base,
             List<Source> sources,
             List<Tx> listTx,
             List<Tx> listUd,

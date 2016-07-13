@@ -30,6 +30,23 @@ public class SourceSql extends AbstractSql<Source> {
         super(context,URI);
     }
 
+    public List<Source> getMinBaseSourceByWallet(Wallet wallet) {
+        List<Source> sources = new ArrayList<>();
+        int base = wallet.getBase() == 0 ? 0 : wallet.getBase()-1;
+        Cursor cursor = query(
+                SourceTable.WALLET_ID+"=? AND "+SourceTable.BASE+"=? AND ("+SourceTable.AMOUNT+"%10)!=0",
+                new String[]{
+                        String.valueOf(wallet.getId()),
+                        String.valueOf(wallet.getBase()-1)});
+        if (cursor.moveToFirst()){
+            do {
+                sources.add(fromCursor(cursor));
+            }while (cursor.moveToNext());
+        }
+        cursor.close();
+        return sources;
+    }
+
     public List<Source> getByWallet(long id) {
         List<Source> sources = new ArrayList<>();
         Cursor cursor = query(SourceTable.WALLET_ID+"=?",new String[]{String.valueOf(id)},SourceTable.BASE+" ASC");

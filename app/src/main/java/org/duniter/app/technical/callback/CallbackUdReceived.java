@@ -8,5 +8,5 @@ import java.util.List;
  * Created by naivalf27 on 21/04/16.
  */
 public interface CallbackUdReceived {
-    public void methode(List<Tx> txList);
+    public void methode(List<Tx> txList,int base);
 }

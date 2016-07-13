@@ -74,16 +74,6 @@ public class Contact implements Serializable {
         this.contact = contact;
     }
 
-    public boolean filter(String query, boolean findByPubKey){
-        boolean result;
-        if(!findByPubKey){
-            result = (uid.toLowerCase().substring(0,query.length()).equals(query)) || (uid.toLowerCase().substring(0,query.length()).equals(query));
-        }else{
-            result = publicKey.toLowerCase().contains(query);
-        }
-        return result;
-    }
-
     public boolean certify() {
         return !revoke &&
                 uid!=null && !uid.equals("") &&

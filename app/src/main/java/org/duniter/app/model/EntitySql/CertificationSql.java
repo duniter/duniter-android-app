@@ -68,8 +68,7 @@ public class CertificationSql extends AbstractSql<Certification> {
                 CertificationTable.IS_WRITTEN + TEXT + NOTNULL + COMMA +
                 CertificationTable.HASH + TEXT + COMMA +
                 "FOREIGN KEY (" + CertificationTable.IDENTITY_ID + ") REFERENCES " +
-                IdentitySql.IdentityTable.TABLE_NAME + "(" + IdentitySql.IdentityTable._ID + ") ON DELETE CASCADE" + COMMA +
-                UNIQUE + "(" + CertificationTable.IDENTITY_ID + COMMA + CertificationTable.HASH + ")" +
+                IdentitySql.IdentityTable.TABLE_NAME + "(" + IdentitySql.IdentityTable._ID + ") ON DELETE CASCADE" +
                 ")";
     }
 

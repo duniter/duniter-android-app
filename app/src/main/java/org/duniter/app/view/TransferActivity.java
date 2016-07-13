@@ -37,6 +37,7 @@ import org.duniter.app.model.EntityServices.IdentityService;
 import org.duniter.app.technical.AmountPair;
 import org.duniter.app.technical.PartialRegexInputFilter;
 import org.duniter.app.technical.callback.CallbackLookup;
+import org.duniter.app.technical.crypto.ServiceLocator;
 import org.duniter.app.technical.format.Contantes;
 import org.duniter.app.technical.format.Time;
 import org.duniter.app.technical.format.UnitCurrency;
@@ -176,6 +177,9 @@ public class TransferActivity extends ActionBarActivity implements View.OnClickL
         Contact contact = (Contact) getIntent().getExtras().getSerializable(Application.CONTACT);
         setContactSelected(contact);
         long walletId = getIntent().getExtras().getLong(Application.WALLET_ID,-1);
+        if (walletId == -1){
+            walletId = SqlService.getWalletSql(this).getIfAlone(contact.getCurrency().getId());
+        }
         setWalletSelected(walletId);
 
         TextView amount_label = (TextView) findViewById(R.id.amount_label);
@@ -615,6 +619,8 @@ public class TransferActivity extends ActionBarActivity implements View.OnClickL
         final AmountPair qtAmount;
         String receiverPublicKey = mReceiverPublicKey.getText().toString();
         String comment;
+
+        if (walletSelected == null) return false;
 
         if ((receiverPublicKey = validatePublicKey(receiverPublicKey)) == null) return false;
         if ((qtAmount = validateAmount()) == null) return false;

@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorAdapter;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.math.BigInteger;
@@ -80,6 +81,8 @@ public class TxCursorAdapter extends CursorAdapter {
         View view = inflater.inflate(R.layout.list_item_tx, parent, false);
 
         ViewHolder holder = new ViewHolder();
+        holder.ic_pending = (ImageView) view.findViewById(R.id.ic_pending);
+        holder.txt_time = (LinearLayout) view.findViewById(R.id.txt_time);
         holder.day = (TextView) view.findViewById(R.id.day);
         holder.hour = (TextView) view.findViewById(R.id.hour);
         holder.amount = (TextView) view.findViewById(R.id.amount);
@@ -102,7 +105,7 @@ public class TxCursorAdapter extends CursorAdapter {
         boolean isUd = Boolean.valueOf(cursor.getString(isUdIndex));
         if (isUd){
             holder.publicKey.setText("DU");
-            holder.icon.setImageResource(R.drawable.ic_input_primary_18dp);
+            holder.icon.setImageResource(R.drawable.ic_arrow_upward_18dp);
         }else{
             if (uid == null || uid.equals("")){
                 holder.publicKey.setText(Format.minifyPubkey(publicKey));
@@ -116,14 +119,16 @@ public class TxCursorAdapter extends CursorAdapter {
         Long time = cursor.getLong(timeIndex);
         Date date;
         if (time.equals(Long.valueOf("999999999999"))){
-            date = new Date();
-            holder.hour.setText("");
+            holder.txt_time.setVisibility(View.GONE);
+            holder.ic_pending.setVisibility(View.VISIBLE);
         }else{
+            holder.txt_time.setVisibility(View.VISIBLE);
+            holder.ic_pending.setVisibility(View.GONE);
             date = new Date(time*1000);
             holder.hour.setText(new SimpleDateFormat("HH:mm:ss").format(date.getTime()));
+            holder.day.setText(new SimpleDateFormat("EEE dd").format(date.getTime()));
         }
 
-        holder.day.setText(new SimpleDateFormat("EEE dd").format(date.getTime()));
 
 
         String currencyName = cursor.getString(currencyNameIndex);
@@ -278,6 +283,8 @@ public class TxCursorAdapter extends CursorAdapter {
     }
 
     private static class ViewHolder {
+        public ImageView ic_pending;
+        public LinearLayout txt_time;
         public TextView day;
         public TextView hour;
         public TextView amount;

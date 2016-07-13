@@ -39,7 +39,7 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:textColor="@android:color/white"
-            android:text="@string/generating_keys" />
+            android:text="@string/download_wallet_data" />
     </LinearLayout>
 
     <LinearLayout

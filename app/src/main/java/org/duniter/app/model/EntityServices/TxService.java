@@ -3,6 +3,7 @@ package org.duniter.app.model.EntityServices;
 import android.content.Context;
 import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -49,9 +50,12 @@ public class TxService {
             @Override
             public void getDataFinished(int code, String response) {
                 if (code == 200){
-                    List<Tx> txList = UdJson.fromTx(response,wallet);
+                    Map<Integer, List<Tx>> map = UdJson.fromTx(response,wallet);
+
+                    int base = new ArrayList<>(map.keySet()).get(0);
+                    List<Tx> txList = map.get(base);
                     if (callback!=null){
-                        callback.methode(txList);
+                        callback.methode(txList,base);
                     }
                 }else{
                     Log.d("TX SERVICE", "error get Tx code:"+code);

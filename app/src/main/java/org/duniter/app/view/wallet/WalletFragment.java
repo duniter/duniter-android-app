@@ -260,6 +260,13 @@ public class WalletFragment extends ListFragment
                 });
                 result = true;
                 break;
+            case R.id.action_change:
+                if (currency == null){
+                    currency = SqlService.getCurrencySql(getActivity()).getById(wallet.getCurrency().getId());
+                }
+                WalletService.testTx(getActivity(),wallet,currency);
+                result = true;
+                break;
             default:
                 result = super.onOptionsItemSelected(item);
         }
@@ -312,33 +319,16 @@ public class WalletFragment extends ListFragment
             identity = SqlService.getIdentitySql(getActivity()).getById(identityId);
         }
 
-        if (needSelf){
-            messages.add(getString(R.string.warning_wallet_self));
-        }
-        if (needMembership && !willNeedMembership){
-            messages.add(getString(R.string.warning_wallet_membership));
-        }
-        if (willNeedMembership){
-            messages.add(getString(R.string.warning_wallet_load_membership));
-        }
-        if (needRenew){
-            messages.add(getString(R.string.warning_wallet_renew));
-        }
-        if (willNeedCertifications>0){
-            if (willNeedCertifications==1) {
-                messages.add(getString(R.string.warning_wallet_certification));
-            }else{
-                messages.add(String.format(getString(R.string.warning_wallet_certifications),String.valueOf(willNeedCertifications)));
-            }
-        }
-
-        if (messages.size()==0){
-            messages.add(getActivity().getString(R.string.not_important_message));
-        }
-
         int number = Integer.valueOf(identity.getSelfBlockUid().substring(0,identity.getSelfBlockUid().indexOf("-")));
 
-        InfoDialogFragment dial = InfoDialogFragment.newInstance(true,currency,messages,number);
+        Bundle args = new Bundle();
+        args.putBoolean("needSelf",needSelf);
+        args.putBoolean("needMembership",needMembership);
+        args.putBoolean("willNeedMembership",willNeedMembership);
+        args.putBoolean("needRenew",needRenew);
+        args.putInt("willNeedCertifications",willNeedCertifications);
+
+        InfoDialogFragment dial = InfoDialogFragment.newInstance(true,currency,args,number);
         dial.show(getFragmentManager(),InfoDialogFragment.class.getName());
     }
 
