@@ -1,9 +1,11 @@
 package org.duniter.app.view;
 
+import android.app.AlertDialog;
 import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
@@ -39,8 +41,10 @@ import org.duniter.app.technical.PartialRegexInputFilter;
 import org.duniter.app.technical.callback.CallbackLookup;
 import org.duniter.app.technical.crypto.ServiceLocator;
 import org.duniter.app.technical.format.Contantes;
+import org.duniter.app.technical.format.Formater;
 import org.duniter.app.technical.format.Time;
 import org.duniter.app.technical.format.UnitCurrency;
+import org.duniter.app.technical.group.GPSources;
 import org.duniter.app.view.identity.IdentityFragment;
 import org.duniter.app.view.identity.IdentityListFragment;
 import org.duniter.app.widget.ActionEditText;
@@ -645,35 +649,84 @@ public class TransferActivity extends ActionBarActivity implements View.OnClickL
         txDoc.addIssuer(walletSelected.getPublicKey());
 
         //set inputs
-        long cumulativeAmount = 0;
-        int base = 0;
+        int base = qtAmount.base;
+        GPSources sources = WalletService.getSourcesUtil(this,qtAmount.quantitatif,qtAmount.base,walletSelected);
         SourceSql sourceSql = SqlService.getSourceSql(this);
-        List<Source> sources = sourceSql.getByWallet(walletSelected.getId());
-        List<Source> usedSources = new ArrayList<>();
-        for (Source source : sources) {
-            txDoc.addInput(source.getType(),source.getIdentifier(),source.getNoffset());
-            usedSources.add(source);
-            if (base<source.getBase()){
-                cumulativeAmount = Format.convertBase(cumulativeAmount,base,source.getBase());
-                base = source.getBase();
+
+        if(qtAmount.base != sources.baseMax){
+            qtAmount.quantitatif = qtAmount.quantitatif * Double.valueOf(Math.pow(10,qtAmount.base-sources.baseMax)).longValue();
+            qtAmount.base = sources.baseMax;
+        }
+
+        boolean amountOk = true;
+
+        if (sources.totalAmount<qtAmount.quantitatif){
+            amountOk = false;
+            new AlertDialog.Builder(this)
+                    .setTitle(getString(R.string.error_transaction))
+                    .setMessage(getString(R.string.reason_error_transaction, Formater.quantitatifFormatter(sources.totalAmount,currency.getName())))
+                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    })
+                    .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    })
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .show();
+        }else{
+            for (int i=0; i<sources.sources.size(); i++) {
+                Source source =sources.sources.get(i);
+                txDoc.addInput(source.getType(),source.getIdentifier(),source.getNoffset());
+                txDoc.addUnlock(i,"0");
+                sourceSql.delete(source.getId());
             }
-            cumulativeAmount += source.getAmount();
-            if (cumulativeAmount>=qtAmount.quantitatif) {
-                break;
+
+            if (base == sources.baseMax){
+                txDoc.addOutput(qtAmount.quantitatif,base,receiverPublicKey);
+                long refundAmount = sources.totalAmount - qtAmount.quantitatif;
+                if (refundAmount > 0) {
+                    txDoc.addOutput(refundAmount,base,walletSelected.getPublicKey());
+                }
+            }else{
+                int difBase = base - sources.baseMax;
+                long rest = sources.totalAmount - qtAmount.quantitatif;
+                if (rest > 0){
+                    long restAmount = Double.valueOf(rest % Math.pow(10,difBase)).longValue();
+                    qtAmount.quantitatif = qtAmount.quantitatif + restAmount;
+                    txDoc.addOutput(qtAmount.quantitatif,qtAmount.base,receiverPublicKey);
+                    txDoc.addOutput(rest - restAmount,qtAmount.base,walletSelected.getPublicKey());
+                }else{
+                    txDoc.addOutput(qtAmount.quantitatif,qtAmount.base,receiverPublicKey);
+                }
             }
-        }
 
-        for (int i=0; i<usedSources.size(); i++) {
-            txDoc.addUnlock(i,"0");
-            sourceSql.delete(usedSources.get(i).getId());
         }
-
-        txDoc.addOutput(qtAmount.quantitatif,base,receiverPublicKey);
-        long refundAmount = cumulativeAmount-qtAmount.quantitatif;
-        if (refundAmount > 0) {
-            txDoc.addOutput(refundAmount,base,walletSelected.getPublicKey());
-        }
-
+//        for (Source source : sources) {
+//            txDoc.addInput(source.getType(),source.getIdentifier(),source.getNoffset());
+//            usedSources.add(source);
+//            if (base<source.getBase()){
+//                cumulativeAmount = Format.convertBase(cumulativeAmount,base,source.getBase());
+//                base = source.getBase();
+//            }
+//            cumulativeAmount += source.getAmount();
+//            if (cumulativeAmount>=qtAmount.quantitatif) {
+//                break;
+//            }
+//        }
+//
+//        for (int i=0; i<usedSources.size(); i++) {
+//            txDoc.addUnlock(i,"0");
+//            sourceSql.delete(usedSources.get(i).getId());
+//        }
+//        txDoc.addOutput(qtAmount.quantitatif,base,receiverPublicKey);
+//        long refundAmount = cumulativeAmount-qtAmount.quantitatif;
+//        if (refundAmount > 0) {
+//            txDoc.addOutput(refundAmount,base,walletSelected.getPublicKey());
+//        }
         boolean signed = false;
         //todo prompt for password
         try {
@@ -681,7 +734,7 @@ public class TransferActivity extends ActionBarActivity implements View.OnClickL
         } catch (AddressFormatException e) {
             e.printStackTrace();
         }
-        if (signed) {
+        if (signed && amountOk) {
             final Context context = this;
             WalletService.payed(this, currency, txDoc, new WebService.WebServiceInterface() {
                 @Override
@@ -697,12 +750,13 @@ public class TransferActivity extends ActionBarActivity implements View.OnClickL
                         }
                         Tx tx = new Tx();
                         long amount = 0;
-                        amount -= qtAmount.quantitatif;
+                        amount -= Double.valueOf(qtAmount.quantitatif*Math.pow(10,walletSelected.getBase()-qtAmount.base)).longValue();
                         tx.setPublicKey(pubKey);
                         tx.setUid(uid);
                         tx.setAmount(amount);
-                        tx.setAmountTimeOrigin(UnitCurrency.quantitatif_time(amount,qtAmount.base,dividend,baseDividend,dt));
-                        tx.setAmountRelatifOrigin(UnitCurrency.quantitatif_relatif(amount,qtAmount.base,dividend,baseDividend));
+                        tx.setBase(walletSelected.getBase());
+                        tx.setAmountTimeOrigin(UnitCurrency.quantitatif_time(amount,walletSelected.getBase(),dividend,baseDividend,dt));
+                        tx.setAmountRelatifOrigin(UnitCurrency.quantitatif_relatif(amount,walletSelected.getBase(),dividend,baseDividend));
                         tx.setCurrency(currency);
                         tx.setWallet(walletSelected);
                         tx.setState(TxState.PENDING.name());
@@ -716,7 +770,7 @@ public class TransferActivity extends ActionBarActivity implements View.OnClickL
 
                         SqlService.getTxSql(context).insert(tx);
 
-                        walletSelected.setAmount(walletSelected.getAmount()-qtAmount.quantitatif);
+                        walletSelected.setAmount(walletSelected.getAmount()+ amount);
                         SqlService.getWalletSql(context).update(walletSelected,walletSelected.getId());
                         finish();
                     }

@@ -9,12 +9,15 @@ import android.provider.BaseColumns;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.duniter.app.model.Entity.Currency;
 import org.duniter.app.model.Entity.Source;
 import org.duniter.app.model.Entity.Wallet;
 import org.duniter.app.model.EntitySql.base.AbstractSql;
+import org.duniter.app.technical.group.GPSources;
 
 /**
  * Created by naivalf27 on 20/04/16.
@@ -45,6 +48,25 @@ public class SourceSql extends AbstractSql<Source> {
         }
         cursor.close();
         return sources;
+    }
+
+    public GPSources getByWalletAndBase(Wallet wallet, int base) {
+        List<Source> sources = new ArrayList<>();
+        long amount = 0;
+        Cursor cursor = query(
+                SourceTable.WALLET_ID+"=? AND "+SourceTable.BASE+"=?",
+                new String[]{
+                        String.valueOf(wallet.getId()),
+                        String.valueOf(base)},
+                SourceTable.AMOUNT+ " ASC");
+        if (cursor.moveToFirst()){
+            do {
+                Source source = fromCursor(cursor);
+                sources.add(source);
+                amount += source.getAmount();
+            }while (cursor.moveToNext());
+        }
+        return new GPSources(sources,amount,base);
     }
 
     public List<Source> getByWallet(long id) {

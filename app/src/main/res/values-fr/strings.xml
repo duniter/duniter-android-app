@@ -487,5 +487,7 @@
     <string name="message_confirm_certification_3">2.) son propriétaire possède un autre compte déjà certifié.</string>
     <string name="message_confirm_certification_4">3.) son propriétaire viole (volontairement ou non) la règle 1 ou 2 (par exemple en certifiant des comptes factices ou en double).</string>
     <string name="message_confirm_certification_5">Etes-vous sûr de vouloir néanmoins certifier cette identité ?</string>
+    <string name="error_transaction">Erreur de transaction</string>
+    <string name="reason_error_transaction">La monnaie ayant récemment effectué un roulement le montant maxi d\'une transaction est de %s. (Ceci est temporaire)</string>
 
 </resources>

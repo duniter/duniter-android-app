@@ -22,8 +22,8 @@ public class SourceService {
             @Override
             public void getDataFinished(int code, String response) {
                 if (code == 200){
-                    SourceJson sourceJson = SourceJson.fromJson(response);
-                    List<Source> sources = SourceJson.fromSource(sourceJson, wallet.getCurrency(),wallet);
+//                    SourceJson sourceJson = SourceJson.fromJson(response);
+                    List<Source> sources = SourceJson.fromSource(response, wallet.getCurrency(),wallet);
                     if (callback != null){
                         callback.methode(sources);
                     }

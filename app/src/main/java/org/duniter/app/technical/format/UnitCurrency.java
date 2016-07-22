@@ -31,7 +31,7 @@ public class UnitCurrency{
     public static AmountPair relatif_quantitatif(final double relatif, final int base, final long dividend, final int baseDividend){
         int b = base + baseDividend;
         Double quantitatif = relatif*(double)dividend;
-        return new AmountPair(quantitatif.longValue(),b);
+        return new AmountPair(quantitatif.longValue(),baseDividend);
     }
 
     public static AmountPair time_quantitatif(final long timeinMilliSecond,final long dividend, final int baseDividend, long delay){

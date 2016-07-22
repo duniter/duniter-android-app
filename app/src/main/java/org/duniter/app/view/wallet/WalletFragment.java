@@ -187,6 +187,7 @@ public class WalletFragment extends ListFragment
         renewItem = menu.findItem(R.id.action_renew);
         revokeItem = menu.findItem(R.id.action_revoke);
         signItem = menu.findItem(R.id.action_sign);
+        menu.findItem(R.id.action_change).setVisible(false);
 
         if(identityId <= 0) {
             actionTab.setVisibility(View.GONE);
@@ -264,7 +265,7 @@ public class WalletFragment extends ListFragment
                 if (currency == null){
                     currency = SqlService.getCurrencySql(getActivity()).getById(wallet.getCurrency().getId());
                 }
-                WalletService.testTx(getActivity(),wallet,currency);
+                WalletService.testTx(getActivity(),wallet);
                 result = true;
                 break;
             default:

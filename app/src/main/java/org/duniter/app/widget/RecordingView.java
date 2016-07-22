@@ -3,6 +3,7 @@ package org.duniter.app.widget;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.os.Bundle;
+import android.text.InputFilter;
 import android.widget.EditText;
 
 import org.duniter.app.R;
@@ -12,9 +13,11 @@ import org.duniter.app.model.EntityServices.CurrencyService;
 import org.duniter.app.model.EntityServices.WalletService;
 import org.duniter.app.services.SqlService;
 import org.duniter.app.task.GenerateKeysTask;
+import org.duniter.app.technical.PartialRegexInputFilter;
 import org.duniter.app.technical.callback.Callback;
 import org.duniter.app.technical.crypto.Base58;
 import org.duniter.app.technical.crypto.KeyPair;
+import org.duniter.app.technical.format.Contantes;
 
 /**
  * Created by naivalf27 on 25/02/16.
@@ -33,6 +36,11 @@ public class RecordingView {
 
     public RecordingView(Context mContext, EditText mUid, EditText mSalt, EditText mPassword, EditText mConfirmPassword, SelectorCurrencyView selectorCurrencyView, Action action) {
         this.mUid = mUid;
+        this.mUid.setFilters(
+                new InputFilter[] {
+                        new PartialRegexInputFilter(Contantes.UID_REGEX)
+                }
+        );
         this.mSalt = mSalt;
         this.mPassword = mPassword;
         this.mConfirmPassword = mConfirmPassword;

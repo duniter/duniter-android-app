@@ -167,7 +167,7 @@ public class ConverterDialog extends DialogFragment{
                 quantitatif = Long.valueOf(value);
 
                 relatif = UnitCurrency.quantitatif_relatif(quantitatif,base, dividend,base);
-                txt_du.setText(Formater.relatifFormatter(getActivity(),decimal,relatif));
+                txt_du.setText(String.valueOf(relatif));
 
                 time = UnitCurrency.quantitatif_time(quantitatif, base,dividend,base,delay);
                 time_converted.setText(Formater.timeFormatterV2(getActivity(),time));
@@ -193,7 +193,7 @@ public class ConverterDialog extends DialogFragment{
                 txt_coin.setText(String.valueOf(quantitatif));
 
                 relatif = UnitCurrency.quantitatif_relatif(quantitatif,base, dividend,base);
-                txt_du.setText(Formater.relatifFormatter(getActivity(),decimal,relatif));
+                txt_du.setText(String.valueOf(relatif));
                 break;
         }
         addTextWatcher();

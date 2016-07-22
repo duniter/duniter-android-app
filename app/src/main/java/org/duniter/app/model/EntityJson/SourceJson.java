@@ -22,12 +22,14 @@ public class SourceJson implements Serializable {
     public String pubkey;
     public Sources[] sources;
 
-    public static SourceJson fromJson(String response) {
-        Gson gson = new Gson();
-        return gson.fromJson(response, SourceJson.class);
-    }
+//    public static SourceJson fromJson(String response) {
+//        Gson gson = new Gson();
+//        return gson.fromJson(response, SourceJson.class);
+//    }
 
-    public static List<Source> fromSource(SourceJson sourceJson, Currency currency, Wallet wallet){
+    public static List<Source> fromSource(String response, Currency currency, Wallet wallet){
+        Gson gson = new Gson();
+        SourceJson sourceJson = gson.fromJson(response, SourceJson.class);
         List<Source> res = new ArrayList<>();
         for(Sources s : sourceJson.sources){
             Source source = new Source();

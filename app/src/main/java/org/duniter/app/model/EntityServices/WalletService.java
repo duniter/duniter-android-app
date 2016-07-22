@@ -50,6 +50,7 @@ import org.duniter.app.technical.callback.CallbackUpdateWallet;
 import org.duniter.app.technical.crypto.AddressFormatException;
 import org.duniter.app.technical.crypto.ServiceLocator;
 import org.duniter.app.technical.format.UnitCurrency;
+import org.duniter.app.technical.group.GPSources;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -232,7 +233,102 @@ public class WalletService {
         });
     }
 
-    public static void testTx(final Context context, Wallet wallet, Currency currency){
+    public static GPSources getSourcesUtil(Context context, long amount, int base, Wallet wallet){
+        GPSources res;
+
+        long amountSource = 0;
+        int baseMax = 0;
+        boolean needoneMax = false;
+        List<Source> sourcesUse = new ArrayList<>();
+
+        GPSources currentSources = SqlService.getSourceSql(context).getByWalletAndBase(wallet,base);
+
+        for (int i = 0; i<base; i++){
+            long as = 0;
+            GPSources bigLastSources = SqlService.getSourceSql(context).getByWalletAndBase(wallet, i);
+            int mult = Double.valueOf(Math.pow(10,base-i)).intValue();
+            List<Source> bigSourceUseFiltred = decompoSource(bigLastSources.sources, -1, mult);
+            for (Source s : bigSourceUseFiltred){
+                as += s.getAmount();
+            }
+            amountSource = baseMax<i ?
+                    Double.valueOf(amountSource / Math.pow(10,i-baseMax)).longValue() :
+                    amountSource;
+            if (bigLastSources.sources.size() == bigSourceUseFiltred.size()){
+                sourcesUse.addAll(bigSourceUseFiltred);
+                amountSource +=  as;
+                needoneMax = true;
+                baseMax = i;
+            }else if(amount < amountSource *mult ) {
+                sourcesUse.add(bigSourceUseFiltred.get(0));
+                amountSource += bigSourceUseFiltred.get(0).getAmount();
+                baseMax = i;
+            }else if (amount <= (as+amountSource) * mult){ /* montant inferieur au total des sources*/
+                sourcesUse.addAll(bigLastSources.sources);
+                amountSource += bigLastSources.totalAmount;
+                baseMax = i;
+                break;
+            }
+        }
+
+        int i=0;
+        while ((i<currentSources.sources.size() && amountSource<amount) || needoneMax){
+            amountSource = baseMax<base ?
+                    Double.valueOf(amountSource / Math.pow(10,base-baseMax)).longValue() :
+                    amountSource;
+            needoneMax = false;
+            sourcesUse.add(currentSources.sources.get(i));
+            amountSource+=currentSources.sources.get(i).getAmount();
+            baseMax = base;
+            i++;
+        }
+        res = new GPSources(sourcesUse,amountSource,baseMax);
+
+        return res;
+
+    }
+
+    private static List<Source> decompoSource(List<Source> sources, long somme, int mod){
+        List<Source> res;
+        if (somme == -1){
+            somme = 0;
+            for (Source s: sources){
+                somme += (s.getAmount()%mod);
+            }
+        }
+        long min = somme % mod;
+        int posMin = -1;
+        boolean find = false;
+        res = new ArrayList<>(sources);
+        if (min>0) {
+            for (int i = 0 ; i< sources.size();i++){
+                if ((sources.get(i).getAmount()%mod) == min){
+                    res.remove(i);
+                    find = true;
+                    break;
+                }else{
+                    if (posMin == -1 && (sources.get(i).getAmount()%mod)!=0){
+                        posMin = i;
+                    }
+                }
+            }
+            if (find){
+                return res;
+            }else{
+                Source ms = res.get(posMin);
+                res.remove(posMin);
+                return decompoSource(res,somme-(ms.getAmount()%mod),mod);
+            }
+        }else{
+            return res;
+        }
+    }
+
+    public static void testTx(final Context context, Wallet wallet){
+//        List<Source> sources = getSourcesUtil(context,20056,2,wallet);
+    }
+
+    public static void changeTx(final Context context, Wallet wallet, Currency currency){
         List<Source> sourcesBaseMin = SqlService.getSourceSql(context).getByWallet(wallet.getId());
 
         TxDoc txDoc = new TxDoc(currency, "");
@@ -244,6 +340,7 @@ public class WalletService {
                 txDoc.addInput(source.getType(), source.getIdentifier(), source.getNoffset());
             }
         }
+
         txDoc.addUnlock(0, "0");
         txDoc.addUnlock(1, "0");
         txDoc.addUnlock(3, "0");

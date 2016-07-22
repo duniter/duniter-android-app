@@ -486,6 +486,8 @@
     <string name="message_confirm_certification_3">2.) the issuer already has another certified account.</string>
     <string name="message_confirm_certification_4">3.) the issuer purposely or carelessly violates rule 1 or 2 (he certifies faked or double accounts).</string>
     <string name="message_confirm_certification_5">Are you sure you want to certify this identity ?</string>
+    <string name="error_transaction">Error of transaction</string>
+    <string name="reason_error_transaction">The currency with recent turnover the maximum amount of a transaction is %s. (This is temporary)</string>
 
 
     <string-array name="node" translatable="false">
