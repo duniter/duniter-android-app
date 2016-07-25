@@ -488,6 +488,8 @@
     <string name="message_confirm_certification_5">Are you sure you want to certify this identity ?</string>
     <string name="error_transaction">Error of transaction</string>
     <string name="reason_error_transaction">The currency with recent turnover the maximum amount of a transaction is %s. (This is temporary)</string>
+    <string name="warning_delete">Are you sure you want to delete your wallet?</string>
+    <string name="warning_revoke">Are you sure you want to remove your wallet and revoke your membership in currency?</string>
 
 
     <string-array name="node" translatable="false">

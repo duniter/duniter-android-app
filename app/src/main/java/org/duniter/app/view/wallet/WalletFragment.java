@@ -1,8 +1,10 @@
 package org.duniter.app.view.wallet;
 
+import android.app.AlertDialog;
 import android.app.ListFragment;
 import android.app.LoaderManager;
 import android.content.CursorLoader;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
 import android.content.SharedPreferences;
@@ -205,8 +207,7 @@ public class WalletFragment extends ListFragment
                 result = true;
                 break;
             case R.id.action_delete:
-                SqlService.getWalletSql(getActivity()).delete(walletId);
-                getActivity().onBackPressed();
+                callValidationDialog(0);
                 result = true;
                 break;
             case R.id.action_sign:
@@ -245,20 +246,7 @@ public class WalletFragment extends ListFragment
                 result = true;
                 break;
             case R.id.action_revoke:
-                if (identity == null && identityId>0) {
-                    identity = SqlService.getIdentitySql(getActivity()).getById(identityId);
-                }
-                if (currency == null){
-                    currency = SqlService.getCurrencySql(getActivity()).getById(identity.getCurrency().getId());
-                }
-                identity.setCurrency(currency);
-                identity.setWallet(wallet);
-                IdentityService.revokeIdentity(getActivity(), identity, new CallbackIdentity() {
-                    @Override
-                    public void methode(Identity identity) {
-                        onRefresh();
-                    }
-                });
+                callValidationDialog(1);
                 result = true;
                 break;
             case R.id.action_change:
@@ -272,6 +260,42 @@ public class WalletFragment extends ListFragment
                 result = super.onOptionsItemSelected(item);
         }
         return result;
+    }
+
+    private void callValidationDialog(final int type) {// 0 = delete ; 1 = revoke
+        new AlertDialog.Builder(getActivity())
+                .setTitle(getString(R.string.warning))
+                .setMessage(type == 0 ? getString(R.string.warning_delete) : getString(R.string.warning_revoke))
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        if (type==0){
+                            SqlService.getWalletSql(getActivity()).delete(walletId);
+                            getActivity().onBackPressed();
+                        }else{
+                            if (identity == null && identityId>0) {
+                                identity = SqlService.getIdentitySql(getActivity()).getById(identityId);
+                            }
+                            if (currency == null){
+                                currency = SqlService.getCurrencySql(getActivity()).getById(identity.getCurrency().getId());
+                            }
+                            identity.setCurrency(currency);
+                            identity.setWallet(wallet);
+                            IdentityService.revokeIdentity(getActivity(), identity, new CallbackIdentity() {
+                                @Override
+                                public void methode(Identity identity) {
+                                    onRefresh();
+                                }
+                            });
+                        }
+                    }
+                })
+                .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .show();
     }
 
     private void showQrCode() {

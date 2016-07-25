@@ -489,5 +489,7 @@
     <string name="message_confirm_certification_5">Etes-vous sûr de vouloir néanmoins certifier cette identité ?</string>
     <string name="error_transaction">Erreur de transaction</string>
     <string name="reason_error_transaction">La monnaie ayant récemment effectué un roulement le montant maxi d\'une transaction est de %s. (Ceci est temporaire)</string>
+    <string name="warning_delete">Êtes-vous sur de vouloir supprimer votre portefeuille ?</string>
+    <string name="warning_revoke">Êtes-vous sûr de vouloir supprimer votre portefeuille et révoquer votre adhésion à la monnaie ?</string>
 
 </resources>
