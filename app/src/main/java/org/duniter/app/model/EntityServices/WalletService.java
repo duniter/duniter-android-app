@@ -245,27 +245,39 @@ public class WalletService {
 
         for (int i = 0; i<base; i++){
             long as = 0;
-            GPSources bigLastSources = SqlService.getSourceSql(context).getByWalletAndBase(wallet, i);
+            GPSources sources = SqlService.getSourceSql(context).getByWalletAndBase(wallet, i);
             int mult = Double.valueOf(Math.pow(10,base-i)).intValue();
-            List<Source> bigSourceUseFiltred = decompoSource(bigLastSources.sources, -1, mult);
-            for (Source s : bigSourceUseFiltred){
+            List<Source> sourceFiltred = decompoSource(sources.sources, -1, mult);
+            if (sourceFiltred.size()==0 && sources.sources.size()>0){
+                GPSources s = findByBase(sources.sources,amount,base);
+                if (s.totalAmount>amount){
+                    sourcesUse.addAll(s.sources);
+                    amountSource =0;
+                    for (Source so:sourcesUse){
+                        amountSource+=so.getAmount();
+                    }
+                    baseMax = i;
+                    break;
+                }
+            }
+            for (Source s : sourceFiltred) {
                 as += s.getAmount();
             }
             amountSource = baseMax<i ?
                     Double.valueOf(amountSource / Math.pow(10,i-baseMax)).longValue() :
                     amountSource;
-            if (bigLastSources.sources.size() == bigSourceUseFiltred.size()){
-                sourcesUse.addAll(bigSourceUseFiltred);
+            if (sources.sources.size() == sourceFiltred.size()){
+                sourcesUse.addAll(sourceFiltred);
                 amountSource +=  as;
                 needoneMax = true;
                 baseMax = i;
             }else if(amount < amountSource *mult ) {
-                sourcesUse.add(bigSourceUseFiltred.get(0));
-                amountSource += bigSourceUseFiltred.get(0).getAmount();
+                sourcesUse.add(sourceFiltred.get(0));
+                amountSource += sourceFiltred.get(0).getAmount();
                 baseMax = i;
             }else if (amount <= (as+amountSource) * mult){ /* montant inferieur au total des sources*/
-                sourcesUse.addAll(bigLastSources.sources);
-                amountSource += bigLastSources.totalAmount;
+                sourcesUse.addAll(sources.sources);
+                amountSource += sources.totalAmount;
                 baseMax = i;
                 break;
             }
@@ -322,6 +334,21 @@ public class WalletService {
         }else{
             return res;
         }
+    }
+
+    private static GPSources findByBase(List<Source> sources, long amount,int base){
+        long amountSource = 0;
+        List<Source> res = new ArrayList<>();
+        for (Source source : sources){
+            if (amountSource<amount){
+                long as = Double.valueOf(source.getAmount() * Math.pow(10,(source.getBase()-base))).longValue();
+                amountSource += as;
+                res.add(source);
+            }else{
+                break;
+            }
+        }
+        return new GPSources(res,amountSource,base);
     }
 
     public static void testTx(final Context context, Wallet wallet){

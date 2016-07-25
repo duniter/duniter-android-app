@@ -750,7 +750,7 @@ public class TransferActivity extends ActionBarActivity implements View.OnClickL
                         }
                         Tx tx = new Tx();
                         long amount = 0;
-                        amount -= Double.valueOf(qtAmount.quantitatif*Math.pow(10,walletSelected.getBase()-qtAmount.base)).longValue();
+                        amount -= Double.valueOf(qtAmount.quantitatif*Math.pow(10,qtAmount.base-walletSelected.getBase())).longValue();
                         tx.setPublicKey(pubKey);
                         tx.setUid(uid);
                         tx.setAmount(amount);
