@@ -34,8 +34,9 @@ public class TxService {
                     TxJson txJson = TxJson.fromJson(response);
                     List<Tx> txList = TxJson.fromTx(txJson,wallet,mapMember);
                     List<String> listSource = TxJson.fromTxGetSourcesPending(txJson);
+                    Map<String,List<String>> map = TxJson.fromTxGetMapSourcePending(txJson);
                     if (callback!=null){
-                        callback.methode(txList,listSource);
+                        callback.methode(txList,listSource,map);
                     }
                 }else{
                     Log.d("TX SERVICE", "error get Tx code:"+code);

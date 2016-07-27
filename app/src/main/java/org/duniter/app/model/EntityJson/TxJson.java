@@ -190,6 +190,23 @@ public class TxJson implements Serializable {
         return new ArrayList<Tx>(txs.values());
     }
 
+    public static Map<String, List<String>> fromTxGetMapSourcePending(TxJson txJson) {
+        Map<String, List<String>> result = new HashMap<>();
+        for (History.Elem e : txJson.history.sending){
+            List<String> list =new ArrayList<>();
+            for (String i : e.inputs){
+                String type = i.substring(0,i.indexOf(":"));
+                String iden = i.substring(i.indexOf(":")+1,i.lastIndexOf(":"));
+                String num = i.substring(i.lastIndexOf(":"));
+                if(type.equals("T")){
+                    list.add(iden);
+                }
+            }
+            result.put(e.hash,list);
+        }
+        return result;
+    }
+
     public static class History{
         public Elem sent[];
         public Elem received[];

@@ -10,7 +10,6 @@ import android.widget.Toast;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -21,7 +20,6 @@ import java.util.Map;
 import org.duniter.app.Application;
 import org.duniter.app.Format;
 import org.duniter.app.R;
-import org.duniter.app.enumeration.TxState;
 import org.duniter.app.model.Entity.BlockUd;
 import org.duniter.app.model.Entity.Certification;
 import org.duniter.app.model.Entity.Currency;
@@ -37,7 +35,6 @@ import org.duniter.app.model.EntityWeb.TxWeb;
 import org.duniter.app.model.document.TxDoc;
 import org.duniter.app.services.SqlService;
 import org.duniter.app.services.WebService;
-import org.duniter.app.technical.AmountPair;
 import org.duniter.app.technical.callback.Callback;
 import org.duniter.app.technical.callback.CallbackBlock;
 import org.duniter.app.technical.callback.CallbackCertify;
@@ -48,11 +45,8 @@ import org.duniter.app.technical.callback.CallbackTx;
 import org.duniter.app.technical.callback.CallbackUdReceived;
 import org.duniter.app.technical.callback.CallbackUpdateWallet;
 import org.duniter.app.technical.crypto.AddressFormatException;
-import org.duniter.app.technical.crypto.ServiceLocator;
 import org.duniter.app.technical.format.UnitCurrency;
 import org.duniter.app.technical.group.GPSources;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
  * Created by naivalf27 on 27/04/16.
@@ -67,8 +61,8 @@ public class WalletService {
         if (forced || (currentTime >= (lastTime+fiveMin))){
             Updater updater = new Updater(context, wallet, new CallbackUpdateWallet() {
                 @Override
-                public void methode(Wallet wallet, BlockUd currentBlock, int base, List<Source> listSources, List<Tx> listTx,List<Tx> listUd,List<String> listSourcePending, Requirement requirement,List<Certification> certifications, Identity identity) {
-                    insert(context, wallet, identity, currentBlock, base, listSources, listTx,listUd,listSourcePending, requirement,certifications);
+                public void methode(Wallet wallet, BlockUd currentBlock, int base, List<Source> listSources, List<Tx> listTx, List<Tx> listUd, List<String> listSourcePending, Requirement requirement, List<Certification> certifications, Identity identity, Map<String, List<String>> mapPendingTxSource) {
+                    insert(context, wallet, identity, currentBlock, base, listSources, listTx,listUd,listSourcePending, requirement,certifications,mapPendingTxSource);
                     preferences.edit().putLong(Application.LAST_UPDATE,currentTime).apply();
                     if (callback != null) {
                         callback.methode();
@@ -89,7 +83,8 @@ public class WalletService {
                               List<Tx> listUd,
                               List<String> listSourcePending,
                               Requirement requirement,
-                              List<Certification> certifications){
+                              List<Certification> certifications,
+                              Map<String, List<String>> mapPendingTxSource){
 
         long amount = 0;
         int base = _base;
@@ -102,6 +97,7 @@ public class WalletService {
         SourceSql sourceSql = SqlService.getSourceSql(context);
         List<Source> sourcesSql = sourceSql.getByWallet(wallet.getId());
         List<Source> _SourcesSql = new ArrayList<>(sourcesSql);
+        List<String> hashSource = new ArrayList<>();
         for (Source source : _SourcesSql) {
             if (!listSource.contains(source)) {
                 sourceSql.delete(source.getId());
@@ -109,6 +105,7 @@ public class WalletService {
             }
         }
         for (Source source : listSource) {
+            hashSource.add(source.getIdentifier());
             amount += Format.convertBase(source.getAmount(),source.getBase(),base);
             if (!sourcesSql.contains(source)) {
                 if (source.getType().equals("D") ?
@@ -134,7 +131,20 @@ public class WalletService {
 
         for (Tx tx : listTx) {
             if (tx.getState().equals("PENDING")){
-                amount += Format.convertBase(tx.getAmount(),tx.getBase(),base);
+                List<String> li = mapPendingTxSource.get(tx.getHash());
+                li = li ==null ? new ArrayList<String>():li;
+                boolean isOk =true;
+                for (String s : li){
+                    if (!hashSource.contains(s)){
+                        isOk = false;
+                        break;
+                    }
+                }
+                if (!isOk || tx.getAmount()>0){
+                    //TODO action pending
+                }else {
+                    amount += Format.convertBase(tx.getAmount(), tx.getBase(), base);
+                }
             }
             if (!listValid.containsKey(tx.getHash())) {
                 int i = 0;
@@ -246,8 +256,8 @@ public class WalletService {
         for (int i = 0; i<base; i++){
             long as = 0;
             GPSources sources = SqlService.getSourceSql(context).getByWalletAndBase(wallet, i);
-            int mult = Double.valueOf(Math.pow(10,base-i)).intValue();
-            List<Source> sourceFiltred = decompoSource(sources.sources, -1, mult);
+            double mult = Math.pow(10,i-base);
+            List<Source> sourceFiltred = decompoSource(sources.sources, -1, Math.pow(10,base-i));
             if (sourceFiltred.size()==0 && sources.sources.size()>0){
                 GPSources s = findByBase(sources.sources,amount,base);
                 if (s.totalAmount>amount){
@@ -284,7 +294,7 @@ public class WalletService {
         }
 
         int i=0;
-        while ((i<currentSources.sources.size() && amountSource<amount) || needoneMax){
+        while ((i<currentSources.sources.size() && amountSource<amount) || (needoneMax && amountSource%10==0)){
             amountSource = baseMax<base ?
                     Double.valueOf(amountSource / Math.pow(10,base-baseMax)).longValue() :
                     amountSource;
@@ -300,7 +310,7 @@ public class WalletService {
 
     }
 
-    private static List<Source> decompoSource(List<Source> sources, long somme, int mod){
+    private static List<Source> decompoSource(List<Source> sources, long somme, double mod){
         List<Source> res;
         if (somme == -1){
             somme = 0;
@@ -308,7 +318,7 @@ public class WalletService {
                 somme += (s.getAmount()%mod);
             }
         }
-        long min = somme % mod;
+        long min = Double.valueOf(somme % mod).longValue();
         int posMin = -1;
         boolean find = false;
         res = new ArrayList<>(sources);
@@ -329,7 +339,7 @@ public class WalletService {
             }else{
                 Source ms = res.get(posMin);
                 res.remove(posMin);
-                return decompoSource(res,somme-(ms.getAmount()%mod),mod);
+                return decompoSource(res,Double.valueOf(somme-(ms.getAmount()%mod)).longValue(),mod);
             }
         }else{
             return res;
@@ -475,6 +485,7 @@ public class WalletService {
         private Map<String,String> mapMember;
         private Identity identity;
         private Requirement requirement;
+        private Map<String, List<String>> mapPendingTxSource;
 
         public Updater(Context context, Wallet wallet, CallbackUpdateWallet callback){
             this.context = context;
@@ -487,6 +498,7 @@ public class WalletService {
             this.listTx = new ArrayList<>();
             this.base = 0;
             this.mapMember=new HashMap<>();
+            this.mapPendingTxSource = new HashMap<>();
             this.requirement = null;
             this.identity = null;
         }
@@ -514,9 +526,10 @@ public class WalletService {
         public void getTxs(){
             TxService.getListTx(context, wallet, mapMember, new CallbackTx() {
                 @Override
-                public void methode(List<Tx> txList,List<String> lsp) {
+                public void methode(List<Tx> txList, List<String> lsp, Map<String, List<String>> map) {
                     listTx = txList;
                     listSourcePending = lsp;
+                    mapPendingTxSource = map;
                     getUds();
                 }
             });
@@ -579,7 +592,7 @@ public class WalletService {
         }
 
         public void finish(){
-            callback.methode(wallet, currentBlock, base,listSource, listTx, listUd, listSourcePending, requirement,certifications,identity);
+            callback.methode(wallet, currentBlock, base,listSource, listTx, listUd, listSourcePending, requirement,certifications,identity,mapPendingTxSource);
         }
 
         @Override

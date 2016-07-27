@@ -1,6 +1,7 @@
 package org.duniter.app.technical.callback;
 
 import java.util.List;
+import java.util.Map;
 
 import org.duniter.app.model.Entity.BlockUd;
 import org.duniter.app.model.Entity.Certification;
@@ -24,5 +25,5 @@ public interface CallbackUpdateWallet {
             List<String> listSourcePending,
             Requirement requirement,
             List<Certification> certifications,
-            Identity identity);
+            Identity identity, Map<String, List<String>> mapPendingTxSource);
 }
