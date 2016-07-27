@@ -23,7 +23,7 @@
     <org.duniter.app.view.dialog.preference.NumberPickerPreference
         android:key="decimal"
         android:title="@string/number_digit"
-        android:defaultValue="2" />
+        android:defaultValue="4" />
 
     <SwitchPreference
         android:title="@string/use_oblivion"

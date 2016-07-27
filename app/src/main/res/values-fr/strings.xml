@@ -7,7 +7,7 @@
     its name should be the snake case of its main words
     -->
 
-    <string name="welcome_to_duniter">Bienvenue dans l\'application Duniter!</string>
+    <string name="welcome_to_duniter">Bienvenue dans l\'application Duniter !</string>
     <string name="welcome_description">Regardez l\'état de vos comptes en temps réel.</string>
     <string name="title_activity_account">Compte</string>
 
